@@ -7,6 +7,7 @@ using Toolbar;
 
 
 // TODO: exclude any experiments for which data is stored in ModuleScienceContainer
+// todo: separate science observer for surface samples like the eva one
 
 namespace ExperimentIndicator
 {
@@ -112,12 +113,12 @@ namespace ExperimentIndicator
                     {
                         case FilterMode.Unresearched:
                             Available = subject.science < 0.0005f;
-                            Log.Debug("    - Mode: Unresearched, result {0}", Available);
+                            Log.Debug("    - Mode: Unresearched, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
                             break;
 
                         case FilterMode.NotMaxed:
                             Available = subject.science < subject.scienceCap;
-                            Log.Debug("    - Mode: NotMaxed, result {0}", Available);
+                            Log.Debug("    - Mode: NotMaxed, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
                             break;
                     }
 
@@ -501,7 +502,21 @@ namespace ExperimentIndicator
 
         public void Start()
         {
-            StartCoroutine(DelayedStart());
+            GameEvents.onVesselWasModified.Add(OnVesselWasModified);
+            GameEvents.onVesselChange.Add(OnVesselChanged);
+            GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
+
+            mainButton = Toolbar.ToolbarManager.Instance.add("ExperimentIndicator", "PopupOpen");
+            mainButton.Text = "blah";
+            mainButton.ToolTip = "testTooltip";
+            mainButton.TexturePath = "ExperimentIndicator/textures/flask";
+            //mainButton.Drawable = new BoxDrawable();
+
+
+            StartCoroutine(RebuildObserverList());
+
+            // run update loop
+            InvokeRepeating("UpdateObservers", 0f, 15f);
         }
 
         public void OnDestroy()
@@ -532,13 +547,33 @@ namespace ExperimentIndicator
             {
                 Log.Debug("OnVesselWasModified invoked, rebuilding observer list");
                 observers.Clear();
-                StartCoroutine(DelayedStart());
+                StopCoroutine("RebuildObserverList");
+                StartCoroutine(RebuildObserverList());
             }
         }
 
-
-        private System.Collections.IEnumerator DelayedStart()
+        public void OnVesselChanged(Vessel newVessel)
         {
+            StopCoroutine("RebuildObserverList");
+
+            Log.Debug("OnVesselChange: {0}", newVessel.name);
+            observers.Clear();
+            StartCoroutine(RebuildObserverList());
+        }
+
+        public void OnVesselDestroyed(Vessel vessel)
+        {
+            if (FlightGlobals.ActiveVessel == vessel)
+            {
+                Log.Debug("Active vessel was destroyed!");
+                observers.Clear();
+            }
+        }
+
+        private System.Collections.IEnumerator RebuildObserverList()
+        {
+            observers.Clear();
+
             while (ResearchAndDevelopment.Instance == null)
                 yield return 0;
 
@@ -546,6 +581,7 @@ namespace ExperimentIndicator
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 if (expid != "evaReport")
+                    if (expid == "crewReport") 
                     observers.Add(new ExperimentObserver(expid));
 
             // evaReport is a special case.  It technically exists on any crewed
@@ -559,16 +595,6 @@ namespace ExperimentIndicator
             observers.Add(new EvaReportObserver());
 
 
-            mainButton = Toolbar.ToolbarManager.Instance.add("ExperimentIndicator", "PopupOpen");
-            mainButton.Text = "blah";
-            mainButton.ToolTip = "testTooltip";
-            mainButton.TexturePath = "ExperimentIndicator/textures/flask";
-            //mainButton.Drawable = new BoxDrawable();
-
-            Log.Debug("ExperimentIndicator started");
-
-            // run update loop
-            InvokeRepeating("UpdateObservers", 0f, .25f);
 
         }
 
