@@ -6,8 +6,8 @@ using UnityEngine;
 using Toolbar;
 
 
-// TODO: exclude any experiments for which data is stored in ModuleScienceContainer
-// todo: separate science observer for surface samples like the eva one
+// TODO: exclude any experiments for which data is stored in ModuleScienceContainer?
+// todo: separate science observer for surface samples like the eva one?
 
 namespace ExperimentIndicator
 {
@@ -443,26 +443,6 @@ namespace ExperimentIndicator
     }
 
 
-    internal class ScienceModuleComparer : IEqualityComparer<ModuleScienceExperiment>
-    {
-        public bool Equals(ModuleScienceExperiment first, ModuleScienceExperiment second)
-        {
-            Log.Debug("comparing {0} to {1}", first.experimentID, second.experimentID);
-
-            if (System.Object.ReferenceEquals(first, second))
-                return true;
-
-            return first.experimentID == second.experimentID;
-        }
-
-        public int GetHashCode(ModuleScienceExperiment module)
-        {
-            if (System.Object.ReferenceEquals(module, null)) return 0;
-
-            return module.GetHashCode();
-        }
-    }
-
 
     internal class BoxDrawable : IDrawable
     {
@@ -517,6 +497,9 @@ namespace ExperimentIndicator
 
             // run update loop
             InvokeRepeating("UpdateObservers", 0f, 15f);
+
+            RenderingManager.AddToPostDrawQueue(7, DrawFunction);
+
         }
 
         public void OnDestroy()
@@ -621,6 +604,11 @@ namespace ExperimentIndicator
         public Vector2 Draw(Vector2 position)
         {
             return Vector2.zero; 
+        }
+
+        public void DrawFunction()
+        {
+            
         }
     }
 }
