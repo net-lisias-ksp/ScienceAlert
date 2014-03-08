@@ -444,54 +444,51 @@ namespace ExperimentIndicator
 
 
 
-    internal class BoxDrawable : IDrawable
-    {
-        // random size for testing purposes
-        private int width = 24;
-        private int height = new System.Random().Next(200) + 50;
-
-        public void Update()
-        {
-            // nothing to do
-        }
-
-        public Vector2 Draw(Vector2 position)
-        {
-            GUILayout.BeginArea(new Rect(position.x, position.y, width, height), GUI.skin.box);
-            GUILayout.FlexibleSpace();
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.Label("something useful here");
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.EndArea();
-
-            return new Vector2(width, height);
-        }
-    }
-
-
 
 
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ExperimentIndicator : MonoBehaviour, IDrawable
     {
+        enum IconState
+        {
+            NoResearch,             // no experiments available, basic flask icon
+
+            NewResearch,            // spinning star flask icon to let user know something new happened
+
+            ResearchAvailable       // Once the user opens the menu and has a look at whatever new thing we have to show,
+                                    // NewResearch becomes ResearchAvailable and the spinning star stops (but flask keeps
+                                    // its star-behind icon)
+        }
+
+        // --------------------------------------------------------------------
+        //    Members of ExperimentIndicator
+        // --------------------------------------------------------------------
         ExperimentObserverList observers = new ExperimentObserverList();
         private Toolbar.IButton mainButton;
+        private IconState researchState = IconState.NoResearch;
 
+        // texture/animation data
+        private const float FRAME_RATE = 24f / 1000f;
+        private const int FRAME_COUNT = 100;
+        private int CurrentFrame = 0;
+
+        private const string NORMAL_FLASK = "ExperimentIndicator/textures/flask";
+        private List<string> STAR_FLASK = new List<string>();
 
         public void Start()
         {
+            for (int i = 0; i < FRAME_COUNT; ++i)
+                STAR_FLASK.Add(NORMAL_FLASK + GetFrame(i + 1));
+
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
 
 
             mainButton = Toolbar.ToolbarManager.Instance.add("ExperimentIndicator", "PopupOpen");
-            mainButton.Text = "blah";
-            mainButton.ToolTip = "testTooltip";
-            mainButton.TexturePath = "ExperimentIndicator/textures/flask";
+            mainButton.Text = "ExpIndicator";
+            mainButton.ToolTip = "Left Click to Open Experiments; Right Click for Settings";
+            mainButton.TexturePath = NORMAL_FLASK;
             mainButton.OnClick += OnToolbarClick;
             //mainButton.Drawable = new BoxDrawable();
 
@@ -499,7 +496,7 @@ namespace ExperimentIndicator
             StartCoroutine(RebuildObserverList());
 
             // run update loop
-            InvokeRepeating("UpdateObservers", 0f, 15f);
+            InvokeRepeating("UpdateObservers", 0f, 5f);
         }
 
 
@@ -515,19 +512,8 @@ namespace ExperimentIndicator
             // empty
         }
 
-        public void UpdateObservers()
-        {
-#if DEBUG
-            float start = Time.realtimeSinceStartup;
-#endif
-
-            foreach (var observer in observers)
-                if (observer.UpdateStatus())
-                    Log.Verbose("Observer {0} is available!", observer.ExperimentTitle);
-#if DEBUG
-            Log.Warning("Tick time: {0} ms", (Time.realtimeSinceStartup - start) * 1000f);
-#endif
-        }
+        
+        
 
         public void OnVesselWasModified(Vessel vessel)
         {
@@ -588,34 +574,8 @@ namespace ExperimentIndicator
         }
 
 
-        private string GetFrame(int frameIndex)
-        {
-            string str = frameIndex.ToString();
 
-            while (str.Length < 4)
-                str = "0" + str;
 
-            return str;
-        }
-
-        public void OnGUI()
-        {
-            //GUILayout.BeginArea(new Rect(50, 50, 300, 400));
-            //GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-
-            //foreach (var observer in observers)
-            //{
-            //    if (observer.Available)
-            //        if (GUILayout.Button(new GUIContent(observer.ExperimentTitle)))
-            //        {
-            //            Log.Debug("Deploying {0}", observer.ExperimentTitle);
-            //            observer.Deploy();
-            //        }
-            //}
-
-            //GUILayout.EndVertical();
-            //GUILayout.EndArea();
-        }
 
         public Vector2 Draw(Vector2 position)
         {
@@ -642,19 +602,138 @@ namespace ExperimentIndicator
 
         public void OnToolbarClick(ClickEvent ce)
         {
+            // todo: left/right click
             Log.Write("Toolbar clicked");
 
-            if (mainButton.Drawable == null)
+            MenuOpen = !MenuOpen;
+        }
+
+
+        #region invoked functions
+
+        public void UpdateObservers()
+        {
+#if DEBUG
+            float start = Time.realtimeSinceStartup;
+#endif
+
+            // if any new experiments become available, our state
+            // changes (remember: observers return true only if their observed
+            // experiment wasn't available before and just become available this update)
+            bool stateChange = observers.Any(observer => observer.UpdateStatus());
+
+            // Is exciting new research available?
+            if (stateChange)
             {
-                mainButton.Drawable = this;
-                Log.Debug("Drawable visible");
+                // if the menu is already open, we don't need to use the flashy animation
+                State = MenuOpen ? IconState.ResearchAvailable : IconState.NewResearch;
             }
             else
             {
-                mainButton.Drawable = null;
-                Log.Debug("Drawable hidden");
+                // if stateChange is true, we know at least one experiment is
+                // available.  On the other hand, if it's false we don't know if
+                // any experiments are available.  If there aren't any,
+                // the icon should be the normal starless flask
+                if (!observers.Any(observer => observer.Available))
+                    State = IconState.NoResearch;
+            }
+
+
+            // quick recap on button image logic:
+            //      no experiments available at all = normal icon
+            //      new experiments are available and user hasn't looked at the menu => animated star flask
+            //      experiments are available and user looked at them (or is looking at them) => non-animated star flask
+            if (MenuOpen)
+            {
+                // stop the star flask animation, if it's running
+                if (State == IconState.NewResearch) State = IconState.ResearchAvailable;
+            }
+#if DEBUG
+            Log.Warning("Tick time: {0} ms", (Time.realtimeSinceStartup - start) * 1000f);
+#endif
+        }
+
+        public void StarAnimation()
+        {
+            CurrentFrame = (CurrentFrame + 1) % STAR_FLASK.Count;
+
+#if DEBUG
+            if (State != IconState.NewResearch)
+                Log.Error("StarAnimation invoked with wrong research state {0}!", State);
+#endif
+            mainButton.TexturePath = STAR_FLASK[CurrentFrame];
+        }
+
+        #endregion
+        #region properties
+        private IconState State
+        {
+            get
+            {
+                return researchState;
+            }
+
+            set
+            {
+                IconState oldState = researchState;
+                researchState = value;
+
+                switch (researchState)
+                {
+                    case IconState.NoResearch: // standard flask icon
+                        mainButton.TexturePath = NORMAL_FLASK;
+
+                        if (oldState == IconState.NewResearch)
+                        {
+                            // cancel animation function
+                            CancelInvoke("StarAnimation");
+                        }
+                        break;
+
+                    case IconState.ResearchAvailable: // star flask icon, no animation
+                        mainButton.TexturePath = STAR_FLASK[0];
+
+                        if (oldState == IconState.NewResearch)
+                        {
+                            // cancel animation function
+                            CancelInvoke("StarAnimation");
+                        }
+                        break;
+
+                    case IconState.NewResearch: // star flask icon plus animation
+                        if (oldState != State)
+                        {    // start animation function, otherwise it's already running
+                            InvokeRepeating("StarAnimation", 0f, FRAME_RATE);
+                        }
+                        break;
+                }
             }
         }
- 
+
+        private bool MenuOpen
+        {
+            get
+            {
+                return mainButton.Drawable != null;
+            }
+            set
+            {
+                mainButton.Drawable = value ? this : null;
+            }
+        }
+
+#endregion
+
+        #region helpers
+        private string GetFrame(int frameIndex)
+        {
+            string str = frameIndex.ToString();
+
+            while (str.Length < 4)
+                str = "0" + str;
+
+            return str;
+        }
+        #endregion
     }
 }
