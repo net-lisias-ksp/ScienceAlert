@@ -475,10 +475,11 @@ namespace ExperimentIndicator
 
 
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    public class ExperimentIndicator : MonoBehaviour
+    public class ExperimentIndicator : MonoBehaviour, IDrawable
     {
         ExperimentObserverList observers = new ExperimentObserverList();
         private Toolbar.IButton mainButton;
+
 
         public void Start()
         {
@@ -486,10 +487,12 @@ namespace ExperimentIndicator
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
 
+
             mainButton = Toolbar.ToolbarManager.Instance.add("ExperimentIndicator", "PopupOpen");
             mainButton.Text = "blah";
             mainButton.ToolTip = "testTooltip";
             mainButton.TexturePath = "ExperimentIndicator/textures/flask";
+            mainButton.OnClick += OnToolbarClick;
             //mainButton.Drawable = new BoxDrawable();
 
 
@@ -497,10 +500,8 @@ namespace ExperimentIndicator
 
             // run update loop
             InvokeRepeating("UpdateObservers", 0f, 15f);
-
-            RenderingManager.AddToPostDrawQueue(7, DrawFunction);
-
         }
+
 
         public void OnDestroy()
         {
@@ -509,6 +510,10 @@ namespace ExperimentIndicator
 
         }
 
+        public void Update()
+        {
+            // empty
+        }
 
         public void UpdateObservers()
         {
@@ -564,9 +569,10 @@ namespace ExperimentIndicator
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 if (expid != "evaReport")
-                    if (expid == "crewReport") 
-                    observers.Add(new ExperimentObserver(expid));
-
+                {
+                    //if (expid == "crewReport")
+                        observers.Add(new ExperimentObserver(expid));
+                }
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless
             // the vessel is itself an eva'ing Kerbal.  Since there are conditions
@@ -582,33 +588,73 @@ namespace ExperimentIndicator
         }
 
 
+        private string GetFrame(int frameIndex)
+        {
+            string str = frameIndex.ToString();
+
+            while (str.Length < 4)
+                str = "0" + str;
+
+            return str;
+        }
+
         public void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(50, 50, 300, 400));
+            //GUILayout.BeginArea(new Rect(50, 50, 300, 400));
+            //GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+
+            //foreach (var observer in observers)
+            //{
+            //    if (observer.Available)
+            //        if (GUILayout.Button(new GUIContent(observer.ExperimentTitle)))
+            //        {
+            //            Log.Debug("Deploying {0}", observer.ExperimentTitle);
+            //            observer.Deploy();
+            //        }
+            //}
+
+            //GUILayout.EndVertical();
+            //GUILayout.EndArea();
+        }
+
+        public Vector2 Draw(Vector2 position)
+        {
+            float necessaryHeight = 24f * observers.Sum(observer => observer.Available ? 1 : 0);
+            float necessaryWidth = 128f;
+
+            GUILayout.BeginArea(new Rect(position.x, position.y, necessaryWidth, necessaryHeight));
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 
             foreach (var observer in observers)
-            {
                 if (observer.Available)
                     if (GUILayout.Button(new GUIContent(observer.ExperimentTitle)))
                     {
                         Log.Debug("Deploying {0}", observer.ExperimentTitle);
                         observer.Deploy();
                     }
-            }
 
             GUILayout.EndVertical();
             GUILayout.EndArea();
+
+            return new Vector2(necessaryWidth, necessaryHeight);
         }
 
-        public Vector2 Draw(Vector2 position)
-        {
-            return Vector2.zero; 
-        }
 
-        public void DrawFunction()
+        public void OnToolbarClick(ClickEvent ce)
         {
-            
+            Log.Write("Toolbar clicked");
+
+            if (mainButton.Drawable == null)
+            {
+                mainButton.Drawable = this;
+                Log.Debug("Drawable visible");
+            }
+            else
+            {
+                mainButton.Drawable = null;
+                Log.Debug("Drawable hidden");
+            }
         }
+ 
     }
 }
