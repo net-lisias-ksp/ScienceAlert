@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Toolbar;
 
 
+// TODO: beginning transmission seems to remove data from container
 // TODO: exclude any experiments for which data is stored in ModuleScienceContainer?
 // todo: separate science observer for surface samples like the eva one?
+// todo: split out storage from individual experiments
 
 namespace ExperimentIndicator
 {
@@ -46,6 +49,8 @@ namespace ExperimentIndicator
         // audio 
         new AudioController audio = new AudioController();
 
+        // experiment text related
+        private float maximumTextLength = float.NaN;
 
 // ----------------------------------------------------------------------------
 //             --> Implementation of ExperimentIndicator <--
@@ -66,7 +71,6 @@ namespace ExperimentIndicator
             mainButton.ToolTip = "Left Click to Open Experiments; Right Click for Settings";
             mainButton.TexturePath = NORMAL_FLASK;
             mainButton.OnClick += OnToolbarClick;
-            //mainButton.Drawable = new BoxDrawable();
 
 
             StartCoroutine(RebuildObserverList());
@@ -82,6 +86,21 @@ namespace ExperimentIndicator
             mainButton.Destroy();
 
         }
+
+        public void OnGUI()
+        {
+            if (float.IsNaN(maximumTextLength) && observers.Count > 0)
+            {
+                // construct the experiment observer list ...
+                maximumTextLength = observers.Max(observer => GUI.skin.button.CalcSize(new GUIContent(observer.ExperimentTitle)).x);
+                Log.Debug("MaximumTextLength = {0}", maximumTextLength);
+
+                // note: we can't use CalcSize anywhere but inside OnGUI.  I know
+                // it's ugly, but it's the least ugly of the available alternatives
+            }
+        }
+
+
 
         public void Update()
         {
@@ -105,14 +124,23 @@ namespace ExperimentIndicator
             {
                 Log.Debug("OnVesselWasModified invoked, rebuilding observer list");
                 observers.Clear();
-                StopCoroutine("RebuildObserverList");
+
+                try
+                {
+                    StopCoroutine("RebuildObserverList");
+                }
+                catch { }
+
                 StartCoroutine(RebuildObserverList());
             }
         }
 
         public void OnVesselChanged(Vessel newVessel)
         {
-            StopCoroutine("RebuildObserverList");
+            try
+            {
+                StopCoroutine("RebuildObserverList");
+            } catch {}
 
             Log.Debug("OnVesselChange: {0}", newVessel.name);
             observers.Clear();
@@ -131,18 +159,43 @@ namespace ExperimentIndicator
         private System.Collections.IEnumerator RebuildObserverList()
         {
             observers.Clear();
+            maximumTextLength = float.NaN;
 
-            while (ResearchAndDevelopment.Instance == null)
+            while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed)
                 yield return 0;
 
+
+            // count the number of "real" transmitters onboard
+            List<IScienceDataTransmitter> transmitters = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
+            transmitters.RemoveAll(tx => tx is MagicDataTransmitter);
+
+            // remove any existing magic transmitters
+            foreach (var part in FlightGlobals.ActiveVessel.Parts)
+                while (part.Modules.Contains("MagicDataTransmitter"))
+                {
+                    part.RemoveModule(part.Modules.OfType<MagicDataTransmitter>().First());
+                    Log.Debug("Removing MagicDataTransmitter from {0}", part.ConstructID);
+                }       
+
+
+            if (transmitters.Count > 0)
+            {
+                // as long as at least one transmitter is "real", the
+                // vessel's root part should have a MagicDataTransmitter
+                if (transmitters.Any(tx => !(tx is MagicDataTransmitter)))
+                {
+                    FlightGlobals.ActiveVessel.rootPart.AddModule("MagicDataTransmitter");
+                    Log.Debug("Added MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.ConstructID);
+                }
+            }
+
+            Log.Debug("There are {0} real transmitters aboard {1}", transmitters.Count, FlightGlobals.ActiveVessel.name);
 
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 if (expid != "evaReport")
-                {
-                    //if (expid == "crewReport")
-                        observers.Add(new ExperimentObserver(expid));
-                }
+                    observers.Add(new ExperimentObserver(expid));
+
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless
             // the vessel is itself an eva'ing Kerbal.  Since there are conditions
@@ -152,9 +205,6 @@ namespace ExperimentIndicator
             // Observer type that will account for these changes and any others
             // that might not necessarily trigger a VesselModified event
             observers.Add(new EvaReportObserver());
-
-
-
         }
 
 
@@ -163,20 +213,26 @@ namespace ExperimentIndicator
 
         public Vector2 Draw(Vector2 position)
         {
+            if (float.IsNaN(maximumTextLength))
+                return Vector2.zero; // text length isn't set yet
+
             float necessaryHeight = 32f * observers.Sum(observer => observer.Available ? 1 : 0);
-            float necessaryWidth = 256;
+            float necessaryWidth = maximumTextLength;
 
             GUILayout.BeginArea(new Rect(position.x, position.y, necessaryWidth, necessaryHeight));
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 
             foreach (var observer in observers)
                 if (observer.Available)
-                    if (GUILayout.Button(new GUIContent(observer.ExperimentTitle)))
+                {
+                    var content = new GUIContent(observer.ExperimentTitle);
+
+                    if (GUILayout.Button(content))
                     {
                         Log.Debug("Deploying {0}", observer.ExperimentTitle);
                         observer.Deploy();
                     }
-
+                }
             GUILayout.EndVertical();
             GUILayout.EndArea();
 

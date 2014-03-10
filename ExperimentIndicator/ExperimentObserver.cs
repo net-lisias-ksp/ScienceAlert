@@ -8,6 +8,7 @@ namespace ExperimentIndicator
 {
     using ScienceModuleList = List<ModuleScienceExperiment>;
     using StorageList = List<IScienceDataContainer>;
+    //using TransmitterList = List<IScienceDataTransmitter>;
     
 
 
@@ -22,11 +23,21 @@ namespace ExperimentIndicator
         private ScienceModuleList modules;              // all ModuleScienceExperiments onboard that represent our experiment
         protected ScienceExperiment experiment;           // The actual experiment that will be performed
         protected StorageList storage;                  // containers for science data
+        //protected TransmitterList transmitters;         // Science transmitters, obviously
+        protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
+
+
+
         public enum FilterMode
         {
             Unresearched = 0,                           // only light on subjects for which no science has been confirmed at all
             NotMaxed = 1,                               // light whenever the experiment subject isn't maxed
         }
+
+
+/******************************************************************************
+ *                    Implementation Details
+ ******************************************************************************/
 
 
         public ExperimentObserver(string expid)
@@ -35,16 +46,20 @@ namespace ExperimentIndicator
             Rebuild();
         }
 
+
+
         ~ExperimentObserver()
         {
 
         }
 
 
+
         public virtual void Rebuild()
         {
             Log.Verbose("ExperimentObserver ({0}): rebuilding...", ExperimentTitle);
             modules = new ScienceModuleList();
+            magicTransmitter = null;
 
             if (FlightGlobals.ActiveVessel == null)
                 return;
@@ -66,10 +81,36 @@ namespace ExperimentIndicator
             Log.Debug("Added ExperimentLight for experiment {0} (active vessel has {1} experiments of type)", experiment.id, modules.Count);
         }
 
+
+
         protected void RebuildStorageList()
         {
             storage = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataContainer>();
+
+            Log.Debug("Locating PartModules that implement IScienceDataTransmitter ...");
+            var transmitterList = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
+
+            if (transmitterList.Count == 1)
+            {
+                // whoops, something's wrong.  If there's a real transmitter,
+                // there will also be a magic transmitter.
+                Log.Error("ExperimentObserver.RebuildStorageList - found only 1 transmitter!");
+            } else
+            {
+                // ExperimentIndicator will handle the magic transmitter details
+                // for us.  All we need to know is that there's definitely
+                // at least one real and one fake transmitter onboard (or else
+                // none of the above; vessel cannot transmit anyway)
+
+                if (transmitterList.Any(tx => !(tx is MagicDataTransmitter)))
+                {
+                    Log.Debug("Onboard transmitter count: {0}; root part transmitters {1}", transmitterList.Count, FlightGlobals.ActiveVessel.rootPart.Modules.OfType<MagicDataTransmitter>().ToList().Count);
+                    magicTransmitter = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<MagicDataTransmitter>().First();
+                }
+                else magicTransmitter = null;
+            }
         }
+
 
 
         /// <summary>
@@ -81,12 +122,25 @@ namespace ExperimentIndicator
         /// has been collected for the experiment, should the indicator light for
         /// goo be on?  I say no.  That means we must account for any existing stored
         /// data in any container onboard the vessel.
+        /// 
+        /// Another note: when data is being transmitted, it is moved from a container
+        /// into a transmitter module.  That's going to be a problem if we don't also
+        /// include transmitters in our search for data; otherwise, as soon as the 
+        /// player begins transmitting it looks like no data for the experiment is 
+        /// onboard and the experiment will "become available" for a few seconds 
+        /// until the data is submitted.
+        ///    However, we encounter another problem here: there's no way to get at
+        /// the queued ScienceData in the transmitter.  We can trick the game into
+        /// always choosing our fake transmitter and get the data that way instead,
+        /// though.  More detail in MagicDataTransmitter description.
         /// </summary>
         /// <param name="subjectid"></param>
         /// <param name="refData"></param>
         /// <returns></returns>
         protected bool FindStoredData(string subjectid, out ScienceData refData)
         {
+            Log.Debug("Queued data count: {0}", magicTransmitter.QueuedData.Count);
+
             foreach (var container in storage)
                 foreach (var data in container.GetData())
                     if (data.subjectID == subjectid)
@@ -95,9 +149,19 @@ namespace ExperimentIndicator
                         return true;
                     }
 
+            if (magicTransmitter != null)
+                foreach (var data in magicTransmitter.QueuedData)
+                    if (data.subjectID == subjectid)
+                    {
+                        refData = data;
+                        Log.Warning("Found stored data in transmitter queue");
+                        return true;
+                    }
+
             refData = null;
             return false;
         }
+
 
 
         /// <summary>
@@ -267,30 +331,6 @@ namespace ExperimentIndicator
 
         #region helpers
 
-        //protected ExperimentSituations VesselSituationToExperimentSituation(Vessel.Situations vesselSituation)
-        //{
-        //    var vessel = FlightGlobals.ActiveVessel;
-
-        //    switch (vesselSituation)
-        //    {
-        //        case Vessel.Situations.LANDED:
-        //        case Vessel.Situations.PRELAUNCH:
-        //            return ExperimentSituations.SrfLanded;
-        //        case Vessel.Situations.SPLASHED:
-        //            return ExperimentSituations.SrfSplashed;
-        //        case Vessel.Situations.FLYING:
-        //            if (vessel.altitude < (double)vessel.mainBody.scienceValues.flyingAltitudeThreshold)
-        //                return ExperimentSituations.FlyingLow;
-
-        //            return ExperimentSituations.FlyingHigh;
-
-        //        default:
-        //            if (vessel.altitude < (double)vessel.mainBody.scienceValues.spaceAltitudeThreshold)
-
-        //                return ExperimentSituations.InSpaceLow;
-        //            return ExperimentSituations.InSpaceHigh;
-        //    }
-        //}
 
         #endregion
     }

@@ -50,6 +50,7 @@
     <Compile Include="AudioController.cs" />
     <Compile Include="ExperimentIndicator.cs" />
     <Compile Include="ExperimentObserver.cs" />
+    <Compile Include="MagicDataTransmitter.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
