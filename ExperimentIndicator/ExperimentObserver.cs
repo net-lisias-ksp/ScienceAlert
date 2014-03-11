@@ -113,7 +113,7 @@ namespace ExperimentIndicator
             // does this experiment even apply in the current situation?
             var vessel = FlightGlobals.ActiveVessel;
 
-            if (IsReadyOnboard)
+            if (!storage.IsBusy && IsReadyOnboard)
             {
                 if (experiment.IsAvailableWhile(experimentSituation, vessel.mainBody))
                 {
@@ -401,7 +401,7 @@ namespace ExperimentIndicator
             bool lastStatus = Available;
 
             if (FlightGlobals.ActiveVessel != null)
-                if (IsReadyOnboard)
+                if (!storage.IsBusy && IsReadyOnboard)
                 {
                     var vessel = FlightGlobals.ActiveVessel;
 

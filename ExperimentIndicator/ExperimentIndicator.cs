@@ -118,7 +118,7 @@ namespace ExperimentIndicator
                 vesselStorage.DumpContainerData();
 
             if (Input.GetKeyDown(KeyCode.R))
-                vesselStorage.Rebuild();
+                vesselStorage.ScheduleRebuild();
         }
 
         
@@ -171,12 +171,12 @@ namespace ExperimentIndicator
                 yield return 0;
 
             if (vesselStorage == null)
-            vesselStorage = new StorageCache();
+                vesselStorage = gameObject.AddComponent<StorageCache>();
 
-            //// construct the experiment observer list ...
-            //foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-            //    if (expid != "evaReport")
-            //        observers.Add(new ExperimentObserver(vesselStorage, expid));
+            // construct the experiment observer list ...
+            foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
+                if (expid != "evaReport")
+                    observers.Add(new ExperimentObserver(vesselStorage, expid));
 
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless

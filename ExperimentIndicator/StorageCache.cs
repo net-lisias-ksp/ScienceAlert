@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace ExperimentIndicator
 {
@@ -17,17 +18,17 @@ namespace ExperimentIndicator
     /// StorageCache keeps track of events and will update itself as
     /// necessary.  It will also manage the magic transmitter as required.
     /// </summary>
-    internal class StorageCache
+    internal class StorageCache : MonoBehaviour
     {
         protected StorageList storage;                      // containers for science data
         protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
         protected Vessel vessel;                            // which vessel this storage cache is for
-
+   
 
 /******************************************************************************
  *                          Begin Implementation
  *****************************************************************************/
-        public StorageCache()
+        public void Start()
         {
             GameEvents.onVesselChange.Add(OnVesselChange);
             GameEvents.onVesselWasModified.Add(OnVesselModified);
@@ -37,12 +38,12 @@ namespace ExperimentIndicator
             GameEvents.onVesselGoOffRails.Add(OffRails);
 
             vessel = FlightGlobals.ActiveVessel;
-            Rebuild();
+            ScheduleRebuild();
         }
 
 
 
-        ~StorageCache()
+        public void OnDestroy()
         {
             GameEvents.onVesselDestroy.Remove(OnVesselDestroyed);
             GameEvents.onVesselWasModified.Remove(OnVesselModified);
@@ -50,6 +51,7 @@ namespace ExperimentIndicator
 
             RemoveMagicTransmitter(false);
         }
+
 
         public void OnRails(Vessel v)
         {
@@ -75,7 +77,7 @@ namespace ExperimentIndicator
 
             RemoveMagicTransmitter();
             vessel = v;
-            Rebuild();
+            ScheduleRebuild();
         }
 
         public void OnVesselModified(Vessel v)
@@ -85,7 +87,8 @@ namespace ExperimentIndicator
             if (vessel != v)
             {
                 OnVesselChange(v);
-            } else Rebuild();
+            }
+            else ScheduleRebuild();
         }
 
 
@@ -104,13 +107,37 @@ namespace ExperimentIndicator
 
 
         /// <summary>
+        /// It turns out that immediately trying to cache storage containers
+        /// right after a vessel switch doesn't work well; some may not be
+        /// initialized.  Luckily, we can fire up a coroutine that will wait
+        /// until the time is right and sort things for us.
+        /// </summary>
+        public void ScheduleRebuild()
+        {
+            if (IsBusy)
+            {
+                try
+                {
+                    StopCoroutine("Rebuild");
+                }
+                catch { }
+            }
+
+            StartCoroutine("Rebuild");
+        }
+
+
+
+        /// <summary>
         /// Rebuild storage cache.  This object is shared between
         /// all ExperimentObservers and allows them to determine what data
         /// is onboard the craft, being transmitted or has been submitted to
         /// R&D
         /// </summary>
-        public void Rebuild()
+        private System.Collections.IEnumerator Rebuild()
         {
+            IsBusy = true;
+
             Log.Debug("StorageCache: Rebuilding ...");
 
             if (FlightGlobals.ActiveVessel != vessel)
@@ -123,6 +150,13 @@ namespace ExperimentIndicator
                 RemoveMagicTransmitter();
                 vessel = FlightGlobals.ActiveVessel;
             }
+
+            while (!FlightGlobals.ready || !vessel.loaded)
+            {
+                Log.Debug("StorageCache.Rebuild - waiting");
+                yield return new WaitForFixedUpdate();
+            }
+
 
             // ScienceContainers are straightforward ...
             storage = vessel.FindPartModulesImplementing<IScienceDataContainer>();
@@ -154,11 +188,6 @@ namespace ExperimentIndicator
                     // vessel's root part should have a MagicDataTransmitter
                     if (transmitters.Any(tx => !(tx is MagicDataTransmitter)))
                     {
-                        //foreach (var snap in vessel.protoVessel.protoPartSnapshots)
-                        //    if (snap.partRef == vessel.rootPart)
-                        //    {
-                        //        snap.
-                        //    }
                         magicTransmitter = vessel.rootPart.AddModule("MagicDataTransmitter") as MagicDataTransmitter;
                         Log.Debug("Added MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.ConstructID);
                     }
@@ -167,6 +196,7 @@ namespace ExperimentIndicator
                     Log.Debug("Vessel {0} has no transmitters; no magic transmitter added", vessel.name);
                 }
 
+            IsBusy = false;
             Log.Debug("Rebuilt StorageCache");
         }
 
@@ -295,5 +325,11 @@ namespace ExperimentIndicator
         }
         
 #endif
+
+        public bool IsBusy
+        {
+            get;
+            private set;
+        }
     }
 }
