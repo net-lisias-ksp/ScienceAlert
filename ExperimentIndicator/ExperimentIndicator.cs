@@ -135,7 +135,7 @@ namespace ExperimentIndicator
                 }
                 catch { }
 
-                StartCoroutine(RebuildObserverList());
+                StartCoroutine("RebuildObserverList");
             }
         }
 
@@ -151,7 +151,7 @@ namespace ExperimentIndicator
 
             try
             {
-                StartCoroutine(RebuildObserverList());
+                StartCoroutine("RebuildObserverList");
             } catch (NullReferenceException e)
             {
                 Log.Error("Null reference exception in OnVesselChanged; did not rebuild observer list.  Exception = {0}", e);
