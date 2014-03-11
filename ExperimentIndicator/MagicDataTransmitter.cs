@@ -69,9 +69,9 @@ namespace ExperimentIndicator
         /// is done mainly so we don't have to keep track of the MagicDataTransmitter
         /// instance and can restrict any updates to here.
         /// </summary>
-        public void Awake()
+        public void Start()
         {
-            Log.Debug("MagicDataTransmitter awake");
+            Log.Debug("MagicDataTransmitter started");
 
             // locate all available real transmitters
             var transmitters = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
@@ -86,11 +86,12 @@ namespace ExperimentIndicator
         }
 
 
+
         public override void OnSave(ConfigNode node)
         {
 #if !DEBUG // permit poisoning in debug games
             node.ClearData(); // don't save anything about MagicDataTransmitter or
-                              // the save file will be poisoned
+                               the save file will be poisoned
 #endif
         }
 

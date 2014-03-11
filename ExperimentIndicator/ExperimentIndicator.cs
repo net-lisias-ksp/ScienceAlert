@@ -114,6 +114,11 @@ namespace ExperimentIndicator
                 audio.PlaySound(AudioController.AvailableSounds.Bubbles);
             }
 
+            if (Input.GetKeyDown(KeyCode.U))
+                vesselStorage.DumpContainerData();
+
+            if (Input.GetKeyDown(KeyCode.R))
+                vesselStorage.Rebuild();
         }
 
         
@@ -167,10 +172,11 @@ namespace ExperimentIndicator
 
             if (vesselStorage == null)
             vesselStorage = new StorageCache();
-            // construct the experiment observer list ...
-            foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                if (expid != "evaReport")
-                    observers.Add(new ExperimentObserver(vesselStorage, expid));
+
+            //// construct the experiment observer list ...
+            //foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
+            //    if (expid != "evaReport")
+            //        observers.Add(new ExperimentObserver(vesselStorage, expid));
 
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless
@@ -194,6 +200,12 @@ namespace ExperimentIndicator
 
             float necessaryHeight = 32f * observers.Sum(observer => observer.Available ? 1 : 0);
             float necessaryWidth = maximumTextLength;
+
+            if (necessaryHeight < 31.9999f)
+            {
+                MenuOpen = false;
+                return Vector2.zero;
+            }
 
             GUILayout.BeginArea(new Rect(position.x, position.y, necessaryWidth, necessaryHeight));
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));

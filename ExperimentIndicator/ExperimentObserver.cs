@@ -350,7 +350,14 @@ namespace ExperimentIndicator
             }
             else
             {
-                Log.Error("Um ... The vessel is already an EVA kerbal.  Don't eat glue");
+                var evas = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
+                foreach (var exp in evas)
+                    if (!exp.Deployed && exp.experimentID == experiment.id)
+                    {
+                        exp.DeployExperiment();
+                        break;
+                    }
+
                 return true;
             }
         }
@@ -411,6 +418,7 @@ namespace ExperimentIndicator
                         ScienceData data;
                         var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
 
+                        Log.Debug("Looking for stored eva report data");
 
                         if (storage.FindStoredData(subject.id, out data))
                         {

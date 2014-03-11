@@ -33,6 +33,9 @@ namespace ExperimentIndicator
             GameEvents.onVesselWasModified.Add(OnVesselModified);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
 
+            GameEvents.onVesselGoOnRails.Add(OnRails);
+            GameEvents.onVesselGoOffRails.Add(OffRails);
+
             vessel = FlightGlobals.ActiveVessel;
             Rebuild();
         }
@@ -48,7 +51,16 @@ namespace ExperimentIndicator
             RemoveMagicTransmitter(false);
         }
 
+        public void OnRails(Vessel v)
+        {
+            Log.Debug("Vessel {0} just went on rails", v.name);
 
+        }
+
+        public void OffRails(Vessel v)
+        {
+            Log.Debug("Vessel {0} just came off rails", v.name);
+        }
 
         #region events
 
@@ -59,6 +71,8 @@ namespace ExperimentIndicator
         /// <param name="v"></param>
         public void OnVesselChange(Vessel v)
         {
+            Log.Debug("StorageCache.OnVesselChange");
+
             RemoveMagicTransmitter();
             vessel = v;
             Rebuild();
@@ -66,6 +80,8 @@ namespace ExperimentIndicator
 
         public void OnVesselModified(Vessel v)
         {
+            Log.Debug("StorageCache.OnVesselModified");
+
             if (vessel != v)
             {
                 OnVesselChange(v);
@@ -76,6 +92,8 @@ namespace ExperimentIndicator
 
         public void OnVesselDestroyed(Vessel v)
         {
+            Log.Debug("StorageCache.OnVesselDestroyed");
+
             RemoveMagicTransmitter();
             storage = new StorageList();
             magicTransmitter = null;
@@ -108,6 +126,7 @@ namespace ExperimentIndicator
 
             // ScienceContainers are straightforward ...
             storage = vessel.FindPartModulesImplementing<IScienceDataContainer>();
+            Log.Debug("StorageCache: located {0} IScienceDataContainers", storage.Count);
 
 
             // now we must deal with IScienceDataTransmitters, which are not 
@@ -135,6 +154,11 @@ namespace ExperimentIndicator
                     // vessel's root part should have a MagicDataTransmitter
                     if (transmitters.Any(tx => !(tx is MagicDataTransmitter)))
                     {
+                        //foreach (var snap in vessel.protoVessel.protoPartSnapshots)
+                        //    if (snap.partRef == vessel.rootPart)
+                        //    {
+                        //        snap.
+                        //    }
                         magicTransmitter = vessel.rootPart.AddModule("MagicDataTransmitter") as MagicDataTransmitter;
                         Log.Debug("Added MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.ConstructID);
                     }
@@ -198,15 +222,20 @@ namespace ExperimentIndicator
         /// <returns></returns>
         public bool FindStoredData(string subjectid, out ScienceData refData)
         {
-            
+            Log.Debug("Searching for {0}", subjectid);
 
             foreach (var container in storage)
                 foreach (var data in container.GetData())
+                {
+                    Log.Debug("Comparing {0} to {1}", subjectid, data.subjectID);
+
                     if (data.subjectID == subjectid)
                     {
                         refData = data;
                         return true;
                     }
+                }
+
 
             if (magicTransmitter != null)
             {
@@ -224,5 +253,47 @@ namespace ExperimentIndicator
             refData = null;
             return false;
         }
+
+#if DEBUG
+        public void DumpContainerData()
+        {
+            Log.Debug("Dumping container data...");
+
+            if (storage == null)
+                Log.Error("storage is null");
+
+            foreach (var container in storage)
+            {
+                if (container == null)
+                    Log.Error("container is null");
+
+                if (container.GetData() == null)
+                {
+                    Log.Error("container.GetData() is null");
+                }
+                else
+                {
+                    foreach (var data in container.GetData())
+                    {
+                        if (data != null)
+                        {
+                            Log.Debug("  Data: {0}, title {1}", data.subjectID, data.title);
+                        }
+                        else Log.Error("data in container.getData() is null");
+                    }
+                }
+            }
+
+            Log.Debug("Dumping transmitter data ...");
+            if (magicTransmitter == null)
+                Log.Error("magicTransmitter is null!");
+
+            foreach (var data in magicTransmitter.QueuedData)
+                Log.Debug("  Data: {0}, title {1}", data.subjectID, data.title);
+
+            Log.Debug("Finished dumping container data!");
+        }
+        
+#endif
     }
 }
