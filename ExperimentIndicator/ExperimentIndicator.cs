@@ -33,6 +33,8 @@ namespace ExperimentIndicator
         //    Members of ExperimentIndicator
         // --------------------------------------------------------------------
         ExperimentObserverList observers = new ExperimentObserverList();
+        private StorageCache vesselStorage;
+
         private Toolbar.IButton mainButton;
         private IconState researchState = IconState.NoResearch;
 
@@ -71,7 +73,6 @@ namespace ExperimentIndicator
             mainButton.ToolTip = "Left Click to Open Experiments; Right Click for Settings";
             mainButton.TexturePath = NORMAL_FLASK;
             mainButton.OnClick += OnToolbarClick;
-
 
             StartCoroutine(RebuildObserverList());
 
@@ -164,37 +165,12 @@ namespace ExperimentIndicator
             while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed)
                 yield return 0;
 
-
-            // count the number of "real" transmitters onboard
-            List<IScienceDataTransmitter> transmitters = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
-            transmitters.RemoveAll(tx => tx is MagicDataTransmitter);
-
-            // remove any existing magic transmitters
-            foreach (var part in FlightGlobals.ActiveVessel.Parts)
-                while (part.Modules.Contains("MagicDataTransmitter"))
-                {
-                    part.RemoveModule(part.Modules.OfType<MagicDataTransmitter>().First());
-                    Log.Debug("Removing MagicDataTransmitter from {0}", part.ConstructID);
-                }       
-
-
-            if (transmitters.Count > 0)
-            {
-                // as long as at least one transmitter is "real", the
-                // vessel's root part should have a MagicDataTransmitter
-                if (transmitters.Any(tx => !(tx is MagicDataTransmitter)))
-                {
-                    FlightGlobals.ActiveVessel.rootPart.AddModule("MagicDataTransmitter");
-                    Log.Debug("Added MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.ConstructID);
-                }
-            }
-
-            Log.Debug("There are {0} real transmitters aboard {1}", transmitters.Count, FlightGlobals.ActiveVessel.name);
-
+            if (vesselStorage == null)
+            vesselStorage = new StorageCache();
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 if (expid != "evaReport")
-                    observers.Add(new ExperimentObserver(expid));
+                    observers.Add(new ExperimentObserver(vesselStorage, expid));
 
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless
@@ -204,7 +180,7 @@ namespace ExperimentIndicator
             // so on) I think it's best we separate it out into its own
             // Observer type that will account for these changes and any others
             // that might not necessarily trigger a VesselModified event
-            observers.Add(new EvaReportObserver());
+            observers.Add(new EvaReportObserver(vesselStorage));
         }
 
 

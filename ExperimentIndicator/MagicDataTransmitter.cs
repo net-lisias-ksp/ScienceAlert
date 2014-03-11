@@ -60,33 +60,6 @@ namespace ExperimentIndicator
     {
         // keep track of which (REAL) transmitter is transmitting what
         private Dictionary<IScienceDataTransmitter, ScienceDataList> realTransmitters = new Dictionary<IScienceDataTransmitter, ScienceDataList>();
-    
-
-        // not called?
-        //public override void OnStart(StartState state)
-        //{
-        //    base.OnStart(state);
-
-        //    Log.Write("Magic data transmitter has appeared!");
-        //}
-
-        //// not called?
-        //public override void OnInitialize()
-        //{
-        //    base.OnInitialize();
-        //    Log.Write("MagicDataTransmitter.OnInitialize()");
-        //}
-
-        //public override void OnActive()
-        //{
-        //    base.OnActive();
-        //    Log.Write("MagicDataTransmitter.OnActive()");
-        //}
-
-        //public void Start()
-        //{
-        //    Log.Write("MagicDataTransmitter:Start()");
-        //}
 
 
         /// <summary>
@@ -115,13 +88,15 @@ namespace ExperimentIndicator
 
         public override void OnSave(ConfigNode node)
         {
+#if !DEBUG // permit poisoning in debug games
             node.ClearData(); // don't save anything about MagicDataTransmitter or
                               // the save file will be poisoned
+#endif
         }
 
         public override void OnLoad(ConfigNode node)
         {
-            //base.OnLoad(node);
+            // empty
         }
 
         void IScienceDataTransmitter.TransmitData(ScienceDataList data)

@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ExperimentIndicator
 {
     using ScienceModuleList = List<ModuleScienceExperiment>;
-    using StorageList = List<IScienceDataContainer>;
+    //
     //using TransmitterList = List<IScienceDataTransmitter>;
     
 
@@ -20,12 +20,9 @@ namespace ExperimentIndicator
     /// </summary>
     internal class ExperimentObserver
     {
-        private ScienceModuleList modules;              // all ModuleScienceExperiments onboard that represent our experiment
-        protected ScienceExperiment experiment;           // The actual experiment that will be performed
-        protected StorageList storage;                  // containers for science data
-        //protected TransmitterList transmitters;         // Science transmitters, obviously
-        protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
-
+        private ScienceModuleList modules;                  // all ModuleScienceExperiments onboard that represent our experiment
+        protected ScienceExperiment experiment;             // The actual experiment that will be performed
+        protected StorageCache storage;                     // Represents possible storage locations on the vessel
 
 
         public enum FilterMode
@@ -40,9 +37,10 @@ namespace ExperimentIndicator
  ******************************************************************************/
 
 
-        public ExperimentObserver(string expid)
+        public ExperimentObserver(StorageCache cache, string expid)
         {
             experiment = ResearchAndDevelopment.GetExperiment(expid);
+            storage = cache;
             Rebuild();
         }
 
@@ -55,11 +53,17 @@ namespace ExperimentIndicator
 
 
 
+        /// <summary>
+        /// Cache ModuleScienceExperiments so we don't have to waste time
+        /// looking for them later.  Any time the vessel has changed (modified,
+        /// lost a part like mystery goo can, etc), this function should be 
+        /// called to keep the modules up to date.
+        /// </summary>
         public virtual void Rebuild()
         {
             Log.Verbose("ExperimentObserver ({0}): rebuilding...", ExperimentTitle);
             modules = new ScienceModuleList();
-            magicTransmitter = null;
+            
 
             if (FlightGlobals.ActiveVessel == null)
                 return;
@@ -77,90 +81,14 @@ namespace ExperimentIndicator
                 if (potential.experimentID == experiment.id)
                     modules.Add(potential);
 
-            RebuildStorageList();
             Log.Debug("Added ExperimentLight for experiment {0} (active vessel has {1} experiments of type)", experiment.id, modules.Count);
         }
 
 
 
-        protected void RebuildStorageList()
-        {
-            storage = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataContainer>();
-
-            Log.Debug("Locating PartModules that implement IScienceDataTransmitter ...");
-            var transmitterList = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
-
-            if (transmitterList.Count == 1)
-            {
-                // whoops, something's wrong.  If there's a real transmitter,
-                // there will also be a magic transmitter.
-                Log.Error("ExperimentObserver.RebuildStorageList - found only 1 transmitter!");
-            } else
-            {
-                // ExperimentIndicator will handle the magic transmitter details
-                // for us.  All we need to know is that there's definitely
-                // at least one real and one fake transmitter onboard (or else
-                // none of the above; vessel cannot transmit anyway)
-
-                if (transmitterList.Any(tx => !(tx is MagicDataTransmitter)))
-                {
-                    Log.Debug("Onboard transmitter count: {0}; root part transmitters {1}", transmitterList.Count, FlightGlobals.ActiveVessel.rootPart.Modules.OfType<MagicDataTransmitter>().ToList().Count);
-                    magicTransmitter = FlightGlobals.ActiveVessel.rootPart.Modules.OfType<MagicDataTransmitter>().First();
-                }
-                else magicTransmitter = null;
-            }
-        }
 
 
-
-        /// <summary>
-        /// As you might imagine, there are definitely cases where an experiment
-        /// is "available" and no science is submitted, yet the data has already
-        /// been collected.  For example, a vessel has two mystery goo containers.
-        /// One is activated in a given situation.  That data is saved, not transmitted.
-        /// Since there is another experiment available and technically no science
-        /// has been collected for the experiment, should the indicator light for
-        /// goo be on?  I say no.  That means we must account for any existing stored
-        /// data in any container onboard the vessel.
-        /// 
-        /// Another note: when data is being transmitted, it is moved from a container
-        /// into a transmitter module.  That's going to be a problem if we don't also
-        /// include transmitters in our search for data; otherwise, as soon as the 
-        /// player begins transmitting it looks like no data for the experiment is 
-        /// onboard and the experiment will "become available" for a few seconds 
-        /// until the data is submitted.
-        ///    However, we encounter another problem here: there's no way to get at
-        /// the queued ScienceData in the transmitter.  We can trick the game into
-        /// always choosing our fake transmitter and get the data that way instead,
-        /// though.  More detail in MagicDataTransmitter description.
-        /// </summary>
-        /// <param name="subjectid"></param>
-        /// <param name="refData"></param>
-        /// <returns></returns>
-        protected bool FindStoredData(string subjectid, out ScienceData refData)
-        {
-            Log.Debug("Queued data count: {0}", magicTransmitter.QueuedData.Count);
-
-            foreach (var container in storage)
-                foreach (var data in container.GetData())
-                    if (data.subjectID == subjectid)
-                    {
-                        refData = data;
-                        return true;
-                    }
-
-            if (magicTransmitter != null)
-                foreach (var data in magicTransmitter.QueuedData)
-                    if (data.subjectID == subjectid)
-                    {
-                        refData = data;
-                        Log.Warning("Found stored data in transmitter queue");
-                        return true;
-                    }
-
-            refData = null;
-            return false;
-        }
+        
 
 
 
@@ -209,12 +137,12 @@ namespace ExperimentIndicator
                         case FilterMode.Unresearched:
                             // If there's a report ready to be transmitted, the experiment
                             // is hardly "Unresearched" in this situation
-                            Available = !FindStoredData(subject.id, out data) && subject.science < 0.0005f;
+                            Available = !storage.FindStoredData(subject.id, out data) && subject.science < 0.0005f;
                             //Log.Debug("    - Mode: Unresearched, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
                             break;
 
                         case FilterMode.NotMaxed:
-                            if (FindStoredData(subject.id, out data))
+                            if (storage.FindStoredData(subject.id, out data))
                             {
                                 Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.scienceCap;
                             }
@@ -353,8 +281,8 @@ namespace ExperimentIndicator
         /// <summary>
         /// Constructor.  We already know exactly which kind of
         /// </summary>
-        public EvaReportObserver()
-            : base("evaReport")
+        public EvaReportObserver(StorageCache cache)
+            : base(cache, "evaReport")
         {
 
         }
@@ -450,8 +378,6 @@ namespace ExperimentIndicator
                 if (part.CrewCapacity > 0)
                     crewableParts.Add(part);
 
-            RebuildStorageList();
-
         }
 
 
@@ -486,7 +412,7 @@ namespace ExperimentIndicator
                         var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
 
 
-                        if (FindStoredData(subject.id, out data))
+                        if (storage.FindStoredData(subject.id, out data))
                         {
                             Log.Write("Found eva stored data for id {0}!", subject.id);
                             Available = false;
