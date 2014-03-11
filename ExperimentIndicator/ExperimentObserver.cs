@@ -330,6 +330,7 @@ namespace ExperimentIndicator
                     foreach (var crew in crewChoices)
                         Log.Debug(" - {0}", crew.name);
 
+                    // select a kerbal target...
                     var luckyKerbal = crewChoices[UnityEngine.Random.Range(0, crewChoices.Count - 1)];
                     Log.Debug("{0} is the lucky Kerbal.  Out the airlock with him!", luckyKerbal.name);
 

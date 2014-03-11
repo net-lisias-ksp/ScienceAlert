@@ -4,11 +4,9 @@ using System.Linq;
 using UnityEngine;
 using Toolbar;
 
-
-// TODO: beginning transmission seems to remove data from container
-// TODO: exclude any experiments for which data is stored in ModuleScienceContainer?
+// TODO: manually selected transmitters ignore MagicTransmitter
+// TODO: option setting to enable/disable session-persistent maneuver nodes from eva kerbal
 // todo: separate science observer for surface samples like the eva one?
-// todo: split out storage from individual experiments
 
 namespace ExperimentIndicator
 {
@@ -146,11 +144,18 @@ namespace ExperimentIndicator
             try
             {
                 StopCoroutine("RebuildObserverList");
-            } catch {}
+            } catch (NullReferenceException) {}
 
             Log.Debug("OnVesselChange: {0}", newVessel.name);
             observers.Clear();
-            StartCoroutine(RebuildObserverList());
+
+            try
+            {
+                StartCoroutine(RebuildObserverList());
+            } catch (NullReferenceException e)
+            {
+                Log.Error("Null reference exception in OnVesselChanged; did not rebuild observer list.  Exception = {0}", e);
+            }
         }
 
         public void OnVesselDestroyed(Vessel vessel)
