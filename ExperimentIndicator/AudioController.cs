@@ -17,6 +17,8 @@ namespace ExperimentIndicator
             Bubbles
         }
 
+
+
         public AudioController()
         {
             gameObject = new GameObject("ExperimentIndicator.AudioSource");
@@ -24,6 +26,8 @@ namespace ExperimentIndicator
 
             bubbles = LoadSound(BUBBLES_PATH);
         }
+
+
 
         public bool PlaySound(AvailableSounds sound)
         {
@@ -48,6 +52,8 @@ namespace ExperimentIndicator
 
             return false;
         }
+
+
 
         private AudioClip LoadSound(string path)
         {

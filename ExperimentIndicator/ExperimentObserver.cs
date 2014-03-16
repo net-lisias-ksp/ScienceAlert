@@ -24,7 +24,7 @@ namespace ExperimentIndicator
         protected ScienceExperiment experiment;             // The actual experiment that will be performed
         protected StorageCache storage;                     // Represents possible storage locations on the vessel
         protected Settings.ExperimentSettings settings;     // settings for this experiment
-
+        protected string lastAvailableId;                   // Id of the last time the experiment was available
 
 
 
@@ -141,7 +141,7 @@ namespace ExperimentIndicator
                             // If there's a report ready to be transmitted, the experiment
                             // is hardly "Unresearched" in this situation
                             Available = !storage.FindStoredData(subject.id, out data) && subject.science < 0.0005f;
-                            Log.Debug("    - Mode: Unresearched, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
+                            //Log.Debug("    - Mode: Unresearched, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
                             break;
 
                         case Settings.ExperimentSettings.FilterMethod.NotMaxed:
@@ -182,6 +182,13 @@ namespace ExperimentIndicator
                             break;
                     }
 
+                    if (Available)
+                    {
+                        if (lastAvailableId != subject.id)
+                            lastStatus = false; // force a refresh, in case we're going from available -> available in different subject id
+
+                        lastAvailableId = subject.id;
+                    }
                 }
                 else
                 {
@@ -195,7 +202,6 @@ namespace ExperimentIndicator
             }
             else Available = false; // no experiments ready
 
-            Log.Debug("Observer last status = {0}, current status {1}", lastStatus, Available);
 
             return Available != lastStatus && Available;
         }

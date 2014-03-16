@@ -14,6 +14,11 @@ using Toolbar;
 // todo: only update experiments on vessel situation change?
 //          further thought: maybe not.  It's not that expensive as is, plus
 //          mod experiments might be changing data on the fly
+//
+// todo: keep track of last subjectid experiment was valid for, so if it
+//       changes when the user hasn't opened the menu, the "available bubbles"
+//       sound will play again like it logically would
+
 
 namespace ExperimentIndicator
 {
@@ -148,19 +153,23 @@ namespace ExperimentIndicator
             Log.Warning("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
 
             // firstly, handle sound
-            if (experiment.SoundOnDiscovery)
+            if (experiment.SoundOnDiscovery && Settings.Instance.SoundOnNewResearch)
                 audio.PlaySound(AudioController.AvailableSounds.Bubbles);
 
             // now handle state
-            if (experiment.AnimateOnDiscovery)
+            if (experiment.AnimateOnDiscovery && Settings.Instance.FlaskAnimationEnabled)
             {
                 indicator.State = ExperimentIndicator.IconState.NewResearch;
             }
             else
             {
-                // if the icon is already animated, don't stop it because this
-                // particular experiment wouldn't produce one
-                indicator.State = indicator.State == ExperimentIndicator.IconState.NewResearch ? ExperimentIndicator.IconState.NewResearch : ExperimentIndicator.IconState.ResearchAvailable;
+                if (Settings.Instance.FlaskAnimationEnabled)
+                {
+                    // if the icon is already animated, don't stop it because this
+                    // particular experiment wouldn't produce one
+                    indicator.State = indicator.State == ExperimentIndicator.IconState.NewResearch ? ExperimentIndicator.IconState.NewResearch : ExperimentIndicator.IconState.ResearchAvailable;
+                }
+                else indicator.State = ExperimentIndicator.IconState.ResearchAvailable;
             }
 
             // menu status (open/closed) is handled by ExperimentIndicator;
