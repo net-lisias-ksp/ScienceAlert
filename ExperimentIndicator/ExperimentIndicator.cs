@@ -273,6 +273,15 @@ namespace ExperimentIndicator
 
             //if (Input.GetKeyDown(KeyCode.R))
             //    vesselStorage.ScheduleRebuild();
+
+            if (Input.GetKeyDown(KeyCode.U))
+            {
+                foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
+                {
+                    var settings = Settings.Instance.GetExperimentSettings(expid);
+                    Log.Debug("{0} settings: {1}", expid, settings.ToString());
+                }
+            }
         }
 
         
@@ -332,14 +341,8 @@ namespace ExperimentIndicator
 
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                if (Settings.Instance.GetExperimentSettings(expid).Enabled)
-                {
-                    if (expid != "evaReport") // evaReport is a special case
-                        observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), expid));
-                } else
-                {
-                    Log.Debug("Experiment {0} - Scan disabled", expid);
-                }
+                if (expid != "evaReport") // evaReport is a special case
+                    observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), expid));
 
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless
@@ -562,7 +565,6 @@ namespace ExperimentIndicator
                 }
                 else if (OptionsOpen)
                 {
-                    Log.Debug("Settings options window = null");
                     mainButton.Drawable = null;
                     Settings.Instance.Save();
                 }

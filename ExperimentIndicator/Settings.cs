@@ -69,6 +69,13 @@ namespace ExperimentIndicator
                 node.AddValue("AssumeOnboard", AssumeOnboard);
                 node.AddValue("Filter", Filter);
             }
+
+            public override string ToString()
+            {
+                ConfigNode node = new ConfigNode();
+                OnSave(node);
+                return node.ToString();
+            }
         }
 
         private Dictionary<string /* expid */, ExperimentSettings> PerExperimentSettings;

@@ -108,14 +108,19 @@ namespace ExperimentIndicator
 
         public void OnVesselDestroyed(Vessel v)
         {
-            Log.Debug("StorageCache.OnVesselDestroyed");
+            if (vessel == v)
+            {
+                Log.Debug("StorageCache.OnVesselDestroyed");
 
-            RemoveMagicTransmitter();
-            storage = new StorageList();
-            magicTransmitter = null;
+                RemoveMagicTransmitter();
+                storage = new StorageList();
+                magicTransmitter = null;
+                vessel = null;
+            }
 
-            if (HasStoredManeuverNodes(v.id))
-                sessionManeuverNodes[v.id].Clear();
+            if (v != null)
+                if (HasStoredManeuverNodes(v.id))
+                    sessionManeuverNodes[v.id].Clear();
         }
 
         #endregion

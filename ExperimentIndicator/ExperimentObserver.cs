@@ -106,12 +106,18 @@ namespace ExperimentIndicator
             if (FlightGlobals.ActiveVessel == null)
             {
                 Available = false;
+                Log.Debug("Observer.UpdateStatus: active vessel is null!");
                 return false;
             }
 
             if (!settings.Enabled)
             {
                 Available = false;
+                lastAvailableId = "";
+
+                if (experiment.id == "mysteryGoo")
+                    Log.Debug("mysteryGoo is disabled");
+
                 return false;
             }
 
