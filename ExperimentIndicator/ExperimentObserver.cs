@@ -23,13 +23,9 @@ namespace ExperimentIndicator
         private ScienceModuleList modules;                  // all ModuleScienceExperiments onboard that represent our experiment
         protected ScienceExperiment experiment;             // The actual experiment that will be performed
         protected StorageCache storage;                     // Represents possible storage locations on the vessel
+        protected Settings.ExperimentSettings settings;     // settings for this experiment
 
 
-        public enum FilterMode
-        {
-            Unresearched = 0,                           // only light on subjects for which no science has been confirmed at all
-            NotMaxed = 1,                               // light whenever the experiment subject isn't maxed
-        }
 
 
 /******************************************************************************
@@ -37,9 +33,18 @@ namespace ExperimentIndicator
  ******************************************************************************/
 
 
-        public ExperimentObserver(StorageCache cache, string expid)
+        public ExperimentObserver(StorageCache cache, Settings.ExperimentSettings expSettings, string expid)
         {
+            settings = expSettings;
+#if DEBUG
+            if (!settings.ScanEnabled)
+                Log.Error("Experiment {0} should have been disabled!", expid);
+#endif
             experiment = ResearchAndDevelopment.GetExperiment(expid);
+
+            if (experiment == null)
+                Log.Error("Failed to get experiment '{0}'", expid);
+
             storage = cache;
             Rebuild();
         }
@@ -68,8 +73,6 @@ namespace ExperimentIndicator
             if (FlightGlobals.ActiveVessel == null)
                 return;
 
-            // todo: set filter on creation?
-            Filter = FilterMode.Unresearched;
 
             // locate all ModuleScienceExperiments that implement this
             // experiment.  By keeping track of them ourselves, we don't
@@ -81,7 +84,7 @@ namespace ExperimentIndicator
                 if (potential.experimentID == experiment.id)
                     modules.Add(potential);
 
-            Log.Debug("Added ExperimentLight for experiment {0} (active vessel has {1} experiments of type)", experiment.id, modules.Count);
+            Log.Debug("Rebuilt ExperimentObserver for experiment {0} (active vessel has {1} experiments of type)", experiment.id, modules.Count);
         }
 
 
@@ -132,16 +135,16 @@ namespace ExperimentIndicator
                     ScienceData data;
 
 
-                    switch (Filter)
+                    switch (settings.Filter)
                     {
-                        case FilterMode.Unresearched:
+                        case Settings.ExperimentSettings.FilterMethod.Unresearched:
                             // If there's a report ready to be transmitted, the experiment
                             // is hardly "Unresearched" in this situation
                             Available = !storage.FindStoredData(subject.id, out data) && subject.science < 0.0005f;
                             //Log.Debug("    - Mode: Unresearched, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
                             break;
 
-                        case FilterMode.NotMaxed:
+                        case Settings.ExperimentSettings.FilterMethod.NotMaxed:
                             if (storage.FindStoredData(subject.id, out data))
                             {
                                 Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.scienceCap;
@@ -149,6 +152,33 @@ namespace ExperimentIndicator
                             else Available = subject.science < subject.scienceCap;
 
                             //Log.Debug("    - Mode: NotMaxed, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
+                            break;
+
+                        case Settings.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
+                            // important note for these last two filters: we can only accurately
+                            // predict the NEXT science report value.  Without knowing exactly how
+                            // KSP comes up with this number, we can't accurately predict exactly
+                            // how multiple reports onboard will contribute.  Rather than taking
+                            // a guess, I've decided to simply only account for the "next" report
+                            // and ignore any instances of multiple reports on one vessel.
+                            if (storage.FindStoredData(subject.id, out data))
+                            {
+                                Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.science * 0.5f;
+                            }
+                            else Available = subject.science < subject.scienceCap * 0.5f;
+
+                            break;
+
+                        case Settings.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
+                            if (storage.FindStoredData(subject.id, out data))
+                            {
+                                Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.scienceCap * 0.9f;
+                            }
+                            else Available = subject.science < subject.scienceCap * 0.9f;
+                            break;
+
+                        default:
+                            Log.Error("Unrecognized experiment filter!");
                             break;
                     }
 
@@ -195,6 +225,16 @@ namespace ExperimentIndicator
                 deployable.DeployExperiment();
                 return true;
             }
+            else
+            {
+                if (settings.AssumeOnboard)
+                    if (modules.Count == 0)
+                    {
+                        PopupDialog.SpawnPopupDialog("Error", string.Format("Cannot deploy custom experiment {0} because it does not extend ModuleScienceExperiment; you will have to manually deploy it.  Sorry!", ExperimentTitle), "Okay", false, HighLogic.Skin);
+                        Log.Error("Custom experiment {0} has no modules and AssumeOnBoard flag; informed user that we cannot automatically deploy it.", ExperimentTitle);
+                        return false;
+                    }
+            }
 
             // we should never reach this point if IsExperimentAvailableOnboard did
             // its job.  This would indicate we're not accounting for something about 
@@ -219,7 +259,7 @@ namespace ExperimentIndicator
         {
             get
             {
-                return GetNextOnboardExperimentModule() != null;
+                return settings.AssumeOnboard || GetNextOnboardExperimentModule() != null;
             }
         }
 
@@ -232,12 +272,6 @@ namespace ExperimentIndicator
         }
 
 
-
-        public FilterMode Filter
-        {
-            get;
-            set;
-        }
 
         public string ExperimentTitle
         {
@@ -252,6 +286,22 @@ namespace ExperimentIndicator
             get
             {
                 return modules.Count;
+            }
+        }
+
+        public bool SoundOnDiscovery
+        {
+            get
+            {
+                return settings.SoundOnDiscovery;
+            }
+        }
+
+        public bool AnimateOnDiscovery
+        {
+            get
+            {
+                return settings.AnimationOnDiscovery;
             }
         }
 
@@ -281,8 +331,8 @@ namespace ExperimentIndicator
         /// <summary>
         /// Constructor.  We already know exactly which kind of
         /// </summary>
-        public EvaReportObserver(StorageCache cache)
-            : base(cache, "evaReport")
+        public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings)
+            : base(cache, settings, "evaReport")
         {
 
         }
@@ -428,14 +478,27 @@ namespace ExperimentIndicator
                         }
                         else
                         {
-                            switch (Filter)
+                            // note: normally I would make the assumption that since
+                            // evaReports are always full value, we don't need to
+                            // do any fancy checking.  However, the safer road is not
+                            // to assume anything and proceed as we did in the base
+                            // class version of this function
+                            switch (settings.Filter)
                             {
-                                case FilterMode.Unresearched:
+                                case Settings.ExperimentSettings.FilterMethod.Unresearched:
                                     Available = subject.science < 0.0005f;
                                     break;
 
-                                case FilterMode.NotMaxed:
+                                case Settings.ExperimentSettings.FilterMethod.NotMaxed:
                                     Available = subject.science < subject.scienceCap;
+                                    break;
+
+                                case Settings.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
+                                    Available = subject.science < subject.scienceCap * 0.5f;
+                                    break;
+
+                                case Settings.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
+                                    Available = subject.scienceCap < subject.scienceCap * 0.9f;
                                     break;
 
                                 default:

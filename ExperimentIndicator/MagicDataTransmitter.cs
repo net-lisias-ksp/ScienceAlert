@@ -91,7 +91,7 @@ namespace ExperimentIndicator
         {
 #if !DEBUG // permit poisoning in debug games
             node.ClearData(); // don't save anything about MagicDataTransmitter or
-                               the save file will be poisoned
+                              // the save file will be poisoned
 #endif
         }
 

@@ -5,8 +5,15 @@ using UnityEngine;
 using Toolbar;
 
 // TODO: manually selected transmitters ignore MagicTransmitter
-// TODO: option setting to enable/disable session-persistent maneuver nodes from eva kerbal
+//          further thought: who really does this?  will think on it more
+
 // todo: separate science observer for surface samples like the eva one?
+// todo: stop scanning when game is paused
+
+
+// todo: only update experiments on vessel situation change?
+//          further thought: maybe not.  It's not that expensive as is, plus
+//          mod experiments might be changing data on the fly
 
 namespace ExperimentIndicator
 {
@@ -32,6 +39,9 @@ namespace ExperimentIndicator
         // --------------------------------------------------------------------
         ExperimentObserverList observers = new ExperimentObserverList();
         private StorageCache vesselStorage;
+        private System.Collections.IEnumerator watcher;
+        private System.Collections.IEnumerator starFlask;
+        private System.Collections.IEnumerator rebuilder;
 
         private Toolbar.IButton mainButton;
         private IconState researchState = IconState.NoResearch;
@@ -41,6 +51,7 @@ namespace ExperimentIndicator
         private const float FRAME_RATE = 24f / 1000f;
         private const int FRAME_COUNT = 100;
         private int StarAnimationFrame = 0;
+        private float ElapsedTime = 0f;
 
         private const string NORMAL_FLASK = "ExperimentIndicator/textures/flask";
         private List<string> STAR_FLASK = new List<string>();
@@ -65,17 +76,15 @@ namespace ExperimentIndicator
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
 
-
             mainButton = Toolbar.ToolbarManager.Instance.add("ExperimentIndicator", "PopupOpen");
             mainButton.Text = "ExpIndicator";
             mainButton.ToolTip = "Left Click to Open Experiments; Right Click for Settings";
             mainButton.TexturePath = NORMAL_FLASK;
             mainButton.OnClick += OnToolbarClick;
 
-            StartCoroutine(RebuildObserverList());
-
-            // run update loop
-            InvokeRepeating("UpdateObservers", 1f, 1f);
+            // set up coroutines
+            rebuilder = RebuildObserverList();
+            starFlask = StarAnimation();
         }
 
 
@@ -88,7 +97,7 @@ namespace ExperimentIndicator
 
         public void OnGUI()
         {
-            if (float.IsNaN(maximumTextLength) && observers.Count > 0)
+            if (float.IsNaN(maximumTextLength) && observers.Count > 0 && rebuilder == null)
             {
                 // construct the experiment observer list ...
                 maximumTextLength = observers.Max(observer => GUI.skin.button.CalcSize(new GUIContent(observer.ExperimentTitle)).x);
@@ -103,7 +112,19 @@ namespace ExperimentIndicator
 
         public void Update()
         {
-            // empty
+            if (rebuilder != null)
+            {   // still working on refreshing observer list
+                if (!rebuilder.MoveNext())
+                    rebuilder = null;
+            }
+            else
+            {
+                if (!vesselStorage.IsBusy && watcher != null && starFlask != null)
+                {
+                    watcher.MoveNext();
+                    starFlask.MoveNext();
+                } else Log.Debug("storage is busy");
+            }
 
             if (Input.GetKeyDown(KeyCode.S))
             {
@@ -112,11 +133,11 @@ namespace ExperimentIndicator
                 audio.PlaySound(AudioController.AvailableSounds.Bubbles);
             }
 
-            if (Input.GetKeyDown(KeyCode.U))
-                vesselStorage.DumpContainerData();
+            //if (Input.GetKeyDown(KeyCode.U))
+            //    vesselStorage.DumpContainerData();
 
-            if (Input.GetKeyDown(KeyCode.R))
-                vesselStorage.ScheduleRebuild();
+            //if (Input.GetKeyDown(KeyCode.R))
+            //    vesselStorage.ScheduleRebuild();
         }
 
         
@@ -128,34 +149,16 @@ namespace ExperimentIndicator
             {
                 Log.Debug("OnVesselWasModified invoked, rebuilding observer list");
                 observers.Clear();
-
-                try
-                {
-                    StopCoroutine("RebuildObserverList");
-                }
-                catch { }
-
-                StartCoroutine("RebuildObserverList");
+                rebuilder = RebuildObserverList();
             }
         }
 
         public void OnVesselChanged(Vessel newVessel)
         {
-            try
-            {
-                StopCoroutine("RebuildObserverList");
-            } catch (NullReferenceException) {}
-
             Log.Debug("OnVesselChange: {0}", newVessel.name);
             observers.Clear();
-
-            try
-            {
-                StartCoroutine("RebuildObserverList");
-            } catch (NullReferenceException e)
-            {
-                Log.Error("Null reference exception in OnVesselChanged; did not rebuild observer list.  Exception = {0}", e);
-            }
+            rebuilder = RebuildObserverList();
+            watcher = null;
         }
 
         public void OnVesselDestroyed(Vessel vessel)
@@ -164,24 +167,40 @@ namespace ExperimentIndicator
             {
                 Log.Debug("Active vessel was destroyed!");
                 observers.Clear();
+                rebuilder = null;
+                watcher = null;
             }
         }
 
+
+
+        /// <summary>
+        /// Each experiment observer caches relevant modules to reduce cpu
+        /// time.  Whenever the vessel changes, they'll need to be updated.
+        /// That's what this function does.
+        /// </summary>
+        /// <returns></returns>
         private System.Collections.IEnumerator RebuildObserverList()
         {
             observers.Clear();
             maximumTextLength = float.NaN;
 
-            while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed)
-                yield return 0;
-
             if (vesselStorage == null)
                 vesselStorage = gameObject.AddComponent<StorageCache>();
 
+            while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed)
+                yield return 0;
+
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                if (expid != "evaReport")
-                    observers.Add(new ExperimentObserver(vesselStorage, expid));
+                if (Settings.Instance.GetExperimentSettings(expid).ScanEnabled)
+                {
+                    if (expid != "evaReport") // evaReport is a special case
+                        observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), expid));
+                } else
+                {
+                    Log.Debug("Experiment {0} - Scan disabled", expid);
+                }
 
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless
@@ -191,13 +210,76 @@ namespace ExperimentIndicator
             // so on) I think it's best we separate it out into its own
             // Observer type that will account for these changes and any others
             // that might not necessarily trigger a VesselModified event
-            observers.Add(new EvaReportObserver(vesselStorage));
+            if (Settings.Instance.GetExperimentSettings("evaReport").ScanEnabled)
+                observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport")));
+
+            watcher = UpdateObservers();
         }
 
 
 
+        /// <summary>
+        /// Update state of all experiment observers.  If their status has 
+        /// changed, UpdateStatus will return true.
+        /// </summary>
+        /// <returns></returns>
+        private System.Collections.IEnumerator UpdateObservers()
+        {
+            while (true)
+            {
+                if (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
+                {
+                    yield return 0; 
+                    continue;
+                }
+
+                // if any new experiments become available, our state
+                // changes (remember: observers return true only if their observed
+                // experiment wasn't available before and just become available this update)
+                var expSituation = VesselSituationToExperimentSituation();
+
+                foreach (var observer in observers)
+                {
+#if DEBUG
+                    float start = Time.realtimeSinceStartup;
+#endif
+
+                    // Is exciting new research available?
+                    if (observer.UpdateStatus(expSituation))
+                    {
+                        // if the menu is already open, we don't need to use the flashy animation
+                        State = MenuOpen ? IconState.ResearchAvailable : IconState.NewResearch;
+                        UpdateMenuState();
+                    } else if (!observers.Any(ob => ob.Available)) {
+                        // if no experiments are available, we should be looking
+                        // at a starless flask in the menu.  Note that this is
+                        // in an else statement because if UpdateStatus just
+                        // returned true, we know there's at least one experiment
+                        // available this frame
+                        State = IconState.NoResearch;
+
+                        if (MenuOpen) // nothing to be seen
+                            MenuOpen = false;
+                    }
+#if DEBUG
+                    Log.Warning("Tick time ({1}): {0} ms", (Time.realtimeSinceStartup - start) * 1000f, observer.ExperimentTitle);
+#endif
+                    yield return 0; // pause until next frame
+                } // end observer loop
 
 
+                yield return 0;
+            } // end infinite while loop
+        }
+
+
+
+        /// <summary>
+        /// Blizzy toolbar popup menu, when the toolbar button is left-clicked.
+        /// The options window is separate.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
         public Vector2 Draw(Vector2 position)
         {
             if (float.IsNaN(maximumTextLength))
@@ -258,59 +340,54 @@ namespace ExperimentIndicator
             }
         }
 
-        public void UpdateObservers()
+        
+
+        private System.Collections.IEnumerator StarAnimation()
         {
-            if (FlightGlobals.ActiveVessel == null)
-                return;
+            IconState oldState = researchState;
 
-#if DEBUG
-            float start = Time.realtimeSinceStartup;
-#endif
-
-            // if any new experiments become available, our state
-            // changes (remember: observers return true only if their observed
-            // experiment wasn't available before and just become available this update)
-            var expSituation = VesselSituationToExperimentSituation();
-
-            bool stateChange = observers.Any(observer => observer.UpdateStatus(expSituation));
-
-            // Is exciting new research available?
-            if (stateChange)
+            while (true)
             {
-                // if the menu is already open, we don't need to use the flashy animation
-                State = MenuOpen ? IconState.ResearchAvailable : IconState.NewResearch;
-            }
-            else
-            {
-                // if stateChange is true, we know at least one experiment is
-                // available.  On the other hand, if it's false we don't know if
-                // any experiments are available.  If there aren't any,
-                // the icon should be the normal starless flask
-                if (!observers.Any(observer => observer.Available))
+                if (oldState != State)
                 {
-                    State = IconState.NoResearch;
+                    // state has changed
+                    oldState = State;
 
-                    if (MenuOpen) // nothing to be seen
-                        MenuOpen = false;
+                    switch (State)
+                    {
+                        case IconState.NoResearch:
+                            mainButton.TexturePath = NORMAL_FLASK;
+                            break;
+                        case IconState.NewResearch:
+                            audio.PlaySound(AudioController.AvailableSounds.Bubbles);
+                            mainButton.TexturePath = STAR_FLASK[StarAnimationFrame];
+                            break;
+
+                        case IconState.ResearchAvailable:
+                            mainButton.TexturePath = STAR_FLASK[StarAnimationFrame];
+                            break;
+                    }
                 }
-            }
 
-            UpdateMenuState();
+                if (State == IconState.NewResearch)
+                {
+                    ElapsedTime += Time.smoothDeltaTime;
 
-#if DEBUG
-            Log.Warning("Tick time: {0} ms", (Time.realtimeSinceStartup - start) * 1000f);
-#endif
-        }
-
-        public void StarAnimation()
-        {
-            StarAnimationFrame = (StarAnimationFrame + 1) % STAR_FLASK.Count;
+                    if (ElapsedTime > FRAME_RATE)
+                    {
+                        ElapsedTime = 0f;
+                        StarAnimationFrame = (StarAnimationFrame + 1) % STAR_FLASK.Count;
 
 #if DEBUG
             if (State != IconState.NewResearch)
                 Log.Error("StarAnimation invoked with wrong research state {0}!", State);
 #endif
-            mainButton.TexturePath = STAR_FLASK[StarAnimationFrame];
+                        mainButton.TexturePath = STAR_FLASK[StarAnimationFrame];
+                    }
+                }
+
+                yield return 0;
+            }
         }
 
         #endregion
@@ -326,39 +403,7 @@ namespace ExperimentIndicator
 
             set
             {
-                IconState oldState = researchState;
                 researchState = value;
-
-                switch (researchState)
-                {
-                    case IconState.NoResearch: // standard flask icon
-                        mainButton.TexturePath = NORMAL_FLASK;
-
-                        if (oldState == IconState.NewResearch)
-                        {
-                            // cancel animation function
-                            CancelInvoke("StarAnimation");
-                        }
-                        break;
-
-                    case IconState.ResearchAvailable: // star flask icon, no animation
-                        mainButton.TexturePath = STAR_FLASK[0];
-
-                        if (oldState == IconState.NewResearch)
-                        {
-                            // cancel animation function
-                            CancelInvoke("StarAnimation");
-                        }
-                        break;
-
-                    case IconState.NewResearch: // star flask icon plus animation
-                        if (oldState != State)
-                        {    // start animation function, otherwise it's already running
-                            InvokeRepeating("StarAnimation", 0f, FRAME_RATE);
-                            audio.PlaySound(AudioController.AvailableSounds.Bubbles);
-                        }
-                        break;
-                }
             }
         }
 
