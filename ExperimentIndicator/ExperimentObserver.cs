@@ -141,7 +141,7 @@ namespace ExperimentIndicator
                             // If there's a report ready to be transmitted, the experiment
                             // is hardly "Unresearched" in this situation
                             Available = !storage.FindStoredData(subject.id, out data) && subject.science < 0.0005f;
-                            //Log.Debug("    - Mode: Unresearched, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
+                            Log.Debug("    - Mode: Unresearched, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
                             break;
 
                         case Settings.ExperimentSettings.FilterMethod.NotMaxed:
@@ -194,6 +194,8 @@ namespace ExperimentIndicator
                 }
             }
             else Available = false; // no experiments ready
+
+            Log.Debug("Observer last status = {0}, current status {1}", lastStatus, Available);
 
             return Available != lastStatus && Available;
         }
@@ -271,6 +273,13 @@ namespace ExperimentIndicator
             protected set;
         }
 
+        public virtual bool AssumeOnboard
+        {
+            get
+            {
+                return settings.AssumeOnboard;
+            }
+        }
 
 
         public string ExperimentTitle

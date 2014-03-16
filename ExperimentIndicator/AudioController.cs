@@ -38,7 +38,8 @@ namespace ExperimentIndicator
                 case AvailableSounds.Bubbles:
                     gameObject.transform.position = Camera.main.transform.position;
                     gameObject.audio.PlayOneShot(bubbles, GameSettings.UI_VOLUME);
-                    break;
+                    timeAtLastSound = Time.realtimeSinceStartup;
+                    return true;
 
                 default:
                     Log.Error("Unhandled sound in AudioController");

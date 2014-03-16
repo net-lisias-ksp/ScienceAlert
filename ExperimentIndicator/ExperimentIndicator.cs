@@ -20,10 +20,168 @@ namespace ExperimentIndicator
     using ExperimentObserverList = List<ExperimentObserver>;
 
 
+    /// <summary>
+    /// Combination of animation and sound effects on status
+    /// changes for experiment observers
+    /// </summary>
+    class EffectController
+    {
+        private const string NormalFlaskTexture = "ExperimentIndicator/textures/flask";
+        private List<string> StarFlaskTextures = new List<string>();
+
+        private float FrameRate = 24f;
+        private int FrameCount = 100;
+        private int CurrentFrame = 0;
+        private float ElapsedTime = 0f;
+        private ExperimentIndicator indicator;
+
+        AudioController audio = new AudioController();
+
+        public EffectController(ExperimentIndicator indi)
+        {
+            indicator = indi;
+            indicator.ToolbarButton.TexturePath = NormalFlaskTexture;
+
+            Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
+            {
+                string str = frame.ToString();
+
+                while (str.Length < desiredLen)
+                    str = "0" + str;
+
+                return str;
+            };
+
+            for (int i = 0; i < FrameCount; ++i)
+                StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
+
+            CurrentFrame = 0;
+            ElapsedTime = 0f;
+        }
+
+        //public void OnLoad(ConfigNode node)
+        //{
+        //    Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
+        //    {
+        //        string str = frame.ToString();
+
+        //        while (str.Length < desiredLen)
+        //            str = "0" + str;
+
+        //        return str;
+        //    };
+
+        //    FrameRate = Settings.Parse<float>(node, "FrameRate", 24f);
+        //    FrameCount = Settings.Parse<int>(node, "FrameCount", 0);
+        //        if (FrameCount == 0)
+        //            Log.Error("FlaskAnimation.OnLoad: Frame count is zero");
+
+        //        for (int i = 0; i < FrameCount; ++i)
+        //            StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
+
+        //    CurrentFrame = 0;
+        //    ElapsedTime = 0f;
+
+        //}
+
+        //public void OnSave(ConfigNode node)
+        //{
+        //    node.AddValue("FrameRate", FrameRate);
+        //    node.AddValue("FrameCount", FrameCount);
+
+        //}
+
+        public System.Collections.IEnumerator FlaskAnimation()
+        {
+            while (true)
+            {
+                Log.Debug("FlaskAnimation, current state {0}", indicator.State);
+
+                if (indicator)
+                    switch (indicator.State)
+                    {
+                        case ExperimentIndicator.IconState.NewResearch:
+                            if (StarFlaskTextures.Count > 0)
+                            {
+                                if (ElapsedTime > TimePerFrame)
+                                {
+                                    ElapsedTime -= TimePerFrame;
+                                    CurrentFrame = (CurrentFrame + 1) % StarFlaskTextures.Count;
+                                    indicator.ToolbarButton.TexturePath = StarFlaskTextures[CurrentFrame];
+                                }
+                                else
+                                {
+                                    ElapsedTime += Time.deltaTime;
+                                }
+                            }
+                            else
+                            {
+#if DEBUG
+                                Log.Error("No star flask animation frames loaded.");
+#endif
+                                indicator.ToolbarButton.TexturePath = NormalFlaskTexture; // this is an error; we should have frames loaded
+                            }
+                            break;
+
+                        case ExperimentIndicator.IconState.ResearchAvailable:
+                            indicator.ToolbarButton.TexturePath = StarFlaskTextures[0];
+                            break;
+
+                        case ExperimentIndicator.IconState.NoResearch:
+                            indicator.ToolbarButton.TexturePath = NormalFlaskTexture;
+                            break;
+                    }
+
+                yield return null;
+            }
+        }
+
+
+
+        /// <summary>
+        /// Determine whether to play a sound and/or change the indicator's
+        /// IconStatus based on the newly-available status of experiment
+        /// </summary>
+        /// <param name="experiment"></param>
+        public void OnExperimentAvailable(ExperimentObserver experiment)
+        {
+            Log.Warning("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
+
+            // firstly, handle sound
+            if (experiment.SoundOnDiscovery)
+                audio.PlaySound(AudioController.AvailableSounds.Bubbles);
+
+            // now handle state
+            if (experiment.AnimateOnDiscovery)
+            {
+                indicator.State = ExperimentIndicator.IconState.NewResearch;
+            }
+            else
+            {
+                // if the icon is already animated, don't stop it because this
+                // particular experiment wouldn't produce one
+                indicator.State = indicator.State == ExperimentIndicator.IconState.NewResearch ? ExperimentIndicator.IconState.NewResearch : ExperimentIndicator.IconState.ResearchAvailable;
+            }
+
+            // menu status (open/closed) is handled by ExperimentIndicator;
+            // we needn't bother with its effects on state here
+        }
+
+
+
+        private float TimePerFrame
+        {
+            get
+            {
+                return FrameRate * 0.001f;
+            }
+        }
+    }
+
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ExperimentIndicator : MonoBehaviour, IDrawable
     {
-        enum IconState
+        public enum IconState
         {
             NoResearch,             // no experiments available, basic flask icon
 
@@ -40,25 +198,16 @@ namespace ExperimentIndicator
         ExperimentObserverList observers = new ExperimentObserverList();
         private StorageCache vesselStorage;
         private System.Collections.IEnumerator watcher;
-        private System.Collections.IEnumerator starFlask;
+        new private System.Collections.IEnumerator animation;
         private System.Collections.IEnumerator rebuilder;
 
         private Toolbar.IButton mainButton;
         private IconState researchState = IconState.NoResearch;
 
 
-        // texture/animation data
-        private const float FRAME_RATE = 24f / 1000f;
-        private const int FRAME_COUNT = 100;
-        private int StarAnimationFrame = 0;
-        private float ElapsedTime = 0f;
+        // star flask animation
+        EffectController effects;
 
-        private const string NORMAL_FLASK = "ExperimentIndicator/textures/flask";
-        private List<string> STAR_FLASK = new List<string>();
-
-
-        // audio 
-        new AudioController audio = new AudioController();
 
         // experiment text related
         private float maximumTextLength = float.NaN;
@@ -69,9 +218,6 @@ namespace ExperimentIndicator
 
         public void Start()
         {
-            for (int i = 0; i < FRAME_COUNT; ++i)
-                STAR_FLASK.Add(NORMAL_FLASK + GetFrame(i + 1));
-
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
@@ -79,12 +225,13 @@ namespace ExperimentIndicator
             mainButton = Toolbar.ToolbarManager.Instance.add("ExperimentIndicator", "PopupOpen");
             mainButton.Text = "ExpIndicator";
             mainButton.ToolTip = "Left Click to Open Experiments; Right Click for Settings";
-            mainButton.TexturePath = NORMAL_FLASK;
             mainButton.OnClick += OnToolbarClick;
+
+            effects = new EffectController(this);
 
             // set up coroutines
             rebuilder = RebuildObserverList();
-            starFlask = StarAnimation();
+            animation = effects.FlaskAnimation();
         }
 
 
@@ -119,19 +266,19 @@ namespace ExperimentIndicator
             }
             else
             {
-                if (!vesselStorage.IsBusy && watcher != null && starFlask != null)
+                if (!vesselStorage.IsBusy && watcher != null && animation != null)
                 {
                     watcher.MoveNext();
-                    starFlask.MoveNext();
+                    animation.MoveNext();
                 } else Log.Debug("storage is busy");
             }
 
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                Log.Debug("Playing bubbles!");
+            //if (Input.GetKeyDown(KeyCode.S))
+            //{
+            //    Log.Debug("Playing bubbles!");
 
-                audio.PlaySound(AudioController.AvailableSounds.Bubbles);
-            }
+            //    audio.PlaySound(AudioController.AvailableSounds.Bubbles);
+            //}
 
             //if (Input.GetKeyDown(KeyCode.U))
             //    vesselStorage.DumpContainerData();
@@ -153,6 +300,8 @@ namespace ExperimentIndicator
             }
         }
 
+
+
         public void OnVesselChanged(Vessel newVessel)
         {
             Log.Debug("OnVesselChange: {0}", newVessel.name);
@@ -160,6 +309,8 @@ namespace ExperimentIndicator
             rebuilder = RebuildObserverList();
             watcher = null;
         }
+
+
 
         public void OnVesselDestroyed(Vessel vessel)
         {
@@ -247,8 +398,11 @@ namespace ExperimentIndicator
                     // Is exciting new research available?
                     if (observer.UpdateStatus(expSituation))
                     {
+                        Log.Debug("observer.UpdateStatus returned true");
+                        effects.OnExperimentAvailable(observer);
+
                         // if the menu is already open, we don't need to use the flashy animation
-                        State = MenuOpen ? IconState.ResearchAvailable : IconState.NewResearch;
+                        //State = MenuOpen ? IconState.ResearchAvailable : IconState.NewResearch;
                         UpdateMenuState();
                     } else if (!observers.Any(ob => ob.Available)) {
                         // if no experiments are available, we should be looking
@@ -256,6 +410,8 @@ namespace ExperimentIndicator
                         // in an else statement because if UpdateStatus just
                         // returned true, we know there's at least one experiment
                         // available this frame
+                        Log.Debug("No observers available: resetting state");
+
                         State = IconState.NoResearch;
 
                         if (MenuOpen) // nothing to be seen
@@ -340,61 +496,12 @@ namespace ExperimentIndicator
             }
         }
 
-        
-
-        private System.Collections.IEnumerator StarAnimation()
-        {
-            IconState oldState = researchState;
-
-            while (true)
-            {
-                if (oldState != State)
-                {
-                    // state has changed
-                    oldState = State;
-
-                    switch (State)
-                    {
-                        case IconState.NoResearch:
-                            mainButton.TexturePath = NORMAL_FLASK;
-                            break;
-                        case IconState.NewResearch:
-                            audio.PlaySound(AudioController.AvailableSounds.Bubbles);
-                            mainButton.TexturePath = STAR_FLASK[StarAnimationFrame];
-                            break;
-
-                        case IconState.ResearchAvailable:
-                            mainButton.TexturePath = STAR_FLASK[StarAnimationFrame];
-                            break;
-                    }
-                }
-
-                if (State == IconState.NewResearch)
-                {
-                    ElapsedTime += Time.smoothDeltaTime;
-
-                    if (ElapsedTime > FRAME_RATE)
-                    {
-                        ElapsedTime = 0f;
-                        StarAnimationFrame = (StarAnimationFrame + 1) % STAR_FLASK.Count;
-
-#if DEBUG
-            if (State != IconState.NewResearch)
-                Log.Error("StarAnimation invoked with wrong research state {0}!", State);
-#endif
-                        mainButton.TexturePath = STAR_FLASK[StarAnimationFrame];
-                    }
-                }
-
-                yield return 0;
-            }
-        }
 
         #endregion
 
 
         #region properties
-        private IconState State
+        public IconState State
         {
             get
             {
@@ -404,6 +511,14 @@ namespace ExperimentIndicator
             set
             {
                 researchState = value;
+            }
+        }
+
+        public IButton ToolbarButton
+        {
+            get
+            {
+                return mainButton;
             }
         }
 
