@@ -342,7 +342,8 @@ namespace ExperimentIndicator
     /// Eva report is a special kind of experiment.  As long as a Kerbal
     /// is aboard the active vessel, it's "available".  A ModuleScienceExperiment
     /// won't appear in the way the other science modules do for other 
-    /// experiments though, so we'll be needing a special case to handle it.
+    /// experiments though (unless the vessel is a kerbalEva part iself), 
+    /// so we'll be needing a special case to handle it.
     /// 
     /// To prevent duplicate reports, we take into account any stored experiment
     /// data as normal.
@@ -383,7 +384,7 @@ namespace ExperimentIndicator
                 // is a logical function to use.  Actually it's possible for it to
                 // generate a crew member out of thin air and put it outside, so nope
                 // 
-                // luckily we can choose a specific Kerbal.  We'll do so by
+                // luckily we can specify a particular onboard Kerbal.  We'll do so by
                 // finding the possibilities and then picking one totally at 
                 // pseudorandom
 
@@ -424,6 +425,8 @@ namespace ExperimentIndicator
             }
             else
             {
+                // The vessel is indeed a kerbalEva, so we can expect to find the
+                // appropriate science module now
                 var evas = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
                 foreach (var exp in evas)
                     if (!exp.Deployed && exp.experimentID == experiment.id)
@@ -462,88 +465,6 @@ namespace ExperimentIndicator
         }
 
 
-
-        /// <summary>
-        /// The original UpdateStatus relies on ModuleScienceExperiments.
-        /// If the active vessel isn't a kerbal on EVA, none will exist
-        /// </summary>
-        /// <returns></returns>
-        public override bool UpdateStatus(ExperimentSituations experimentSituation)
-        {
-            Log.Debug("Updating status for experiment {0}", ExperimentTitle);
-
-            bool lastStatus = Available;
-
-            if (FlightGlobals.ActiveVessel != null)
-                if (!storage.IsBusy && IsReadyOnboard)
-                {
-                    var vessel = FlightGlobals.ActiveVessel;
-
-                    if (experiment.IsAvailableWhile(experimentSituation, vessel.mainBody))
-                    {
-                        var biome = string.Empty; // taking what we learned about biomes and situations before ;\
-
-                        if (experiment.BiomeIsRelevantWhile(experimentSituation))
-                            biome = vessel.mainBody.BiomeMap.GetAtt(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad).name;
-
-                        // there's kerbals, the experiment is runnable, everything
-                        // looks good so far.  Let's just make sure there isn't already
-                        // an evaReport of this kind stored
-                        ScienceData data;
-                        var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
-
-                        Log.Debug("Looking for stored eva report data");
-
-                        if (storage.FindStoredData(subject.id, out data))
-                        {
-                            Log.Write("Found eva stored data for id {0}!", subject.id);
-                            Available = false;
-                        }
-                        else
-                        {
-                            // note: normally I would make the assumption that since
-                            // evaReports are always full value, we don't need to
-                            // do any fancy checking.  However, the safer road is not
-                            // to assume anything and proceed as we did in the base
-                            // class version of this function
-                            switch (settings.Filter)
-                            {
-                                case Settings.ExperimentSettings.FilterMethod.Unresearched:
-                                    Available = subject.science < 0.0005f;
-                                    break;
-
-                                case Settings.ExperimentSettings.FilterMethod.NotMaxed:
-                                    Available = subject.science < subject.scienceCap;
-                                    break;
-
-                                case Settings.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
-                                    Available = subject.science < subject.scienceCap * 0.5f;
-                                    break;
-
-                                case Settings.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
-                                    Available = subject.scienceCap < subject.scienceCap * 0.9f;
-                                    break;
-
-                                default:
-                                    Log.Error("Unrecognized filter mode!");
-                                    Available = false;
-                                    break;
-                            }
-                        }
-                    }
-                    else // I can't imagine any situation where evaReport wasn't technically allowed
-                    {    // but who knows, maybe somebody is running a mod that changes it?
-                        Log.Debug("Experiment {0} isn't available under experiment situation {1}", ExperimentTitle, experimentSituation);
-                        Available = false;
-                    }
-
-                }
-                else Available = false; // no kerbals onboard apparently
-
-
-            // Only return true if the status just changed to "available"
-            return Available != lastStatus && Available;
-        }
 
         public override bool IsReadyOnboard
         {

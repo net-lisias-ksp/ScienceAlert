@@ -354,7 +354,7 @@ namespace ExperimentIndicator
 
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                if (Settings.Instance.GetExperimentSettings(expid).ScanEnabled)
+                if (Settings.Instance.GetExperimentSettings(expid).Enabled)
                 {
                     if (expid != "evaReport") // evaReport is a special case
                         observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), expid));
