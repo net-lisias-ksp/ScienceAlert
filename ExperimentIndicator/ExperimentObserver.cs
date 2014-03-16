@@ -37,7 +37,7 @@ namespace ExperimentIndicator
         {
             settings = expSettings;
 #if DEBUG
-            if (!settings.ScanEnabled)
+            if (!settings.Enabled)
                 Log.Error("Experiment {0} should have been disabled!", expid);
 #endif
             experiment = ResearchAndDevelopment.GetExperiment(expid);
@@ -317,6 +317,14 @@ namespace ExperimentIndicator
             get
             {
                 return settings.AnimationOnDiscovery;
+            }
+        }
+
+        public bool StopWarpOnDiscovery
+        {
+            get
+            {
+                return settings.StopWarpOnDiscovery;
             }
         }
 

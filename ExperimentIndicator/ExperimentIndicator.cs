@@ -277,7 +277,8 @@ namespace ExperimentIndicator
             {
                 if (!vesselStorage.IsBusy && watcher != null && animation != null)
                 {
-                    watcher.MoveNext();
+                    if (!PauseMenu.isOpen)
+                        watcher.MoveNext();
                     animation.MoveNext();
                 } else Log.Debug("storage is busy");
             }
@@ -370,7 +371,7 @@ namespace ExperimentIndicator
             // so on) I think it's best we separate it out into its own
             // Observer type that will account for these changes and any others
             // that might not necessarily trigger a VesselModified event
-            if (Settings.Instance.GetExperimentSettings("evaReport").ScanEnabled)
+            if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
                 observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport")));
 
             watcher = UpdateObservers();
@@ -407,7 +408,12 @@ namespace ExperimentIndicator
                     // Is exciting new research available?
                     if (observer.UpdateStatus(expSituation))
                     {
-                        Log.Debug("observer.UpdateStatus returned true");
+                        // if we're timewarping, resume normal time if that setting
+                        // was used
+                        if (observer.StopWarpOnDiscovery)
+                            if (TimeWarp.CurrentRateIndex > 0)
+                                TimeWarp.SetRate(0, true);
+
                         effects.OnExperimentAvailable(observer);
 
                         // if the menu is already open, we don't need to use the flashy animation

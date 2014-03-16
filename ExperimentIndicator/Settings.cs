@@ -25,9 +25,11 @@ namespace ExperimentIndicator
             }
 
 
-            public bool ScanEnabled = true;
+            public bool Enabled = true;
             public bool SoundOnDiscovery = true;
             public bool AnimationOnDiscovery = true;
+            public bool StopWarpOnDiscovery = false;
+
             public FilterMethod Filter = FilterMethod.Unresearched;
 
             public bool AssumeOnboard = false;      // part of a workaround I'm thinking of for
@@ -42,10 +44,11 @@ namespace ExperimentIndicator
 
             public void OnLoad(ConfigNode node)
             {
-                ScanEnabled = Settings.Parse<bool>(node, "ScanEnabled", true);
+                Enabled = Settings.Parse<bool>(node, "Enabled", true);
                 SoundOnDiscovery = Settings.Parse<bool>(node, "SoundOnDiscovery", true);
                 AnimationOnDiscovery = Settings.Parse<bool>(node, "AnimationOnDiscovery", true);
                 AssumeOnboard = Settings.Parse<bool>(node, "AssumeOnboard", false);
+                StopWarpOnDiscovery = Settings.Parse<bool>(node, "StopWarpOnDiscovery", false);
 
                 var strFilterName = node.GetValue("Filter");
                 if (string.IsNullOrEmpty(strFilterName))
@@ -59,9 +62,10 @@ namespace ExperimentIndicator
 
             public void OnSave(ConfigNode node)
             {
-                node.AddValue("ScanEnabled", ScanEnabled);
+                node.AddValue("Enabled", Enabled);
                 node.AddValue("SoundOnDiscovery", SoundOnDiscovery);
                 node.AddValue("AnimationOnDiscovery", AnimationOnDiscovery);
+                node.AddValue("StopWarpOnDiscovery", StopWarpOnDiscovery);
                 node.AddValue("AssumeOnboard", AssumeOnboard);
                 node.AddValue("Filter", Filter);
             }
@@ -81,7 +85,7 @@ namespace ExperimentIndicator
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 PerExperimentSettings[expid] = new ExperimentSettings();
 
-            RestoreManeuverNodesAfterEva = true;
+            SaveFlightSessionManeuverNodes = true;
             FlaskAnimationEnabled = true;
             SoundOnNewResearch = true;
 
@@ -195,13 +199,15 @@ namespace ExperimentIndicator
 
             Log.Debug("General node = {0}", general.ToString());
 
-            RestoreManeuverNodesAfterEva = Parse<bool>(general, "RestoreManeuverNodesAfterEva", true);
+            SaveFlightSessionManeuverNodes = Parse<bool>(general, "SaveFlightSessionManeuverNodes", true);
             FlaskAnimationEnabled = Parse<bool>(general, "FlaskAnimationEnabled", true);
             SoundOnNewResearch = Parse<bool>(general, "SoundOnNewResearch", true);
 
-            Log.Debug("RestoreManeuverNodesAfterEva = {0}", RestoreManeuverNodesAfterEva);
+
+            Log.Debug("SaveFlightSessionManeuverNodes = {0}", SaveFlightSessionManeuverNodes);
             Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
             Log.Debug("SoundOnNewResearch = {0}", SoundOnNewResearch);
+
 #endregion
 
 #region experiment settings
@@ -219,7 +225,7 @@ namespace ExperimentIndicator
                     Log.Error("No experiment with this name located.");
                 } else {
                     PerExperimentSettings[nodeName].OnLoad(experimentNode);
-                    Log.Debug("OnLoad for {0}: enabled = {1}, sound = {2}, animation = {3}, assume onboard = {4}", nodeName, PerExperimentSettings[nodeName].ScanEnabled, PerExperimentSettings[nodeName].SoundOnDiscovery, PerExperimentSettings[nodeName].AnimationOnDiscovery, PerExperimentSettings[nodeName].AssumeOnboard);
+                    Log.Debug("OnLoad for {0}: enabled = {1}, sound = {2}, animation = {3}, assume onboard = {4}", nodeName, PerExperimentSettings[nodeName].Enabled, PerExperimentSettings[nodeName].SoundOnDiscovery, PerExperimentSettings[nodeName].AnimationOnDiscovery, PerExperimentSettings[nodeName].AssumeOnboard);
                 }
             }
 
@@ -245,7 +251,7 @@ Re-saving config with default values for missing experiments.");
             #region general settings
                 ConfigNode general = node.AddNode(new ConfigNode("GeneralSettings"));
 
-                general.AddValue("RestoreManeuverNodesAfterEva", RestoreManeuverNodesAfterEva);
+                general.AddValue("SaveFlightSessionManeuverNodes", SaveFlightSessionManeuverNodes);
                 general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
                 general.AddValue("SoundOnNewResearch", SoundOnNewResearch);
 
@@ -277,7 +283,7 @@ Re-saving config with default values for missing experiments.");
 *****************************************************************************/
         #region General settings
 
-        public bool RestoreManeuverNodesAfterEva { get; private set; }
+        public bool SaveFlightSessionManeuverNodes { get; private set; }
         public bool FlaskAnimationEnabled { get; private set; }
         public bool SoundOnNewResearch { get; private set; }
 

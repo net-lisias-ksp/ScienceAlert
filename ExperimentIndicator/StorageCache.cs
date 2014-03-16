@@ -62,7 +62,7 @@ namespace ExperimentIndicator
             if (arg.from.vessel == vessel)
             {
                 // let's check and see if any maneuver nodes are around
-                if (vessel.patchedConicSolver.maneuverNodes.Count > 0)
+                if (vessel.patchedConicSolver.maneuverNodes.Count > 0 && Settings.Instance.SaveFlightSessionManeuverNodes)
                 {
                     // yep, we've got some maneuver nodes here
                     // todo: based on option whether or not to restore maneuver nodes automatically
