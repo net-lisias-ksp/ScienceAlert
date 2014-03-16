@@ -52,6 +52,7 @@
     <Compile Include="ExperimentObserver.cs" />
     <Compile Include="MagicDataTransmitter.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="OptionsWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StorageCache.cs" />

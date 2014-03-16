@@ -109,6 +109,12 @@ namespace ExperimentIndicator
                 return false;
             }
 
+            if (!settings.Enabled)
+            {
+                Available = false;
+                return false;
+            }
+
             //Log.Debug("Updating status for experiment {0}", ExperimentTitle);
 
             bool lastStatus = Available;
@@ -195,7 +201,7 @@ namespace ExperimentIndicator
                     // experiment isn't available under this situation
 #if DEBUG
                     //if (GetNextOnboardExperimentModule())
-                    //Log.Verbose("    - is onboard but not applicable in this situation {1}", ExperimentTitle, experimentSituation);
+                    //Log.Verbose("{0} is onboard but not applicable in this situation {1} (vessel situation {2})", ExperimentTitle, experimentSituation, vessel.situation);
 #endif
                     Available = false;
                 }
@@ -353,7 +359,7 @@ namespace ExperimentIndicator
         List<Part> crewableParts = new List<Part>();
 
         /// <summary>
-        /// Constructor.  We already know exactly which kind of
+        /// Constructor
         /// </summary>
         public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings)
             : base(cache, settings, "evaReport")
@@ -361,6 +367,17 @@ namespace ExperimentIndicator
 
         }
 
+
+
+        /// <summary>
+        /// This function will do one of two things: if the active vessel
+        /// isn't an eva kerbal, it will choose a kerbal at random from
+        /// the crew and send them on eva.
+        /// 
+        /// On the other hand, if the active vessel is an eva kerbal, it
+        /// will deploy the experiment itself.
+        /// </summary>
+        /// <returns></returns>
         public override bool Deploy()
         {
             if (!Available || !IsReadyOnboard)

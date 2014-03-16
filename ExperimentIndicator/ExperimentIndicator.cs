@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define PROFILE
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,16 +9,12 @@ using Toolbar;
 //          further thought: who really does this?  will think on it more
 
 // todo: separate science observer for surface samples like the eva one?
-// todo: stop scanning when game is paused
 
 
 // todo: only update experiments on vessel situation change?
 //          further thought: maybe not.  It's not that expensive as is, plus
 //          mod experiments might be changing data on the fly
-//
-// todo: keep track of last subjectid experiment was valid for, so if it
-//       changes when the user hasn't opened the menu, the "available bubbles"
-//       sound will play again like it logically would
+
 
 
 namespace ExperimentIndicator
@@ -64,43 +61,13 @@ namespace ExperimentIndicator
             ElapsedTime = 0f;
         }
 
-        //public void OnLoad(ConfigNode node)
-        //{
-        //    Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
-        //    {
-        //        string str = frame.ToString();
 
-        //        while (str.Length < desiredLen)
-        //            str = "0" + str;
-
-        //        return str;
-        //    };
-
-        //    FrameRate = Settings.Parse<float>(node, "FrameRate", 24f);
-        //    FrameCount = Settings.Parse<int>(node, "FrameCount", 0);
-        //        if (FrameCount == 0)
-        //            Log.Error("FlaskAnimation.OnLoad: Frame count is zero");
-
-        //        for (int i = 0; i < FrameCount; ++i)
-        //            StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
-
-        //    CurrentFrame = 0;
-        //    ElapsedTime = 0f;
-
-        //}
-
-        //public void OnSave(ConfigNode node)
-        //{
-        //    node.AddValue("FrameRate", FrameRate);
-        //    node.AddValue("FrameCount", FrameCount);
-
-        //}
 
         public System.Collections.IEnumerator FlaskAnimation()
         {
             while (true)
             {
-                Log.Debug("FlaskAnimation, current state {0}", indicator.State);
+                //.Debug("FlaskAnimation, current state {0}", indicator.State);
 
                 if (indicator)
                     switch (indicator.State)
@@ -185,7 +152,15 @@ namespace ExperimentIndicator
                 return FrameRate * 0.001f;
             }
         }
+
+        public AudioController AudioController
+        {
+            get
+            { return audio; }
+        }
     }
+
+
 
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ExperimentIndicator : MonoBehaviour, IDrawable
@@ -209,12 +184,13 @@ namespace ExperimentIndicator
         private System.Collections.IEnumerator watcher;
         new private System.Collections.IEnumerator animation;
         private System.Collections.IEnumerator rebuilder;
-
-        private Toolbar.IButton mainButton;
         private IconState researchState = IconState.NoResearch;
 
+        // related controls
+        private Toolbar.IButton mainButton;
+        private OptionsWindow optionsWindow;
 
-        // star flask animation
+        // animation and audio effects from experiment observers
         EffectController effects;
 
 
@@ -227,6 +203,7 @@ namespace ExperimentIndicator
 
         public void Start()
         {
+           
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
@@ -237,6 +214,7 @@ namespace ExperimentIndicator
             mainButton.OnClick += OnToolbarClick;
 
             effects = new EffectController(this);
+            optionsWindow = new OptionsWindow(effects.AudioController);
 
             // set up coroutines
             rebuilder = RebuildObserverList();
@@ -256,7 +234,7 @@ namespace ExperimentIndicator
             if (float.IsNaN(maximumTextLength) && observers.Count > 0 && rebuilder == null)
             {
                 // construct the experiment observer list ...
-                maximumTextLength = observers.Max(observer => GUI.skin.button.CalcSize(new GUIContent(observer.ExperimentTitle)).x);
+                maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle)).x);
                 Log.Debug("MaximumTextLength = {0}", maximumTextLength);
 
                 // note: we can't use CalcSize anywhere but inside OnGUI.  I know
@@ -401,7 +379,7 @@ namespace ExperimentIndicator
 
                 foreach (var observer in observers)
                 {
-#if DEBUG
+#if PROFILE
                     float start = Time.realtimeSinceStartup;
 #endif
 
@@ -425,14 +403,14 @@ namespace ExperimentIndicator
                         // in an else statement because if UpdateStatus just
                         // returned true, we know there's at least one experiment
                         // available this frame
-                        Log.Debug("No observers available: resetting state");
+                        //Log.Debug("No observers available: resetting state");
 
                         State = IconState.NoResearch;
 
                         if (MenuOpen) // nothing to be seen
                             MenuOpen = false;
                     }
-#if DEBUG
+#if PROFILE
                     Log.Warning("Tick time ({1}): {0} ms", (Time.realtimeSinceStartup - start) * 1000f, observer.ExperimentTitle);
 #endif
                     yield return 0; // pause until next frame
@@ -465,6 +443,10 @@ namespace ExperimentIndicator
                 return Vector2.zero;
             }
 
+            var old = GUI.skin;
+
+            GUI.skin = Settings.Skin;
+
             GUILayout.BeginArea(new Rect(position.x, position.y, necessaryWidth, necessaryHeight));
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 
@@ -482,17 +464,31 @@ namespace ExperimentIndicator
             GUILayout.EndVertical();
             GUILayout.EndArea();
 
+            GUI.skin = old;
+
             return new Vector2(necessaryWidth, necessaryHeight);
         }
 
 
         public void OnToolbarClick(ClickEvent ce)
         {
-            // todo: left/right click
-            Log.Write("Toolbar clicked");
+            if (ce.MouseButton == 0)
+            {
+                Log.Debug("Toolbar left clicked");
 
-            MenuOpen = !MenuOpen;
-            UpdateMenuState();
+                if (!OptionsOpen)
+                {
+                    MenuOpen = !MenuOpen;
+                }
+                else OptionsOpen = false; // if options is open, left click will close it.  Another click
+                                            // should be required to open the menu
+            }
+            else // right click
+            {
+                Log.Debug("Toolbar right clicked");
+
+                OptionsOpen = !OptionsOpen;
+            }
         }
 
 
@@ -541,13 +537,39 @@ namespace ExperimentIndicator
         {
             get
             {
-                return mainButton.Drawable != null;
+                return mainButton.Drawable != null && mainButton.Drawable is ExperimentIndicator;
             }
             set
             {
                 mainButton.Drawable = value ? this : null;
+                UpdateMenuState();
             }
         }
+
+
+
+        private bool OptionsOpen
+        {
+            get
+            {
+                return mainButton.Drawable != null && mainButton.Drawable is OptionsWindow;
+            }
+            set
+            {
+                if (value)
+                {
+                    mainButton.Drawable = optionsWindow;
+                }
+                else if (OptionsOpen)
+                {
+                    Log.Debug("Settings options window = null");
+                    mainButton.Drawable = null;
+                    Settings.Instance.Save();
+                }
+                UpdateMenuState();
+            }
+        }
+
 
 #endregion
 
@@ -564,6 +586,8 @@ namespace ExperimentIndicator
 
         private ExperimentSituations VesselSituationToExperimentSituation()
         {
+            //Log.Debug("Flying low altitude <= {0}, Low space altitude <= {1}",(double)FlightGlobals.ActiveVessel.mainBody.scienceValues.flyingAltitudeThreshold,  (double)FlightGlobals.ActiveVessel.mainBody.scienceValues.spaceAltitudeThreshold);
+
             switch (FlightGlobals.ActiveVessel.situation)
             {
                 case Vessel.Situations.LANDED:

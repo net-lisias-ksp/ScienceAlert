@@ -268,12 +268,12 @@ namespace ExperimentIndicator
         /// <returns></returns>
         public bool FindStoredData(string subjectid, out ScienceData refData)
         {
-            Log.Debug("Searching for {0}", subjectid);
+            //Log.Debug("Searching for {0}", subjectid);
 
             foreach (var container in storage)
                 foreach (var data in container.GetData())
                 {
-                    Log.Debug("Comparing {0} to {1}", subjectid, data.subjectID);
+                    //Log.Debug("Comparing {0} to {1}", subjectid, data.subjectID);
 
                     if (data.subjectID == subjectid)
                     {
@@ -285,7 +285,7 @@ namespace ExperimentIndicator
 
             if (magicTransmitter != null)
             {
-                Log.Debug("Queued data count: {0}", magicTransmitter.QueuedData.Count);
+                //Log.Debug("Queued data count: {0}", magicTransmitter.QueuedData.Count);
 
                 foreach (var data in magicTransmitter.QueuedData)
                     if (data.subjectID == subjectid)

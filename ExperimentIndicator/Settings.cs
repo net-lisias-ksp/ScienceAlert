@@ -16,7 +16,7 @@ namespace ExperimentIndicator
         // per-experiment settings
         public class ExperimentSettings
         {
-            public enum FilterMethod
+            public enum FilterMethod : int
             {
                 Unresearched = 0,                           // only light on subjects for which no science has been confirmed at all
                 NotMaxed = 1,                               // light whenever the experiment subject isn't maxed
@@ -71,8 +71,8 @@ namespace ExperimentIndicator
             }
         }
 
-        public static Dictionary<string /* expid */, ExperimentSettings> PerExperimentSettings;
-
+        private Dictionary<string /* expid */, ExperimentSettings> PerExperimentSettings;
+        private GUISkin skin;
 
 /******************************************************************************
  *                      Implementation details
@@ -88,6 +88,31 @@ namespace ExperimentIndicator
             SaveFlightSessionManeuverNodes = true;
             FlaskAnimationEnabled = true;
             SoundOnNewResearch = true;
+
+
+            skin = GameObject.Instantiate(HighLogic.Skin) as GUISkin;
+
+            // adjust the skin a little bit.  It wastes a lot of space in its
+            // current form
+
+            skin.button.fixedHeight = 24f;
+            skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
+            skin.box.alignment = TextAnchor.MiddleCenter;
+            skin.box.padding = new RectOffset(5, 5, 15, 10);
+            skin.box.contentOffset = Vector2.zero;
+
+            //windowSkin.scrollView.border.left = windowSkin.scrollView.border.right = windowSkin.scrollView.border.bottom = windowSkin.scrollView.border.top = 0;
+
+            //windowSkin.scrollView.margin = new RectOffset(0, 8, 0, 0);
+
+            //windowSkin.toggle.padding.top = windowSkin.toggle.padding.bottom = -2;
+            //windowSkin.scrollView.padding.left = windowSkin.scrollView.padding.right = windowSkin.scrollView.padding.bottom = windowSkin.scrollView.padding.top = 0;
+
+            //windowSkin.label.normal.background = blackBg;
+            //windowSkin.label.alignment = TextAnchor.MiddleCenter;
+            //windowSkin.toggle.alignment = TextAnchor.LowerCenter;
+
+
 
             Load();
         }
@@ -222,7 +247,7 @@ namespace ExperimentIndicator
 
                 if (!PerExperimentSettings.ContainsKey(nodeName))
                 {
-                    Log.Error("No experiment with this name located.");
+                    Log.Error("No experiment named '{0}' located.", nodeName);
                 } else {
                     PerExperimentSettings[nodeName].OnLoad(experimentNode);
                     Log.Debug("OnLoad for {0}: enabled = {1}, sound = {2}, animation = {3}, assume onboard = {4}", nodeName, PerExperimentSettings[nodeName].Enabled, PerExperimentSettings[nodeName].SoundOnDiscovery, PerExperimentSettings[nodeName].AnimationOnDiscovery, PerExperimentSettings[nodeName].AssumeOnboard);
@@ -266,15 +291,13 @@ Re-saving config with default values for missing experiments.");
             #endregion
         }
 
-        public void PersistenceSave()
-        {
-            Log.Debug("Settings.PersistSave");
 
-        }
-
-        public void PersistenceLoad()
+        public static GUISkin Skin
         {
-            Log.Debug("Settings.PersistLoad");
+            get
+            {
+                return Settings.Instance.skin;
+            }
         }
 
 
@@ -283,9 +306,9 @@ Re-saving config with default values for missing experiments.");
 *****************************************************************************/
         #region General settings
 
-        public bool SaveFlightSessionManeuverNodes { get; private set; }
-        public bool FlaskAnimationEnabled { get; private set; }
-        public bool SoundOnNewResearch { get; private set; }
+        public bool SaveFlightSessionManeuverNodes { get; set; }
+        public bool FlaskAnimationEnabled { get; set; }
+        public bool SoundOnNewResearch { get; set; }
 
         #endregion
 

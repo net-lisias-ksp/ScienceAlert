@@ -5,16 +5,21 @@ namespace ExperimentIndicator
     internal class AudioController
     {
         private const string BUBBLES_PATH = "ExperimentIndicator/sounds/bubbles.wav";
+        private const string CLICK_PATH = "ExperimentIndicator/sounds/click1.wav";
+
         private const float LOADING_TIMEOUT = 3f;
         private const float MIN_TIME_BETWEEN_SOUNDS = 2f;
 
         private UnityEngine.AudioClip bubbles;
+        private UnityEngine.AudioClip click;
+
         private GameObject gameObject;
         private float timeAtLastSound = 0f;
 
         public enum AvailableSounds
         {
-            Bubbles
+            Bubbles,
+            UIClick // does not trigger minimum time counter
         }
 
 
@@ -25,6 +30,7 @@ namespace ExperimentIndicator
             gameObject.AddComponent<AudioSource>();
 
             bubbles = LoadSound(BUBBLES_PATH);
+            click = LoadSound(CLICK_PATH);
         }
 
 
@@ -37,17 +43,30 @@ namespace ExperimentIndicator
                 return false; // too early for another sound
             }
 
-            switch (sound)
+            try
             {
-                case AvailableSounds.Bubbles:
-                    gameObject.transform.position = Camera.main.transform.position;
-                    gameObject.audio.PlayOneShot(bubbles, GameSettings.UI_VOLUME);
-                    timeAtLastSound = Time.realtimeSinceStartup;
-                    return true;
+                gameObject.transform.position = Camera.main.transform.position;
+                timeAtLastSound = Time.realtimeSinceStartup;
 
-                default:
-                    Log.Error("Unhandled sound in AudioController");
-                    break;
+                switch (sound)
+                {
+                    case AvailableSounds.Bubbles:
+                        gameObject.audio.PlayOneShot(bubbles, GameSettings.UI_VOLUME);
+
+                        return true;
+
+                    case AvailableSounds.UIClick:
+                        gameObject.audio.PlayOneShot(click, GameSettings.UI_VOLUME);
+                        timeAtLastSound = 0f; // don't trigger countodwn
+                        return true;
+
+                    default:
+                        Log.Error("Unhandled sound in AudioController");
+                        break;
+                }
+            } catch 
+            {
+                Log.Error("Error playing sound {0}", sound);
             }
 
             return false;
