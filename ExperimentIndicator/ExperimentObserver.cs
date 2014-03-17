@@ -36,10 +36,7 @@ namespace ExperimentIndicator
         public ExperimentObserver(StorageCache cache, Settings.ExperimentSettings expSettings, string expid)
         {
             settings = expSettings;
-#if DEBUG
-            if (!settings.Enabled)
-                Log.Error("Experiment {0} should have been disabled!", expid);
-#endif
+
             experiment = ResearchAndDevelopment.GetExperiment(expid);
 
             if (experiment == null)
@@ -106,6 +103,7 @@ namespace ExperimentIndicator
             if (FlightGlobals.ActiveVessel == null)
             {
                 Available = false;
+                lastAvailableId = "";
                 Log.Debug("Observer.UpdateStatus: active vessel is null!");
                 return false;
             }
@@ -114,10 +112,6 @@ namespace ExperimentIndicator
             {
                 Available = false;
                 lastAvailableId = "";
-
-                if (experiment.id == "mysteryGoo")
-                    Log.Debug("mysteryGoo is disabled");
-
                 return false;
             }
 
@@ -179,6 +173,7 @@ namespace ExperimentIndicator
                             }
                             else Available = subject.science < subject.scienceCap * 0.5f;
 
+                            //Log.Debug("Subject.science = {0}, scienceCap = {1}, next science = {2}", subject.science, subject.scienceCap, data != null ? ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject).ToString() : "(unk)");
                             break;
 
                         case Settings.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
@@ -214,7 +209,6 @@ namespace ExperimentIndicator
             }
             else Available = false; // no experiments ready
 
-
             return Available != lastStatus && Available;
         }
 
@@ -233,6 +227,7 @@ namespace ExperimentIndicator
                 return false;
             }
 
+           
             // find an unused science module and use it 
             //      note for crew reports: as long as a kerbal exists somewhere in the vessel hierarchy,
             //      crew reports are allowed from "empty" command modules as stock behaviour.  So we 
@@ -248,12 +243,20 @@ namespace ExperimentIndicator
             else
             {
                 if (settings.AssumeOnboard)
+                {
                     if (modules.Count == 0)
                     {
                         PopupDialog.SpawnPopupDialog("Error", string.Format("Cannot deploy custom experiment {0} because it does not extend ModuleScienceExperiment; you will have to manually deploy it.  Sorry!", ExperimentTitle), "Okay", false, HighLogic.Skin);
                         Log.Error("Custom experiment {0} has no modules and AssumeOnBoard flag; informed user that we cannot automatically deploy it.", ExperimentTitle);
                         return false;
                     }
+                }
+                else
+                {
+                    PopupDialog.SpawnPopupDialog("Error", string.Format("There are no open {0} experiments available onboard.", ExperimentTitle), "Okay", false, Settings.Skin);
+                    Log.Error("Failed to deploy experiment {0}; no more available science modules.", ExperimentTitle);
+                    return false;
+                }
             }
 
             // we should never reach this point if IsExperimentAvailableOnboard did
@@ -264,6 +267,7 @@ namespace ExperimentIndicator
         }
 
 
+
         #region Properties
         private ModuleScienceExperiment GetNextOnboardExperimentModule()
         {
@@ -272,7 +276,6 @@ namespace ExperimentIndicator
                     return module;
 
             return null;
-
         }
 
         public virtual bool IsReadyOnboard
@@ -290,6 +293,8 @@ namespace ExperimentIndicator
             get;
             protected set;
         }
+
+
 
         public virtual bool AssumeOnboard
         {

@@ -355,6 +355,8 @@ namespace ExperimentIndicator
             if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
                 observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport")));
 
+            observers.OrderBy(obs => obs.ExperimentTitle);
+
             watcher = UpdateObservers();
         }
 

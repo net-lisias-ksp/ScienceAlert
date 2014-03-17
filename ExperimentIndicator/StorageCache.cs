@@ -24,7 +24,7 @@ namespace ExperimentIndicator
         protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
         protected Vessel vessel;                            // which vessel this storage cache is for
         protected Dictionary<Guid, List<ManeuverNode>> sessionManeuverNodes = new Dictionary<Guid, List<ManeuverNode>>();
-
+        
 
 /******************************************************************************
  *                          Begin Implementation
@@ -235,13 +235,17 @@ namespace ExperimentIndicator
         /// <param name="rootOnly"></param>
         private void RemoveMagicTransmitter(bool rootOnly = true)
         {
-            if (vessel.rootPart.Modules.Contains("MagicDataTransmitter"))
-                vessel.rootPart.RemoveModule(vessel.rootPart.Modules.OfType<MagicDataTransmitter>().Single());
+            if (vessel != null)
+                if (vessel.rootPart != null)
+                {
+                    if (vessel.rootPart.Modules.Contains("MagicDataTransmitter"))
+                        vessel.rootPart.RemoveModule(vessel.rootPart.Modules.OfType<MagicDataTransmitter>().Single());
 
-            if (!rootOnly)
-                foreach (var part in vessel.Parts)
-                    if (part.Modules.Contains("MagicDataTransmitter"))
-                        part.RemoveModule(part.Modules.OfType<MagicDataTransmitter>().First());
+                    if (!rootOnly)
+                        foreach (var part in vessel.Parts)
+                            if (part.Modules.Contains("MagicDataTransmitter"))
+                                part.RemoveModule(part.Modules.OfType<MagicDataTransmitter>().First());
+                }
 
             magicTransmitter = null;
         }
