@@ -119,8 +119,6 @@ namespace ExperimentIndicator
                     GUILayout.Space(8f);
 
                     var settings = Settings.Instance.GetExperimentSettings(key);
-
-                    //GUILayout.Label(ResearchAndDevelopment.GetExperiment(key).experimentTitle);
                     GUILayout.Box(ResearchAndDevelopment.GetExperiment(key).experimentTitle, GUILayout.ExpandWidth(true));
 
                     //GUILayout.Space(4f);
@@ -144,19 +142,6 @@ namespace ExperimentIndicator
 
             GUILayout.EndVertical();
 
-            //var testRect = new Rect(windowRect.x + 50, windowRect.y + 50, 100, 100);
-            //var testRect = GUILayoutUtility.GetLastRect();
-            //testRect.x += 50;
-            //testRect.y += 50;
-
-            //testRect.width = 100;
-            //testRect.height = 100;
-
-            //Log.Debug("testRect = {0}", testRect);
-
-            //GUILayout.BeginArea(testRect);
-            //GUILayout.Toggle(false, "Test toggle button");
-            //GUILayout.EndArea();
 
             // trim the window, if necessary
             if (!drawFlag)

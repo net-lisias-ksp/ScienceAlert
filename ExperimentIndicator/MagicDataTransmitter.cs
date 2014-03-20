@@ -22,37 +22,16 @@ namespace ExperimentIndicator
     /// the experiment is fresh in the interim time while the results are
     /// being transmitted by an antenna.
     /// 
-    /// So, how do we solve this?  One way is to implement our very own
-    /// transmitter which includes the functions we need to examine data
-    /// being transmitted and then using something like ModuleManager to edit
-    /// all ModuleDataTransmitters into our custom version.  This would probably
-    /// work, but it has some disadvantages.  The main one is that it will make
-    /// the user's save dependent on this plugin existing the moment their 
-    /// persistent file is saved.  This is REALLY bad for an info plugin; if
-    /// they delete it and try to load their file, ALL OF THEIR ANTENNA-USING 
-    /// VESSELS WILL BE DELETED!
+    /// This method involves tricking the game into thinking there's a fake
+    /// transmitter on the vessel. Whenever it goes looking for a transmitter
+    /// to use, our magic version will score highest and be chosen. It will
+    /// receive the data to be transmitted and delegate that data to real
+    /// transmitters itself.
     /// 
-    /// We might be able to hijack the modules ingame.  I experimented with this
-    /// a bit and it was messy.
-    /// 
-    /// We might be able to tap into the Actions/Events for a given part and 
-    /// insert some stub functions which let us know when something is being
-    /// submitted, and then perhaps suppress experiment detection while its
-    /// active.  Not a real great solution either.
-    /// 
-    /// We could keep a short memory.  A band-aid solution at best.  What happens
-    /// when the craft is out of power trying to transmit the first packet?
-    /// 
-    /// But there's a really simple way we can accomplish everything we want
-    /// WITHOUT imposing any save-breaking changes: we create a fake transmitter.
-    /// Recall that on craft with multiple transmitters, the game says something
-    /// along the lines of "searching for the best one".  So what if we made a fake
-    /// transmitter and rigged it to stand miles above any normal transmitter on
-    /// the craft?  Then any time the user wanted to submit data, it'd go right to
-    /// our fake transmitter which would in turn pass the actual submission to
-    /// real transmitters.  Simple!  The only tricky bit will be installing the
-    /// module at runtime and making sure it doesn't pollute the user's save file.
-    /// This turned out to be considerably easier than I thought.
+    /// There are a couple of edge cases to be solved still, however. For
+    /// instance, a player can manually select a transmitter, click "transmit"
+    /// and bypass this transmitter. I haven't fixed this yet because I still
+    /// need to determine whether anyone actually uses this method of transmission.
     /// </summary>
     using ScienceDataList = List<ScienceData>;
 
@@ -89,10 +68,8 @@ namespace ExperimentIndicator
 
         public override void OnSave(ConfigNode node)
         {
-#if !DEBUG // permit poisoning in debug games
             node.ClearData(); // don't save anything about MagicDataTransmitter or
                               // the save file will be poisoned
-#endif
         }
 
         public override void OnLoad(ConfigNode node)

@@ -112,7 +112,11 @@ namespace ExperimentIndicator
             {
                 Log.Debug("StorageCache.OnVesselDestroyed");
 
-                RemoveMagicTransmitter();
+                //RemoveMagicTransmitter();
+                        // temporary: seeing if attempting to remove transmitter while
+                        // vessel is being destroyed is causing:
+                        //      Destroying object multiple times. Don't use DestroyImmediate on the same object in OnDisable or OnDestroy."
+
                 storage = new StorageList();
                 magicTransmitter = null;
                 vessel = null;
@@ -238,13 +242,19 @@ namespace ExperimentIndicator
             if (vessel != null)
                 if (vessel.rootPart != null)
                 {
-                    if (vessel.rootPart.Modules.Contains("MagicDataTransmitter"))
-                        vessel.rootPart.RemoveModule(vessel.rootPart.Modules.OfType<MagicDataTransmitter>().Single());
+                    try
+                    {
+                        if (vessel.rootPart.Modules.Contains("MagicDataTransmitter"))
+                            vessel.rootPart.RemoveModule(vessel.rootPart.Modules.OfType<MagicDataTransmitter>().Single());
 
-                    if (!rootOnly)
-                        foreach (var part in vessel.Parts)
-                            if (part.Modules.Contains("MagicDataTransmitter"))
-                                part.RemoveModule(part.Modules.OfType<MagicDataTransmitter>().First());
+                        if (!rootOnly)
+                            foreach (var part in vessel.Parts)
+                                if (part.Modules.Contains("MagicDataTransmitter"))
+                                    part.RemoveModule(part.Modules.OfType<MagicDataTransmitter>().First());
+                    } catch (Exception e)
+                    {
+                        Log.Warning("RemoveMagicTransmitter: caught exception {0}", e);
+                    }
                 }
 
             magicTransmitter = null;
