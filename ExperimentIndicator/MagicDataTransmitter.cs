@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using DebugTools;
 
 namespace ExperimentIndicator
 {
@@ -32,6 +33,10 @@ namespace ExperimentIndicator
     /// instance, a player can manually select a transmitter, click "transmit"
     /// and bypass this transmitter. I haven't fixed this yet because I still
     /// need to determine whether anyone actually uses this method of transmission.
+    /// 
+    /// Note: Why not use MM to edit the transmitter module itself with our own
+    /// version? It will contaminate the player's save, which I want to avoid whenever
+    /// possible.
     /// </summary>
     using ScienceDataList = List<ScienceData>;
 
@@ -39,6 +44,12 @@ namespace ExperimentIndicator
     {
         // keep track of which (REAL) transmitter is transmitting what
         private Dictionary<IScienceDataTransmitter, ScienceDataList> realTransmitters = new Dictionary<IScienceDataTransmitter, ScienceDataList>();
+
+        // If all transmitters are busy, we'll need a mechanism to wait for one
+        // to become ready. It seems that sending data to a busy transmitter
+        // will result in it getting stalled, remaining open but
+        // not sending data
+        private Dictionary<IScienceDataTransmitter, ScienceDataList> toBeTransmitted = new Dictionary<IScienceDataTransmitter, ScienceDataList>();
 
 
         /// <summary>
@@ -59,9 +70,28 @@ namespace ExperimentIndicator
             transmitters.RemoveAll(tx => tx is MagicDataTransmitter);
 
             foreach (var tx in transmitters)
+            {
                 realTransmitters.Add(tx, new ScienceDataList());
+                toBeTransmitted.Add(tx, new ScienceDataList());
+            }
 
             Log.Debug("MagicDataTransmitter has found {0} useable transmitters", transmitters.Count);
+        }
+
+        public void Update()
+        {
+            // keep an eye on queued transmission data and send it as
+            // as soon as its assigned transmitter becomes available
+            var txs = toBeTransmitted.Keys;
+
+            foreach (var tx in txs)
+                if (toBeTransmitted[tx].Count > 0)
+                    if (!tx.IsBusy() && tx.CanTransmit())
+                    {
+                        realTransmitters[tx].AddRange(toBeTransmitted[tx]);
+                        toBeTransmitted[tx].Clear();
+                        tx.TransmitData(realTransmitters[tx]);
+                    }
         }
 
 
@@ -77,6 +107,49 @@ namespace ExperimentIndicator
             // empty
         }
 
+
+        /// <summary>
+        /// A suitable transmitter has been selected to submit some data. We'll queue
+        /// it for transmission in the next Update().
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="transmitter"></param>
+        private void QueueTransmission(ScienceDataList data, IScienceDataTransmitter transmitter)
+        {
+            if (data.Count == 0)
+                return;
+
+#if DEBUG
+            if (!realTransmitters.ContainsKey(transmitter))
+                Log.Error("MagicDataTransmitter.DoTransmit - Given transmitter isn't in real transmitter list!");
+#endif
+
+            toBeTransmitted[transmitter].AddRange(data);
+
+            //// if all transmitters are busy, we shouldn't have been
+            //// sent a transmit request at all! We can handle it though, by
+            //// waiting until one of the transmitters becomes available
+            //if (transmitter.IsBusy() || !transmitter.CanTransmit())
+            //{
+            //    toBeTransmitted[transmitter].AddRange(data);
+            //}
+            //else
+            //{
+            //    if (!transmitter.IsBusy())
+            //    {
+            //        realTransmitters[transmitter].Clear();
+            //        realTransmitters[transmitter].AddRange(data);
+            //        transmitter.TransmitData(data);
+            //    }
+            //}
+        }
+
+
+
+        /// <summary>
+        /// Locate a suitable transmitter and queue this data up for it
+        /// </summary>
+        /// <param name="data"></param>
         void IScienceDataTransmitter.TransmitData(ScienceDataList data)
         {
             Log.Debug("MagicTransmitter: received {0} ScienceData entries", data.Count);
@@ -90,15 +163,18 @@ namespace ExperimentIndicator
 
             if (potentials.Count > 0)
             {
-                potentials.OrderBy(potential => ScienceUtil.GetTransmitterScore(potential));
+                potentials = potentials.OrderBy(potential => ScienceUtil.GetTransmitterScore(potential)).ToList();
 
-                if (!potentials.First().IsBusy())
-                    realTransmitters[potentials.First()].Clear();
+                QueueTransmission(data, potentials.First());
 
-                realTransmitters[potentials.First()].AddRange(data);
-                potentials.First().TransmitData(data);
+                
+                //if (!potentials.First().IsBusy())
+                //    realTransmitters[potentials.First()].Clear();
 
-                Log.Debug("Sent data to transmitter {0}, total queued {1}", potentials.First().ToString(), QueuedData.Count);
+                //realTransmitters[potentials.First()].AddRange(data);
+                //potentials.First().TransmitData(data);
+
+                //Log.Debug("Sent data to transmitter {0}, total queued {1}", potentials.First().ToString(), QueuedData.Count);
             }
             else Log.Error("MagicDataTransmitter: Did not find any real transmitters");
         }
@@ -142,6 +218,7 @@ namespace ExperimentIndicator
                         kvp.Value.Clear(); // it's not doing anything, therefore nothing is queued
 
                     list.AddRange(kvp.Value);
+                    list.AddRange(toBeTransmitted[kvp.Key]);
                 }
 
                 return list;

@@ -4,6 +4,7 @@ using System.Text;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using DebugTools;
 
 namespace ExperimentIndicator
 {

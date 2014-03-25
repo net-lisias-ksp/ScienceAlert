@@ -1,10 +1,7 @@
 ﻿#define VERBOSE
 using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
 
-namespace ExperimentIndicator
+namespace DebugTools
 {
     public class Log
     {

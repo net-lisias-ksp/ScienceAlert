@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Toolbar;
+using DebugTools;
 
 // TODO: manually selected transmitters ignore MagicTransmitter
 //          further thought: who really does this?  will think on it more
