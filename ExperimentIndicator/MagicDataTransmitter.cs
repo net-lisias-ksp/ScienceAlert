@@ -78,6 +78,8 @@ namespace ExperimentIndicator
             Log.Debug("MagicDataTransmitter has found {0} useable transmitters", transmitters.Count);
         }
 
+
+
         public void Update()
         {
             // keep an eye on queued transmission data and send it as
@@ -101,6 +103,8 @@ namespace ExperimentIndicator
             node.ClearData(); // don't save anything about MagicDataTransmitter or
                               // the save file will be poisoned
         }
+
+
 
         public override void OnLoad(ConfigNode node)
         {

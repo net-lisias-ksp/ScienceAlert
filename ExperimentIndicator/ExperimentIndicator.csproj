@@ -47,18 +47,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\DebugTools\ConfigUtil.cs">
+      <Link>Tools\ConfigUtil.cs</Link>
+    </Compile>
+    <Compile Include="..\..\DebugTools\Log.cs">
+      <Link>Tools\Log.cs</Link>
+    </Compile>
+    <Compile Include="..\..\DebugTools\ResourceUtil.cs">
+      <Link>Tools\ResourceUtil.cs</Link>
+    </Compile>
     <Compile Include="AudioController.cs" />
     <Compile Include="ExperimentIndicator.cs" />
     <Compile Include="ExperimentObserver.cs" />
-    <Compile Include="Log.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="MagicDataTransmitter.cs" />
     <Compile Include="OptionsWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StorageCache.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\flask.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\sheet.png" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>set ksp=C:\Program Files (x86)\Steam\SteamApps\common\Kerbal Space Program\GameData

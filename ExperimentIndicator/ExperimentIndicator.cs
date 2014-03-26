@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Toolbar;
 using DebugTools;
+using ResourceTools;
 
 // TODO: manually selected transmitters ignore MagicTransmitter
 //          further thought: who really does this?  will think on it more
@@ -42,9 +43,6 @@ namespace ExperimentIndicator
 
         public EffectController(ExperimentIndicator indi)
         {
-            indicator = indi;
-            indicator.ToolbarButton.TexturePath = NormalFlaskTexture;
-
             Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
             {
                 string str = frame.ToString();
@@ -55,11 +53,99 @@ namespace ExperimentIndicator
                 return str;
             };
 
-            for (int i = 0; i < FrameCount; ++i)
-                StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
+
+
+            // load textures
+            try
+            {
+                if (!GameDatabase.Instance.ExistsTexture(NormalFlaskTexture))
+                {
+                    // load normal flask texture
+                    Log.Debug("Loading normal flask texture");
+
+                    #region normal flask texture
+                    Texture2D nflask = ResourceUtil.GetEmbeddedTexture("ExperimentIndicator.Resources.flask.png", true);
+
+                    if (nflask == null)
+                    {
+                        Log.Error("Failed to create normal flask texture!");
+                    }
+                    else
+                    {
+                        GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(nflask, false, true, true);
+                        ti.name = NormalFlaskTexture;
+                        GameDatabase.Instance.databaseTexture.Add(ti);
+                        Log.Debug("Created normal flask texture {0}", ti.name);
+                    }
+
+                    #endregion
+                    #region sprite sheet textures
+
+
+                    // load sprite sheet
+                    Log.Debug("Loading sprite sheet textures...");
+
+                    Texture2D sheet = ResourceUtil.GetEmbeddedTexture("ExperimentIndicator.Resources.sheet.png", false, false);
+
+                    if (sheet == null)
+                    {
+                        Log.Error("Failed to create sprite sheet texture!");
+                    }
+                    else
+                    {
+                        var rt = RenderTexture.GetTemporary(sheet.width, sheet.height);
+                        var oldRt = RenderTexture.active;
+                        int invertHeight = ((FrameCount - 1) / (sheet.width / 24)) * 24;
+
+                        Graphics.Blit(sheet, rt);
+                        RenderTexture.active = rt;
+
+                        for (int i = 0; i < FrameCount; ++i)
+                        {
+                            StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
+                            Texture2D sliced = new Texture2D(24, 24, TextureFormat.ARGB32, false);
+
+                            //Log.Debug("{0} = {1},{2}", i, (i % (sheet.width / 24)) * 24, invertHeight - (i / (sheet.width / 24)) * 24);
+
+                            sliced.ReadPixels(new Rect((i % (sheet.width / 24)) * 24, /*invertHeight -*/ (i / (sheet.width / 24)) * 24, 24, 24), 0, 0);
+                            sliced.Apply();
+
+                            //sliced.SaveToDisk(StarFlaskTextures.Last());
+
+                            GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(sliced, false, false, false);
+                            ti.name = StarFlaskTextures.Last();
+
+                            GameDatabase.Instance.databaseTexture.Add(ti);
+                            Log.Debug("Added sheet texture {0}", ti.name);
+                        }
+
+                        //sheet.SaveToDisk("ExperimentIndicator/textures/sheet.png");
+
+                        RenderTexture.active = oldRt;
+                        RenderTexture.ReleaseTemporary(rt);
+                    }
+
+                    Log.Debug("Finished loading sprite sheet textures.");
+                    #endregion
+                }
+                else
+                { // textures already loaded
+                    for (int i = 0; i < FrameCount; ++i)
+                        StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
+                }
+            } catch (Exception e)
+            {
+                Log.Error("Failed to load textures: {0}", e);
+            }
+            
+
+
+            indicator = indi;
+            indicator.ToolbarButton.TexturePath = NormalFlaskTexture;
 
             CurrentFrame = 0;
             ElapsedTime = 0f;
+            FrameRate = Settings.Instance.StarFlaskFrameRate;
         }
 
 
@@ -78,8 +164,12 @@ namespace ExperimentIndicator
                             {
                                 if (ElapsedTime > TimePerFrame)
                                 {
-                                    ElapsedTime -= TimePerFrame;
-                                    CurrentFrame = (CurrentFrame + 1) % StarFlaskTextures.Count;
+                                    while (ElapsedTime > TimePerFrame)
+                                    {
+                                        ElapsedTime -= TimePerFrame;
+                                        CurrentFrame = (CurrentFrame + 1) % StarFlaskTextures.Count;
+                                    }
+
                                     indicator.ToolbarButton.TexturePath = StarFlaskTextures[CurrentFrame];
                                 }
                                 else
@@ -150,7 +240,7 @@ namespace ExperimentIndicator
         {
             get
             {
-                return FrameRate * 0.001f;
+                return 1f / FrameRate;
             }
         }
 
@@ -205,16 +295,18 @@ namespace ExperimentIndicator
         public void Start()
         {
            
+            // event setup
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
 
+            // toolbar setup
             mainButton = Toolbar.ToolbarManager.Instance.add("ExperimentIndicator", "PopupOpen");
             mainButton.Text = "ExpIndicator";
             mainButton.ToolTip = "Left Click to Open Experiments; Right Click for Settings";
             mainButton.OnClick += OnToolbarClick;
 
-            effects = new EffectController(this);
+            effects = new EffectController(this); // requires toolbar button to exist
             optionsWindow = new OptionsWindow(effects.AudioController);
 
             // set up coroutines
@@ -275,14 +367,14 @@ namespace ExperimentIndicator
             //if (Input.GetKeyDown(KeyCode.R))
             //    vesselStorage.ScheduleRebuild();
 
-            if (Input.GetKeyDown(KeyCode.U))
-            {
-                foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                {
-                    var settings = Settings.Instance.GetExperimentSettings(expid);
-                    Log.Debug("{0} settings: {1}", expid, settings.ToString());
-                }
-            }
+            //if (Input.GetKeyDown(KeyCode.U))
+            //{
+            //    foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
+            //    {
+            //        var settings = Settings.Instance.GetExperimentSettings(expid);
+            //        Log.Debug("{0} settings: {1}", expid, settings.ToString());
+            //    }
+            //}
         }
 
         
@@ -478,6 +570,8 @@ namespace ExperimentIndicator
 
         public void OnToolbarClick(ClickEvent ce)
         {
+            effects.AudioController.PlaySound(AudioController.AvailableSounds.UIClick);
+
             if (ce.MouseButton == 0)
             {
                 Log.Debug("Toolbar left clicked");

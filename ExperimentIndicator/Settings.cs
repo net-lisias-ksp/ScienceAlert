@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using UnityEngine;
 using DebugTools;
+using ConfigTools;
 
 namespace ExperimentIndicator
 {
@@ -45,11 +46,11 @@ namespace ExperimentIndicator
 
             public void OnLoad(ConfigNode node)
             {
-                Enabled = Settings.Parse<bool>(node, "Enabled", true);
-                SoundOnDiscovery = Settings.Parse<bool>(node, "SoundOnDiscovery", true);
-                AnimationOnDiscovery = Settings.Parse<bool>(node, "AnimationOnDiscovery", true);
-                AssumeOnboard = Settings.Parse<bool>(node, "AssumeOnboard", false);
-                StopWarpOnDiscovery = Settings.Parse<bool>(node, "StopWarpOnDiscovery", false);
+                Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
+                SoundOnDiscovery = ConfigUtil.Parse<bool>(node, "SoundOnDiscovery", true);
+                AnimationOnDiscovery = ConfigUtil.Parse<bool>(node, "AnimationOnDiscovery", true);
+                AssumeOnboard = ConfigUtil.Parse<bool>(node, "AssumeOnboard", false);
+                StopWarpOnDiscovery = ConfigUtil.Parse<bool>(node, "StopWarpOnDiscovery", false);
 
                 var strFilterName = node.GetValue("Filter");
                 if (string.IsNullOrEmpty(strFilterName))
@@ -96,7 +97,7 @@ namespace ExperimentIndicator
             SaveFlightSessionManeuverNodes = true;
             FlaskAnimationEnabled = true;
             SoundOnNewResearch = true;
-
+            StarFlaskFrameRate = 24f;
 
             skin = GameObject.Instantiate(HighLogic.Skin) as GUISkin;
 
@@ -137,49 +138,7 @@ namespace ExperimentIndicator
         }
         
         
-        public static T Parse<T>(ConfigNode node, string valueName, T defaultValue)
-        {
-            try
-            {
-                var value = node.GetValue(valueName);
-                if (string.IsNullOrEmpty(value))
-                {
-                    Log.Error("Settings: Value '{0}' does not exist in given ConfigNode", valueName);
-                    return defaultValue;
-                }
-
-                var method = typeof(T).GetMethod("TryParse", new[] {
-                    typeof (string),
-                    typeof(T).MakeByRefType()
-                });
-
-                if (method == null)
-                {
-                    Log.Error("Failed to locate TryParse in {0}", typeof(T).FullName);
-                }
-                else
-                {
-                    object[] args = new object[] { value, default(T) };
-
-                    if ((bool)method.Invoke(null, args))
-                    {
-                        Log.Debug("Examined {0}, parse returned{1}", value, args[1]);
-                        return (T)args[1];
-                    }
-                    else
-                    {
-                        Log.Error("Settings: TryParse failed with node name '{0}' (returned value '{1}'", valueName, string.IsNullOrEmpty(valueName) ? "[null]" : value);
-                        return defaultValue;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error("Settings: Failed to parse value '{0}' from ConfigNode, resulted in an exception {1}", valueName, e);
-            }
-
-            return defaultValue;
-        }
+        
 
 
         private string GetConfigPath()
@@ -232,14 +191,16 @@ namespace ExperimentIndicator
 
             Log.Debug("General node = {0}", general.ToString());
 
-            SaveFlightSessionManeuverNodes = Parse<bool>(general, "SaveFlightSessionManeuverNodes", true);
-            FlaskAnimationEnabled = Parse<bool>(general, "FlaskAnimationEnabled", true);
-            SoundOnNewResearch = Parse<bool>(general, "SoundOnNewResearch", true);
+            SaveFlightSessionManeuverNodes = ConfigUtil.Parse<bool>(general, "SaveFlightSessionManeuverNodes", true);
+            FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
+            SoundOnNewResearch = ConfigUtil.Parse<bool>(general, "SoundOnNewResearch", true);
+            StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
 
 
             Log.Debug("SaveFlightSessionManeuverNodes = {0}", SaveFlightSessionManeuverNodes);
             Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
             Log.Debug("SoundOnNewResearch = {0}", SoundOnNewResearch);
+            Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
 
 #endregion
 
@@ -287,6 +248,7 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("SaveFlightSessionManeuverNodes", SaveFlightSessionManeuverNodes);
                 general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
                 general.AddValue("SoundOnNewResearch", SoundOnNewResearch);
+                general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
 
             #endregion
 
@@ -317,6 +279,7 @@ Re-saving config with default values for missing experiments.");
         public bool SaveFlightSessionManeuverNodes { get; set; }
         public bool FlaskAnimationEnabled { get; set; }
         public bool SoundOnNewResearch { get; set; }
+        public float StarFlaskFrameRate { get; private set; }
 
         #endregion
 
