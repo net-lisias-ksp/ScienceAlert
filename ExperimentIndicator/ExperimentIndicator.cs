@@ -212,7 +212,7 @@ namespace ExperimentIndicator
 
             // firstly, handle sound
             if (experiment.SoundOnDiscovery && Settings.Instance.SoundOnNewResearch)
-                audio.PlaySound(AudioController.AvailableSounds.Bubbles);
+                audio.PlaySound("bubbles");
 
             // now handle state
             if (experiment.AnimateOnDiscovery && Settings.Instance.FlaskAnimationEnabled)
@@ -568,6 +568,7 @@ namespace ExperimentIndicator
                     if (GUILayout.Button(content))
                     {
                         Log.Debug("Deploying {0}", observer.ExperimentTitle);
+                        effects.AudioController.PlaySound("click2");
                         observer.Deploy();
                     }
                 }
@@ -582,7 +583,7 @@ namespace ExperimentIndicator
 
         public void OnToolbarClick(ClickEvent ce)
         {
-            effects.AudioController.PlaySound(AudioController.AvailableSounds.UIClick);
+            effects.AudioController.PlaySound("click1");
 
             if (ce.MouseButton == 0)
             {

@@ -1,86 +1,142 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 using DebugTools;
 
 namespace ExperimentIndicator
 {
     internal class AudioController
     {
-        private const string BUBBLES_PATH = "ExperimentIndicator/sounds/bubbles.wav";
-        private const string CLICK_PATH = "ExperimentIndicator/sounds/click1.wav";
-
+        private Dictionary<string /* sound name */, PlayableSound> sounds = new Dictionary<string, PlayableSound>();
         private const float LOADING_TIMEOUT = 3f;
-        private const float MIN_TIME_BETWEEN_SOUNDS = 2f;
-
-        private UnityEngine.AudioClip bubbles;
-        private UnityEngine.AudioClip click;
-
+        
         private GameObject gameObject;
-        private float timeAtLastSound = 0f;
 
-        public enum AvailableSounds
+
+        internal class PlayableSound
         {
-            Bubbles,
-            UIClick // does not trigger minimum time counter
-        }
+            private AudioClip clip;
+            private AudioSource source;
+            private float lastPlayed = 0f;
+            private Settings.SoundSettings settings;
 
+            internal PlayableSound(AudioClip aclip, AudioSource player, Settings.SoundSettings ssettings)
+            {
+                clip = aclip;
+                source = player;
+                settings = ssettings;
+            }
+
+            public bool Play()
+            {
+                if (settings.Enabled)
+                    if (Time.realtimeSinceStartup - lastPlayed > settings.MinDelay)
+                    {
+                        if (clip != null)
+                        {
+                            source.PlayOneShot(clip, GameSettings.UI_VOLUME);
+                            lastPlayed = Time.realtimeSinceStartup;
+                            Log.Debug("PlayableSound: played at {0}, next earlier play is at {1} (minDelay is {2})", lastPlayed, lastPlayed + settings.MinDelay, settings.MinDelay);
+                            return true;
+                        }
+                        else
+                        {
+                            Log.Error("Cannot play sound; clip is null!");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        // too early for this sound
+                        Log.Warning("Too early to play {0}", clip.name);
+                        return false;
+                    }
+
+                Log.Verbose("Cannot play sound; this sound is disabled");
+                return false; // sound disabled
+            }
+        }
 
 
         public AudioController()
         {
             gameObject = new GameObject("ExperimentIndicator.AudioSource");
             gameObject.AddComponent<AudioSource>();
-
-            bubbles = LoadSound(BUBBLES_PATH);
-            click = LoadSound(CLICK_PATH);
-        }
+            gameObject.transform.parent = Camera.main.transform;
 
 
+            string soundDir = KSPUtil.ApplicationRootPath + "GameData/ExperimentIndicator/sounds/";
 
-        public bool PlaySound(AvailableSounds sound)
-        {
-            if (Time.realtimeSinceStartup - timeAtLastSound < MIN_TIME_BETWEEN_SOUNDS)
+            string[] files = Directory.GetFiles(soundDir, "*.wav");
+
+            Log.Debug("Found {0} files in directory {1}", files.Length, soundDir);
+            foreach (var f in files)
+                Log.Debug("File: {0}", f);
+
+            foreach (var file in files)
             {
-                Log.Debug("Too early for sound");
-                return false; // too early for another sound
-            }
+                Log.Debug("Loading sound: {0}", file);
 
-            try
-            {
-                gameObject.transform.position = Camera.main.transform.position;
-                timeAtLastSound = Time.realtimeSinceStartup;
-
-                switch (sound)
+                AudioClip newClip = LoadSound(file, false);
+                if (newClip != null)
                 {
-                    case AvailableSounds.Bubbles:
-                        gameObject.audio.PlayOneShot(bubbles, GameSettings.UI_VOLUME);
+                    string name = file.Substring(file.LastIndexOf('/') + 1);
+                    if (name.EndsWith(".wav"))
+                        name = name.Substring(0, name.Length - ".wav".Length);
 
-                        return true;
+                    Log.Debug("Loaded sound; adding as {0}", name);
 
-                    case AvailableSounds.UIClick:
-                        gameObject.audio.PlayOneShot(click, GameSettings.UI_VOLUME);
-                        timeAtLastSound = 0f; // don't trigger countodwn
-                        return true;
-
-                    default:
-                        Log.Error("Unhandled sound in AudioController");
-                        break;
+                    sounds.Add(name, new PlayableSound(newClip, gameObject.audio, Settings.Instance.GetSoundSettings(name)));
                 }
-            } catch 
-            {
-                Log.Error("Error playing sound {0}", sound);
             }
 
-            return false;
+            Log.Debug("The following sounds are loaded:");
+            foreach (var kvp in sounds)
+                Log.Debug("Sound: {0}", kvp.Key);
+        }
+
+
+        public bool PlaySound(string name)
+        {
+            if (!sounds.ContainsKey(name))
+            {
+                Log.Error("Cannot play '{0}'; does not exist!", name);
+                return false;
+            }
+            else
+            {
+                if (sounds[name].Play())
+                {
+                    Log.Debug("Played '{0}'", name);
+                    return true;
+                }
+                else return false;
+            }
         }
 
 
 
-        private AudioClip LoadSound(string path)
+        /// <summary>
+        /// The GameDatabase audio clips all seem to be intended for use with
+        /// 3D. It causes a problem with our UI sounds because the player's
+        /// viewpoint is moving. Even if we attach an audio source to the
+        /// player camera, strange effects due to that movement (like much
+        /// louder in one ear in certain orientations) seem to occur.
+        /// 
+        /// This allows us to load the sounds ourselves with the parameters
+        /// we want.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private AudioClip LoadSound(string path, bool relativeToGameData = true)
         {
-            if (path.StartsWith("/"))
-                path = path.Substring(1);
+            if (relativeToGameData)
+            {
+                if (path.StartsWith("/"))
+                    path = path.Substring(1);
 
-            path = KSPUtil.ApplicationRootPath + "GameData/" + path;
+                path = KSPUtil.ApplicationRootPath + "GameData/" + path;
+            }
             Log.Verbose("Loading sound {0}", path);
 
             // windows requires three slashes.  see:

@@ -80,7 +80,53 @@ namespace ExperimentIndicator
             }
         }
 
+
+
+        // per-sound settings
+        public class SoundSettings
+        {
+            internal SoundSettings()
+            {
+                Enabled = true;
+                MinDelay = 0f;
+            }
+
+            public void OnLoad(ConfigNode node)
+            {
+                Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
+                MinDelay = ConfigUtil.Parse<float>(node, "MinDelay", 0f);
+            }
+
+            public void OnSave(ConfigNode node)
+            {
+                node.AddValue("Enabled", Enabled);
+                node.AddValue("MinDelay", MinDelay);
+            }
+
+            public bool Enabled
+            {
+                get;
+                private set;
+            }
+
+            public float MinDelay
+            {
+                get;
+                private set;
+            }
+
+            public override string ToString()
+            {
+                return string.Format("Enabled = {0}, MinDelay = {1}", Enabled, MinDelay);
+            }
+        }
+
+
+
+
         private Dictionary<string /* expid */, ExperimentSettings> PerExperimentSettings;
+        private Dictionary<string /* name */, SoundSettings> PerSoundSettings;
+
         private GUISkin skin;
 
 /******************************************************************************
@@ -90,6 +136,8 @@ namespace ExperimentIndicator
         {
             // set default values
             PerExperimentSettings = new Dictionary<string, ExperimentSettings>();
+            PerSoundSettings = new Dictionary<string, SoundSettings>();
+
 
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 PerExperimentSettings[expid] = new ExperimentSettings();
@@ -104,22 +152,11 @@ namespace ExperimentIndicator
             // adjust the skin a little bit.  It wastes a lot of space in its
             // current form
 
-            skin.button.fixedHeight = 24f;
-            skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
-            skin.box.alignment = TextAnchor.MiddleCenter;
-            skin.box.padding = new RectOffset(5, 5, 15, 10);
-            skin.box.contentOffset = Vector2.zero;
-
-            //windowSkin.scrollView.border.left = windowSkin.scrollView.border.right = windowSkin.scrollView.border.bottom = windowSkin.scrollView.border.top = 0;
-
-            //windowSkin.scrollView.margin = new RectOffset(0, 8, 0, 0);
-
-            //windowSkin.toggle.padding.top = windowSkin.toggle.padding.bottom = -2;
-            //windowSkin.scrollView.padding.left = windowSkin.scrollView.padding.right = windowSkin.scrollView.padding.bottom = windowSkin.scrollView.padding.top = 0;
-
-            //windowSkin.label.normal.background = blackBg;
-            //windowSkin.label.alignment = TextAnchor.MiddleCenter;
-            //windowSkin.toggle.alignment = TextAnchor.LowerCenter;
+                skin.button.fixedHeight = 24f;
+                skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
+                skin.box.alignment = TextAnchor.MiddleCenter;
+                skin.box.padding = new RectOffset(5, 5, 15, 10);
+                skin.box.contentOffset = Vector2.zero;
 
 
 
@@ -185,6 +222,7 @@ namespace ExperimentIndicator
         public void OnLoad(ConfigNode node)
         {
             Log.Debug("Settings.load");
+            bool resave = false;
 
 #region general settings
             ConfigNode general = node.GetNode("GeneralSettings");
@@ -231,11 +269,37 @@ namespace ExperimentIndicator
                 Log.Warning(@"
 Experiment config count does not match number of available experiments.  
 Re-saving config with default values for missing experiments.");
-                              
-                Save();
+
+                resave = true;
             }
 
 #endregion
+
+#region sound settings
+            
+                var audioNode = node.GetNode("AudioSettings");
+
+                if (audioNode != null)
+                {
+                    if (audioNode.nodes != null)
+                    {
+                        foreach (var audioSetting in audioNode.nodes.DistinctNames())
+                        {
+                            var settings = new SoundSettings();
+
+                            Log.Debug("Loading sound settings for '{0}'", audioSetting);
+                            settings.OnLoad(audioNode.GetNode(audioSetting));
+
+                            PerSoundSettings[audioSetting] = settings;
+                        }
+                    }
+                    else Log.Error("No individual audio nodes found in AudioSettings");
+                }
+                else Log.Error("No AudioSettings ConfigNode found in settings.cfg");
+#endregion
+
+            if (resave)
+                Save();
         }
 
         public void OnSave(ConfigNode node)
@@ -253,11 +317,23 @@ Re-saving config with default values for missing experiments.");
             #endregion
 
             #region experiment settings
-            ConfigNode expSettings = node.AddNode(new ConfigNode("ExperimentSettings"));
+                ConfigNode expSettings = node.AddNode(new ConfigNode("ExperimentSettings"));
 
-            foreach (var kvp in PerExperimentSettings)
-                kvp.Value.OnSave(expSettings.AddNode(new ConfigNode(kvp.Key)));
+                foreach (var kvp in PerExperimentSettings)
+                    kvp.Value.OnSave(expSettings.AddNode(new ConfigNode(kvp.Key)));
             
+            #endregion
+
+            #region sound settings
+
+                var audioSettings = node.AddNode(new ConfigNode("AudioSettings"));
+
+                foreach (var kvp in PerSoundSettings)
+                {
+                    var n = audioSettings.AddNode(new ConfigNode(kvp.Key));
+                    kvp.Value.OnSave(n);
+                }
+
             #endregion
         }
 
@@ -301,6 +377,27 @@ Re-saving config with default values for missing experiments.");
 
         #endregion
 
+
+        #region sound settings
+
+        public SoundSettings GetSoundSettings(string soundName)
+        {
+            if (PerSoundSettings.ContainsKey(soundName))
+            {
+                return PerSoundSettings[soundName];
+            } else {
+                // return default settings
+                Log.Debug("No loaded settings found for '{0}' -- creating default settings", soundName);
+
+                var newSound = new SoundSettings();
+
+                PerSoundSettings.Add(soundName, newSound);
+
+                return newSound;
+            }
+        }
+
+        #endregion
     }
 
 

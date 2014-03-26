@@ -75,7 +75,7 @@ namespace ExperimentIndicator
             bool result = GUILayout.Toggle(value, content);
             if (result != value)
             {
-                audio.PlaySound(AudioController.AvailableSounds.UIClick);
+                audio.PlaySound("click1");
 
 #if DEBUG
                 Log.Debug("Toggle '{0}' is now {1}", content, result);
@@ -89,7 +89,7 @@ namespace ExperimentIndicator
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
             if (newValue != currentValue)
             {
-                audio.PlaySound(AudioController.AvailableSounds.UIClick);
+                audio.PlaySound("click1");
                 settings.Filter = (Settings.ExperimentSettings.FilterMethod)newValue;
             }
 
