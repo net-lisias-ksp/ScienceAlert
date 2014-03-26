@@ -208,7 +208,7 @@ namespace ExperimentIndicator
         /// <param name="experiment"></param>
         public void OnExperimentAvailable(ExperimentObserver experiment)
         {
-            Log.Warning("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
+            Log.Verbose("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
 
             // firstly, handle sound
             if (experiment.SoundOnDiscovery && Settings.Instance.SoundOnNewResearch)
@@ -266,6 +266,11 @@ namespace ExperimentIndicator
                                     // NewResearch becomes ResearchAvailable and the spinning star stops (but flask keeps
                                     // its star-behind icon)
         }
+
+
+        private const float TIMEWARP_CHECK_THRESHOLD = 25f; // when the game exceeds this threshold, experiment observers
+                                                            // will check their status on every frame rather than sequentially,
+                                                            // one observer per frame
 
         // --------------------------------------------------------------------
         //    Members of ExperimentIndicator
@@ -511,9 +516,16 @@ namespace ExperimentIndicator
 #if PROFILE
                     Log.Warning("Tick time ({1}): {0} ms", (Time.realtimeSinceStartup - start) * 1000f, observer.ExperimentTitle);
 #endif
-                    yield return 0; // pause until next frame
-                } // end observer loop
+                    
+                    // if the user accelerated time, it's possible to have some
+                    // experiments checked too late. If the user is time warping
+                    // quickly enough, then we'll go ahead and check every 
+                    // experiment on every loop
+                    if (TimeWarp.CurrentRate < TIMEWARP_CHECK_THRESHOLD)
+                        yield return 0; // pause until next frame
 
+                    
+                } // end observer loop
 
                 yield return 0;
             } // end infinite while loop
