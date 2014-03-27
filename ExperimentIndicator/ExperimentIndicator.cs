@@ -3,6 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+/******************************************************************************
+ *                 Experiment Indicator for Kerbal Space Program              *
+ *                                                                            *
+ * Version 1.0 (first release)                                                *
+ * Author: xEvilReeperx                                                       *
+ * Created: 3/3/2014                                                          *
+ * ************************************************************************** *
+ * Code licensed under the terms of GPL v3.0                                  *
+ *                                                                            *
+ * See the included LICENSE.txt or visit http://www.gnu.org/licenses/gpl.html *
+ * for the full license text.                                                 *
+ *                                                                            *
+ *****************************************************************************/
 using Toolbar;
 using DebugTools;
 using ResourceTools;
@@ -12,10 +25,8 @@ using ResourceTools;
 
 // todo: separate science observer for surface samples like the eva one?
 
-
-// todo: only update experiments on vessel situation change?
-//          further thought: maybe not.  It's not that expensive as is, plus
-//          mod experiments might be changing data on the fly
+// BUG: if an eva report is stored and the player goes on eva in the same
+// situation, ExperimentIndicator reports that an eva report is available
 
 
 

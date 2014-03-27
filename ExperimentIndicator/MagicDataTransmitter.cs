@@ -1,4 +1,16 @@
-﻿using System;
+﻿/******************************************************************************
+ *                 Experiment Indicator for Kerbal Space Program              *
+ *                                                                            *
+ * Author: xEvilReeperx                                                       *
+ *                                                                            *
+ * ************************************************************************** *
+ * Code licensed under the terms of GPL v3.0                                  *
+ *                                                                            *
+ * See the included LICENSE.txt or visit http://www.gnu.org/licenses/gpl.html *
+ * for the full license text.                                                 *
+ *                                                                            *
+ *****************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,8 +47,8 @@ namespace ExperimentIndicator
     /// need to determine whether anyone actually uses this method of transmission.
     /// 
     /// Note: Why not use MM to edit the transmitter module itself with our own
-    /// version? It will contaminate the player's save, which I want to avoid whenever
-    /// possible.
+    /// version? It will contaminate the player's save, which I want to avoid in
+    /// a WIP Plugin
     /// </summary>
     using ScienceDataList = List<ScienceData>;
 

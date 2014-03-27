@@ -1,4 +1,16 @@
-﻿using System;
+﻿/******************************************************************************
+ *                 Experiment Indicator for Kerbal Space Program              *
+ *                                                                            *
+ * Author: xEvilReeperx                                                       *
+ *                                                                            *
+ * ************************************************************************** *
+ * Code licensed under the terms of GPL v3.0                                  *
+ *                                                                            *
+ * See the included LICENSE.txt or visit http://www.gnu.org/licenses/gpl.html *
+ * for the full license text.                                                 *
+ *                                                                            *
+ *****************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
