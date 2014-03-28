@@ -33,7 +33,6 @@ namespace ScienceAlert
         // Control position and scrollbars
         private Rect windowRect;// = new Rect(0, 0, 256, Screen.height / 5 * 3);
         private Vector2 scrollPos = new Vector2();
-        private bool drawFlag = false;
         private AudioController audio;
         private Dictionary<string /* expid */, int /* selected index */> experimentIds = new Dictionary<string, int>();
         private List<GUIContent> filterList = new List<GUIContent>();
@@ -160,16 +159,6 @@ namespace ScienceAlert
             GUILayout.EndScrollView();
 
             GUILayout.EndVertical();
-
-
-            // trim the window, if necessary
-            if (!drawFlag)
-            {
-                //windowRect.height = Math.Min(windowRect.height, GUILayoutUtility.GetLastRect().height);
-                drawFlag = true;
-            }
-
-            //Log.Debug("Window rect = {0}", windowRect);
         }
 
 
