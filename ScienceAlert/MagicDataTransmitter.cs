@@ -1,14 +1,20 @@
 ﻿/******************************************************************************
- *                    Science Alert for Kerbal Space Program                  *
- *                                                                            *
- * Author: xEvilReeperx                                                       *
- *                                                                            *
- * ************************************************************************** *
- * Code licensed under the terms of GPL v3.0                                  *
- *                                                                            *
- * See the included LICENSE.txt or visit http://www.gnu.org/licenses/gpl.html *
- * for the full license text.                                                 *
- *                                                                            *
+                   Science Alert for Kerbal Space Program                    
+ ******************************************************************************
+    Copyright (C) 2014 Allen Mrazek (amrazek@hotmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 using System;
 using System.Collections.Generic;
@@ -47,8 +53,8 @@ namespace ScienceAlert
     /// need to determine whether anyone actually uses this method of transmission.
     /// 
     /// Note: Why not use MM to edit the transmitter module itself with our own
-    /// version? It will contaminate the player's save, which I want to avoid in
-    /// a WIP Plugin
+    /// version? It will contaminate the player's save. Also I'm experimenting 
+    /// with adding PartModules on-the-fly
     /// </summary>
     using ScienceDataList = List<ScienceData>;
 
