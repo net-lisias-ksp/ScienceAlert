@@ -518,8 +518,10 @@ namespace ScienceAlert
 
                         effects.OnExperimentAvailable(observer);
 
-                        // if the menu is already open, we don't need to use the flashy animation
-                        //State = MenuOpen ? IconState.ResearchAvailable : IconState.NewResearch;
+                        // the button is important; if it's auto-hidden we should
+                        // show it to the player
+                        if (!OptionsOpen && !MenuOpen && Settings.Instance.FlaskAnimationEnabled) ToolbarButton.Important = true;
+
                         UpdateMenuState();
                     } else if (!observers.Any(ob => ob.Available)) {
                         // if no experiments are available, we should be looking
@@ -637,7 +639,11 @@ namespace ScienceAlert
             if (MenuOpen)
             {
                 // stop the star flask animation, if it's running
-                if (State == IconState.NewResearch) State = IconState.ResearchAvailable;
+                if (State == IconState.NewResearch)
+                {
+                    State = IconState.ResearchAvailable;
+                    ToolbarButton.Important = false;
+                }
             }
         }
 
@@ -677,6 +683,7 @@ namespace ScienceAlert
             {
                 mainButton.Drawable = value ? this : null;
                 UpdateMenuState();
+                ToolbarButton.Important = false;
             }
         }
 
@@ -693,6 +700,7 @@ namespace ScienceAlert
                 if (value)
                 {
                     mainButton.Drawable = optionsWindow;
+                    ToolbarButton.Important = false;
                 }
                 else if (OptionsOpen)
                 {
