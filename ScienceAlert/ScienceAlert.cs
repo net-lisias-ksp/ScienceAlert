@@ -280,7 +280,7 @@ namespace ScienceAlert
         }
 
 
-        private const float TIMEWARP_CHECK_THRESHOLD = 25f; // when the game exceeds this threshold, experiment observers
+        private const float TIMEWARP_CHECK_THRESHOLD = 10f; // when the game exceeds this threshold, experiment observers
                                                             // will check their status on every frame rather than sequentially,
                                                             // one observer per frame
 
