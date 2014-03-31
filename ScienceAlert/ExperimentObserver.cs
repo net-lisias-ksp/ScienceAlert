@@ -46,7 +46,6 @@ namespace ScienceAlert
         protected string lastAvailableId;                   // Id of the last time the experiment was available
 
 
-
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
@@ -213,6 +212,9 @@ namespace ScienceAlert
                             lastStatus = false; // force a refresh, in case we're going from available -> available in different subject id
 
                         lastAvailableId = subject.id;
+
+                        if (Available != lastStatus && Available && Available)
+                            Log.Write("Experiment {0} just became available!", lastAvailableId);
                     }
                 }
                 else
@@ -378,7 +380,7 @@ namespace ScienceAlert
         /// <param name="latRad"></param>
         /// <param name="lonRad"></param>
         /// <returns></returns>
-        protected static string GetBiome(double latRad, double lonRad)
+        public static string GetBiome(double latRad, double lonRad)
         {
             var vessel = FlightGlobals.ActiveVessel;
             return string.IsNullOrEmpty(vessel.landedAt) ? vessel.mainBody.BiomeMap.GetAtt(latRad, lonRad).name : vessel.landedAt;
@@ -417,7 +419,9 @@ namespace ScienceAlert
         /// <summary>
         /// This function will do one of two things: if the active vessel
         /// isn't an eva kerbal, it will choose a kerbal at random from
-        /// the crew and send them on eva.
+        /// the crew and send them on eva (unless the conditions outside
+        /// would make it dangerous, in which case player will receive
+        /// a dialog instead).
         /// 
         /// On the other hand, if the active vessel is an eva kerbal, it
         /// will deploy the experiment itself.
@@ -442,48 +446,39 @@ namespace ScienceAlert
             // find a kerbal and dump him into space
             if (!FlightGlobals.ActiveVessel.isEVA)
             {
-                // You might think HighLogic.CurrentGame.CrewRoster.GetNextAvailableCrewMember
-                // is a logical function to use.  Actually it's possible for it to
-                // generate a crew member out of thin air and put it outside, so nope
-                // 
-                // luckily we can specify a particular onboard Kerbal.  We'll do so by
-                // finding the possibilities and then picking one totally at 
-                // pseudorandom
+                // check conditions outside
+                Log.Warning("Current static pressure: {0}", FlightGlobals.getStaticPressure());
 
-                List<ProtoCrewMember> crewChoices = new List<ProtoCrewMember>();
-
-                foreach (var crewable in crewableParts)
-                    crewChoices.AddRange(crewable.protoModuleCrew);
-
-                if (crewChoices.Count == 0)
-                {
-                    Log.Error("EvaReportObserver.Deploy - No crew choices available.  Check logic");
-                    return false;
-                }
-                else
-                {
-                    Log.Debug("Choices of kerbal:");
-                    foreach (var crew in crewChoices)
-                        Log.Debug(" - {0}", crew.name);
-
-                    // select a kerbal target...
-                    var luckyKerbal = crewChoices[UnityEngine.Random.Range(0, crewChoices.Count - 1)];
-                    Log.Debug("{0} is the lucky Kerbal.  Out the airlock with him!", luckyKerbal.name);
-
-                    // out he goes!
-                    bool success = FlightEVA.SpawnEVA(luckyKerbal.KerbalRef);
-
-                    if (!success)
+                if (FlightGlobals.getStaticPressure() > Settings.Instance.EvaAtmospherePressureWarnThreshold)
+                    if (FlightGlobals.ActiveVessel.GetSrfVelocity().magnitude > Settings.Instance.EvaAtmosphereVelocityWarnThreshold)
                     {
-                        Log.Error("EvaReportObserver.Deploy - Did not successfully send {0} out the airlock.  Hatch might be blocked.", luckyKerbal.name);
-                        return false;
+                        Log.Debug("setting up dialog options to warn player about eva risk");
+
+                        var options = new DialogOption[2];
+
+                        options[0] = new DialogOption("Science is worth a little risk",new Callback(OnConfirmEva));
+                        options[1] = new DialogOption("No, it would be a PR nightmare", null);
+
+                        var dlg = new MultiOptionDialog("It looks dangerous out there. Are you sure you want to send someone out? They might lose their grip!", "Dangerous Condition Alert", Settings.Skin, options);
+
+
+                        PopupDialog.SpawnPopupDialog(dlg, false, Settings.Skin);
+                        return true;
                     }
 
-                    // todo: schedule a coroutine to wait for it to exist and pop open
-                    // the report?
-
-                    return true;
+                
+                
+                if (!ExpelCrewman())
+                {
+                    Log.Error("EvaReportObserver.Deploy - Did not successfully send kerbal out the airlock.  Hatch might be blocked.");
+                    return false;
                 }
+
+                // todo: schedule a coroutine to wait for it to exist and pop open
+                // the report?
+
+                return true;
+                
             }
             else
             {
@@ -498,6 +493,55 @@ namespace ScienceAlert
                     }
 
                 return true;
+            }
+        }
+
+
+
+        protected void OnConfirmEva()
+        {
+            Log.Write("EvaObserver: User confirmed eva despite conditions");
+            Log.Write("Expelling... {0}", ExpelCrewman() ? "success!" : "failed");
+        }
+
+
+
+        /// <summary>
+        /// Toss a random kerbal out the airlock
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool ExpelCrewman()
+        {
+            // You might think HighLogic.CurrentGame.CrewRoster.GetNextAvailableCrewMember
+            // is a logical function to use.  Actually it's possible for it to
+            // generate a crew member out of thin air and put it outside, so nope
+            // 
+            // luckily we can specify a particular onboard Kerbal.  We'll do so by
+            // finding the possibilities and then picking one totally at 
+            // pseudorandom
+
+            List<ProtoCrewMember> crewChoices = new List<ProtoCrewMember>();
+
+            foreach (var crewable in crewableParts)
+            crewChoices.AddRange(crewable.protoModuleCrew);
+
+            if (crewChoices.Count == 0)
+            {
+                Log.Error("EvaReportObserver.Deploy - No crew choices available.  Check logic");
+                return false;
+            }
+            else
+            {
+                Log.Debug("Choices of kerbal:");
+                foreach (var crew in crewChoices)
+                    Log.Debug(" - {0}", crew.name);
+
+                // select a kerbal target...
+                var luckyKerbal = crewChoices[UnityEngine.Random.Range(0, crewChoices.Count - 1)];
+                Log.Debug("{0} is the lucky Kerbal.  Out the airlock with him!", luckyKerbal.name);
+
+                // out he goes!
+                return FlightEVA.SpawnEVA(luckyKerbal.KerbalRef);
             }
         }
 

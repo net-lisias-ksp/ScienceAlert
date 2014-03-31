@@ -30,6 +30,10 @@ using Toolbar;
 using DebugTools;
 using ResourceTools;
 
+// TODO: overall sound mute
+
+// TODO: unfiltered biome map sometimes results in incorrect biome being selected
+
 // TODO: manually selected transmitters ignore MagicTransmitter
 //          further thought: who really does this?  will think on it more
 
@@ -37,6 +41,7 @@ using ResourceTools;
 
 // BUG: if an eva report is stored and the player goes on eva in the same
 // situation, ScienceAlert reports that an eva report is available
+
 
 
 

@@ -144,7 +144,11 @@ namespace ScienceAlert
                     settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
                     settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
                     settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
-                    settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
+
+                    // only add the Assume Onboard option if the experiment isn't
+                    // one of the default types
+                    if (!settings.IsDefault)
+                        settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
 
                     GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
 
@@ -154,6 +158,7 @@ namespace ScienceAlert
                     if (oldSel != experimentIds[key])
                         Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
 
+                    
                 }
 
             GUILayout.EndScrollView();

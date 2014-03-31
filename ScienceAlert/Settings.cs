@@ -61,6 +61,8 @@ namespace ScienceAlert
                                                     // we won't be able to interact directly with the experiment,
                                                     // we should at least be able to tell when it could run under
                                                     // our desired filter
+            public bool IsDefault = false;
+
 
             public void OnLoad(ConfigNode node)
             {
@@ -78,6 +80,7 @@ namespace ScienceAlert
                 }
 
                 Filter = (FilterMethod)Enum.Parse(typeof(FilterMethod), strFilterName);
+                IsDefault = ConfigUtil.Parse<bool>(node, "IsDefault", false);
             }
 
             public void OnSave(ConfigNode node)
@@ -88,6 +91,7 @@ namespace ScienceAlert
                 node.AddValue("StopWarpOnDiscovery", StopWarpOnDiscovery);
                 node.AddValue("AssumeOnboard", AssumeOnboard);
                 node.AddValue("Filter", Filter);
+                node.AddValue("IsDefault", IsDefault);
             }
 
             public override string ToString()
@@ -172,10 +176,11 @@ namespace ScienceAlert
 
                 skin.button.fixedHeight = 24f;
                 skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
+                //skin.toggle.padding.left = skin.toggle.padding.right = skin.toggle.padding.top = skin.toggle.padding.bottom = 0;
+                skin.toggle.margin = new RectOffset(0, 0, 0, 0);
                 skin.box.alignment = TextAnchor.MiddleCenter;
                 skin.box.padding = new RectOffset(5, 5, 15, 10);
-                skin.box.contentOffset = Vector2.zero;
-
+                skin.box.contentOffset = new Vector2(0, 0f);
 
 
             Load();
@@ -251,6 +256,8 @@ namespace ScienceAlert
             FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
             SoundOnNewResearch = ConfigUtil.Parse<bool>(general, "SoundOnNewResearch", true);
             StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
+            EvaAtmospherePressureWarnThreshold = ConfigUtil.Parse<double>(general, "EvaAtmosPressureThreshold", 0.00035);
+            EvaAtmosphereVelocityWarnThreshold = ConfigUtil.Parse<float>(general, "EvaAtmosVelocityThreshold", 30);
 
 
             Log.Debug("SaveFlightSessionManeuverNodes = {0}", SaveFlightSessionManeuverNodes);
@@ -331,6 +338,8 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
                 general.AddValue("SoundOnNewResearch", SoundOnNewResearch);
                 general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
+                general.AddValue("EvaAtmosPressureThreshold", EvaAtmospherePressureWarnThreshold);
+                general.AddValue("EvaAtmosVelocityThreshold", EvaAtmosphereVelocityWarnThreshold);
 
             #endregion
 
@@ -374,6 +383,8 @@ Re-saving config with default values for missing experiments.");
         public bool FlaskAnimationEnabled { get; set; }
         public bool SoundOnNewResearch { get; set; }
         public float StarFlaskFrameRate { get; private set; }
+        public double EvaAtmospherePressureWarnThreshold { get; private set; }
+        public float EvaAtmosphereVelocityWarnThreshold { get; private set; }
 
         #endregion
 
