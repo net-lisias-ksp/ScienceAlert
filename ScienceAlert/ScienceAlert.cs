@@ -572,7 +572,7 @@ namespace ScienceAlert
             if (float.IsNaN(maximumTextLength))
                 return Vector2.zero; // text length isn't set yet
 
-            float necessaryHeight = 32f * observers.Sum(observer => observer.Available ? 1 : 0);
+            float necessaryHeight = 32f * observers.Count;
             float necessaryWidth = maximumTextLength;
 
             if (necessaryHeight < 31.9999f)
