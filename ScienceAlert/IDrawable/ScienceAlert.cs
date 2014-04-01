@@ -234,7 +234,7 @@ namespace ScienceAlert
         /// <param name="experiment"></param>
         public void OnExperimentAvailable(ExperimentObserver experiment)
         {
-            Log.Verbose("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
+            //Log.Verbose("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
 
             // firstly, handle sound
             if (experiment.SoundOnDiscovery && Settings.Instance.SoundOnNewResearch)
@@ -739,7 +739,7 @@ namespace ScienceAlert
                 }
                 else if (!DebugOpen)
                 {
-                    mainButton.Drawable = new DebugWindow();
+                    mainButton.Drawable = new DebugWindow(this);
                     UpdateMenuState();
                 }
             }
@@ -758,7 +758,7 @@ namespace ScienceAlert
             return str;
         }
 
-        private ExperimentSituations VesselSituationToExperimentSituation()
+        public ExperimentSituations VesselSituationToExperimentSituation()
         {
             //Log.Debug("Flying low altitude <= {0}, Low space altitude <= {1}",(double)FlightGlobals.ActiveVessel.mainBody.scienceValues.flyingAltitudeThreshold,  (double)FlightGlobals.ActiveVessel.mainBody.scienceValues.spaceAltitudeThreshold);
 

@@ -34,6 +34,14 @@ namespace ScienceAlert
     {
         private readonly int windowId = UnityEngine.Random.Range(0, int.MaxValue);
         private Rect windowRect = new Rect(0, 0, 324, Screen.height / 5);
+        ScienceAlert indicator;
+
+
+        internal DebugWindow(ScienceAlert ind)
+        {
+            indicator = ind;
+        }
+
 
 
         public Vector2 Draw(Vector2 position)
@@ -73,6 +81,48 @@ namespace ScienceAlert
         }
 
 
+        /// <summary>
+        /// Writes the current situation being checked against for
+        /// the eva experiment to the log.
+        /// </summary>
+        private void CurrentSituationEva()
+        {
+            var vessel = FlightGlobals.ActiveVessel;
+            var expSituation = indicator.VesselSituationToExperimentSituation();
+            var biome = string.Empty;
+            
+            if (ResearchAndDevelopment.GetExperiment("evaReport").BiomeIsRelevantWhile(expSituation))
+                biome = ExperimentObserver.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad); 
+
+            var subject = ResearchAndDevelopment.GetExperimentSubject(ResearchAndDevelopment.GetExperiment("evaReport"), expSituation, vessel.mainBody, biome);
+
+            Log.Warning("Current eva situation: {0}, science {1}", subject.id, subject.science);
+        }
+
+
+        /// <summary>
+        /// List real and fake transmitter counts
+        /// </summary>
+        private void TransmitterCheck()
+        {
+            var txs = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
+
+            Log.Write("There are {0} total transmitters - {1} real, {2} magic", txs.Count, txs.Count(tx => !(tx is MagicDataTransmitter)), txs.Count(tx => tx is MagicDataTransmitter));
+
+            var magics = txs.Where(tx => tx is MagicDataTransmitter).ToList();
+
+            foreach (var tx in magics)
+            {
+                var magic = tx as MagicDataTransmitter;
+
+                Log.Write("MagicDataTransmitter {0} has {1} queued transmissions", magic.part.ConstructID, magic.QueuedData.Count);
+
+                foreach (var data in magic.QueuedData)
+                    Log.Write("  - {0}", data.subjectID);
+            }
+        }
+
+
         private void RenderOptions(int winid)
         {
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
@@ -81,6 +131,12 @@ namespace ScienceAlert
 
                 if (GUILayout.Button("Log Onboard ScienceData", GUILayout.ExpandWidth(true)))
                     DumpScienceData();
+
+                if (GUILayout.Button("Log Current Eva SitID", GUILayout.ExpandWidth(true)))
+                    CurrentSituationEva();
+
+                if (GUILayout.Button("Onboard Transmitters", GUILayout.ExpandWidth(true)))
+                    TransmitterCheck();
 
             GUILayout.EndVertical();
         }

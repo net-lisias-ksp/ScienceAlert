@@ -54,7 +54,7 @@ namespace ScienceAlert
                         {
                             source.PlayOneShot(clip, GameSettings.UI_VOLUME);
                             lastPlayed = Time.realtimeSinceStartup;
-                            Log.Debug("PlayableSound: played at {0}, next earlier play is at {1} (minDelay is {2})", lastPlayed, lastPlayed + settings.MinDelay, settings.MinDelay);
+                            Log.Debug("PlayableSound: played at {0}, next available at {1} (minDelay is {2})", lastPlayed, lastPlayed + settings.MinDelay, settings.MinDelay);
                             return true;
                         }
                         else
