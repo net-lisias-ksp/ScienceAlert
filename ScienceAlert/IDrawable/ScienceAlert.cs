@@ -315,6 +315,8 @@ namespace ScienceAlert
         // animation and audio effects from experiment observers
         EffectController effects;
 
+        // cleans up biome maps
+        BiomeFilter biomeFilter;
 
         // experiment text related
         private float maximumTextLength = float.NaN;
@@ -339,6 +341,7 @@ namespace ScienceAlert
 
             effects = new EffectController(this); // requires toolbar button to exist
             optionsWindow = new OptionsWindow(effects.AudioController);
+            biomeFilter = gameObject.AddComponent<BiomeFilter>();
 
             // set up coroutines
             rebuilder = RebuildObserverList();
@@ -466,7 +469,7 @@ namespace ScienceAlert
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 if (expid != "evaReport") // evaReport is a special case
-                    observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), expid));
+                    observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, expid));
 
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless
@@ -477,7 +480,7 @@ namespace ScienceAlert
             // Observer type that will account for these changes and any others
             // that might not necessarily trigger a VesselModified event
             if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
-                observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport")));
+                observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter));
 
             observers.OrderBy(obs => obs.ExperimentTitle);
 
@@ -739,7 +742,7 @@ namespace ScienceAlert
                 }
                 else if (!DebugOpen)
                 {
-                    mainButton.Drawable = new DebugWindow(this);
+                    mainButton.Drawable = new DebugWindow(this, biomeFilter);
                     UpdateMenuState();
                 }
             }

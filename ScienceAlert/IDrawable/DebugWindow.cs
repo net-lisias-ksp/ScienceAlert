@@ -35,11 +35,12 @@ namespace ScienceAlert
         private readonly int windowId = UnityEngine.Random.Range(0, int.MaxValue);
         private Rect windowRect = new Rect(0, 0, 324, Screen.height / 5);
         ScienceAlert indicator;
+        BiomeFilter biomeFilter;
 
-
-        internal DebugWindow(ScienceAlert ind)
+        internal DebugWindow(ScienceAlert ind, BiomeFilter filter)
         {
             indicator = ind;
+            biomeFilter = filter;
         }
 
 
@@ -92,7 +93,7 @@ namespace ScienceAlert
             var biome = string.Empty;
             
             if (ResearchAndDevelopment.GetExperiment("evaReport").BiomeIsRelevantWhile(expSituation))
-                biome = ExperimentObserver.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad); 
+               biome = biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad); 
 
             var subject = ResearchAndDevelopment.GetExperimentSubject(ResearchAndDevelopment.GetExperiment("evaReport"), expSituation, vessel.mainBody, biome);
 

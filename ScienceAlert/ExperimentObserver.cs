@@ -44,16 +44,17 @@ namespace ScienceAlert
         protected StorageCache storage;                     // Represents possible storage locations on the vessel
         protected Settings.ExperimentSettings settings;     // settings for this experiment
         protected string lastAvailableId;                   // Id of the last time the experiment was available
-
+        protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
 
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
 
 
-        public ExperimentObserver(StorageCache cache, Settings.ExperimentSettings expSettings, string expid)
+        public ExperimentObserver(StorageCache cache, Settings.ExperimentSettings expSettings, BiomeFilter filter, string expid)
         {
             settings = expSettings;
+            biomeFilter = filter;
 
             experiment = ResearchAndDevelopment.GetExperiment(expid);
 
@@ -153,7 +154,7 @@ namespace ScienceAlert
                     //
                     // Supplying an empty string if the biome doesn't matter seems to work
                     if (experiment.BiomeIsRelevantWhile(experimentSituation))
-                        biome = GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad); // vessel.mainBody.BiomeMap.GetAtt(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad).name;
+                        biome = biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad); 
 
                     var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
                     ScienceData data;
@@ -370,21 +371,7 @@ namespace ScienceAlert
         #region helpers
 
 
-        /// <summary>
-        /// A little helper to determine biome.  It's not a straight biome
-        /// map check: KSC, Launchpad and the runway are considered to be
-        /// biomes when landed on yet have no entry in the biome map.
-        /// Vessel.landedAt seems to be updated correctly when it's in
-        /// these locations so we'll rely on that when it has a value.
-        /// </summary>
-        /// <param name="latRad"></param>
-        /// <param name="lonRad"></param>
-        /// <returns></returns>
-        public static string GetBiome(double latRad, double lonRad)
-        {
-            var vessel = FlightGlobals.ActiveVessel;
-            return string.IsNullOrEmpty(vessel.landedAt) ? vessel.mainBody.BiomeMap.GetAtt(latRad, lonRad).name : vessel.landedAt;
-        }
+
 
         #endregion
     }
@@ -408,8 +395,8 @@ namespace ScienceAlert
         /// <summary>
         /// Constructor
         /// </summary>
-        public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings)
-            : base(cache, settings, "evaReport")
+        public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter)
+            : base(cache, settings, filter, "evaReport")
         {
 
         }

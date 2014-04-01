@@ -57,6 +57,7 @@
       <Link>Tools\ResourceUtil.cs</Link>
     </Compile>
     <Compile Include="AudioController.cs" />
+    <Compile Include="BiomeFilter.cs" />
     <Compile Include="IDrawable\DebugWindow.cs" />
     <Compile Include="IDrawable\ScienceAlert.cs" />
     <Compile Include="ExperimentObserver.cs" />
