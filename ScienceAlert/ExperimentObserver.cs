@@ -258,7 +258,18 @@ namespace ScienceAlert
             if (deployable)
             {
                 Log.Debug("Deploying experiment module on part {0}", deployable.part.ConstructID);
-                deployable.DeployExperiment();
+
+                try
+                {
+                    // Get the most-derived type and use its DeployExperiment so we don't
+                    // skip any plugin-derived versions
+                    deployable.GetType().InvokeMember("DeployExperiment", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.IgnoreReturn | System.Reflection.BindingFlags.InvokeMethod, null, deployable, null);
+                } catch (Exception e)
+                {
+                    Log.Error("Failed to invoke \"DeployExperiment\" using GetType(), falling back to base type after encountering exception {0}", e);
+                    deployable.DeployExperiment();
+                }
+
                 return true;
             }
             else
