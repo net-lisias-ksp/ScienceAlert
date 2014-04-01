@@ -10,6 +10,16 @@ using ResourceTools;
 
 namespace ScienceAlert
 {
+    /// <summary>
+    /// Filtering at the edges of the original biome maps can cause some
+    /// inaccurate biome reporting. That's not good, because it'll trick
+    /// experiment observers into believing they entered a new situation
+    /// but only for a split second.
+    /// 
+    /// To solve the problem, we'll work it backwards: query the original
+    /// map by converting from texture coordinates into lat and lon, and
+    /// refer to this stored texture whenever possible to identify biomes
+    /// </summary>
     internal class BiomeFilter : MonoBehaviour
     {
         private CelestialBody current;      // which CelestialBody we've got a cached biome map texture for
@@ -67,8 +77,8 @@ namespace ScienceAlert
                 // CB's original biome map
                 //
                 // note: this is a simple equirectangular projection,
-                // although for some reason, KSP translates its biome 
-                // maps by 90 degrees horizontally?
+                // although for some reason, KSP offsets its biome 
+                // maps by 90 degrees
 
                 lonRad -= Mathf.PI * 0.5f; 
                 if (lonRad < 0d) lonRad += Mathf.PI * 2d;
