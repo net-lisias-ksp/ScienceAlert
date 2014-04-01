@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.0 (first release)                                                *
+ * Version 1.1                                                *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -19,6 +19,28 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ****************************************************************************
+ * Changelog
+ * 1.1
+ *      Added EVA condition warning
+ *      
+ *      Fixed issue where base function of ModuleScienceExperiment was called
+ *          instead of the correct one
+ *          
+ *      Fixed issue where ScienceAlert would detect the wrong biome and flash
+ *          the icon at the incorrect time
+ *          
+ *      Stock experiments no longer have "Assume onboard" option display
+ *          by default (to reduce clutter)
+ *          
+ *      Temporarily added a debug menu, accessable using default settings by
+ *          middle-mouse clicking the toolbar button
+ *          
+ *      Available experiment menu polished a little; will now appear in the
+ *          same location consistently
+ * 
+ * 1.0
+ *      First public release
  *****************************************************************************/
 
 //#define PROFILE
@@ -32,7 +54,7 @@ using ResourceTools;
 
 // TODO: overall sound mute
 
-// TODO: unfiltered biome map sometimes results in incorrect biome being selected
+// TODO: Unnecessary ExperimentObserver rebuilding (vessel modified etc)
 
 // TODO: manually selected transmitters ignore MagicTransmitter
 //          further thought: who really does this?  will think on it more
@@ -320,6 +342,8 @@ namespace ScienceAlert
 
         // experiment text related
         private float maximumTextLength = float.NaN;
+        private Rect experimentButtonRect = new Rect(0, 0, 0, 0);
+        private int experimentMenuID = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
 
 // ----------------------------------------------------------------------------
 //             --> Implementation of ScienceAlert <--
@@ -349,6 +373,7 @@ namespace ScienceAlert
         }
 
 
+
         public void OnDestroy()
         {
             Log.Debug("ScienceAlert destroyed");
@@ -356,12 +381,16 @@ namespace ScienceAlert
 
         }
 
+
+
         public void OnGUI()
         {
             if (float.IsNaN(maximumTextLength) && observers.Count > 0 && rebuilder == null)
             {
                 // construct the experiment observer list ...
                 maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle)).x);
+                experimentButtonRect.width = maximumTextLength + 5;
+
                 Log.Debug("MaximumTextLength = {0}", maximumTextLength);
 
                 // note: we can't use CalcSize anywhere but inside OnGUI.  I know
@@ -482,7 +511,7 @@ namespace ScienceAlert
             if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
                 observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter));
 
-            observers.OrderBy(obs => obs.ExperimentTitle);
+            observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
 
             watcher = UpdateObservers();
         }
@@ -575,8 +604,8 @@ namespace ScienceAlert
             if (float.IsNaN(maximumTextLength))
                 return Vector2.zero; // text length isn't set yet
 
-            float necessaryHeight = 32f * observers.Count;
-            float necessaryWidth = maximumTextLength;
+            float maxHeight = 32f * observers.Count;
+            float necessaryHeight = 32f * observers.Count(obs => obs.Available);
 
             if (necessaryHeight < 31.9999f)
             {
@@ -588,7 +617,22 @@ namespace ScienceAlert
 
             GUI.skin = Settings.Skin;
 
-            GUILayout.BeginArea(new Rect(position.x, position.y, necessaryWidth, necessaryHeight));
+            experimentButtonRect.x = position.x;
+            experimentButtonRect.y = position.y;
+            experimentButtonRect.height = necessaryHeight;
+
+            GUILayout.Window(experimentMenuID, experimentButtonRect, DrawButtonMenu, "Available Experiments");
+
+
+            GUI.skin = old;
+
+            return new Vector2(experimentButtonRect.width, maxHeight);
+        }
+
+
+        private void DrawButtonMenu(int winid)
+        {
+            //GUILayout.BeginArea(new Rect(position.x, position.y, necessaryWidth, necessaryHeight));
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
 
             foreach (var observer in observers)
@@ -604,13 +648,8 @@ namespace ScienceAlert
                     }
                 }
             GUILayout.EndVertical();
-            GUILayout.EndArea();
-
-            GUI.skin = old;
-
-            return new Vector2(necessaryWidth, necessaryHeight);
+            //GUILayout.EndArea();
         }
-
 
         public void OnToolbarClick(ClickEvent ce)
         {
