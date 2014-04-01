@@ -75,11 +75,10 @@ namespace ScienceAlert
             var oldSkin = GUI.skin;
             GUI.skin = Settings.Skin;
 
-                //windowRect = new Rect(position.x, position.y, 256, Screen.height / 5 * 3);
                 windowRect.x = position.x;
                 windowRect.y = position.y;
 
-                GUILayout.Window(windowId, windowRect, RenderControls, "Experiment Indicator");
+                GUILayout.Window(windowId, windowRect, RenderControls, "Science Alert");
 
             GUI.skin = oldSkin;
 

@@ -258,7 +258,7 @@ namespace ScienceAlert
             StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
             EvaAtmospherePressureWarnThreshold = ConfigUtil.Parse<double>(general, "EvaAtmosPressureThreshold", 0.00035);
             EvaAtmosphereVelocityWarnThreshold = ConfigUtil.Parse<float>(general, "EvaAtmosVelocityThreshold", 30);
-
+            DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
 
             Log.Debug("SaveFlightSessionManeuverNodes = {0}", SaveFlightSessionManeuverNodes);
             Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
@@ -340,6 +340,7 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
                 general.AddValue("EvaAtmosPressureThreshold", EvaAtmospherePressureWarnThreshold);
                 general.AddValue("EvaAtmosVelocityThreshold", EvaAtmosphereVelocityWarnThreshold);
+                general.AddValue("DebugMode", DebugMode);
 
             #endregion
 
@@ -385,6 +386,7 @@ Re-saving config with default values for missing experiments.");
         public float StarFlaskFrameRate { get; private set; }
         public double EvaAtmospherePressureWarnThreshold { get; private set; }
         public float EvaAtmosphereVelocityWarnThreshold { get; private set; }
+        public bool DebugMode { get; private set; }
 
         #endregion
 

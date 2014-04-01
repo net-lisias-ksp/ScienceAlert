@@ -624,11 +624,19 @@ namespace ScienceAlert
                 else OptionsOpen = false; // if options is open, left click will close it.  Another click
                                             // should be required to open the menu
             }
-            else // right click
+            else // right or middle click
             {
-                Log.Debug("Toolbar right clicked");
+                if (ce.MouseButton == 2 && Settings.Instance.DebugMode) // middle
+                {
+                    Log.Debug("DebugMode enabled, middle-click on toolbar button. Opening debug menu.");
+                    DebugOpen = !DebugOpen;
+                }
+                else
+                {
+                    Log.Debug("Toolbar right or middle clicked");
 
-                OptionsOpen = !OptionsOpen;
+                    OptionsOpen = !OptionsOpen;
+                }
             }
         }
 
@@ -716,6 +724,26 @@ namespace ScienceAlert
             }
         }
 
+        private bool DebugOpen
+        {
+            get
+            {
+                return mainButton.Drawable != null && mainButton.Drawable is DebugWindow;
+            }
+            set
+            {
+                if (!value)
+                {
+                    if (DebugOpen)
+                        mainButton.Drawable = null;
+                }
+                else if (!DebugOpen)
+                {
+                    mainButton.Drawable = new DebugWindow();
+                    UpdateMenuState();
+                }
+            }
+        }
 
 #endregion
 
