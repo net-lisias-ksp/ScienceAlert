@@ -91,9 +91,10 @@ namespace ScienceAlert
             var vessel = FlightGlobals.ActiveVessel;
             var expSituation = indicator.VesselSituationToExperimentSituation();
             var biome = string.Empty;
-            
+
             if (ResearchAndDevelopment.GetExperiment("evaReport").BiomeIsRelevantWhile(expSituation))
-               biome = biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad); 
+                if (!biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
+                    biome = "[bad biome result]";
 
             var subject = ResearchAndDevelopment.GetExperimentSubject(ResearchAndDevelopment.GetExperiment("evaReport"), expSituation, vessel.mainBody, biome);
 

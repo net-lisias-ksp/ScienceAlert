@@ -33,15 +33,27 @@ namespace ScienceAlert
     /// experiment observers into believing they entered a new situation
     /// but only for a split second.
     /// 
-    /// To solve the problem, we'll work it backwards: query the original
-    /// map by converting from texture coordinates into lat and lon, and
-    /// refer to this stored texture whenever possible to identify biomes
+    /// This class will generate a "clean" version with no aliasing. The
+    /// previous version simply queried the cleaned up version whenever
+    /// it was available. However, while this avoids "bogus" results
+    /// (where the alias color between shores and grasslands matches something
+    /// that's incorrect, tundra for instance) it isn't very good at low
+    /// altitudes.
+    /// 
+    /// In 1.1, I'm switching back to the stock GetAttr default function
+    /// but we'll add a filter by checking against the clean map within
+    /// a certain radius for its result. If we don't get any matches, the
+    /// GetAttr value is probably invalid and should be discarded.
     /// </summary>
     internal class BiomeFilter : MonoBehaviour
     {
+        private const int HALF_SEARCH_DIMENSIONS = 3;    // box around the point on the biome map to
+                                                    // use to verify biome map results
+
         private CelestialBody current;      // which CelestialBody we've got a cached biome map texture for
         private Texture2D projectedMap;     // this is the cleaned biome map of the current CelestialBody
         private System.Collections.IEnumerator projector;   // this coroutine constructs the projectedMap from current CelestialBody
+
 
         internal BiomeFilter()
         {
@@ -64,62 +76,82 @@ namespace ScienceAlert
         }
 
 
-        /// <summary>
-        /// A little helper to determine biome.  It's not a straight biome
-        /// map check: KSC, Launchpad and the runway are considered to be
-        /// biomes when landed on yet have no entry in the biome map.
-        /// Vessel.landedAt seems to be updated correctly when it's in
-        /// these locations so we'll rely on that when it has a value.
-        /// 
-        /// This version will use a clean reverse-projected map of
-        /// biomes to avoid inaccuracies if it's available. In the meantime,
-        /// it will query the BiomeMap of the active vessel's main body
-        /// directly.
-        /// </summary>
-        /// <param name="latRad"></param>
-        /// <param name="lonRad"></param>
-        /// <returns></returns>
-        public string GetBiome(double latRad, double lonRad)
-        {
-            var vessel = FlightGlobals.ActiveVessel;
 
-            if (!IsBusy && string.IsNullOrEmpty(vessel.landedAt))
-            {
+        public bool GetBiome(double latRad, double lonRad, out string biome)
+        {
 #if DEBUG
                 if (FlightGlobals.ActiveVessel.mainBody != current)
                     Log.Error("BiomeFilter.GetBome body mismatch: active {0} does not match cached {1}!", FlightGlobals.currentMainBody, current);
 #endif
 
-                // projected map is complete; let's use that instead of the
-                // CB's original biome map
-                //
-                // note: this is a simple equirectangular projection,
-                // although for some reason, KSP offsets its biome 
-                // maps by 90 degrees
+            var vessel = FlightGlobals.ActiveVessel;
+            biome = string.Empty;
 
-                lonRad -= Mathf.PI * 0.5f; 
-                if (lonRad < 0d) lonRad += Mathf.PI * 2d;
-                lonRad %= Mathf.PI * 2d;
+            // vessel.landedAt gets priority since there are some special
+            // factors it will take into account for us; specifically, that
+            // the vessel is on the launchpad, ksc, etc which are treated
+            // as biomes even though they don't exist on the biome map.
+            if (!string.IsNullOrEmpty(vessel.landedAt))
+            {
+                biome = vessel.landedAt;
+                return true;
+            }
+            else
+            {
+                // use the stock function to get an initial possibility
+                var possibleBiome = vessel.mainBody.BiomeMap.GetAtt(latRad, lonRad);
 
-                float u = (float)(lonRad / (Mathf.PI * 2));
-			    float v = (float)(latRad / Mathf.PI) + 0.5f;
 
-                Color c = projectedMap.GetPixel((int)(u * projectedMap.width), (int)(v * projectedMap.height));
-                CBAttributeMap.MapAttribute attr = current.BiomeMap.defaultAttribute;
-
-                if (attr.mapColor != c)
-                    attr = current.BiomeMap.Attributes.SingleOrDefault(mapAttr => mapAttr.mapColor == c);
-
-                if (attr == null)
+                // if the cleaned map is finished, let's test the validity
+                // of the result by checking some surrounding areas
+                if (!IsBusy)
                 {
-                    Log.Error("Did not find a match for color {0} on body {1}", c.ToString(), current.name);
+                    if (VerifyBiomeResult(latRad, lonRad, possibleBiome))
+                    {
+                        // looks good!
+                        biome = possibleBiome.name;
+                        return true;
+                    }
+                    else
+                    {
+#if DEBUG
+                        Log.Error("Biome '{0}' is probably an error", possibleBiome.name);
+#endif
+                        
+                        return false;
+                    }
                 }
                 else
                 {
-                    return attr.name;
+                    // not finished building the cleaned map so we'll
+                    // just use what we have
+                    biome = possibleBiome.name;
+                    return true;
                 }
             }
-            return string.IsNullOrEmpty(vessel.landedAt) ? vessel.mainBody.BiomeMap.GetAtt(latRad, lonRad).name : vessel.landedAt;
+        }
+
+
+        private bool VerifyBiomeResult(double lat, double lon, CBAttributeMap.MapAttribute target)
+        {
+            lon -= Mathf.PI * 0.5f;
+            if (lon < 0d) lon += Mathf.PI * 2d;
+            lon %= Mathf.PI * 2d;
+
+            int x_center = (int)Math.Round(projectedMap.width * (float)(lon / (Mathf.PI * 2)), 0);
+            int y_center = (int)Math.Round(projectedMap.height * ((float)(lat / Mathf.PI) + 0.5f), 0);
+
+            for (int y = y_center - HALF_SEARCH_DIMENSIONS; y < y_center + HALF_SEARCH_DIMENSIONS; ++y)
+            for (int x = x_center - HALF_SEARCH_DIMENSIONS; x < x_center + HALF_SEARCH_DIMENSIONS; ++x)
+            {
+                Color c = projectedMap.GetPixel(x, y);
+
+                if (c == target.mapColor)
+                    return true; // we have a match, no need to look further
+            }
+
+            Log.Error("VerifyBiomeResult: '{0}' is probably bogus", target.name);
+            return false;
         }
 
 
@@ -162,6 +194,7 @@ namespace ScienceAlert
             current = newBody;
             projectedMap = new Texture2D(current.BiomeMap.Map.width, current.BiomeMap.Map.height, TextureFormat.ARGB32, false);
             projectedMap.filterMode = FilterMode.Point;
+
 
             yield return null;
 

@@ -26,9 +26,6 @@ using DebugTools;
 namespace ScienceAlert
 {
     using ScienceModuleList = List<ModuleScienceExperiment>;
-    //
-    //using TransmitterList = List<IScienceDataTransmitter>;
-    
 
 
     /// <summary>
@@ -44,6 +41,7 @@ namespace ScienceAlert
         protected StorageCache storage;                     // Represents possible storage locations on the vessel
         protected Settings.ExperimentSettings settings;     // settings for this experiment
         protected string lastAvailableId;                   // Id of the last time the experiment was available
+        protected string lastBiomeQuery;                    // the last good biome result we had
         protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
 
 /******************************************************************************
@@ -154,7 +152,14 @@ namespace ScienceAlert
                     //
                     // Supplying an empty string if the biome doesn't matter seems to work
                     if (experiment.BiomeIsRelevantWhile(experimentSituation))
-                        biome = biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad); 
+                        if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
+                        {
+                            lastBiomeQuery = biome;
+                        }
+                        else
+                        {
+                            biome = lastBiomeQuery; // we're almost certainly still in the old area then
+                        }
 
                     var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
                     ScienceData data;

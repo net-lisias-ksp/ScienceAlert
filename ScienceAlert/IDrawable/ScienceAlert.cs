@@ -21,6 +21,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.2
+ *      Fixed a serious issue: "stop on discovery" could sometimes affect
+ *          orbital parameters, especially at high warp
+ *          
+ *      Further tweaked biome detection. There should no longer be any
+ *          instances of incorrect science alerts
+ * 
  * 1.1
  *      Added EVA condition warning
  *      
@@ -52,9 +59,6 @@ using Toolbar;
 using DebugTools;
 using ResourceTools;
 
-// TODO: overall sound mute
-
-// TODO: Unnecessary ExperimentObserver rebuilding (vessel modified etc)
 
 // TODO: manually selected transmitters ignore MagicTransmitter
 //          further thought: who really does this?  will think on it more
@@ -63,6 +67,7 @@ using ResourceTools;
 
 // BUG: if an eva report is stored and the player goes on eva in the same
 // situation, ScienceAlert reports that an eva report is available
+//      haven't been able to verify this one
 
 
 
@@ -442,14 +447,22 @@ namespace ScienceAlert
 
         
         
-
+        /// <summary>
+        /// Something about the ship has changed. If it was say 
+        /// an experiment being ripped off by a collision, the observer
+        /// watching that experiment should probably handle that.
+        /// </summary>
+        /// <param name="vessel"></param>
         public void OnVesselWasModified(Vessel vessel)
         {
             if (vessel == FlightGlobals.ActiveVessel)
             {
-                Log.Debug("OnVesselWasModified invoked, rebuilding observer list");
-                observers.Clear();
-                rebuilder = RebuildObserverList();
+                //Log.Debug("OnVesselWasModified invoked, rebuilding observer list");
+                //observers.Clear();
+                //rebuilder = RebuildObserverList();
+
+                foreach (var obs in observers)
+                    obs.Rebuild();
             }
         }
 
@@ -570,7 +583,7 @@ namespace ScienceAlert
                         if (observer.StopWarpOnDiscovery)
                             if (TimeWarp.CurrentRateIndex > 0)
                             {
-                                // Simply setting warp to zero causes some kind of
+                                // Simply setting warp index to zero causes some kind of
                                 // accuracy problem that can seriously affect the
                                 // orbit of the vessel.
                                 //
