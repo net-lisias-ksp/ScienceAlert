@@ -66,7 +66,7 @@ namespace ScienceAlert
                     else
                     {
                         // too early for this sound
-                        Log.Verbose("Too early to play {0}", clip.name);
+                        //Log.Verbose("Too early to play {0}", clip.name);
                         return false;
                     }
 

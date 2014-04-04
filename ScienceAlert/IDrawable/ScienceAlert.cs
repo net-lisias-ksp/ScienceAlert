@@ -518,6 +518,24 @@ namespace ScienceAlert
 
 
 
+        //private System.Collections.IEnumerator StopWarp()
+        //{
+        //    // if we're timewarping, resume normal time if that setting
+        //    // was used
+        //    if (TimeWarp.CurrentRateIndex > 0)
+        //    {
+        //        FlightDriver.SetPause(true);
+        //        yield return new WaitForFixedUpdate();
+
+        //        TimeWarp.SetRate(0, true);
+        //        yield return new WaitForFixedUpdate();
+
+        //        FlightDriver.SetPause(false);
+        //    }
+
+        //    yield break;
+        //}
+
         /// <summary>
         /// Update state of all experiment observers.  If their status has 
         /// changed, UpdateStatus will return true.
@@ -551,7 +569,20 @@ namespace ScienceAlert
                         // was used
                         if (observer.StopWarpOnDiscovery)
                             if (TimeWarp.CurrentRateIndex > 0)
+                            {
+                                // Simply setting warp to zero causes some kind of
+                                // accuracy problem that can seriously affect the
+                                // orbit of the vessel.
+                                //
+                                // to avoid this, we'll take a snapshot of the orbit
+                                // pre-warp and then apply it again after we've changed
+                                // the warp rate
+                                OrbitSnapshot snap = new OrbitSnapshot(FlightGlobals.ActiveVessel.GetOrbitDriver().orbit);
                                 TimeWarp.SetRate(0, true);
+                                FlightGlobals.ActiveVessel.GetOrbitDriver().orbit = snap.Load();
+                                FlightGlobals.ActiveVessel.GetOrbitDriver().orbit.UpdateFromUT(Planetarium.GetUniversalTime());
+                            }
+
 
                         effects.OnExperimentAvailable(observer);
 
