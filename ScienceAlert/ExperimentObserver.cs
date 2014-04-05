@@ -80,10 +80,8 @@ namespace ScienceAlert
         /// </summary>
         public virtual void Rebuild()
         {
-            Log.Verbose("ExperimentObserver ({0}): rebuilding...", ExperimentTitle);
             modules = new ScienceModuleList();
             
-
             if (FlightGlobals.ActiveVessel == null)
                 return;
 

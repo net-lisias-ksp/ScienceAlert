@@ -21,6 +21,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.3
+ *      Log spam due to vessel modification reduced
+ * 
+ * 
+ * 
  * 1.2
  *      Fixed a serious issue: "stop on discovery" could sometimes affect
  *          orbital parameters, especially at high warp
@@ -461,8 +466,10 @@ namespace ScienceAlert
                 //observers.Clear();
                 //rebuilder = RebuildObserverList();
 
-                foreach (var obs in observers)
-                    obs.Rebuild();
+                Log.Write("Vessel was modified; refreshing observer caches...");
+                    foreach (var obs in observers)
+                        obs.Rebuild();
+                Log.Write("Done");
             }
         }
 
@@ -499,6 +506,8 @@ namespace ScienceAlert
         /// <returns></returns>
         private System.Collections.IEnumerator RebuildObserverList()
         {
+            Log.Write("Rebuilding observer list...");
+
             observers.Clear();
             maximumTextLength = float.NaN;
 
@@ -527,6 +536,8 @@ namespace ScienceAlert
             observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
 
             watcher = UpdateObservers();
+
+            Log.Write("Observer list rebuilt");
         }
 
 

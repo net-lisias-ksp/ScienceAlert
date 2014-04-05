@@ -147,23 +147,6 @@ namespace ScienceAlert
 #endif
 
             toBeTransmitted[transmitter].AddRange(data);
-
-            //// if all transmitters are busy, we shouldn't have been
-            //// sent a transmit request at all! We can handle it though, by
-            //// waiting until one of the transmitters becomes available
-            //if (transmitter.IsBusy() || !transmitter.CanTransmit())
-            //{
-            //    toBeTransmitted[transmitter].AddRange(data);
-            //}
-            //else
-            //{
-            //    if (!transmitter.IsBusy())
-            //    {
-            //        realTransmitters[transmitter].Clear();
-            //        realTransmitters[transmitter].AddRange(data);
-            //        transmitter.TransmitData(data);
-            //    }
-            //}
         }
 
 
@@ -188,15 +171,6 @@ namespace ScienceAlert
                 potentials = potentials.OrderBy(potential => ScienceUtil.GetTransmitterScore(potential)).ToList();
 
                 QueueTransmission(data, potentials.First());
-
-                
-                //if (!potentials.First().IsBusy())
-                //    realTransmitters[potentials.First()].Clear();
-
-                //realTransmitters[potentials.First()].AddRange(data);
-                //potentials.First().TransmitData(data);
-
-                //Log.Debug("Sent data to transmitter {0}, total queued {1}", potentials.First().ToString(), QueuedData.Count);
             }
             else Log.Error("MagicDataTransmitter: Did not find any real transmitters");
         }

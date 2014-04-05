@@ -26,7 +26,7 @@ namespace ScienceAlert
     internal class AudioController
     {
         private Dictionary<string /* sound name */, PlayableSound> sounds = new Dictionary<string, PlayableSound>();
-        private const float LOADING_TIMEOUT = 3f;
+        private const float LOADING_TIMEOUT = 5f;
         
         private GameObject gameObject;
 
@@ -47,6 +47,9 @@ namespace ScienceAlert
 
             public bool Play()
             {
+                if (!source.gameObject.activeSelf)
+                    source.gameObject.SetActive(true);
+
                 if (settings.Enabled)
                     if (Time.realtimeSinceStartup - lastPlayed > settings.MinDelay)
                     {
@@ -159,9 +162,10 @@ namespace ScienceAlert
             // http://docs.unity3d.com/Documentation/ScriptReference/WWW.html
             if (Application.platform == RuntimePlatform.WindowsPlayer)
             {
-                path = "file:///" + path;
+                if (!path.StartsWith("file:///"))
+                    path = "file:///" + path;
             }
-            else path = "file://" + path;
+            else if (!path.StartsWith("file://")) path = "file://" + path;
 
             Log.Debug("sound path: {0}, escaped {1}", path, System.Uri.EscapeUriString(path));
 
