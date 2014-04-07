@@ -26,6 +26,8 @@
  *          multipliers into account correctly which could result in
  *          incorrect alerts
  *          
+ *      Added a global warp setting option
+ *      
  *      Log spam due to vessel modification reduced
  * 
  *      Experiments that rely on custom code to determine availability
@@ -607,21 +609,22 @@ namespace ScienceAlert
                     {
                         // if we're timewarping, resume normal time if that setting
                         // was used
-                        if (observer.StopWarpOnDiscovery)
-                            if (TimeWarp.CurrentRateIndex > 0)
-                            {
-                                // Simply setting warp index to zero causes some kind of
-                                // accuracy problem that can seriously affect the
-                                // orbit of the vessel.
-                                //
-                                // to avoid this, we'll take a snapshot of the orbit
-                                // pre-warp and then apply it again after we've changed
-                                // the warp rate
-                                OrbitSnapshot snap = new OrbitSnapshot(FlightGlobals.ActiveVessel.GetOrbitDriver().orbit);
-                                TimeWarp.SetRate(0, true);
-                                FlightGlobals.ActiveVessel.GetOrbitDriver().orbit = snap.Load();
-                                FlightGlobals.ActiveVessel.GetOrbitDriver().orbit.UpdateFromUT(Planetarium.GetUniversalTime());
-                            }
+                        if (observer.StopWarpOnDiscovery || Settings.Instance.GlobalWarp == Settings.WarpSetting.GlobalOn)
+                            if (Settings.Instance.GlobalWarp != Settings.WarpSetting.GlobalOff)
+                                if (TimeWarp.CurrentRateIndex > 0)
+                                {
+                                    // Simply setting warp index to zero causes some kind of
+                                    // accuracy problem that can seriously affect the
+                                    // orbit of the vessel.
+                                    //
+                                    // to avoid this, we'll take a snapshot of the orbit
+                                    // pre-warp and then apply it again after we've changed
+                                    // the warp rate
+                                    OrbitSnapshot snap = new OrbitSnapshot(FlightGlobals.ActiveVessel.GetOrbitDriver().orbit);
+                                    TimeWarp.SetRate(0, true);
+                                    FlightGlobals.ActiveVessel.GetOrbitDriver().orbit = snap.Load();
+                                    FlightGlobals.ActiveVessel.GetOrbitDriver().orbit.UpdateFromUT(Planetarium.GetUniversalTime());
+                                }
 
 
                         effects.OnExperimentAvailable(observer);

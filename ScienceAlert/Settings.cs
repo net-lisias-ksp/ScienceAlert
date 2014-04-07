@@ -32,6 +32,12 @@ namespace ScienceAlert
         // Singleton pattern
         private static Settings instance;
 
+        public enum WarpSetting : int
+        {
+            ByExperiment = 0,
+            GlobalOn,
+            GlobalOff
+        }
 
         // per-experiment settings
         public class ExperimentSettings
@@ -259,6 +265,8 @@ namespace ScienceAlert
             EvaAtmospherePressureWarnThreshold = ConfigUtil.Parse<double>(general, "EvaAtmosPressureThreshold", 0.00035);
             EvaAtmosphereVelocityWarnThreshold = ConfigUtil.Parse<float>(general, "EvaAtmosVelocityThreshold", 30);
             DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
+            GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
+
 
             Log.Debug("SaveFlightSessionManeuverNodes = {0}", SaveFlightSessionManeuverNodes);
             Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
@@ -341,6 +349,7 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("EvaAtmosPressureThreshold", EvaAtmospherePressureWarnThreshold);
                 general.AddValue("EvaAtmosVelocityThreshold", EvaAtmosphereVelocityWarnThreshold);
                 general.AddValue("DebugMode", DebugMode);
+                general.AddValue("GlobalWarp", GlobalWarp);
 
             #endregion
 
@@ -387,6 +396,7 @@ Re-saving config with default values for missing experiments.");
         public double EvaAtmospherePressureWarnThreshold { get; private set; }
         public float EvaAtmosphereVelocityWarnThreshold { get; private set; }
         public bool DebugMode { get; private set; }
+        public WarpSetting GlobalWarp { get; set; }
 
         #endregion
 
