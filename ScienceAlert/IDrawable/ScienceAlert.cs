@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.1                                                *
+ * Version 1.3                                                                *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -22,6 +22,10 @@
  ****************************************************************************
  * Changelog
  * 1.3
+ *      Fixed a serious issue: ScienceAlert wasn't taking science
+ *          multipliers into account correctly which could result in
+ *          incorrect alerts
+ *          
  *      Log spam due to vessel modification reduced
  * 
  *      Experiments that rely on custom code to determine availability

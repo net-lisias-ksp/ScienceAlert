@@ -117,7 +117,7 @@ namespace ScienceAlert
 
             var subject = ResearchAndDevelopment.GetExperimentSubject(ResearchAndDevelopment.GetExperiment("gravityScan"), expSituation, vessel.mainBody, biome);
 
-            Log.Warning("Current gravScan situation: {0}, science {1}", subject.id, subject.science);
+            Log.Warning("Current gravScan situation: {0}, total science {1}", subject.id, subject.science);
         }
 
 

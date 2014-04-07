@@ -102,8 +102,44 @@ namespace ScienceAlert
 
 
 
+        /// <summary>
+        /// Calculate the total science value of "known" science plus
+        /// potential science for a given ScienceSubject
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public virtual float GetScienceTotal(ScienceSubject subject, out List<ScienceData> data)
+        {
+            var found = storage.FindStoredData(subject.id);
+            data = found;
 
-        
+            if (found.Count() == 0)
+            {
+                // straight stored data
+                return subject.science;
+            }
+            else
+            {
+                // we've got at least one report we need to consider
+                float potentialScience = subject.science + ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject);
+
+                // we can consider a maximum of two reports. At least until I figure
+                // out how exactly the decay factor works or do something hacky to fake it
+                if (found.Count() > 1)
+                {
+                    // note: hacky workaround for now: just assume the third report etc
+                    // has the same value as the second. It'll overestimate but that's
+                    // better than underestimating and possibly not hitting the threshold
+                    // that would stop the player from getting spammed with alerts
+                    for (int i = 0; i < found.Count() - 1; ++i)
+                        potentialScience += ResearchAndDevelopment.GetNextScienceValue(found.First().dataAmount, subject);
+
+                    //Log.Debug("Found a second report; its approximate value is {0}", ResearchAndDevelopment.GetNextScienceValue(found.First().dataAmount, subject));
+                }
+                return potentialScience;
+            }
+        }
 
 
 
@@ -160,53 +196,37 @@ namespace ScienceAlert
                         }
 
                     var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
-                    ScienceData data = null;
-
+                    List<ScienceData> data = null;
+                    float scienceTotal = GetScienceTotal(subject, out data);
+                    Log.Debug("{0} scienceTotal = {1}, scienceCap = {2}", subject.id, scienceTotal, subject.scienceCap);
 
                     switch (settings.Filter)
                     {
                         case Settings.ExperimentSettings.FilterMethod.Unresearched:
-                            // If there's a report ready to be transmitted, the experiment
-                            // is hardly "Unresearched" in this situation
-                            Available = !storage.FindStoredData(subject.id, out data) && subject.science < 0.0005f;
-                            //Log.Debug("    - Mode: Unresearched, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
+                            // Fairly straightforward: total science + potential should be zero
+                            Available = scienceTotal < 0.0005f;
                             break;
 
                         case Settings.ExperimentSettings.FilterMethod.NotMaxed:
-                            if (storage.FindStoredData(subject.id, out data))
-                            {
-                                Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.scienceCap - 1f;
-                            }
-                            else Available = subject.science < subject.scienceCap - 1f;
-
-                            //Log.Debug("    - Mode: NotMaxed, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
+                            // <98% of science cap
+                            Available = scienceTotal < subject.scienceCap * 0.98;
                             break;
 
                         case Settings.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
                             // important note for these last two filters: we can only accurately
-                            // predict the NEXT science report value. 
-                            //
-                            // I've decided to simply only account for the "next" report
-                            // and ignore any instances of multiple reports on one vessel.
-                            if (storage.FindStoredData(subject.id, out data))
-                            {
-                                Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.science * 0.5f;
-                            }
-                            else Available = subject.science < subject.scienceCap * 0.5f;
-
-                            //Log.Debug("Subject.science = {0}, scienceCap = {1}, next science = {2}", subject.science, subject.scienceCap, data != null ? ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject).ToString() : "(unk)");
+                            // predict science for up to two of the same reports. After that,
+                            // it'll be highly overestimated
+                            Available = scienceTotal < subject.scienceCap * 0.5f;
                             break;
 
                         case Settings.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
-                            if (storage.FindStoredData(subject.id, out data))
-                            {
-                                Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.scienceCap * 0.9f;
-                            }
-                            else Available = subject.science < subject.scienceCap * 0.9f;
+                            Available = scienceTotal < subject.scienceCap * 0.9f;
                             break;
 
-                        default:
+                        default: // this should NEVER occur, but nice to have a safety measure
+                                 // in place if I add a filter option and forget to add its logic
                             Log.Error("Unrecognized experiment filter!");
+                            data = new List<ScienceData>(); 
                             break;
                     }
                     
@@ -219,10 +239,13 @@ namespace ScienceAlert
 
                         if (Available != lastStatus && Available)
                         {
-                            Log.Write("Experiment {0} just became available for possible {1} science! (Cap is {2}, threshold is {3}, current sci is {4})", lastAvailableId, data != null ? ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject).ToString() : "(no previous data)", subject.scienceCap, settings.Filter, data == null ? subject.science : (subject.science + ResearchAndDevelopment.GetScienceValue(data.dataAmount, subject)));
+                            Log.Write("Experiment {0} just became available for possible {1} science! (Cap is {2}, threshold is {3}, current sci is {4})", lastAvailableId, scienceTotal - subject.science, subject.scienceCap, settings.Filter, subject.science);
 
-                            if (data != null)
-                                Log.Write("Raw dataAmount = {0}, nextScience = {1}", data.dataAmount, ResearchAndDevelopment.GetScienceValue(data.dataAmount, subject));
+                            if (data.Count() > 0)
+                            {
+                                Log.Write("Raw dataAmount = {0}, nextScience = {1}", data.First().dataAmount, ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject));
+                                Log.Write("Total science value = {0}", GetScienceTotal(subject, out data));
+                            }
                         }
                     }
                 }

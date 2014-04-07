@@ -304,38 +304,25 @@ namespace ScienceAlert
         /// <param name="subjectid"></param>
         /// <param name="refData"></param>
         /// <returns></returns>
-        public bool FindStoredData(string subjectid, out ScienceData refData)
+        public List<ScienceData> FindStoredData(string subjectid)
         {
-            //Log.Debug("Searching for {0}", subjectid);
+            var found = new List<ScienceData>();
 
             foreach (var container in storage)
                 foreach (var data in container.GetData())
-                {
-                    //Log.Debug("Comparing {0} to {1}", subjectid, data.subjectID);
-
                     if (data.subjectID == subjectid)
-                    {
-                        refData = data;
-                        return true;
-                    }
-                }
-
+                        found.Add(data);
+                    
 
             if (magicTransmitter != null)
-            {
-                //Log.Debug("Queued data count: {0}", magicTransmitter.QueuedData.Count);
-
                 foreach (var data in magicTransmitter.QueuedData)
                     if (data.subjectID == subjectid)
                     {
-                        refData = data;
+                        found.Add(data);
                         Log.Debug("Found stored data in transmitter queue");
-                        return true;
                     }
-            }
 
-            refData = null;
-            return false;
+            return found;
         }
 
 
