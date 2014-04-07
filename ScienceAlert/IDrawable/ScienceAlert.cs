@@ -24,6 +24,10 @@
  * 1.3
  *      Log spam due to vessel modification reduced
  * 
+ *      Experiments that rely on custom code to determine availability
+ *          will now be hidden from the options window, since ScienceAlert
+ *          will be unable to interact with them (determined by checking
+ *          if that experiment's biome and situation mask flags are zero)
  * 
  * 
  * 1.2
@@ -67,6 +71,9 @@ using ResourceTools;
 
 // TODO: manually selected transmitters ignore MagicTransmitter
 //          further thought: who really does this?  will think on it more
+
+// TODO: properly figure out total science value of all onboard reports
+//          (even multiple copies)
 
 // todo: separate science observer for surface samples like the eva one?
 
@@ -520,7 +527,12 @@ namespace ScienceAlert
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 if (expid != "evaReport") // evaReport is a special case
-                    observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, expid));
+                    if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
+                    {   // we can't monitor this experiment, so no need to clutter the
+                        // ui with it
+                        Log.Warning("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
+                        
+                    } else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, expid));
 
             // evaReport is a special case.  It technically exists on any crewed
             // vessel.  That vessel won't report it normally though, unless
@@ -836,7 +848,7 @@ namespace ScienceAlert
                 }
                 else if (!DebugOpen)
                 {
-                    mainButton.Drawable = new DebugWindow(this, biomeFilter);
+                    mainButton.Drawable = new DebugWindow(this, biomeFilter, vesselStorage);
                     UpdateMenuState();
                 }
             }

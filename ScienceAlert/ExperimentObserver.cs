@@ -160,7 +160,7 @@ namespace ScienceAlert
                         }
 
                     var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
-                    ScienceData data;
+                    ScienceData data = null;
 
 
                     switch (settings.Filter)
@@ -175,9 +175,9 @@ namespace ScienceAlert
                         case Settings.ExperimentSettings.FilterMethod.NotMaxed:
                             if (storage.FindStoredData(subject.id, out data))
                             {
-                                Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.scienceCap;
+                                Available = subject.science + ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject) < subject.scienceCap - 1f;
                             }
-                            else Available = subject.science < subject.scienceCap;
+                            else Available = subject.science < subject.scienceCap - 1f;
 
                             //Log.Debug("    - Mode: NotMaxed, result {0}, science {1}, id {2}", Available, subject.science, subject.id);
                             break;
@@ -209,7 +209,7 @@ namespace ScienceAlert
                             Log.Error("Unrecognized experiment filter!");
                             break;
                     }
-
+                    
                     if (Available)
                     {
                         if (lastAvailableId != subject.id)
@@ -217,8 +217,13 @@ namespace ScienceAlert
 
                         lastAvailableId = subject.id;
 
-                        if (Available != lastStatus && Available && Available)
-                            Log.Write("Experiment {0} just became available!", lastAvailableId);
+                        if (Available != lastStatus && Available)
+                        {
+                            Log.Write("Experiment {0} just became available for possible {1} science! (Cap is {2}, threshold is {3}, current sci is {4})", lastAvailableId, data != null ? ResearchAndDevelopment.GetNextScienceValue(data.dataAmount, subject).ToString() : "(no previous data)", subject.scienceCap, settings.Filter, data == null ? subject.science : (subject.science + ResearchAndDevelopment.GetScienceValue(data.dataAmount, subject)));
+
+                            if (data != null)
+                                Log.Write("Raw dataAmount = {0}, nextScience = {1}", data.dataAmount, ResearchAndDevelopment.GetScienceValue(data.dataAmount, subject));
+                        }
                     }
                 }
                 else

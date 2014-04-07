@@ -339,33 +339,6 @@ namespace ScienceAlert
         }
 
 
-        /// <summary>
-        /// Similar to above, but searches for a list of similar science
-        /// data instead.  This is used when looking for experiments
-        /// that might have multiple similar reports onboard (multiple
-        /// equal goo samples, for example)
-        /// </summary>
-        /// <param name="subjectid"></param>
-        /// <returns></returns>
-        //public List<ScienceData> FindStoredDataList(string subjectid)
-        //{
-        //    List<ScienceData> dataList = new List<ScienceData>();
-
-        //    // regular containers
-        //    foreach (var container in storage)
-        //        foreach (var data in container.GetData())
-        //            if (data.subjectID == subjectid)
-        //                dataList.Add(data);
-
-        //    if (magicTransmitter != null)
-        //        foreach (var data in magicTransmitter.QueuedData)
-        //            if (data.subjectID == subjectid)
-        //                dataList.Add(data);
-
-        //    return dataList;
-        //}
-
-
 
         /// <summary>
         /// Although a bit outside the normal scope of this object,
@@ -503,6 +476,15 @@ namespace ScienceAlert
         }
         
 #endif
+
+        public int StorageContainerCount
+        {
+            get
+            {
+                return storage.Count;
+            }
+        }
+
 
         public bool IsBusy
         {

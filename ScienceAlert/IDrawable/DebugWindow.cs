@@ -36,11 +36,13 @@ namespace ScienceAlert
         private Rect windowRect = new Rect(0, 0, 324, Screen.height / 5);
         ScienceAlert indicator;
         BiomeFilter biomeFilter;
+        StorageCache storage;
 
-        internal DebugWindow(ScienceAlert ind, BiomeFilter filter)
+        internal DebugWindow(ScienceAlert ind, BiomeFilter filter, StorageCache cache)
         {
             indicator = ind;
             biomeFilter = filter;
+            storage = cache;
         }
 
 
@@ -69,6 +71,7 @@ namespace ScienceAlert
             var containers = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataContainer>();
 
             Log.Write("Dumping all science found in {0} containers aboard {1}", containers.Count, FlightGlobals.ActiveVessel.vesselName);
+            Log.Write("StorageCache is keeping track of {0} containers", storage.StorageContainerCount);
 
             foreach (var can in containers)
             {
@@ -100,6 +103,23 @@ namespace ScienceAlert
 
             Log.Warning("Current eva situation: {0}, science {1}", subject.id, subject.science);
         }
+
+
+        private void CurrentSituationGravityScan()
+        {
+            var vessel = FlightGlobals.ActiveVessel;
+            var expSituation = indicator.VesselSituationToExperimentSituation();
+            var biome = string.Empty;
+
+            if (ResearchAndDevelopment.GetExperiment("gravityScan").BiomeIsRelevantWhile(expSituation))
+                if (!biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
+                    biome = "[bad biome result]";
+
+            var subject = ResearchAndDevelopment.GetExperimentSubject(ResearchAndDevelopment.GetExperiment("gravityScan"), expSituation, vessel.mainBody, biome);
+
+            Log.Warning("Current gravScan situation: {0}, science {1}", subject.id, subject.science);
+        }
+
 
 
         /// <summary>
@@ -136,6 +156,9 @@ namespace ScienceAlert
 
                 if (GUILayout.Button("Log Current Eva SitID", GUILayout.ExpandWidth(true)))
                     CurrentSituationEva();
+
+                if (GUILayout.Button("Log Current GravityScan SitID", GUILayout.ExpandWidth(true)))
+                    CurrentSituationGravityScan();
 
                 if (GUILayout.Button("Onboard Transmitters", GUILayout.ExpandWidth(true)))
                     TransmitterCheck();

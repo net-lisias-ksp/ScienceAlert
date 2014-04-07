@@ -37,6 +37,7 @@ namespace ScienceAlert
         private Dictionary<string /* expid */, int /* selected index */> experimentIds = new Dictionary<string, int>();
         private List<GUIContent> filterList = new List<GUIContent>();
 
+
         public OptionsWindow(AudioController audioDevice)
         {
             windowRect = new Rect(0, 0, 324, Screen.height / 5 * 3);

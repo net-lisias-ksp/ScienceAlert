@@ -47,7 +47,7 @@ namespace ScienceAlert
     /// </summary>
     internal class BiomeFilter : MonoBehaviour
     {
-        private const int HALF_SEARCH_DIMENSIONS = 3;    // box around the point on the biome map to
+        private const int HALF_SEARCH_DIMENSIONS = 2;    // box around the point on the biome map to
                                                     // use to verify biome map results
 
         private CelestialBody current;      // which CelestialBody we've got a cached biome map texture for
