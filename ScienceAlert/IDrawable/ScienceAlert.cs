@@ -28,6 +28,8 @@
  *          
  *      Added a global warp setting option
  *      
+ *      Added a global alert sound setting option
+ *      
  *      Log spam due to vessel modification reduced
  * 
  *      Experiments that rely on custom code to determine availability
@@ -282,8 +284,9 @@ namespace ScienceAlert
             //Log.Verbose("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
 
             // firstly, handle sound
-            if (experiment.SoundOnDiscovery && Settings.Instance.SoundOnNewResearch)
-                audio.PlaySound("bubbles");
+            if (experiment.SoundOnDiscovery || Settings.Instance.SoundNotification == Settings.SoundNotifySetting.Always)
+                if (Settings.Instance.SoundNotification != Settings.SoundNotifySetting.Never)
+                    audio.PlaySound("bubbles");
 
             // now handle state
             if (experiment.AnimateOnDiscovery && Settings.Instance.FlaskAnimationEnabled)

@@ -124,9 +124,12 @@ namespace ScienceAlert
 
             Settings.Instance.SaveFlightSessionManeuverNodes = AudibleToggle(Settings.Instance.SaveFlightSessionManeuverNodes, "Save flight session maneuvers");
             Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, "Flask animation enabled");
-            Settings.Instance.SoundOnNewResearch = AudibleToggle(Settings.Instance.SoundOnNewResearch, "Sound on new research available");
                 GUILayout.Label(new GUIContent("Global Warp Settings"), GUILayout.ExpandWidth(true));
                 Settings.Instance.GlobalWarp = (Settings.WarpSetting)GUILayout.SelectionGrid((int)Settings.Instance.GlobalWarp, new GUIContent[] { new GUIContent("By Experiment"), new GUIContent("Globally on"), new GUIContent("Globally off") }, 3, GUILayout.ExpandWidth(false));
+
+                GUILayout.Label(new GUIContent("Global Alert Sound"), GUILayout.ExpandWidth(true));
+                Settings.Instance.SoundNotification = (Settings.SoundNotifySetting)GUILayout.SelectionGrid((int)Settings.Instance.SoundNotification, new GUIContent[] { new GUIContent("By Experiment"), new GUIContent("Always"), new GUIContent("Never") }, 3, GUILayout.ExpandWidth(false));
+
             GUILayout.Space(10f);
 
             scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);

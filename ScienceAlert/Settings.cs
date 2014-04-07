@@ -39,6 +39,13 @@ namespace ScienceAlert
             GlobalOff
         }
 
+        public enum SoundNotifySetting : int
+        {
+            ByExperiment = 0,
+            Always,
+            Never
+        }
+
         // per-experiment settings
         public class ExperimentSettings
         {
@@ -172,8 +179,9 @@ namespace ScienceAlert
 
             SaveFlightSessionManeuverNodes = true;
             FlaskAnimationEnabled = true;
-            SoundOnNewResearch = true;
             StarFlaskFrameRate = 24f;
+            GlobalWarp = WarpSetting.ByExperiment;
+            SoundNotification = SoundNotifySetting.ByExperiment;
 
             skin = GameObject.Instantiate(HighLogic.Skin) as GUISkin;
 
@@ -260,17 +268,16 @@ namespace ScienceAlert
 
             SaveFlightSessionManeuverNodes = ConfigUtil.Parse<bool>(general, "SaveFlightSessionManeuverNodes", true);
             FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
-            SoundOnNewResearch = ConfigUtil.Parse<bool>(general, "SoundOnNewResearch", true);
             StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
             EvaAtmospherePressureWarnThreshold = ConfigUtil.Parse<double>(general, "EvaAtmosPressureThreshold", 0.00035);
             EvaAtmosphereVelocityWarnThreshold = ConfigUtil.Parse<float>(general, "EvaAtmosVelocityThreshold", 30);
             DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
             GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
+            SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
 
 
             Log.Debug("SaveFlightSessionManeuverNodes = {0}", SaveFlightSessionManeuverNodes);
             Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
-            Log.Debug("SoundOnNewResearch = {0}", SoundOnNewResearch);
             Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
 
 #endregion
@@ -344,12 +351,12 @@ Re-saving config with default values for missing experiments.");
 
                 general.AddValue("SaveFlightSessionManeuverNodes", SaveFlightSessionManeuverNodes);
                 general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
-                general.AddValue("SoundOnNewResearch", SoundOnNewResearch);
                 general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
                 general.AddValue("EvaAtmosPressureThreshold", EvaAtmospherePressureWarnThreshold);
                 general.AddValue("EvaAtmosVelocityThreshold", EvaAtmosphereVelocityWarnThreshold);
                 general.AddValue("DebugMode", DebugMode);
                 general.AddValue("GlobalWarp", GlobalWarp);
+                general.AddValue("SoundNotification", SoundNotification);
 
             #endregion
 
@@ -391,12 +398,12 @@ Re-saving config with default values for missing experiments.");
 
         public bool SaveFlightSessionManeuverNodes { get; set; }
         public bool FlaskAnimationEnabled { get; set; }
-        public bool SoundOnNewResearch { get; set; }
         public float StarFlaskFrameRate { get; private set; }
         public double EvaAtmospherePressureWarnThreshold { get; private set; }
         public float EvaAtmosphereVelocityWarnThreshold { get; private set; }
         public bool DebugMode { get; private set; }
         public WarpSetting GlobalWarp { get; set; }
+        public SoundNotifySetting SoundNotification { get; set; }
 
         #endregion
 

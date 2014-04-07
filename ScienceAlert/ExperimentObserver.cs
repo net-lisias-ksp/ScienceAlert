@@ -239,13 +239,15 @@ namespace ScienceAlert
 
                         if (Available != lastStatus && Available)
                         {
-                            Log.Write("Experiment {0} just became available for possible {1} science! (Cap is {2}, threshold is {3}, current sci is {4})", lastAvailableId, scienceTotal - subject.science, subject.scienceCap, settings.Filter, subject.science);
+                            Log.Write("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science);
 
+#if DEBUG
                             if (data.Count() > 0)
                             {
                                 Log.Write("Raw dataAmount = {0}, nextScience = {1}", data.First().dataAmount, ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject));
                                 Log.Write("Total science value = {0}", GetScienceTotal(subject, out data));
                             }
+#endif
                         }
                     }
                 }
