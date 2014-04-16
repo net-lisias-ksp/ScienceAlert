@@ -76,7 +76,7 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>set ksp=C:\Program Files (x86)\Steam\SteamApps\common\Kerbal Space Program\GameData
+    <PostBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program\GameData
 
 robocopy "$(ProjectDir)bin\$(Configuration)" "$(ProjectDir)GameData\$(ProjectName)" $(TargetFileName)
 robocopy "$(ProjectDir)GameData\$(ProjectName)" "%25ksp%25\$(ProjectName)" /E /xo

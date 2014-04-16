@@ -92,7 +92,8 @@ namespace ScienceAlert
         private void CurrentSituationEva()
         {
             var vessel = FlightGlobals.ActiveVessel;
-            var expSituation = indicator.VesselSituationToExperimentSituation();
+            //var expSituation = indicator.VesselSituationToExperimentSituation();
+            var expSituation = ScienceUtil.GetExperimentSituation(vessel);
             var biome = string.Empty;
 
             if (ResearchAndDevelopment.GetExperiment("evaReport").BiomeIsRelevantWhile(expSituation))
@@ -108,7 +109,8 @@ namespace ScienceAlert
         private void CurrentSituationGravityScan()
         {
             var vessel = FlightGlobals.ActiveVessel;
-            var expSituation = indicator.VesselSituationToExperimentSituation();
+            //var expSituation = indicator.VesselSituationToExperimentSituation();
+            var expSituation = ScienceUtil.GetExperimentSituation(vessel);
             var biome = string.Empty;
 
             if (ResearchAndDevelopment.GetExperiment("gravityScan").BiomeIsRelevantWhile(expSituation))

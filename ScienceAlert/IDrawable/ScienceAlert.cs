@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.3                                                                *
+ * Version 1.4                                                               *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -21,6 +21,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.4
+ *      Fixed an issue that could cause ScienceAlert to spew NREs when
+ *          the orbited body didn't have a biome map
+ *          
  * 1.3
  *      Fixed a serious issue: ScienceAlert wasn't taking science
  *          multipliers into account correctly which could result in
@@ -503,12 +507,22 @@ namespace ScienceAlert
 
         public void OnVesselDestroyed(Vessel vessel)
         {
-            if (FlightGlobals.ActiveVessel == vessel)
+            try
             {
-                Log.Debug("Active vessel was destroyed!");
+                if (FlightGlobals.ActiveVessel == vessel)
+                {
+                    Log.Debug("Active vessel was destroyed!");
+                    observers.Clear();
+                    rebuilder = null;
+                    watcher = null;
+                }
+            } catch (Exception)
+            {
+                // rarely (usually when something has gone REALLY WRONG
+                // elswhere), accessing FlightGlobals.ActiveVessel will
+                // spew forth a storm of NREs
                 observers.Clear();
-                rebuilder = null;
-                watcher = null;
+                rebuilder = watcher = null;
             }
         }
 
@@ -599,7 +613,8 @@ namespace ScienceAlert
                 // if any new experiments become available, our state
                 // changes (remember: observers return true only if their observed
                 // experiment wasn't available before and just become available this update)
-                var expSituation = VesselSituationToExperimentSituation();
+                //var expSituation = VesselSituationToExperimentSituation();
+                var expSituation = ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel);
 
                 foreach (var observer in observers)
                 {
@@ -877,30 +892,30 @@ namespace ScienceAlert
             return str;
         }
 
-        public ExperimentSituations VesselSituationToExperimentSituation()
-        {
-            //Log.Debug("Flying low altitude <= {0}, Low space altitude <= {1}",(double)FlightGlobals.ActiveVessel.mainBody.scienceValues.flyingAltitudeThreshold,  (double)FlightGlobals.ActiveVessel.mainBody.scienceValues.spaceAltitudeThreshold);
+        //public ExperimentSituations VesselSituationToExperimentSituation()
+        //{
+        //    //Log.Debug("Flying low altitude <= {0}, Low space altitude <= {1}",(double)FlightGlobals.ActiveVessel.mainBody.scienceValues.flyingAltitudeThreshold,  (double)FlightGlobals.ActiveVessel.mainBody.scienceValues.spaceAltitudeThreshold);
 
-            switch (FlightGlobals.ActiveVessel.situation)
-            {
-                case Vessel.Situations.LANDED:
-                case Vessel.Situations.PRELAUNCH:
-                    return ExperimentSituations.SrfLanded;
-                case Vessel.Situations.SPLASHED:
-                    return ExperimentSituations.SrfSplashed;
-                case Vessel.Situations.FLYING:
-                    if (FlightGlobals.ActiveVessel.altitude < (double)FlightGlobals.ActiveVessel.mainBody.scienceValues.flyingAltitudeThreshold)
-                        return ExperimentSituations.FlyingLow;
+        //    switch (FlightGlobals.ActiveVessel.situation)
+        //    {
+        //        case Vessel.Situations.LANDED:
+        //        case Vessel.Situations.PRELAUNCH:
+        //            return ExperimentSituations.SrfLanded;
+        //        case Vessel.Situations.SPLASHED:
+        //            return ExperimentSituations.SrfSplashed;
+        //        case Vessel.Situations.FLYING:
+        //            if (FlightGlobals.ActiveVessel.altitude < (double)FlightGlobals.ActiveVessel.mainBody.scienceValues.flyingAltitudeThreshold)
+        //                return ExperimentSituations.FlyingLow;
 
-                    return ExperimentSituations.FlyingHigh;
+        //            return ExperimentSituations.FlyingHigh;
 
-                default:
-                    if (FlightGlobals.ActiveVessel.altitude < (double)FlightGlobals.ActiveVessel.mainBody.scienceValues.spaceAltitudeThreshold)
+        //        default:
+        //            if (FlightGlobals.ActiveVessel.altitude < (double)FlightGlobals.ActiveVessel.mainBody.scienceValues.spaceAltitudeThreshold)
 
-                        return ExperimentSituations.InSpaceLow;
-                    return ExperimentSituations.InSpaceHigh;
-            }
-        }
+        //                return ExperimentSituations.InSpaceLow;
+        //            return ExperimentSituations.InSpaceHigh;
+        //    }
+        //}
         #endregion
     }
 }

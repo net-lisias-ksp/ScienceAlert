@@ -177,12 +177,6 @@ namespace ScienceAlert
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 PerExperimentSettings[expid] = new ExperimentSettings();
 
-            SaveFlightSessionManeuverNodes = true;
-            FlaskAnimationEnabled = true;
-            StarFlaskFrameRate = 24f;
-            GlobalWarp = WarpSetting.ByExperiment;
-            SoundNotification = SoundNotifySetting.ByExperiment;
-
             skin = GameObject.Instantiate(HighLogic.Skin) as GUISkin;
 
             // adjust the skin a little bit.  It wastes a lot of space in its
@@ -199,6 +193,7 @@ namespace ScienceAlert
 
             Load();
         }
+
 
         public static Settings Instance
         {
@@ -220,6 +215,8 @@ namespace ScienceAlert
             string path = KSPUtil.ApplicationRootPath + "/GameData/ScienceAlert/settings.cfg";
             return path;
         }
+
+
 
         public void Load()
         {

@@ -87,6 +87,9 @@ namespace ScienceAlert
             var vessel = FlightGlobals.ActiveVessel;
             biome = string.Empty;
 
+            if (vessel.mainBody.BiomeMap == null)
+                return true;
+
             // vessel.landedAt gets priority since there are some special
             // factors it will take into account for us; specifically, that
             // the vessel is on the launchpad, ksc, etc which are treated
@@ -185,6 +188,13 @@ namespace ScienceAlert
                 yield break;
             }
 
+            if (newBody == null)
+            {
+                Log.Error("BiomeFilter.ReprojectMap failure: newBody is null!");
+                projector = null;
+                yield break;
+            }
+
             Log.Debug("ScienceAlert.BiomeFilter: Reprojecting biome map for {0}", newBody.name);
 
 #if DEBUG
@@ -192,6 +202,14 @@ namespace ScienceAlert
                 Log.Error("Error: BiomeFilter.ReprojectBiomeMap was given wrong target! Given {0}, it should be {1}", newBody.name, FlightGlobals.currentMainBody.name);
 #endif
             current = newBody;
+
+            if (current.BiomeMap == null)
+            {
+                projectedMap = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                projector = null;
+                yield break;
+            }
+
             projectedMap = new Texture2D(current.BiomeMap.Map.width, current.BiomeMap.Map.height, TextureFormat.ARGB32, false);
             projectedMap.filterMode = FilterMode.Point;
 

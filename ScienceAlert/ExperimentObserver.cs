@@ -198,7 +198,7 @@ namespace ScienceAlert
                     var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
                     List<ScienceData> data = null;
                     float scienceTotal = GetScienceTotal(subject, out data);
-                    Log.Debug("{0} scienceTotal = {1}, scienceCap = {2}", subject.id, scienceTotal, subject.scienceCap);
+                    //Log.Debug("{0} scienceTotal = {1}, scienceCap = {2}", subject.id, scienceTotal, subject.scienceCap);
 
                     switch (settings.Filter)
                     {
@@ -230,6 +230,7 @@ namespace ScienceAlert
                             break;
                     }
                     
+
                     if (Available)
                     {
                         if (lastAvailableId != subject.id)
