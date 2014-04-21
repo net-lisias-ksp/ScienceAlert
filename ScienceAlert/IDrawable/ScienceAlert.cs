@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.4                                                               *
+ * Version 1.5                                                               *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -21,6 +21,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.5
+ *      Fixed an issue where game would use the incorrect camera
+ *          after ejecting an eva kerbal, potentially causing a crash
+ *          
  * 1.4
  *      Fixed an issue that could cause ScienceAlert to spew NREs when
  *          the orbited body didn't have a biome map

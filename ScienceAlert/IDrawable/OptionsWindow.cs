@@ -122,7 +122,6 @@ namespace ScienceAlert
             GUILayout.Label("General Settings", GUILayout.ExpandWidth(true));
             //GUILayout.Space(6f);
 
-            Settings.Instance.SaveFlightSessionManeuverNodes = AudibleToggle(Settings.Instance.SaveFlightSessionManeuverNodes, "Save flight session maneuvers");
             Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, "Flask animation enabled");
                 GUILayout.Label(new GUIContent("Global Warp Settings"), GUILayout.ExpandWidth(true));
                 Settings.Instance.GlobalWarp = (Settings.WarpSetting)GUILayout.SelectionGrid((int)Settings.Instance.GlobalWarp, new GUIContent[] { new GUIContent("By Experiment"), new GUIContent("Globally on"), new GUIContent("Globally off") }, 3, GUILayout.ExpandWidth(false));

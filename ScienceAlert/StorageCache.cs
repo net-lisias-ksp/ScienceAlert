@@ -42,8 +42,7 @@ namespace ScienceAlert
         protected StorageList storage;                      // containers for science data
         protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
         protected Vessel vessel;                            // which vessel this storage cache is for
-        protected Dictionary<Guid, List<ManeuverNode>> sessionManeuverNodes = new Dictionary<Guid, List<ManeuverNode>>();
-        
+
 
 /******************************************************************************
  *                          Begin Implementation
@@ -53,7 +52,6 @@ namespace ScienceAlert
             GameEvents.onVesselChange.Add(OnVesselChange);
             GameEvents.onVesselWasModified.Add(OnVesselModified);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
-            GameEvents.onCrewOnEva.Add(CrewGoingEva);
 
             vessel = FlightGlobals.ActiveVessel;
             ScheduleRebuild();
@@ -63,7 +61,6 @@ namespace ScienceAlert
 
         public void OnDestroy()
         {
-            GameEvents.onCrewOnEva.Remove(CrewGoingEva);
             GameEvents.onVesselDestroy.Remove(OnVesselDestroyed);
             GameEvents.onVesselWasModified.Remove(OnVesselModified);
             GameEvents.onVesselChange.Remove(OnVesselChange);
@@ -72,23 +69,7 @@ namespace ScienceAlert
         }
 
 
-        public void CrewGoingEva(GameEvents.FromToAction<Part, Part> arg)
-        {
-            // from = part the crew got out of
-            // to = the kerbal eva part itself
-            Log.Debug("Crew going eva from {0} to {1}", arg.from.ConstructID, arg.to.ConstructID);
 
-            if (arg.from.vessel == vessel)
-            {
-                // let's check and see if any maneuver nodes are around
-                if (vessel.patchedConicSolver.maneuverNodes.Count > 0 && Settings.Instance.SaveFlightSessionManeuverNodes)
-                {
-                    // yep, we've got some maneuver nodes here
-                    // todo: based on option whether or not to restore maneuver nodes automatically
-                    StoreManeuverNodes(vessel);
-                }
-            }
-        }
 
         #region events
 
@@ -104,10 +85,6 @@ namespace ScienceAlert
             RemoveMagicTransmitter();
             vessel = v;
             ScheduleRebuild();
-
-            // restore maneuver nodes for this vessel, if we have some stored
-            if (HasStoredManeuverNodes(v.id) && FlightGlobals.ActiveVessel == v)
-                RestoreManeuverNodes(v.id);
         }
 
 
@@ -140,10 +117,6 @@ namespace ScienceAlert
                 magicTransmitter = null;
                 vessel = null;
             }
-
-            if (v != null)
-                if (HasStoredManeuverNodes(v.id))
-                    sessionManeuverNodes[v.id].Clear();
         }
 
         #endregion
@@ -325,102 +298,6 @@ namespace ScienceAlert
             return found;
         }
 
-
-
-        /// <summary>
-        /// Although a bit outside the normal scope of this object,
-        /// it seems the most logical place to put session-persistent
-        /// maneuver nodes.
-        /// </summary>
-        /// <param name="v"></param>
-        public void StoreManeuverNodes(Vessel v)
-        {
-            Log.Debug("Storing maneuver nodes for {0}", v.vesselName);
-            sessionManeuverNodes[v.id] = v.patchedConicSolver.maneuverNodes;
-        }
-
-
-
-        public bool HasStoredManeuverNodes(Guid guid)
-        {
-            return sessionManeuverNodes.ContainsKey(guid) && sessionManeuverNodes[guid] != null && sessionManeuverNodes[guid].Count > 0;
-        }
-
-
-
-        /// <summary>
-        /// This function kicks off the restore maneuver node coroutine.
-        /// </summary>
-        /// <param name="v"></param>
-        public void RestoreManeuverNodes(Guid guid)
-        {
-            if (HasStoredManeuverNodes(guid))
-            {
-                Log.Debug("Scheduling maneuver node restoration for {0}", guid);
-                StartCoroutine(RestoreManeuverNodeRoutine(guid));
-            }
-        }
-
-
-
-        /// <summary>
-        /// I've experienced issues in the past when working with maneuver nodes where
-        /// adding them too quickly results in error spam.
-        /// </summary>
-        /// <param name="v"></param>
-        /// <param name="nodes"></param>
-        /// <returns></returns>
-        private System.Collections.IEnumerator RestoreManeuverNodeRoutine(Guid guid)
-        {
-            if (!HasStoredManeuverNodes(guid))
-            {
-                Log.Debug("No stored nodes for vessel {0}", guid);
-                yield break;
-            }
-
-            while (!FlightGlobals.ready)
-                yield return new WaitForFixedUpdate();
-
-            var nodes = sessionManeuverNodes[guid];
-
-            Func<Guid, Vessel> findVessel = target =>
-            {
-                foreach (var vessel in FlightGlobals.Vessels)
-                    if (vessel.id == target)
-                        return vessel;
-                return null;
-            };
-
-            foreach (var node in nodes)
-            {
-                var vessel = findVessel(guid);
-
-                if (vessel != null)
-                {
-                    Log.Debug("RestoreManeuverNodeRoutine: restoring node with deltaV {0}", node.DeltaV.ToString());
-
-                    var newNode = vessel.patchedConicSolver.AddManeuverNode(node.UT);
-                    newNode.nodeRotation = node.nodeRotation;
-                    newNode.DeltaV = node.DeltaV;
-
-                    vessel.patchedConicSolver.Update();
-                    vessel.patchedConicSolver.UpdateFlightPlan();
-
-                    yield return new WaitForFixedUpdate();
-                }
-                else
-                {
-                    // the vessel ... no longer exists?  hmm
-                    Log.Error("Vessel destroyed while restoring maneuver nodes.");
-                    yield break;
-                }
-            }
-
-            Log.Debug("Finished restoring maneuver nodes to {0}", findVessel(guid).vesselName);
-
-            // and we can now clear the cache of those nodes
-            sessionManeuverNodes[guid].Clear();
-        }
 
 #if DEBUG
         public void DumpContainerData()

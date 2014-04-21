@@ -195,52 +195,53 @@ namespace ScienceAlert
                             biome = lastBiomeQuery; // we're almost certainly still in the old area then
                         }
 
-                    var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
-                    List<ScienceData> data = null;
-                    float scienceTotal = GetScienceTotal(subject, out data);
-                    //Log.Debug("{0} scienceTotal = {1}, scienceCap = {2}", subject.id, scienceTotal, subject.scienceCap);
 
-                    switch (settings.Filter)
+                    try
                     {
-                        case Settings.ExperimentSettings.FilterMethod.Unresearched:
-                            // Fairly straightforward: total science + potential should be zero
-                            Available = scienceTotal < 0.0005f;
-                            break;
+                        var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
+                        List<ScienceData> data = null;
+                        float scienceTotal = GetScienceTotal(subject, out data);
+                        //Log.Debug("{0} scienceTotal = {1}, scienceCap = {2}", subject.id, scienceTotal, subject.scienceCap);
 
-                        case Settings.ExperimentSettings.FilterMethod.NotMaxed:
-                            // <98% of science cap
-                            Available = scienceTotal < subject.scienceCap * 0.98;
-                            break;
-
-                        case Settings.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
-                            // important note for these last two filters: we can only accurately
-                            // predict science for up to two of the same reports. After that,
-                            // it'll be highly overestimated
-                            Available = scienceTotal < subject.scienceCap * 0.5f;
-                            break;
-
-                        case Settings.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
-                            Available = scienceTotal < subject.scienceCap * 0.9f;
-                            break;
-
-                        default: // this should NEVER occur, but nice to have a safety measure
-                                 // in place if I add a filter option and forget to add its logic
-                            Log.Error("Unrecognized experiment filter!");
-                            data = new List<ScienceData>(); 
-                            break;
-                    }
-                    
-
-                    if (Available)
-                    {
-                        if (lastAvailableId != subject.id)
-                            lastStatus = false; // force a refresh, in case we're going from available -> available in different subject id
-
-                        lastAvailableId = subject.id;
-
-                        if (Available != lastStatus && Available)
+                        switch (settings.Filter)
                         {
-                            Log.Write("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science);
+                            case Settings.ExperimentSettings.FilterMethod.Unresearched:
+                                // Fairly straightforward: total science + potential should be zero
+                                Available = scienceTotal < 0.0005f;
+                                break;
+
+                            case Settings.ExperimentSettings.FilterMethod.NotMaxed:
+                                // <98% of science cap
+                                Available = scienceTotal < subject.scienceCap * 0.98;
+                                break;
+
+                            case Settings.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
+                                // important note for these last two filters: we can only accurately
+                                // predict science for up to two of the same reports. After that,
+                                // it'll be highly overestimated
+                                Available = scienceTotal < subject.scienceCap * 0.5f;
+                                break;
+
+                            case Settings.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
+                                Available = scienceTotal < subject.scienceCap * 0.9f;
+                                break;
+
+                            default: // this should NEVER occur, but nice to have a safety measure
+                                // in place if I add a filter option and forget to add its logic
+                                Log.Error("Unrecognized experiment filter!");
+                                data = new List<ScienceData>();
+                                break;
+                        }
+                        if (Available)
+                        {
+                            if (lastAvailableId != subject.id)
+                                lastStatus = false; // force a refresh, in case we're going from available -> available in different subject id
+
+                            lastAvailableId = subject.id;
+
+                            if (Available != lastStatus && Available)
+                            {
+                                Log.Write("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science);
 
 #if DEBUG
                             if (data.Count() > 0)
@@ -249,7 +250,28 @@ namespace ScienceAlert
                                 Log.Write("Total science value = {0}", GetScienceTotal(subject, out data));
                             }
 #endif
+                            }
                         }
+
+                    } catch (NullReferenceException e)
+                    {
+                        // trying to track down this, which occurs sometimes when
+                        // switching vessels:
+                        /*
+                         * NullReferenceException: Object reference not set to an instance of an object
+  at ScienceSubject..ctor (.ScienceExperiment exp, ExperimentSituations sit, .CelestialBody body, System.String biome) [0x00000] in <filename unknown>:0 
+  at ResearchAndDevelopment.GetExperimentSubject (.ScienceExperiment experiment, ExperimentSituations situation, .CelestialBody body, System.String biome) [0x00000] in <filename unknown>:0 
+  at ScienceAlert.ExperimentObserver.UpdateStatus (ExperimentSituations experimentSituation) [0x00000] in <filename unknown>:0 
+  at ScienceAlert.ScienceAlert+<UpdateObservers>d__8.MoveNext () [0x00000] in <filename unknown>:0 
+  at ScienceAlert.ScienceAlert.Update () [0x00000] in <filename unknown>:0 
+                         * */
+                        Log.Error("NullReferenceException: {0}", e);
+                        if (experiment == null) Log.Error("Observer's experiment is null");
+                        if (experimentSituation == null) Log.Error("bad situation");
+                        if (vessel == null) Log.Error("Vessel is null");
+                        if (vessel.mainBody == null) Log.Error("mainBody is null");
+                        if (biome == null) Log.Error("biome is null");
+
                     }
                 }
                 else
@@ -564,6 +586,15 @@ namespace ScienceAlert
             }
             else
             {
+                // 1.5 bugfix:
+                //   if the player is in IVA view when we spawn eva, it looks
+                // like KSP doesn't switch cameras automatically
+                if ((CameraManager.Instance.currentCameraMode & (CameraManager.CameraMode.Internal | CameraManager.CameraMode.IVA)) != 0)
+                {
+                    Log.Write("Detected IVA or internal cam; switching to flight cam");
+                    CameraManager.Instance.SetCameraFlight();
+                }
+
                 Log.Debug("Choices of kerbal:");
                 foreach (var crew in crewChoices)
                     Log.Debug(" - {0}", crew.name);

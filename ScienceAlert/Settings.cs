@@ -263,7 +263,6 @@ namespace ScienceAlert
 
             Log.Debug("General node = {0}", general.ToString());
 
-            SaveFlightSessionManeuverNodes = ConfigUtil.Parse<bool>(general, "SaveFlightSessionManeuverNodes", true);
             FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
             StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
             EvaAtmospherePressureWarnThreshold = ConfigUtil.Parse<double>(general, "EvaAtmosPressureThreshold", 0.00035);
@@ -272,8 +271,6 @@ namespace ScienceAlert
             GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
             SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
 
-
-            Log.Debug("SaveFlightSessionManeuverNodes = {0}", SaveFlightSessionManeuverNodes);
             Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
             Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
 
@@ -346,7 +343,6 @@ Re-saving config with default values for missing experiments.");
             #region general settings
                 ConfigNode general = node.AddNode(new ConfigNode("GeneralSettings"));
 
-                general.AddValue("SaveFlightSessionManeuverNodes", SaveFlightSessionManeuverNodes);
                 general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
                 general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
                 general.AddValue("EvaAtmosPressureThreshold", EvaAtmospherePressureWarnThreshold);
@@ -393,7 +389,6 @@ Re-saving config with default values for missing experiments.");
 *****************************************************************************/
         #region General settings
 
-        public bool SaveFlightSessionManeuverNodes { get; set; }
         public bool FlaskAnimationEnabled { get; set; }
         public float StarFlaskFrameRate { get; private set; }
         public double EvaAtmospherePressureWarnThreshold { get; private set; }

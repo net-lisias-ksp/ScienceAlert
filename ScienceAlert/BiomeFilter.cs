@@ -153,7 +153,9 @@ namespace ScienceAlert
                     return true; // we have a match, no need to look further
             }
 
-            Log.Error("VerifyBiomeResult: '{0}' is probably bogus", target.name);
+            if (Settings.Instance.DebugMode)
+                Log.Error("VerifyBiomeResult: '{0}' is probably bogus", target.name);
+
             return false;
         }
 
