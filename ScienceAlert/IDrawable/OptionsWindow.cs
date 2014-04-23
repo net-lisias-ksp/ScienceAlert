@@ -23,6 +23,7 @@ using System.Text;
 using UnityEngine;
 using Toolbar;
 using DebugTools;
+using ResourceTools;
 
 namespace ScienceAlert
 {
@@ -31,12 +32,19 @@ namespace ScienceAlert
         private readonly int windowId = UnityEngine.Random.Range(0, int.MaxValue);
 
         // Control position and scrollbars
-        private Rect windowRect;// = new Rect(0, 0, 256, Screen.height / 5 * 3);
+        private Rect windowRect;
         private Vector2 scrollPos = new Vector2();
+        private Vector2 additionalScrollPos = new Vector2();
         private AudioController audio;
         private Dictionary<string /* expid */, int /* selected index */> experimentIds = new Dictionary<string, int>();
         private List<GUIContent> filterList = new List<GUIContent>();
+        private string sciMinValue = "0";
+        private bool additionalOptions = false; // flag set when additional options subwindow is open
 
+        // Materials and textures
+        Texture2D collapseButton = new Texture2D(24, 24);
+        Texture2D expandButton = new Texture2D(24, 24);
+        GUISkin whiteLabel;
 
         public OptionsWindow(AudioController audioDevice)
         {
@@ -63,6 +71,27 @@ namespace ScienceAlert
             filterList.Add(new GUIContent("< 90% collected"));
 
             audio = audioDevice;
+            sciMinValue = Settings.Instance.ScienceThreshold.ToString();
+
+            var tex = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnExpand.png", true);
+
+            if (tex == null)
+            {
+                Log.Error("Failed to retrieve expand button texture from stream");
+            }
+            else
+            {
+                Log.Debug("Collapse button texture loaded successfully");
+                expandButton = tex;
+                
+                collapseButton = UnityEngine.Texture.Instantiate(expandButton) as Texture2D;
+                ResourceUtil.FlipTexture(collapseButton, true, true);
+            }
+
+            whiteLabel = Settings.Skin;
+            whiteLabel.label.onNormal.textColor = Color.white;
+            whiteLabel.toggle.onNormal.textColor = Color.white;
+            whiteLabel.label.onActive.textColor = Color.white;
         }
 
         ~OptionsWindow()
@@ -87,9 +116,9 @@ namespace ScienceAlert
         }
 
 
-        private bool AudibleToggle(bool value, string content)
+        private bool AudibleToggle(bool value, string content, GUILayoutOption[] options = null)
         {
-            bool result = GUILayout.Toggle(value, content);
+            bool result = GUILayout.Toggle(value, content, options);
             if (result != value)
             {
                 audio.PlaySound("click1");
@@ -117,56 +146,123 @@ namespace ScienceAlert
         private void RenderControls(int windowId)
         {
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+            {
 
-            // general settings
-            GUILayout.Label("General Settings", GUILayout.ExpandWidth(true));
-            //GUILayout.Space(6f);
-
-            Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, "Flask animation enabled");
                 GUILayout.Label(new GUIContent("Global Warp Settings"), GUILayout.ExpandWidth(true));
                 Settings.Instance.GlobalWarp = (Settings.WarpSetting)GUILayout.SelectionGrid((int)Settings.Instance.GlobalWarp, new GUIContent[] { new GUIContent("By Experiment"), new GUIContent("Globally on"), new GUIContent("Globally off") }, 3, GUILayout.ExpandWidth(false));
 
                 GUILayout.Label(new GUIContent("Global Alert Sound"), GUILayout.ExpandWidth(true));
                 Settings.Instance.SoundNotification = (Settings.SoundNotifySetting)GUILayout.SelectionGrid((int)Settings.Instance.SoundNotification, new GUIContent[] { new GUIContent("By Experiment"), new GUIContent("Always"), new GUIContent("Never") }, 3, GUILayout.ExpandWidth(false));
 
-            GUILayout.Space(10f);
+                GUILayout.Space(4f);
 
-            scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
-            GUI.skin = Settings.Skin;
+                GUILayout.BeginHorizontal();
+                    GUILayout.Label(new GUIContent("Additional Options"));
+                    GUILayout.FlexibleSpace();
+                    additionalOptions = GUILayout.Button(new GUIContent(additionalOptions ? collapseButton : expandButton)) ? !additionalOptions : additionalOptions;
+                GUILayout.EndHorizontal();
 
-                var keys = new List<string>(experimentIds.Keys);
-
-                foreach (var key in keys)
+                if (additionalOptions)
                 {
-                    GUILayout.Space(8f);
+                    GUI.skin = whiteLabel;
 
-                    var settings = Settings.Instance.GetExperimentSettings(key);
-                    GUILayout.Box(ResearchAndDevelopment.GetExperiment(key).experimentTitle, GUILayout.ExpandWidth(true));
+                    additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.MinHeight(64f));
+                    {
+                        GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
+                        {
+                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            {
+                                GUILayout.Label("Flask Animation");
+                                Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty);
+                                GUILayout.Space(6f);
+                            }
+                            GUILayout.EndHorizontal();
 
-                    //GUILayout.Space(4f);
-                    settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
-                    settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
-                    settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
-                    settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
+                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            {
+                                GUILayout.Label(new GUIContent("Alert Threshold"), GUILayout.ExpandWidth(false));
+                                Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
 
-                    // only add the Assume Onboard option if the experiment isn't
-                    // one of the default types
-                    if (!settings.IsDefault)
-                        settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
 
-                    GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
+                                string newValue = GUILayout.TextField(sciMinValue, 3, GUILayout.ExpandWidth(true));
+                                GUILayout.Label(new GUIContent("science"), GUILayout.ExpandWidth(true));
 
-                    int oldSel = experimentIds[key];
-                    experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
+                                float converted = 0f;
 
-                    if (oldSel != experimentIds[key])
-                        Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
+                                if (!string.Equals(sciMinValue, newValue))
+                                    if (string.IsNullOrEmpty(newValue))
+                                    {
+                                        Settings.Instance.ScienceThreshold = 0f;
+                                        sciMinValue = newValue;
+                                    }
+                                    else
+                                    {
+                                        if (float.TryParse(newValue, out converted))
+                                        {
+                                            Settings.Instance.ScienceThreshold = Mathf.Max(0f, converted);
+                                            sciMinValue = newValue;
 
-                    
+                                            Log.Debug("ScienceThreshold is now {0}", Settings.Instance.ScienceThreshold);
+                                        }
+                                        else
+                                        {
+                                            audio.PlaySound("error");
+                                            Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
+                                            Log.Write("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
+                                        }
+                                    }
+                            }
+                            GUILayout.EndHorizontal();
+
+                            GUILayout.FlexibleSpace();
+                        }
+                        GUILayout.EndVertical();
+
+                        GUI.skin = Settings.Skin;
+                    }
+                    GUILayout.EndScrollView();
                 }
+                //else
+                //{
 
-            GUILayout.EndScrollView();
+                    scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
+                    {
+                        GUI.skin = Settings.Skin;
 
+                        var keys = new List<string>(experimentIds.Keys);
+
+                        foreach (var key in keys)
+                        {
+                            GUILayout.Space(8f);
+
+                            var settings = Settings.Instance.GetExperimentSettings(key);
+                            GUILayout.Box(ResearchAndDevelopment.GetExperiment(key).experimentTitle, GUILayout.ExpandWidth(true));
+
+                            //GUILayout.Space(4f);
+                            settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
+                            settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
+                            settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
+                            settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
+
+                            // only add the Assume Onboard option if the experiment isn't
+                            // one of the default types
+                            if (!settings.IsDefault)
+                                settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
+
+                            GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
+
+                            int oldSel = experimentIds[key];
+                            experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
+
+                            if (oldSel != experimentIds[key])
+                                Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
+
+
+                        }
+                    }
+                    GUILayout.EndScrollView();
+                //}
+            }
             GUILayout.EndVertical();
         }
 

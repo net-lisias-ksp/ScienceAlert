@@ -73,7 +73,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\sheet.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\btnExpand.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program\GameData

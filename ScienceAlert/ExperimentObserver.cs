@@ -101,7 +101,6 @@ namespace ScienceAlert
 
 
 
-
         /// <summary>
         /// Calculate the total science value of "known" science plus
         /// potential science for a given ScienceSubject
@@ -109,7 +108,7 @@ namespace ScienceAlert
         /// <param name="subject"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public virtual float GetScienceTotal(ScienceSubject subject, out List<ScienceData> data)
+        protected virtual float GetScienceTotal(ScienceSubject subject, out List<ScienceData> data)
         {
             var found = storage.FindStoredData(subject.id);
             data = found;
@@ -128,18 +127,86 @@ namespace ScienceAlert
                 // out how exactly the decay factor works or do something hacky to fake it
                 if (found.Count() > 1)
                 {
-                    // note: hacky workaround for now: just assume the third report etc
-                    // has the same value as the second. It'll overestimate but that's
-                    // better than underestimating and possibly not hitting the threshold
-                    // that would stop the player from getting spammed with alerts
-                    for (int i = 0; i < found.Count() - 1; ++i)
-                        potentialScience += ResearchAndDevelopment.GetNextScienceValue(found.First().dataAmount, subject);
+                    float secondReport = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject);
 
-                    //Log.Debug("Found a second report; its approximate value is {0}", ResearchAndDevelopment.GetNextScienceValue(found.First().dataAmount, subject));
+                    potentialScience += secondReport;
+
+                    // there's some kind of interpolation that the game does for
+                    // subsequent experiments. Dividing by four seems to give fairly
+                    // decent estimate. It's very unlikely that the exact science value
+                    // after the second report is going to matter one way or the other
+                    // though, so this is a decent enough solution for now
+                    if (found.Count > 2)
+                        for (int i = 3; i < found.Count; ++i)
+                            potentialScience += secondReport / Mathf.Pow(4f, i - 2);
                 }
                 return potentialScience;
             }
         }
+
+
+
+        /// <summary>
+        /// Nothing complicated about this; each planet has a particular
+        /// multiplier for the various situations to increase the value 
+        /// of experiments
+        /// </summary>
+        /// <param name="sit"></param>
+        /// <returns></returns>
+        protected float GetBodyScienceValueMultipler(ExperimentSituations sit)
+        {
+            var b = FlightGlobals.currentMainBody;
+
+            switch (sit)
+            {
+                case ExperimentSituations.FlyingHigh:
+                    return b.scienceValues.FlyingHighDataValue;
+                case ExperimentSituations.FlyingLow:
+                    return b.scienceValues.FlyingLowDataValue;
+                case ExperimentSituations.InSpaceHigh:
+                    return b.scienceValues.InSpaceHighDataValue;
+                case ExperimentSituations.InSpaceLow:
+                    return b.scienceValues.InSpaceLowDataValue;
+                case ExperimentSituations.SrfLanded:
+                    return b.scienceValues.LandedDataValue;
+                case ExperimentSituations.SrfSplashed:
+                    return b.scienceValues.SplashedDataValue;
+                default:
+                    return 0f;
+            }
+
+        }
+
+
+        /// <summary>
+        /// Calculate the value of a report if taken at this instant while
+        /// considering existing science and reports
+        /// stored onboard
+        /// </summary>
+        /// <param name="subject"></param>
+        /// <param name="situation"></param>
+        /// <param name="stored"></param>
+        /// <returns></returns>
+        protected float CalculateNextReportValue(ScienceSubject subject, ExperimentSituations situation, List<ScienceData> stored)
+        {
+            if (stored.Count == 0)
+                ResearchAndDevelopment.GetReferenceDataValue(experiment.baseValue * experiment.dataScale, subject);
+
+            if (stored.Count == 1)
+                return ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, subject);
+
+            float experimentValue = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject);
+
+            if (stored.Count == 2)
+                return experimentValue;
+
+            // for more than 2, we'll have to estimate. Presumably there's some
+            // kind of interpolation going on. I've found that just dividing the previous
+            // value by four is a good estimate. Having three of the exact same reports
+            // on a vessel will be quite uncommon anyway
+            return experimentValue / Mathf.Pow(4f, stored.Count - 2);
+        }
+
 
 
 
@@ -166,15 +233,12 @@ namespace ScienceAlert
                 return false;
             }
 
-            //Log.Debug("Updating status for experiment {0}", ExperimentTitle);
-
             bool lastStatus = Available;
-
-            // does this experiment even apply in the current situation?
             var vessel = FlightGlobals.ActiveVessel;
 
             if (!storage.IsBusy && IsReadyOnboard)
             {
+                // does this experiment even apply in the current situation?
                 if (experiment.IsAvailableWhile(experimentSituation, vessel.mainBody))
                 {
                     var biome = string.Empty;
@@ -188,6 +252,9 @@ namespace ScienceAlert
                     if (experiment.BiomeIsRelevantWhile(experimentSituation))
                         if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
                         {
+                            if (biome == null)
+                                Log.Error("SUPERERROR: biomeFilter returned true but gave a null biome!");
+
                             lastBiomeQuery = biome;
                         }
                         else
@@ -201,7 +268,6 @@ namespace ScienceAlert
                         var subject = ResearchAndDevelopment.GetExperimentSubject(experiment, experimentSituation, vessel.mainBody, biome);
                         List<ScienceData> data = null;
                         float scienceTotal = GetScienceTotal(subject, out data);
-                        //Log.Debug("{0} scienceTotal = {1}, scienceCap = {2}", subject.id, scienceTotal, subject.scienceCap);
 
                         switch (settings.Filter)
                         {
@@ -232,6 +298,20 @@ namespace ScienceAlert
                                 data = new List<ScienceData>();
                                 break;
                         }
+
+                        // check the science threshold
+                        if (Available && Settings.Instance.EnableScienceThreshold)
+                        {
+                            // make sure any experiment we alert on will produce at
+                            // least X science, or we should ignore it even if it
+                            // would otherwise match the filter
+                            Available = Available && CalculateNextReportValue(subject, experimentSituation, data) >= Settings.Instance.ScienceThreshold;
+#if DEBUG
+                            if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
+                                Log.Warning("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
+#endif
+                        }
+
                         if (Available)
                         {
                             if (lastAvailableId != subject.id)
@@ -259,18 +339,33 @@ namespace ScienceAlert
                         // switching vessels:
                         /*
                          * NullReferenceException: Object reference not set to an instance of an object
-  at ScienceSubject..ctor (.ScienceExperiment exp, ExperimentSituations sit, .CelestialBody body, System.String biome) [0x00000] in <filename unknown>:0 
-  at ResearchAndDevelopment.GetExperimentSubject (.ScienceExperiment experiment, ExperimentSituations situation, .CelestialBody body, System.String biome) [0x00000] in <filename unknown>:0 
-  at ScienceAlert.ExperimentObserver.UpdateStatus (ExperimentSituations experimentSituation) [0x00000] in <filename unknown>:0 
-  at ScienceAlert.ScienceAlert+<UpdateObservers>d__8.MoveNext () [0x00000] in <filename unknown>:0 
+  at ScienceSubject..ctor (.ScienceExperiment exp, ExperimentSituations sit, .CelestialBody body, System.String biome) [0x00000] in <filename unknown>:0 
+
+  at ResearchAndDevelopment.GetExperimentSubject (.ScienceExperiment experiment, ExperimentSituations situation, .CelestialBody body, System.String biome) [0x00000] in <filename unknown>:0 
+
+  at ScienceAlert.ExperimentObserver.UpdateStatus (ExperimentSituations experimentSituation) [0x00000] in <filename unknown>:0 
+
+  at ScienceAlert.ScienceAlert+<UpdateObservers>d__8.MoveNext () [0x00000] in <filename unknown>:0 
+
   at ScienceAlert.ScienceAlert.Update () [0x00000] in <filename unknown>:0 
                          * */
                         Log.Error("NullReferenceException: {0}", e);
+                        Log.Error("While processing: {0}", experiment.experimentTitle);
                         if (experiment == null) Log.Error("Observer's experiment is null");
-                        if (experimentSituation == null) Log.Error("bad situation");
+                        //if (experimentSituation == null) Log.Error("bad situation");
                         if (vessel == null) Log.Error("Vessel is null");
                         if (vessel.mainBody == null) Log.Error("mainBody is null");
                         if (biome == null) Log.Error("biome is null");
+                        Log.Error("Last biome query: {0}", lastBiomeQuery);
+                        Log.Error("last available id: {0}", lastAvailableId);
+                        Log.Error("Experiment situation: {0}", experimentSituation);
+                        if (vessel.mainBody.BiomeMap == null)
+                            Log.Error("vessel body has no biome map");
+                        if (experiment.BiomeIsRelevantWhile(experimentSituation))
+                            Log.Error("Biome is relevant");
+                        if (string.Empty == null)
+                            Log.Error("Logic fail: string.empty is null");
+                        Log.Error("Body.theName = {0}, is null {1}", vessel.mainBody.theName, vessel.mainBody.theName == null ? "yes" : "no");
 
                     }
                 }
@@ -290,6 +385,12 @@ namespace ScienceAlert
         }
 
 
+
+        /// <summary>
+        /// No secret here, run the associated experiment using
+        /// the next available science part
+        /// </summary>
+        /// <returns></returns>
         public virtual bool Deploy()
         {
             if (!Available)
@@ -350,7 +451,7 @@ namespace ScienceAlert
             // we should never reach this point if IsExperimentAvailableOnboard did
             // its job.  This would indicate we're not accounting for something about 
             // experiment states
-            Log.Error("Logic problem: Did not deploy experiment, but we should have been able to.  Investigate {0}", ExperimentTitle);
+            Log.Error("Logic problem: Did not deploy experiment but we should have been able to.  Investigate {0}", ExperimentTitle);
             return false;
         }
 
@@ -510,7 +611,7 @@ namespace ScienceAlert
 
                         var options = new DialogOption[2];
 
-                        options[0] = new DialogOption("Science is worth a little risk",new Callback(OnConfirmEva));
+                        options[0] = new DialogOption("Science is worth a little risk", new Callback(OnConfirmEva));
                         options[1] = new DialogOption("No, it would be a PR nightmare", null);
 
                         var dlg = new MultiOptionDialog("It looks dangerous out there. Are you sure you want to send someone out? They might lose their grip!", "Dangerous Condition Alert", Settings.Skin, options);
@@ -586,7 +687,15 @@ namespace ScienceAlert
             }
             else
             {
-                // 1.5 bugfix:
+                // 1.4b bugfix for the 1.4a buxfix:
+                //  if the player is in map view, SetCameraFlight won't shut it
+                // down for us. Whoops
+                if (MapView.MapIsEnabled)
+                {
+                    MapView.ExitMapView();
+                }
+
+                // 1.4a bugfix:
                 //   if the player is in IVA view when we spawn eva, it looks
                 // like KSP doesn't switch cameras automatically
                 if ((CameraManager.Instance.currentCameraMode & (CameraManager.CameraMode.Internal | CameraManager.CameraMode.IVA)) != 0)
@@ -594,6 +703,7 @@ namespace ScienceAlert
                     Log.Write("Detected IVA or internal cam; switching to flight cam");
                     CameraManager.Instance.SetCameraFlight();
                 }
+
 
                 Log.Debug("Choices of kerbal:");
                 foreach (var crew in crewChoices)

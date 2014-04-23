@@ -22,6 +22,24 @@
  ****************************************************************************
  * Changelog
  * 1.5
+ *      New feature: you can now set a minimum threshold for a science report
+ *          If performing an experiment won't result in at least that much
+ *          science, then it will be ignored even if it would otherwise match
+ *          your filter settings
+ *          
+ *      Small UI improvement: added a collapsing section where new
+ *          options can be added
+ *          
+ *      Fixed an issue where the biome filter could sometimes
+ *          ignore biome
+ *          
+ *          
+ * 1.4b
+ *      Fixed an issue where 1.4a's fix would cause the flight and
+ *          map cameras to interact strangely if the player was
+ *          in map view at the time
+ *          
+ * 1.4a
  *      Fixed an issue where game would use the incorrect camera
  *          after ejecting an eva kerbal, potentially causing a crash
  *          
@@ -581,24 +599,6 @@ namespace ScienceAlert
 
 
 
-        //private System.Collections.IEnumerator StopWarp()
-        //{
-        //    // if we're timewarping, resume normal time if that setting
-        //    // was used
-        //    if (TimeWarp.CurrentRateIndex > 0)
-        //    {
-        //        FlightDriver.SetPause(true);
-        //        yield return new WaitForFixedUpdate();
-
-        //        TimeWarp.SetRate(0, true);
-        //        yield return new WaitForFixedUpdate();
-
-        //        FlightDriver.SetPause(false);
-        //    }
-
-        //    yield break;
-        //}
-
         /// <summary>
         /// Update state of all experiment observers.  If their status has 
         /// changed, UpdateStatus will return true.
@@ -617,7 +617,6 @@ namespace ScienceAlert
                 // if any new experiments become available, our state
                 // changes (remember: observers return true only if their observed
                 // experiment wasn't available before and just become available this update)
-                //var expSituation = VesselSituationToExperimentSituation();
                 var expSituation = ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel);
 
                 foreach (var observer in observers)

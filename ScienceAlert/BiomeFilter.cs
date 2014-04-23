@@ -31,7 +31,8 @@ namespace ScienceAlert
     /// Filtering at the edges of the original biome maps can cause some
     /// inaccurate biome reporting. That's not good, because it'll trick
     /// experiment observers into believing they entered a new situation
-    /// but only for a split second.
+    /// but only for a split second if the filtered color just happens
+    /// to match any of the biomes.
     /// 
     /// This class will generate a "clean" version with no aliasing. The
     /// previous version simply queried the cleaned up version whenever
@@ -53,7 +54,7 @@ namespace ScienceAlert
         private CelestialBody current;      // which CelestialBody we've got a cached biome map texture for
         private Texture2D projectedMap;     // this is the cleaned biome map of the current CelestialBody
         private System.Collections.IEnumerator projector;   // this coroutine constructs the projectedMap from current CelestialBody
-
+        private const float COLOR_THRESHOLD = 0.005f;       // Maximum color difference for two colors to be considered the same
 
         internal BiomeFilter()
         {
@@ -79,13 +80,12 @@ namespace ScienceAlert
 
         public bool GetBiome(double latRad, double lonRad, out string biome)
         {
+            biome = string.Empty;
+            var vessel = FlightGlobals.ActiveVessel;
 #if DEBUG
                 if (FlightGlobals.ActiveVessel.mainBody != current)
                     Log.Error("BiomeFilter.GetBome body mismatch: active {0} does not match cached {1}!", FlightGlobals.currentMainBody, current);
 #endif
-
-            var vessel = FlightGlobals.ActiveVessel;
-            biome = string.Empty;
 
             if (vessel.mainBody.BiomeMap == null)
                 return true;
@@ -134,7 +134,10 @@ namespace ScienceAlert
             }
         }
 
-
+        private bool Similar(Color first, Color second)
+        {
+            return Mathf.Abs(first.r - second.r) < COLOR_THRESHOLD && Mathf.Abs(first.g - second.g) < COLOR_THRESHOLD && Mathf.Abs(first.b - second.b) < COLOR_THRESHOLD;
+        }
         private bool VerifyBiomeResult(double lat, double lon, CBAttributeMap.MapAttribute target)
         {
             lon -= Mathf.PI * 0.5f;
@@ -149,12 +152,15 @@ namespace ScienceAlert
             {
                 Color c = projectedMap.GetPixel(x, y);
 
-                if (c == target.mapColor)
+#if DEBUG
+                //Log.Write("Projected is {0}, comparing to {1}, comparison is {2}", c, target.mapColor, Similar(c, target.mapColor));
+#endif
+                if (Similar(c, target.mapColor))
                     return true; // we have a match, no need to look further
             }
 
-            if (Settings.Instance.DebugMode)
-                Log.Error("VerifyBiomeResult: '{0}' is probably bogus", target.name);
+            //if (Settings.Instance.DebugMode)
+            //    Log.Error("VerifyBiomeResult: '{0}' is probably bogus", target.name);
 
             return false;
         }

@@ -190,7 +190,6 @@ namespace ScienceAlert
                 skin.box.padding = new RectOffset(5, 5, 15, 10);
                 skin.box.contentOffset = new Vector2(0, 0f);
 
-
             Load();
         }
 
@@ -270,6 +269,8 @@ namespace ScienceAlert
             DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
             GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
             SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
+            EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
+            ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
 
             Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
             Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
@@ -350,6 +351,8 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("DebugMode", DebugMode);
                 general.AddValue("GlobalWarp", GlobalWarp);
                 general.AddValue("SoundNotification", SoundNotification);
+                general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
+                general.AddValue("ScienceThreshold", ScienceThreshold);
 
             #endregion
 
@@ -396,6 +399,8 @@ Re-saving config with default values for missing experiments.");
         public bool DebugMode { get; private set; }
         public WarpSetting GlobalWarp { get; set; }
         public SoundNotifySetting SoundNotification { get; set; }
+        public bool EnableScienceThreshold { get; set; }
+        public float ScienceThreshold { get; set; }
 
         #endregion
 

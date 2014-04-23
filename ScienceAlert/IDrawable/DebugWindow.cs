@@ -84,6 +84,60 @@ namespace ScienceAlert
             Log.Write("End science dump.");
         }
 
+        private float GetBodyScienceValueMultipler(ExperimentSituations sit)
+        {
+            var b = FlightGlobals.currentMainBody;
+
+            switch (sit)
+            {
+                case ExperimentSituations.FlyingHigh:
+                    return b.scienceValues.FlyingHighDataValue;
+                case ExperimentSituations.FlyingLow:
+                    return b.scienceValues.FlyingLowDataValue;
+                case ExperimentSituations.InSpaceHigh:
+                    return b.scienceValues.InSpaceHighDataValue;
+                case ExperimentSituations.InSpaceLow:
+                    return b.scienceValues.InSpaceLowDataValue;
+                case ExperimentSituations.SrfLanded:
+                    return b.scienceValues.LandedDataValue;
+                case ExperimentSituations.SrfSplashed:
+                    return b.scienceValues.SplashedDataValue;
+                default:
+                    return 0f;
+            }
+
+        }
+
+        // test calculations
+        private void ExperimentValues()
+        {
+            foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
+            {
+                
+                ScienceExperiment exp = ResearchAndDevelopment.GetExperiment(expid);
+                ScienceSubject subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, ScienceUtil.GetExperimentBiome(FlightGlobals.currentMainBody, FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude));
+
+                Log.Write("---- {0} -----", exp.experimentTitle);
+ 
+                Log.Write("Current main body: {0}", FlightGlobals.currentMainBody.name);
+                Log.Write("Current subject: {0}", subject.id);
+
+                Log.Write("exp baseValue = {0}", exp.baseValue);
+                Log.Write("exp dataScale = {0}", exp.dataScale);
+                Log.Write("exp body multiplier = {0}", GetBodyScienceValueMultipler(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)));
+                Log.Write("sub dataScale = {0}", subject.dataScale);
+                Log.Write("sub subjectValue = {0}", ResearchAndDevelopment.GetSubjectValue(exp.baseValue * exp.dataScale, subject));
+                Log.Write("sub scientificValue = {0}", subject.scientificValue);
+                
+                // for my reference: these are all correct
+                Log.Write("reference value = {0}", ResearchAndDevelopment.GetReferenceDataValue(exp.baseValue * exp.dataScale, subject));
+                Log.Write("this value = {0}", ResearchAndDevelopment.GetScienceValue(exp.dataScale * exp.baseValue, subject));
+                Log.Write("next value = {0}", ResearchAndDevelopment.GetNextScienceValue(exp.baseValue * exp.dataScale, subject));
+
+                Log.Write("//////////////");
+            }
+        }
+
 
         /// <summary>
         /// Writes the current situation being checked against for
@@ -164,6 +218,9 @@ namespace ScienceAlert
 
                 if (GUILayout.Button("Onboard Transmitters", GUILayout.ExpandWidth(true)))
                     TransmitterCheck();
+
+                if (GUILayout.Button("Experiment current values", GUILayout.ExpandWidth(true)))
+                    ExperimentValues();
 
             GUILayout.EndVertical();
         }
