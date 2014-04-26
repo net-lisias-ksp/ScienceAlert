@@ -73,7 +73,7 @@ namespace ScienceAlert
             audio = audioDevice;
             sciMinValue = Settings.Instance.ScienceThreshold.ToString();
 
-            var tex = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnExpand.png", true);
+            var tex = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnExpand.png", false);
 
             if (tex == null)
             {
@@ -86,6 +86,9 @@ namespace ScienceAlert
                 
                 collapseButton = UnityEngine.Texture.Instantiate(expandButton) as Texture2D;
                 ResourceUtil.FlipTexture(collapseButton, true, true);
+
+                collapseButton.Compress(false);
+                expandButton.Compress(false);
             }
 
             whiteLabel = Settings.Skin;
@@ -94,10 +97,13 @@ namespace ScienceAlert
             whiteLabel.label.onActive.textColor = Color.white;
         }
 
+
+
         ~OptionsWindow()
         {
             Log.Debug("OptionsWindow destroyed");
         }
+
 
 
         public Vector2 Draw(Vector2 position)
@@ -116,6 +122,7 @@ namespace ScienceAlert
         }
 
 
+
         private bool AudibleToggle(bool value, string content, GUILayoutOption[] options = null)
         {
             bool result = GUILayout.Toggle(value, content, options);
@@ -130,6 +137,8 @@ namespace ScienceAlert
             return result;
         }
 
+
+
         private int AudibleSelectionGrid(int currentValue, ref Settings.ExperimentSettings settings)
         {
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
@@ -141,6 +150,21 @@ namespace ScienceAlert
 
             return newValue;
         }
+
+
+
+        private bool AudibleButton(GUIContent content, GUILayoutOption[] options = null)
+        {
+            bool pressed = GUILayout.Button(content, options);
+
+            if (pressed)
+            {
+                audio.PlaySound("click1");
+            }
+
+            return pressed;
+        }
+
 
 
         private void RenderControls(int windowId)
@@ -159,33 +183,40 @@ namespace ScienceAlert
                 GUILayout.BeginHorizontal();
                     GUILayout.Label(new GUIContent("Additional Options"));
                     GUILayout.FlexibleSpace();
-                    additionalOptions = GUILayout.Button(new GUIContent(additionalOptions ? collapseButton : expandButton)) ? !additionalOptions : additionalOptions;
+                    additionalOptions = AudibleButton(new GUIContent(additionalOptions ? collapseButton : expandButton)) ? !additionalOptions : additionalOptions;
                 GUILayout.EndHorizontal();
 
                 if (additionalOptions)
                 {
                     GUI.skin = whiteLabel;
 
-                    additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.MinHeight(64f));
+                    additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.MinHeight(128f));
                     {
                         GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
                         {
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
-                                GUILayout.Label("Flask Animation");
-                                Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty);
-                                GUILayout.Space(6f);
+                                GUILayout.Label("Globally Enable Animation", GUILayout.ExpandWidth(true));
+                                Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
+                            }
+                            GUILayout.EndHorizontal();
+
+                            GUILayout.Space(8f);
+
+
+                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            {
+                                GUILayout.Label(new GUIContent("Enable Minimum Science Threshold"), GUILayout.ExpandWidth(true));
+                                Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
                             }
                             GUILayout.EndHorizontal();
 
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
-                                GUILayout.Label(new GUIContent("Alert Threshold"), GUILayout.ExpandWidth(false));
-                                Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-
-
-                                string newValue = GUILayout.TextField(sciMinValue, 3, GUILayout.ExpandWidth(true));
-                                GUILayout.Label(new GUIContent("science"), GUILayout.ExpandWidth(true));
+                                GUILayout.Space(24f);
+                                GUILayout.Label("Ignore reports worth less than:");
+                                string newValue = GUILayout.TextField(sciMinValue, 5, GUILayout.MinWidth(24f));
+                                newValue = newValue.Replace(',', '.');
 
                                 float converted = 0f;
 
@@ -208,13 +239,11 @@ namespace ScienceAlert
                                         {
                                             audio.PlaySound("error");
                                             Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
-                                            Log.Write("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
+                                            Log.Debug("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
                                         }
                                     }
                             }
                             GUILayout.EndHorizontal();
-
-                            GUILayout.FlexibleSpace();
                         }
                         GUILayout.EndVertical();
 
@@ -222,49 +251,48 @@ namespace ScienceAlert
                     }
                     GUILayout.EndScrollView();
                 }
-                //else
-                //{
 
-                    scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
+
+                scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
+                {
+                    GUI.skin = Settings.Skin;
+
+                    var keys = new List<string>(experimentIds.Keys);
+
+                    foreach (var key in keys)
                     {
-                        GUI.skin = Settings.Skin;
+                        GUILayout.Space(8f);
 
-                        var keys = new List<string>(experimentIds.Keys);
+                        var settings = Settings.Instance.GetExperimentSettings(key);
+                        GUILayout.Box(ResearchAndDevelopment.GetExperiment(key).experimentTitle, GUILayout.ExpandWidth(true));
 
-                        foreach (var key in keys)
-                        {
-                            GUILayout.Space(8f);
+                        //GUILayout.Space(4f);
+                        settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
+                        settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
+                        settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
+                        settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
 
-                            var settings = Settings.Instance.GetExperimentSettings(key);
-                            GUILayout.Box(ResearchAndDevelopment.GetExperiment(key).experimentTitle, GUILayout.ExpandWidth(true));
+                        // only add the Assume Onboard option if the experiment isn't
+                        // one of the default types
+                        if (!settings.IsDefault)
+                            settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
 
-                            //GUILayout.Space(4f);
-                            settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
-                            settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
-                            settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
-                            settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
+                        GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
 
-                            // only add the Assume Onboard option if the experiment isn't
-                            // one of the default types
-                            if (!settings.IsDefault)
-                                settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
+                        int oldSel = experimentIds[key];
+                        experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
 
-                            GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
-
-                            int oldSel = experimentIds[key];
-                            experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
-
-                            if (oldSel != experimentIds[key])
-                                Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
+                        if (oldSel != experimentIds[key])
+                            Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
 
 
-                        }
                     }
-                    GUILayout.EndScrollView();
-                //}
+                }
+                GUILayout.EndScrollView();
             }
             GUILayout.EndVertical();
         }
+
 
 
         public void Update()

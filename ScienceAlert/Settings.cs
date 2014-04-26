@@ -173,7 +173,6 @@ namespace ScienceAlert
             PerExperimentSettings = new Dictionary<string, ExperimentSettings>();
             PerSoundSettings = new Dictionary<string, SoundSettings>();
 
-
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 PerExperimentSettings[expid] = new ExperimentSettings();
 

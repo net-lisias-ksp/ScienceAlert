@@ -110,6 +110,13 @@ namespace ScienceAlert
         /// <returns></returns>
         protected virtual float GetScienceTotal(ScienceSubject subject, out List<ScienceData> data)
         {
+            if (subject == null)
+            {
+                Log.Error("GetScienceTotal: subject is null; cannot locate stored data");
+                data = new List<ScienceData>();
+                return 0f;
+            }
+
             var found = storage.FindStoredData(subject.id);
             data = found;
 
@@ -123,8 +130,6 @@ namespace ScienceAlert
                 // we've got at least one report we need to consider
                 float potentialScience = subject.science + ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject);
 
-                // we can consider a maximum of two reports. At least until I figure
-                // out how exactly the decay factor works or do something hacky to fake it
                 if (found.Count() > 1)
                 {
                     float secondReport = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject);
@@ -178,6 +183,7 @@ namespace ScienceAlert
         }
 
 
+
         /// <summary>
         /// Calculate the value of a report if taken at this instant while
         /// considering existing science and reports
@@ -190,21 +196,18 @@ namespace ScienceAlert
         protected float CalculateNextReportValue(ScienceSubject subject, ExperimentSituations situation, List<ScienceData> stored)
         {
             if (stored.Count == 0)
-                ResearchAndDevelopment.GetReferenceDataValue(experiment.baseValue * experiment.dataScale, subject);
-
-            if (stored.Count == 1)
                 return ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, subject);
 
             float experimentValue = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject);
 
-            if (stored.Count == 2)
+            if (stored.Count == 1)
                 return experimentValue;
 
-            // for more than 2, we'll have to estimate. Presumably there's some
+
+            // for two or more, we'll have to estimate. Presumably there's some
             // kind of interpolation going on. I've found that just dividing the previous
-            // value by four is a good estimate. Having three of the exact same reports
-            // on a vessel will be quite uncommon anyway
-            return experimentValue / Mathf.Pow(4f, stored.Count - 2);
+            // value by four is a good estimate.
+            return experimentValue / Mathf.Pow(4f, stored.Count - 1);
         }
 
 
@@ -252,9 +255,6 @@ namespace ScienceAlert
                     if (experiment.BiomeIsRelevantWhile(experimentSituation))
                         if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
                         {
-                            if (biome == null)
-                                Log.Error("SUPERERROR: biomeFilter returned true but gave a null biome!");
-
                             lastBiomeQuery = biome;
                         }
                         else
@@ -305,6 +305,10 @@ namespace ScienceAlert
                             // make sure any experiment we alert on will produce at
                             // least X science, or we should ignore it even if it
                             // would otherwise match the filter
+#if DEBUG
+                            Log.Write("next report value of {0}: {1}", experiment.id, CalculateNextReportValue(subject, experimentSituation, data));
+#endif
+
                             Available = Available && CalculateNextReportValue(subject, experimentSituation, data) >= Settings.Instance.ScienceThreshold;
 #if DEBUG
                             if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
@@ -321,7 +325,7 @@ namespace ScienceAlert
 
                             if (Available != lastStatus && Available)
                             {
-                                Log.Write("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science);
+                                Log.Write("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, CalculateNextReportValue(subject, experimentSituation, data));
 
 #if DEBUG
                             if (data.Count() > 0)
@@ -333,8 +337,12 @@ namespace ScienceAlert
                             }
                         }
 
-                    } catch (NullReferenceException e)
+                    } catch (NullReferenceException)
                     {
+                        // note to self: even with all the logging I did when
+                        // I could sometimes reproduce the exception, nothing
+                        // looked wrong except that biome string becomes null
+
                         // trying to track down this, which occurs sometimes when
                         // switching vessels:
                         /*
@@ -349,24 +357,26 @@ namespace ScienceAlert
 
   at ScienceAlert.ScienceAlert.Update () [0x00000] in <filename unknown>:0 
                          * */
-                        Log.Error("NullReferenceException: {0}", e);
-                        Log.Error("While processing: {0}", experiment.experimentTitle);
-                        if (experiment == null) Log.Error("Observer's experiment is null");
-                        //if (experimentSituation == null) Log.Error("bad situation");
-                        if (vessel == null) Log.Error("Vessel is null");
-                        if (vessel.mainBody == null) Log.Error("mainBody is null");
-                        if (biome == null) Log.Error("biome is null");
-                        Log.Error("Last biome query: {0}", lastBiomeQuery);
-                        Log.Error("last available id: {0}", lastAvailableId);
-                        Log.Error("Experiment situation: {0}", experimentSituation);
-                        if (vessel.mainBody.BiomeMap == null)
-                            Log.Error("vessel body has no biome map");
-                        if (experiment.BiomeIsRelevantWhile(experimentSituation))
-                            Log.Error("Biome is relevant");
-                        if (string.Empty == null)
-                            Log.Error("Logic fail: string.empty is null");
-                        Log.Error("Body.theName = {0}, is null {1}", vessel.mainBody.theName, vessel.mainBody.theName == null ? "yes" : "no");
+                        //Log.Error("NullReferenceException: {0}", e);
+                        //Log.Error("While processing: {0}", experiment.experimentTitle);
+                        //if (experiment == null) Log.Error("Observer's experiment is null");
+                        ////if (experimentSituation == null) Log.Error("bad situation");
+                        //if (vessel == null) Log.Error("Vessel is null");
+                        //if (vessel.mainBody == null) Log.Error("mainBody is null");
+                        //if (biome == null) Log.Error("biome is null");
+                        //Log.Error("Last biome query: {0}", lastBiomeQuery);
+                        //Log.Error("last available id: {0}", lastAvailableId);
+                        //Log.Error("Experiment situation: {0}", experimentSituation);
+                        //if (vessel.mainBody.BiomeMap == null)
+                        //    Log.Error("vessel body has no biome map");
+                        //if (experiment.BiomeIsRelevantWhile(experimentSituation))
+                        //    Log.Error("Biome is relevant");
+                        //if (string.Empty == null)
+                        //    Log.Error("Logic fail: string.empty is null");
+                        //Log.Error("Body.theName = {0}, is null {1}", vessel.mainBody.theName, vessel.mainBody.theName == null ? "yes" : "no");
 
+                        Log.Error("Failed to create {0} ScienceSubject. If you can manage to reproduce this error, let me know.", experiment.id);
+                        Available = false;
                     }
                 }
                 else
@@ -435,7 +445,7 @@ namespace ScienceAlert
                 {
                     if (modules.Count == 0)
                     {
-                        PopupDialog.SpawnPopupDialog("Error", string.Format("Cannot deploy custom experiment {0} because it does not extend ModuleScienceExperiment; you will have to manually deploy it.  Sorry!", ExperimentTitle), "Okay", false, HighLogic.Skin);
+                        PopupDialog.SpawnPopupDialog("Error", string.Format("Cannot deploy custom experiment {0} because it does not extend ModuleScienceExperiment; you will have to manually deploy it. Sorry!", ExperimentTitle), "Okay", false, HighLogic.Skin);
                         Log.Error("Custom experiment {0} has no modules and AssumeOnBoard flag; informed user that we cannot automatically deploy it.", ExperimentTitle);
                         return false;
                     }

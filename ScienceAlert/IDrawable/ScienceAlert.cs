@@ -33,11 +33,10 @@
  *      Fixed an issue where the biome filter could sometimes
  *          ignore biome
  *          
+ *      Fixed an issue caused by last version's fix which could make
+ *          the flight camera and map camera active at the same time if
+ *          the player goes on eva with an active map view
  *          
- * 1.4b
- *      Fixed an issue where 1.4a's fix would cause the flight and
- *          map cameras to interact strangely if the player was
- *          in map view at the time
  *          
  * 1.4a
  *      Fixed an issue where game would use the incorrect camera
@@ -102,6 +101,9 @@ using Toolbar;
 using DebugTools;
 using ResourceTools;
 
+// TODO: prevent users from clicking on science button multiple times in rapid
+//          succession, activating multiple science reports? Most apparent time
+//          is when activating goo, which has a delay as it plays the open animation
 
 // TODO: manually selected transmitters ignore MagicTransmitter
 //          further thought: who really does this?  will think on it more
@@ -727,23 +729,22 @@ namespace ScienceAlert
 
         private void DrawButtonMenu(int winid)
         {
-            //GUILayout.BeginArea(new Rect(position.x, position.y, necessaryWidth, necessaryHeight));
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-
-            foreach (var observer in observers)
-                if (observer.Available)
-                {
-                    var content = new GUIContent(observer.ExperimentTitle);
-
-                    if (GUILayout.Button(content))
+            {
+                foreach (var observer in observers)
+                    if (observer.Available)
                     {
-                        Log.Debug("Deploying {0}", observer.ExperimentTitle);
-                        effects.AudioController.PlaySound("click2");
-                        observer.Deploy();
+                        var content = new GUIContent(observer.ExperimentTitle);
+
+                        if (GUILayout.Button(content))
+                        {
+                            Log.Debug("Deploying {0}", observer.ExperimentTitle);
+                            effects.AudioController.PlaySound("click2");
+                            observer.Deploy();
+                        }
                     }
-                }
+            }
             GUILayout.EndVertical();
-            //GUILayout.EndArea();
         }
 
         public void OnToolbarClick(ClickEvent ce)
