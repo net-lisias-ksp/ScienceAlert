@@ -18,8 +18,9 @@
  *****************************************************************************/
 using System.Collections.Generic;
 using System.IO;
+using System;
 using UnityEngine;
-using DebugTools;
+using LogTools;
 
 namespace ScienceAlert
 {
@@ -105,7 +106,13 @@ namespace ScienceAlert
 
                     Log.Debug("Loaded sound; adding as {0}", name);
 
-                    sounds.Add(name, new PlayableSound(newClip, gameObject.audio, Settings.Instance.GetSoundSettings(name)));
+                    try
+                    {
+                        sounds.Add(name, new PlayableSound(newClip, gameObject.audio, Settings.Instance.GetSoundSettings(name)));
+                    } catch (Exception e)
+                    {
+                        Log.Error("AudioController: cannot add {0} due to {1}", name, e);
+                    }
                 }
             }
 

@@ -22,7 +22,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Toolbar;
-using DebugTools;
+using LogTools;
 using ResourceTools;
 
 namespace ScienceAlert
@@ -169,7 +169,7 @@ namespace ScienceAlert
 
         private void RenderControls(int windowId)
         {
-            GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+            GUILayout.BeginVertical(GUILayout.ExpandWidth(true), GUILayout.Height(windowRect.height));
             {
 
                 GUILayout.Label(new GUIContent("Global Warp Settings"), GUILayout.ExpandWidth(true));

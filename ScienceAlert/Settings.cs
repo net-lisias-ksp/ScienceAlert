@@ -22,7 +22,7 @@ using System.Text;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
-using DebugTools;
+using LogTools;
 using ConfigTools;
 
 namespace ScienceAlert

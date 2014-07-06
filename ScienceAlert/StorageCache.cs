@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using DebugTools;
+using LogTools;
 
 namespace ScienceAlert
 {
@@ -157,6 +157,8 @@ namespace ScienceAlert
 
             Log.Debug("StorageCache: Rebuilding ...");
 
+            yield return new WaitForFixedUpdate();
+
             if (FlightGlobals.ActiveVessel != vessel)
             {
                 // this could be an indication that we're not monitoring
@@ -206,7 +208,10 @@ namespace ScienceAlert
                     if (transmitters.Any(tx => !(tx is MagicDataTransmitter)))
                     {
                         magicTransmitter = vessel.rootPart.AddModule("MagicDataTransmitter") as MagicDataTransmitter;
+                        magicTransmitter.cacheOwner = this;
+
                         Log.Debug("Added MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.ConstructID);
+
                     }
                 } else
                 {

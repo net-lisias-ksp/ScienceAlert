@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using DebugTools;
+using LogTools;
 #if DEBUG
 using ResourceTools;
 #endif
@@ -82,12 +82,8 @@ namespace ScienceAlert
         {
             biome = string.Empty;
             var vessel = FlightGlobals.ActiveVessel;
-#if DEBUG
-                if (FlightGlobals.ActiveVessel.mainBody != current)
-                    Log.Error("BiomeFilter.GetBome body mismatch: active {0} does not match cached {1}!", FlightGlobals.currentMainBody, current);
-#endif
 
-            if (vessel.mainBody.BiomeMap == null)
+            if (vessel == null || vessel.mainBody.BiomeMap == null || vessel.mainBody.BiomeMap.Map == null)
                 return true;
 
             // vessel.landedAt gets priority since there are some special
@@ -140,6 +136,15 @@ namespace ScienceAlert
         }
         private bool VerifyBiomeResult(double lat, double lon, CBAttributeMap.MapAttribute target)
         {
+            if (projectedMap == null)
+            {
+                Log.Debug("Cannot verify biome result; no projected map exists");
+                return true; // we'll have to assume it's accurate since we can't prove otherwise
+            }
+
+            if (target == null || target.mapColor == null)
+                return true; // this shouldn't happen 
+
             lon -= Mathf.PI * 0.5f;
             if (lon < 0d) lon += Mathf.PI * 2d;
             lon %= Mathf.PI * 2d;
@@ -158,9 +163,6 @@ namespace ScienceAlert
                 if (Similar(c, target.mapColor))
                     return true; // we have a match, no need to look further
             }
-
-            //if (Settings.Instance.DebugMode)
-            //    Log.Error("VerifyBiomeResult: '{0}' is probably bogus", target.name);
 
             return false;
         }
@@ -200,6 +202,7 @@ namespace ScienceAlert
             {
                 Log.Error("BiomeFilter.ReprojectMap failure: newBody is null!");
                 projector = null;
+                current = null;
                 yield break;
             }
 
@@ -209,38 +212,38 @@ namespace ScienceAlert
             if (newBody != FlightGlobals.currentMainBody)
                 Log.Error("Error: BiomeFilter.ReprojectBiomeMap was given wrong target! Given {0}, it should be {1}", newBody.name, FlightGlobals.currentMainBody.name);
 #endif
-            current = newBody;
+            current = null;
 
-            if (current.BiomeMap == null)
+            if (newBody.BiomeMap == null || newBody.BiomeMap.Map == null)
             {
-                projectedMap = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                projectedMap = null;
                 projector = null;
                 yield break;
             }
 
-            projectedMap = new Texture2D(current.BiomeMap.Map.width, current.BiomeMap.Map.height, TextureFormat.ARGB32, false);
-            projectedMap.filterMode = FilterMode.Point;
+            Texture2D projection = new Texture2D(newBody.BiomeMap.Map.width, newBody.BiomeMap.Map.height, TextureFormat.ARGB32, false);
+            projection.filterMode = FilterMode.Point;
 
 
             yield return null;
 
             float timer = Time.realtimeSinceStartup;
-            Color32[] pixels = projectedMap.GetPixels32();
+            Color32[] pixels = projection.GetPixels32();
 
-            for (int y = 0; y < projectedMap.height; ++y)
+            for (int y = 0; y < projection.height; ++y)
             {
-                for (int x = 0; x < projectedMap.width; ++x)
+                for (int x = 0; x < projection.width; ++x)
                 {
                     // convert x and y into uv coordinates
-                    float u = (float)x / projectedMap.width;
-                    float v = (float)y / projectedMap.height;
+                    float u = (float)x / projection.width;
+                    float v = (float)y / projection.height;
 
                     // convert uv coordinates into latitude and longitude
                     double lat = Math.PI * v - Math.PI * 0.5;
                     double lon = 2d * Math.PI * u + Math.PI * 0.5;
 
                     // set biome color in our clean texture
-                    pixels[y * projectedMap.width + x] = (Color32)current.BiomeMap.GetAtt(lat, lon).mapColor;
+                    pixels[y * projection.width + x] = (Color32)newBody.BiomeMap.GetAtt(lat, lon).mapColor;
                 }
 
                 Log.Debug("ScienceAlert.BiomeFilter: still working");
@@ -249,20 +252,24 @@ namespace ScienceAlert
                     yield return null;
             }
 
-            projectedMap.SetPixels32(pixels);
-            projectedMap.Apply();
-#if DEBUG
-            projectedMap.SaveToDisk(string.Format("ScienceAlert/projected_{0}.png", current.name));
+            projection.SetPixels32(pixels);
+            projection.Apply();
 
-            var original = new Texture2D(current.BiomeMap.Map.width, current.BiomeMap.Map.height, TextureFormat.ARGB32, false);
-            var origPixels = current.BiomeMap.Map.GetPixels32();
+            Log.Debug("Finished projection; storing data");
+#if DEBUG
+            projection.SaveToDisk(string.Format("ScienceAlert/projected_{0}.png", newBody.name));
+
+            var original = new Texture2D(newBody.BiomeMap.Map.width, newBody.BiomeMap.Map.height, TextureFormat.ARGB32, false);
+            var origPixels = newBody.BiomeMap.Map.GetPixels32();
             original.SetPixels32(origPixels);
             original.Apply();
 
-            original.SaveToDisk(string.Format("ScienceAlert/original_{0}.png", current.name));
+            original.SaveToDisk(string.Format("ScienceAlert/original_{0}.png", newBody.name));
 #endif   
-            Log.Verbose("Filtering biome map of {0} took {1} seconds", current.name, Time.realtimeSinceStartup - timer);
+            Log.Verbose("Filtering biome map of {0} took {1} seconds", newBody.name, Time.realtimeSinceStartup - timer);
 
+            current = newBody;
+            projectedMap = projection;
             projector = null; // we're finished!
         }
 

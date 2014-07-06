@@ -21,6 +21,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.5a
+ *      Bugfix: Fixed issue where alerts could appear for science reports worth
+ *              no science
+ *              
+ *      Bugfix: Rapidly disintegrating vessels could sometimes cause an issue
+ *              that spammed KeyNotFound exceptions
+ *              
+ *      Bugfix: Biome map filter function could sometimes be interrupted and
+ *              be left in a bad state, causing ScienceAlert to stop reporting
+ *              science
+ *              
+ *      Bugfix: Biome map filter function could, in rare circumstances, produce
+ *              a wrong result
+ * 
  * 1.5
  *      New feature: you can now set a minimum threshold for a science report
  *          If performing an experiment won't result in at least that much
@@ -98,7 +112,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Toolbar;
-using DebugTools;
+using LogTools;
 using ResourceTools;
 
 // TODO: prevent users from clicking on science button multiple times in rapid
@@ -355,7 +369,7 @@ namespace ScienceAlert
 
 
 
-    [KSPAddon(KSPAddon.Startup.Flight, false)]
+    [ImprovedAddonLoader.KSPAddonImproved(ImprovedAddonLoader.KSPAddonImproved.Startup.Flight, false)]
     public class ScienceAlert : MonoBehaviour, IDrawable
     {
         public enum IconState
@@ -571,32 +585,83 @@ namespace ScienceAlert
             while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed)
                 yield return 0;
 
-            // construct the experiment observer list ...
-            foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                if (expid != "evaReport") // evaReport is a special case
-                    if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
-                    {   // we can't monitor this experiment, so no need to clutter the
-                        // ui with it
-                        Log.Warning("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
-                        
-                    } else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, expid));
 
-            // evaReport is a special case.  It technically exists on any crewed
-            // vessel.  That vessel won't report it normally though, unless
-            // the vessel is itself an eva'ing Kerbal.  Since there are conditions
-            // that would result in the experiment no longer being available 
-            // (kerbal dies, user goes out on eva and switches back to ship, and
-            // so on) I think it's best we separate it out into its own
-            // Observer type that will account for these changes and any others
-            // that might not necessarily trigger a VesselModified event
-            if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
-                observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter));
+            // critical: there's a quiet issue where sometimes user get multiple
+            //           experimentIds loaded (the one I know of at the moment is
+            //           through a small bug in MM), but if that happens, GetExperimentIDs()
+            //           will throw an exception and the whole plugin goes down in flames.
 
-            observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+            try
+            {
+                // construct the experiment observer list ...
+                foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
+                    if (expid != "evaReport") // evaReport is a special case
+                        if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
+                        {   // we can't monitor this experiment, so no need to clutter the
+                            // ui with it
+                            Log.Warning("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
 
-            watcher = UpdateObservers();
+                        }
+                        else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, expid));
 
-            Log.Write("Observer list rebuilt");
+                // evaReport is a special case.  It technically exists on any crewed
+                // vessel.  That vessel won't report it normally though, unless
+                // the vessel is itself an eva'ing Kerbal.  Since there are conditions
+                // that would result in the experiment no longer being available 
+                // (kerbal dies, user goes out on eva and switches back to ship, and
+                // so on) I think it's best we separate it out into its own
+                // Observer type that will account for these changes and any others
+                // that might not necessarily trigger a VesselModified event
+                if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
+                    observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter));
+
+                observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+
+                watcher = UpdateObservers();
+
+                Log.Write("Observer list rebuilt");
+            } catch (Exception e)
+            {
+                Log.Error("CRITICAL: Exception RebuildObserverList(): {0}", e);
+
+                Log.Write("Listing current experiment definitions:");
+
+                // It's usually something to do with duplicate crew reports
+                foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
+                {
+                    // note: avoid being too spammy by removing the results sections,
+                    // those aren't goign to be causing problems anyway
+                    ConfigNode snipped = new ConfigNode();
+                    node.CopyTo(snipped);
+
+                    snipped.RemoveNode("RESULTS");
+
+                    Log.Write("{0}", snipped.ToString());
+                }
+
+                Log.Write("Finished listing experiment definitions.");
+
+                // find any duplicates
+                HashSet<string /* id */> alreadyKnown = new HashSet<string>();
+
+                foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
+                {
+                    if (node.HasValue("id"))
+                    {
+                        string id = node.GetValue("id");
+
+                        if (!alreadyKnown.Contains(id))
+                        {
+                            alreadyKnown.Add(id);
+                        }
+                        else
+                        {
+                            Log.Error("Duplicate science definition found for '{0}'", id);
+                        }
+                    }
+                    else Log.Write("no value id found");
+                }
+            }
         }
 
 
@@ -704,26 +769,39 @@ namespace ScienceAlert
             float maxHeight = 32f * observers.Count;
             float necessaryHeight = 32f * observers.Count(obs => obs.Available);
 
-            if (necessaryHeight < 31.9999f)
+            // maybe this is contributing to the strange behaviour with
+            // toolbar 1.7.2?
+            //if (necessaryHeight < 31.9999f)
+            //{
+            //    MenuOpen = false;
+            //    return Vector2.zero;
+            //}
+
+            // alternate version:
+            if (necessaryHeight > 31.9999f)
             {
-                MenuOpen = false;
-                return Vector2.zero;
+
+
+                var old = GUI.skin;
+
+                GUI.skin = Settings.Skin;
+
+                experimentButtonRect.x = position.x;
+                experimentButtonRect.y = position.y;
+                experimentButtonRect.height = necessaryHeight;
+
+                GUILayout.Window(experimentMenuID, experimentButtonRect, DrawButtonMenu, "Available Experiments");
+
+
+                GUI.skin = old;
+                //var windowSize = GUILayoutUtility.GetLastRect();
+
+                //return new Vector2(experimentButtonRect.width, maxHeight);
             }
 
-            var old = GUI.skin;
+            return new Vector2(experimentButtonRect.width, necessaryHeight);
 
-            GUI.skin = Settings.Skin;
-
-            experimentButtonRect.x = position.x;
-            experimentButtonRect.y = position.y;
-            experimentButtonRect.height = necessaryHeight;
-
-            GUILayout.Window(experimentMenuID, experimentButtonRect, DrawButtonMenu, "Available Experiments");
-
-
-            GUI.skin = old;
-
-            return new Vector2(experimentButtonRect.width, maxHeight);
+            //return new Vector2(windowSize.width, windowSize.height);
         }
 
 

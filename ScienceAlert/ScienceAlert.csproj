@@ -39,8 +39,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Toolbar">
-      <HintPath>C:\Program Files (x86)\Steam\SteamApps\common\Kerbal Space Program\GameData\000_Toolbar\Toolbar.dll</HintPath>
+    <Reference Include="Toolbar, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Kerbal Space Program\GameData\000_Toolbar\Toolbar.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files (x86)\Steam\SteamApps\common\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
@@ -49,6 +50,9 @@
   <ItemGroup>
     <Compile Include="..\..\DebugTools\ConfigUtil.cs">
       <Link>Tools\ConfigUtil.cs</Link>
+    </Compile>
+    <Compile Include="..\..\DebugTools\ImprovedAddonLoader.cs">
+      <Link>Tools\ImprovedAddonLoader.cs</Link>
     </Compile>
     <Compile Include="..\..\DebugTools\Log.cs">
       <Link>Tools\Log.cs</Link>

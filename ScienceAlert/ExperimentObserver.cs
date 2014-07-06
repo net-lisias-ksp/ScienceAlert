@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using DebugTools;
+using LogTools;
 
 namespace ScienceAlert
 {
@@ -299,6 +299,11 @@ namespace ScienceAlert
                                 break;
                         }
 
+                        // bugfix: also ensure the experiment will generate >0 science, else
+                        //         we could produce alerts for reports that won't generate any science
+                        float nextReport = CalculateNextReportValue(subject, experimentSituation, data);
+                        Available = Available && nextReport > 0.01f;
+
                         // check the science threshold
                         if (Available && Settings.Instance.EnableScienceThreshold)
                         {
@@ -309,7 +314,7 @@ namespace ScienceAlert
                             Log.Write("next report value of {0}: {1}", experiment.id, CalculateNextReportValue(subject, experimentSituation, data));
 #endif
 
-                            Available = Available && CalculateNextReportValue(subject, experimentSituation, data) >= Settings.Instance.ScienceThreshold;
+                            Available = Available && nextReport >= Settings.Instance.ScienceThreshold;
 #if DEBUG
                             if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
                                 Log.Warning("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
@@ -325,7 +330,7 @@ namespace ScienceAlert
 
                             if (Available != lastStatus && Available)
                             {
-                                Log.Write("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, CalculateNextReportValue(subject, experimentSituation, data));
+                                Log.Write("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, nextReport);
 
 #if DEBUG
                             if (data.Count() > 0)

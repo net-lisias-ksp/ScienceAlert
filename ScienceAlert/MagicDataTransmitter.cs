@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using DebugTools;
+using LogTools;
 
 namespace ScienceAlert
 {
@@ -68,7 +68,7 @@ namespace ScienceAlert
         // will result in it getting stalled, remaining open but
         // not sending data
         private Dictionary<IScienceDataTransmitter, ScienceDataList> toBeTransmitted = new Dictionary<IScienceDataTransmitter, ScienceDataList>();
-
+        internal StorageCache cacheOwner;
 
         /// <summary>
         /// Called just as the PartModule is added to a Part.  We can
@@ -104,14 +104,40 @@ namespace ScienceAlert
             // as soon as its assigned transmitter becomes available
             var txs = toBeTransmitted.Keys;
 
-            foreach (var tx in txs)
-                if (toBeTransmitted[tx].Count > 0)
-                    if (!tx.IsBusy() && tx.CanTransmit())
-                    {
-                        realTransmitters[tx].AddRange(toBeTransmitted[tx]);
-                        toBeTransmitted[tx].Clear();
-                        tx.TransmitData(realTransmitters[tx]);
-                    }
+            try
+            {
+                foreach (var tx in txs)
+                    if (toBeTransmitted[tx].Count > 0)
+                        if (!tx.IsBusy() && tx.CanTransmit())
+                        {
+          
+                                realTransmitters[tx].AddRange(toBeTransmitted[tx]);
+                                toBeTransmitted[tx].Clear();
+                                tx.TransmitData(realTransmitters[tx]);
+
+                        }
+            }
+            catch (KeyNotFoundException)
+            {
+                // I'm not sure exactly what causes this to occur
+                // It may be a result of a mod collision or perhaps an event
+                // managed to slip through while the vessel is exploding. Last
+                // time I observed this personally was as the vessel was rolling
+                // down a hill shedding pieces furiously
+
+                /*
+                 * KeyNotFoundException: The given key was not present in the dictionary.
+                      at System.Collections.Generic.Dictionary`2[IScienceDataTransmitter,System.Collections.Generic.List`1[ScienceData]].get_Item (IScienceDataTransmitter key) [0x00000] in <filename unknown>:0 
+                      at ScienceAlert.MagicDataTransmitter.Update () [0x00000] in <filename unknown>:0 
+                 **/
+                Log.Error("MagicDataTransmitter appears to be out of date. Any queued data might have been lost.");
+                cacheOwner.ScheduleRebuild();
+
+                toBeTransmitted.Clear();
+                realTransmitters.Clear();
+
+                
+            }
         }
 
 
