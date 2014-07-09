@@ -1,0 +1,33 @@
+﻿//using System;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+using UnityEngine;
+
+namespace ScienceAlert
+{
+    /// <summary>
+    /// I'm sure there's a better name for this, but essentially this abstracts
+    /// away the exact mechanism that determines whether a location (lat/lon-wise)
+    /// can be checked for an experiment. 
+    /// </summary>
+    internal class ScanInterface : MonoBehaviour
+    {
+        public ScienceAlert creator;
+
+        /// <summary>
+        /// Returns true if the projected location on the biome map has been 
+        /// revealed.
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <returns></returns>
+        public virtual bool HaveScanData(double lat, double lon) { return true; }
+        //public virtual bool ReadyToBeCreated()
+        
+    }
+
+    internal class DefaultScanInterface : ScanInterface
+    {
+    }
+}

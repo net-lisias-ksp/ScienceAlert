@@ -124,6 +124,9 @@ namespace ScienceAlert
                 // managed to slip through while the vessel is exploding. Last
                 // time I observed this personally was as the vessel was rolling
                 // down a hill shedding pieces furiously
+                //
+                // most likely, the transmitter was destroyed. Might be related
+                // to a bug I found with RebuildObservers
 
                 /*
                  * KeyNotFoundException: The given key was not present in the dictionary.
@@ -131,12 +134,11 @@ namespace ScienceAlert
                       at ScienceAlert.MagicDataTransmitter.Update () [0x00000] in <filename unknown>:0 
                  **/
                 Log.Error("MagicDataTransmitter appears to be out of date. Any queued data might have been lost.");
-                cacheOwner.ScheduleRebuild();
 
                 toBeTransmitted.Clear();
                 realTransmitters.Clear();
 
-                
+                cacheOwner.ScheduleRebuild();  
             }
         }
 
@@ -233,9 +235,20 @@ namespace ScienceAlert
             get
             {
                 ScienceDataList list = new ScienceDataList();
+                bool badFlag = false; // used to exterminate a KeyNotFound exception that
+                                      // seems to slip through now and then
 
                 foreach (var kvp in realTransmitters)
                 {
+                    if (kvp.Key == null || kvp.Value == null)
+                    {
+                        // something happened to cause our transmitter list to
+                        // be wrong somehow
+                        Log.Error("MagicDataTransmitter: Encountered a bad transmitter value.");
+                        badFlag = true;
+                        continue;
+                    }
+
                     if (!kvp.Key.IsBusy())
                         kvp.Value.Clear(); // it's not doing anything, therefore nothing is queued
 
@@ -243,6 +256,11 @@ namespace ScienceAlert
                     list.AddRange(toBeTransmitted[kvp.Key]);
                 }
 
+                if (badFlag)
+                {
+                    Log.Warning("Resetting MagicDataTransmitter due to bad transmitter key or value");
+                    cacheOwner.ScheduleRebuild();
+                }
                 return list;
             }
         }

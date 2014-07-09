@@ -43,16 +43,25 @@ namespace ScienceAlert
         protected string lastAvailableId;                   // Id of the last time the experiment was available
         protected string lastBiomeQuery;                    // the last good biome result we had
         protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
+        protected ScanInterface scanInterface;              // Determines whether we're allowed to know if an experiment is available
 
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
 
 
-        public ExperimentObserver(StorageCache cache, Settings.ExperimentSettings expSettings, BiomeFilter filter, string expid)
+        public ExperimentObserver(StorageCache cache, Settings.ExperimentSettings expSettings, BiomeFilter filter, ScanInterface scanMapInterface, string expid)
         {
             settings = expSettings;
             biomeFilter = filter;
+
+            if (scanMapInterface == null)
+            {
+                Log.Warning("ExperimentObserver for {0} given null scanning interface. Using default.", expid);
+                scanMapInterface = new DefaultScanInterface();
+            }
+
+            scanInterface = scanMapInterface;
 
             experiment = ResearchAndDevelopment.GetExperiment(expid);
 
@@ -186,8 +195,7 @@ namespace ScienceAlert
 
         /// <summary>
         /// Calculate the value of a report if taken at this instant while
-        /// considering existing science and reports
-        /// stored onboard
+        /// considering existing science and reports stored onboard
         /// </summary>
         /// <param name="subject"></param>
         /// <param name="situation"></param>
@@ -253,15 +261,27 @@ namespace ScienceAlert
                     //
                     // Supplying an empty string if the biome doesn't matter seems to work
                     if (experiment.BiomeIsRelevantWhile(experimentSituation))
-                        if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
+                    {
+                        // biome matters; check to make sure we have biome data available
+                        if (scanInterface.HaveScanData(vessel.latitude, vessel.longitude))
                         {
-                            lastBiomeQuery = biome;
+                            if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
+                            {
+                                lastBiomeQuery = biome;
+                            }
+                            else
+                            {
+                                biome = lastBiomeQuery; // use last good known value
+                            }
                         }
                         else
-                        {
-                            biome = lastBiomeQuery; // we're almost certainly still in the old area then
+                        { // no biome data available
+                            Available = false;
+                            lastAvailableId = "";
+                            return false;
                         }
 
+                    }
 
                     try
                     {
@@ -347,38 +367,6 @@ namespace ScienceAlert
                         // note to self: even with all the logging I did when
                         // I could sometimes reproduce the exception, nothing
                         // looked wrong except that biome string becomes null
-
-                        // trying to track down this, which occurs sometimes when
-                        // switching vessels:
-                        /*
-                         * NullReferenceException: Object reference not set to an instance of an object
-  at ScienceSubject..ctor (.ScienceExperiment exp, ExperimentSituations sit, .CelestialBody body, System.String biome) [0x00000] in <filename unknown>:0 
-
-  at ResearchAndDevelopment.GetExperimentSubject (.ScienceExperiment experiment, ExperimentSituations situation, .CelestialBody body, System.String biome) [0x00000] in <filename unknown>:0 
-
-  at ScienceAlert.ExperimentObserver.UpdateStatus (ExperimentSituations experimentSituation) [0x00000] in <filename unknown>:0 
-
-  at ScienceAlert.ScienceAlert+<UpdateObservers>d__8.MoveNext () [0x00000] in <filename unknown>:0 
-
-  at ScienceAlert.ScienceAlert.Update () [0x00000] in <filename unknown>:0 
-                         * */
-                        //Log.Error("NullReferenceException: {0}", e);
-                        //Log.Error("While processing: {0}", experiment.experimentTitle);
-                        //if (experiment == null) Log.Error("Observer's experiment is null");
-                        ////if (experimentSituation == null) Log.Error("bad situation");
-                        //if (vessel == null) Log.Error("Vessel is null");
-                        //if (vessel.mainBody == null) Log.Error("mainBody is null");
-                        //if (biome == null) Log.Error("biome is null");
-                        //Log.Error("Last biome query: {0}", lastBiomeQuery);
-                        //Log.Error("last available id: {0}", lastAvailableId);
-                        //Log.Error("Experiment situation: {0}", experimentSituation);
-                        //if (vessel.mainBody.BiomeMap == null)
-                        //    Log.Error("vessel body has no biome map");
-                        //if (experiment.BiomeIsRelevantWhile(experimentSituation))
-                        //    Log.Error("Biome is relevant");
-                        //if (string.Empty == null)
-                        //    Log.Error("Logic fail: string.empty is null");
-                        //Log.Error("Body.theName = {0}, is null {1}", vessel.mainBody.theName, vessel.mainBody.theName == null ? "yes" : "no");
 
                         Log.Error("Failed to create {0} ScienceSubject. If you can manage to reproduce this error, let me know.", experiment.id);
                         Available = false;
@@ -578,8 +566,8 @@ namespace ScienceAlert
         /// <summary>
         /// Constructor
         /// </summary>
-        public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter)
-            : base(cache, settings, filter, "evaReport")
+        public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
+            : base(cache, settings, filter, scanInterface, "evaReport")
         {
 
         }

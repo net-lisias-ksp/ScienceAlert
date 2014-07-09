@@ -408,6 +408,9 @@ namespace ScienceAlert
         // cleans up biome maps
         BiomeFilter biomeFilter;
 
+        // for interfacing with Scansat (or similar)
+        ScanInterface scanInterface;
+
         // experiment text related
         private float maximumTextLength = float.NaN;
         private Rect experimentButtonRect = new Rect(0, 0, 0, 0);
@@ -434,10 +437,18 @@ namespace ScienceAlert
             effects = new EffectController(this); // requires toolbar button to exist
             optionsWindow = new OptionsWindow(effects.AudioController);
             biomeFilter = gameObject.AddComponent<BiomeFilter>();
+            vesselStorage = gameObject.AddComponent<StorageCache>();
 
             // set up coroutines
-            rebuilder = RebuildObserverList();
             animation = effects.FlaskAnimation();
+            //rebuilder = RebuildObserverList();      // no longer necessary; interface change will kick this off now
+
+            // set up whichever interface we're using to determine when it's
+            // permissable to check for science reports
+            // 
+            // it's delayed to make sure whichever interface (if not the
+            // default) has initialized
+            ScheduleInterfaceChange(Settings.Instance.GetInterfaceType());
         }
 
 
@@ -480,32 +491,10 @@ namespace ScienceAlert
                 if (!vesselStorage.IsBusy && watcher != null && animation != null)
                 {
                     if (!PauseMenu.isOpen)
-                        watcher.MoveNext();
+                        if (watcher != null) watcher.MoveNext();
                     animation.MoveNext();
-                } else Log.Debug("storage is busy");
+                } 
             }
-
-            //if (Input.GetKeyDown(KeyCode.S))
-            //{
-            //    Log.Debug("Playing bubbles!");
-
-            //    audio.PlaySound(AudioController.AvailableSounds.Bubbles);
-            //}
-
-            //if (Input.GetKeyDown(KeyCode.U))
-            //    vesselStorage.DumpContainerData();
-
-            //if (Input.GetKeyDown(KeyCode.R))
-            //    vesselStorage.ScheduleRebuild();
-
-            //if (Input.GetKeyDown(KeyCode.U))
-            //{
-            //    foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-            //    {
-            //        var settings = Settings.Instance.GetExperimentSettings(expid);
-            //        Log.Debug("{0} settings: {1}", expid, settings.ToString());
-            //    }
-            //}
         }
 
         
@@ -520,10 +509,6 @@ namespace ScienceAlert
         {
             if (vessel == FlightGlobals.ActiveVessel)
             {
-                //Log.Debug("OnVesselWasModified invoked, rebuilding observer list");
-                //observers.Clear();
-                //rebuilder = RebuildObserverList();
-
                 Log.Write("Vessel was modified; refreshing observer caches...");
                     foreach (var obs in observers)
                         obs.Rebuild();
@@ -567,6 +552,116 @@ namespace ScienceAlert
 
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private System.Collections.IEnumerator ScheduledInterfaceChange(Settings.ScanInterface type)
+        {
+            Log.Write("Scheduled interface change");
+
+            if (SCANsatInterface.IsAvailable())
+                while (!SCANsatInterface.ScenarioReady())
+                    yield return 0;
+
+
+            while (!FlightGlobals.ready || HighLogic.CurrentGame.scenarios.Any(psm =>
+            {
+                if (psm.moduleRef == null)
+                {
+                    Log.Write("PSM {0} moduleRef is null", psm.moduleName);
+                    return true;
+                }
+                else return false;
+            }))
+            {
+                Log.Debug("waiting on scenario moduleRefs");
+                yield return 0;
+            }
+
+
+            Log.Write("Performing interface change");
+            SetInterfaceType(type);
+        }
+
+        internal void ScheduleInterfaceChange(Settings.ScanInterface type)
+        {
+            StartCoroutine(ScheduledInterfaceChange(type));
+        }
+
+
+        private void SetInterfaceType(Settings.ScanInterface type)
+        {
+            // remove any existing interfaces
+            observers.Clear(); // these all have a reference to a potentially now unused
+                               // interface, so they'll have to be reconstructed
+
+            StripComponent<DefaultScanInterface>(gameObject);
+            StripComponent<SCANsatInterface>(gameObject);
+
+            scanInterface = null;
+
+            Log.Write("Setting scan interface type to {0}", type.ToString());
+
+            try
+            {
+                switch (type)
+                {
+                    case Settings.ScanInterface.None:
+                        scanInterface = gameObject.AddComponent<DefaultScanInterface>();
+                        break;
+
+                    case Settings.ScanInterface.ScanSat:
+                        if (!SCANsatInterface.IsAvailable())
+                        {
+                            Log.Error("SCANsatInterface unavailable! Using default.");
+                            SetInterfaceType(Settings.ScanInterface.None);
+                            return;
+                        }
+
+                        var ssInterface = gameObject.AddComponent<SCANsatInterface>();
+                        ssInterface.creator = this;
+
+                        Log.Write("Preparing interface...");
+                        //ssInterface.Prepare(); // actually creates the SCANsat links
+                        Log.Write("Finished preparing SCANsat interface");
+
+                        scanInterface = ssInterface;
+                        break;
+
+                    default:
+                        throw new Exception(string.Format("Interface type '{0}' unrecognized", Settings.Instance.GetInterfaceType()));
+
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception in ScienceAlert.UpdateInterfaceType: {0}", e);
+                Log.Warning("Using default interface");
+
+                SetInterfaceType(Settings.ScanInterface.None);
+                return;
+            }
+
+            rebuilder = RebuildObserverList();
+        }
+
+
+
+        private bool StripComponent<T>(GameObject target) where T:Component
+        {
+            T c = target.GetComponent<T>();
+
+            if (c != null)
+            {
+                GameObject.Destroy(c);
+                return true;
+            }
+            else return false;
+        }
+
+
+        /// <summary>
         /// Each experiment observer caches relevant modules to reduce cpu
         /// time.  Whenever the vessel changes, they'll need to be updated.
         /// That's what this function does.
@@ -579,11 +674,10 @@ namespace ScienceAlert
             observers.Clear();
             maximumTextLength = float.NaN;
 
-            if (vesselStorage == null)
-                vesselStorage = gameObject.AddComponent<StorageCache>();
-
-            while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed)
+          
+            while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed || scanInterface == null)
                 yield return 0;
+
 
 
             // critical: there's a quiet issue where sometimes user get multiple
@@ -602,7 +696,7 @@ namespace ScienceAlert
                             Log.Warning("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
 
                         }
-                        else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, expid));
+                        else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, scanInterface, expid));
 
                 // evaReport is a special case.  It technically exists on any crewed
                 // vessel.  That vessel won't report it normally though, unless
@@ -613,7 +707,7 @@ namespace ScienceAlert
                 // Observer type that will account for these changes and any others
                 // that might not necessarily trigger a VesselModified event
                 if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
-                    observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter));
+                    observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter, scanInterface));
 
                 observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
 
@@ -630,7 +724,7 @@ namespace ScienceAlert
                 foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
                 {
                     // note: avoid being too spammy by removing the results sections,
-                    // those aren't goign to be causing problems anyway
+                    // those aren't going to be causing problems anyway
                     ConfigNode snipped = new ConfigNode();
                     node.CopyTo(snipped);
 
@@ -769,19 +863,8 @@ namespace ScienceAlert
             float maxHeight = 32f * observers.Count;
             float necessaryHeight = 32f * observers.Count(obs => obs.Available);
 
-            // maybe this is contributing to the strange behaviour with
-            // toolbar 1.7.2?
-            //if (necessaryHeight < 31.9999f)
-            //{
-            //    MenuOpen = false;
-            //    return Vector2.zero;
-            //}
-
-            // alternate version:
             if (necessaryHeight > 31.9999f)
             {
-
-
                 var old = GUI.skin;
 
                 GUI.skin = Settings.Skin;
@@ -794,15 +877,11 @@ namespace ScienceAlert
 
 
                 GUI.skin = old;
-                //var windowSize = GUILayoutUtility.GetLastRect();
-
-                //return new Vector2(experimentButtonRect.width, maxHeight);
             }
 
             return new Vector2(experimentButtonRect.width, necessaryHeight);
-
-            //return new Vector2(windowSize.width, windowSize.height);
         }
+
 
 
         private void DrawButtonMenu(int winid)
@@ -824,6 +903,8 @@ namespace ScienceAlert
             }
             GUILayout.EndVertical();
         }
+
+
 
         public void OnToolbarClick(ClickEvent ce)
         {

@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using LogTools;
@@ -44,6 +45,12 @@ namespace ScienceAlert
             ByExperiment = 0,
             Always,
             Never
+        }
+
+        public enum ScanInterface : int
+        {
+            None = 0,               // experiment status updates always allowed
+            ScanSat = 1             // Use Scansat interface if available
         }
 
         // per-experiment settings
@@ -189,6 +196,10 @@ namespace ScienceAlert
                 skin.box.padding = new RectOffset(5, 5, 15, 10);
                 skin.box.contentOffset = new Vector2(0, 0f);
 
+            // default sane values, just in case the config doesn't exist
+                EvaAtmospherePressureWarnThreshold = 0.00035;
+                EvaAtmosphereVelocityWarnThreshold = 30;
+
             Load();
         }
 
@@ -247,7 +258,10 @@ namespace ScienceAlert
             Log.Write("Saving settings to {0}", path);
             ConfigNode saved = new ConfigNode();
             OnSave(saved);
+
+            Log.Debug("About to save: {0}", saved.ToString());
             saved.Save(path);
+            Log.Debug("Saved to {0}", path);
         }
 
 
@@ -257,60 +271,91 @@ namespace ScienceAlert
             bool resave = false;
 
 #region general settings
-            ConfigNode general = node.GetNode("GeneralSettings");
+            try
+            {
+                ConfigNode general = node.GetNode("GeneralSettings");
+                if (general == null) general = node.AddNode(new ConfigNode("GeneralSettings"));
 
-            Log.Debug("General node = {0}", general.ToString());
+                Log.Debug("General node = {0}", general.ToString());
 
-            FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
-            StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
-            EvaAtmospherePressureWarnThreshold = ConfigUtil.Parse<double>(general, "EvaAtmosPressureThreshold", 0.00035);
-            EvaAtmosphereVelocityWarnThreshold = ConfigUtil.Parse<float>(general, "EvaAtmosVelocityThreshold", 30);
-            DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
-            GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
-            SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
-            EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
-            ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
+                FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
+                StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
+                EvaAtmospherePressureWarnThreshold = ConfigUtil.Parse<double>(general, "EvaAtmosPressureThreshold", 0.00035);
+                EvaAtmosphereVelocityWarnThreshold = ConfigUtil.Parse<float>(general, "EvaAtmosVelocityThreshold", 30);
+                DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
+                GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
+                SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
+                EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
+                ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
 
-            Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
-            Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
-
+                Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
+                Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception occurred while loading GeneralSettings section: {0}", e);
+            }
 #endregion
 
-#region experiment settings
-            ConfigNode experimentSettings = node.GetNode("ExperimentSettings");
-
-            foreach (var nodeName in experimentSettings.nodes.DistinctNames())
+#region scan interface settings
+            try
             {
-                Log.Debug("Settings: Parsing experiment node '{0}'", nodeName);
+                ConfigNode si = node.GetNode("ScanInterface");
+                if (si == null) si = node.AddNode(new ConfigNode("ScanInterface"));
 
-                ConfigNode experimentNode = experimentSettings.GetNode(nodeName);
-                Log.Debug("Its contents: {0}", experimentNode.ToString());
+                Log.Debug("ScanInterface node = {0}", si.ToString());
 
-                if (!PerExperimentSettings.ContainsKey(nodeName))
-                {
-                    Log.Error("No experiment named '{0}' located.", nodeName);
-                } else {
-                    PerExperimentSettings[nodeName].OnLoad(experimentNode);
-                    Log.Debug("OnLoad for {0}: enabled = {1}, sound = {2}, animation = {3}, assume onboard = {4}", nodeName, PerExperimentSettings[nodeName].Enabled, PerExperimentSettings[nodeName].SoundOnDiscovery, PerExperimentSettings[nodeName].AnimationOnDiscovery, PerExperimentSettings[nodeName].AssumeOnboard);
-                }
+                ScanInterfaceType = ConfigUtil.ParseEnum<ScanInterface>(si, "InterfaceType", ScanInterface.None);
+                Log.Debug("ScanInterface = {0}", ScanInterfaceType.ToString());
+            } catch (Exception e)
+            {
+                Log.Error("Exception occurred while loading ScanInterface section: {0}", e);
             }
-
-            if (PerExperimentSettings.Keys.Count != experimentSettings.nodes.DistinctNames().GetLength(0))
+#endregion
+#region experiment settings
+            try
             {
-                // we don't have a match for experiments in the config
-                // vs loaded experiments.  Save the default values to disk
-                // immediately so they can be hand-edited if necessary.
-                Log.Warning(@"
+                ConfigNode experimentSettings = node.GetNode("ExperimentSettings");
+
+                foreach (var nodeName in experimentSettings.nodes.DistinctNames())
+                {
+                    Log.Debug("Settings: Parsing experiment node '{0}'", nodeName);
+
+                    ConfigNode experimentNode = experimentSettings.GetNode(nodeName);
+                    Log.Debug("Its contents: {0}", experimentNode.ToString());
+
+                    if (!PerExperimentSettings.ContainsKey(nodeName))
+                    {
+                        Log.Error("No experiment named '{0}' located.", nodeName);
+                    }
+                    else
+                    {
+                        PerExperimentSettings[nodeName].OnLoad(experimentNode);
+                        Log.Debug("OnLoad for {0}: enabled = {1}, sound = {2}, animation = {3}, assume onboard = {4}", nodeName, PerExperimentSettings[nodeName].Enabled, PerExperimentSettings[nodeName].SoundOnDiscovery, PerExperimentSettings[nodeName].AnimationOnDiscovery, PerExperimentSettings[nodeName].AssumeOnboard);
+                    }
+                }
+
+                if (PerExperimentSettings.Keys.Count != experimentSettings.nodes.DistinctNames().GetLength(0))
+                {
+                    // we don't have a match for experiments in the config
+                    // vs loaded experiments.  Save the default values to disk
+                    // immediately so they can be hand-edited if necessary.
+                    Log.Warning(@"
 Experiment config count does not match number of available experiments.  
 Re-saving config with default values for missing experiments.");
 
-                resave = true;
+                    resave = true;
+                }
             }
-
+            catch (Exception e)
+            {
+                Log.Error("Exception occurred while loading ExperimentSettings section: {0}", e);
+            }
 #endregion
 
 #region sound settings
-            
+            try
+            {
                 var audioNode = node.GetNode("AudioSettings");
 
                 if (audioNode != null)
@@ -330,17 +375,25 @@ Re-saving config with default values for missing experiments.");
                     else Log.Error("No individual audio nodes found in AudioSettings");
                 }
                 else Log.Error("No AudioSettings ConfigNode found in settings.cfg");
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception occurred while loading AudioSettings section: {0}", e);
+            }
 #endregion
 
             if (resave)
+            {
+                Log.Debug("Resave flag set; re-saving settings");
                 Save();
+            }
         }
 
         public void OnSave(ConfigNode node)
         {
             Log.Debug("Settings.save");
 
-            #region general settings
+#region general settings
                 ConfigNode general = node.AddNode(new ConfigNode("GeneralSettings"));
 
                 general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
@@ -352,18 +405,24 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("SoundNotification", SoundNotification);
                 general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
                 general.AddValue("ScienceThreshold", ScienceThreshold);
+#endregion
 
-            #endregion
+#region scan interface settings
 
-            #region experiment settings
+                ConfigNode si = node.AddNode(new ConfigNode("ScanInterface"));
+
+                si.AddValue("InterfaceType", ScanInterfaceType.ToString());
+#endregion
+
+#region experiment settings
                 ConfigNode expSettings = node.AddNode(new ConfigNode("ExperimentSettings"));
 
                 foreach (var kvp in PerExperimentSettings)
                     kvp.Value.OnSave(expSettings.AddNode(new ConfigNode(kvp.Key)));
             
-            #endregion
+#endregion
 
-            #region sound settings
+#region sound settings
 
                 var audioSettings = node.AddNode(new ConfigNode("AudioSettings"));
 
@@ -373,7 +432,7 @@ Re-saving config with default values for missing experiments.");
                     kvp.Value.OnSave(n);
                 }
 
-            #endregion
+#endregion
         }
 
 
@@ -403,6 +462,32 @@ Re-saving config with default values for missing experiments.");
 
         #endregion
 
+        #region Scan interface settings
+
+
+        protected ScanInterface ScanInterfaceType { get; private set; }
+
+        public ScanInterface GetInterfaceType()
+        {
+
+            // confirm that the given interface type does exist
+            switch (ScanInterfaceType)
+            {
+                case ScanInterface.ScanSat:
+                    if (AssemblyLoader.loadedAssemblies
+                        .SelectMany(loaded => loaded.assembly.GetExportedTypes())
+                        .ToList().Exists(t => string.Equals(t.FullName, "SCANsat.SCANdata")))
+                    {
+                        return ScanInterfaceType;
+                    }
+                    else return ScanInterface.None; 
+
+                default:
+                    return ScanInterfaceType;
+            }
+        }
+
+        #endregion
 
         #region experiment settings
 
