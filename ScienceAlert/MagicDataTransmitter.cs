@@ -238,22 +238,30 @@ namespace ScienceAlert
                 bool badFlag = false; // used to exterminate a KeyNotFound exception that
                                       // seems to slip through now and then
 
-                foreach (var kvp in realTransmitters)
+                try
                 {
-                    if (kvp.Key == null || kvp.Value == null)
+                    foreach (var kvp in realTransmitters)
                     {
-                        // something happened to cause our transmitter list to
-                        // be wrong somehow
-                        Log.Error("MagicDataTransmitter: Encountered a bad transmitter value.");
-                        badFlag = true;
-                        continue;
+                        if (kvp.Key == null || kvp.Value == null || !realTransmitters.ContainsKey(kvp.Key))
+                        {
+                            // something happened to cause our transmitter list to
+                            // be wrong somehow
+                            Log.Error("MagicDataTransmitter: Encountered a bad transmitter value.");
+                            badFlag = true;
+                            continue;
+                        }
+
+                        if (!kvp.Key.IsBusy())
+                            kvp.Value.Clear(); // it's not doing anything, therefore nothing is queued
+
+                        list.AddRange(kvp.Value);
+                        list.AddRange(toBeTransmitted[kvp.Key]);
                     }
 
-                    if (!kvp.Key.IsBusy())
-                        kvp.Value.Clear(); // it's not doing anything, therefore nothing is queued
-
-                    list.AddRange(kvp.Value);
-                    list.AddRange(toBeTransmitted[kvp.Key]);
+                } catch (Exception e)
+                {
+                    badFlag = true;
+                    Log.Error("Exception occurred in MagicDataTransmitter.QueuedData: {0}", e);
                 }
 
                 if (badFlag)
@@ -261,6 +269,7 @@ namespace ScienceAlert
                     Log.Warning("Resetting MagicDataTransmitter due to bad transmitter key or value");
                     cacheOwner.ScheduleRebuild();
                 }
+
                 return list;
             }
         }
