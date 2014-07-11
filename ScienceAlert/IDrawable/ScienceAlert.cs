@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.5                                                               *
+ * Version 1.6                                                               *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -21,7 +21,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
- * 1.5a
+ * 1.6
  *      Bugfix: Fixed issue where alerts could appear for science reports worth
  *              no science
  *              
