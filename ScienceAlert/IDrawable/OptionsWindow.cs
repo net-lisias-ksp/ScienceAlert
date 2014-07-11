@@ -41,13 +41,18 @@ namespace ScienceAlert
         private string sciMinValue = "0";
         private bool additionalOptions = false; // flag set when additional options subwindow is open
 
+        ScienceAlert creator;
+
         // Materials and textures
         Texture2D collapseButton = new Texture2D(24, 24);
         Texture2D expandButton = new Texture2D(24, 24);
         GUISkin whiteLabel;
+        //GUISkin redToggle;
 
-        public OptionsWindow(AudioController audioDevice)
+        public OptionsWindow(ScienceAlert sa, AudioController audioDevice)
         {
+            creator = sa;
+
             windowRect = new Rect(0, 0, 324, Screen.height / 5 * 3);
 
             var rawIds = ResearchAndDevelopment.GetExperimentIDs();
@@ -91,10 +96,16 @@ namespace ScienceAlert
                 expandButton.Compress(false);
             }
 
-            whiteLabel = Settings.Skin;
+            whiteLabel = (GUISkin)GUISkin.Instantiate(Settings.Skin);
             whiteLabel.label.onNormal.textColor = Color.white;
             whiteLabel.toggle.onNormal.textColor = Color.white;
             whiteLabel.label.onActive.textColor = Color.white;
+
+            //redToggle = (GUISkin)GUISkin.Instantiate(Settings.Skin);
+            //redToggle.toggle.onNormal.textColor =
+            //redToggle.toggle.onHover.textColor =
+            //redToggle.toggle.onActive.textColor = Color.red;
+            //redToggle.toggle.normal.
         }
 
 
@@ -122,10 +133,14 @@ namespace ScienceAlert
         }
 
 
-
-        private bool AudibleToggle(bool value, string content, GUILayoutOption[] options = null)
+        private bool AudibleToggle(bool value, string content, GUIStyle style = null, GUILayoutOption[] options = null)
         {
-            bool result = GUILayout.Toggle(value, content, options);
+            return AudibleToggle(value, new GUIContent(content), style, options);
+        }
+
+        private bool AudibleToggle(bool value, GUIContent content,  GUIStyle style = null, GUILayoutOption[] options = null)
+        {
+            bool result = GUILayout.Toggle(value, content, style == null ? Settings.Skin.toggle : style, options);
             if (result != value)
             {
                 audio.PlaySound("click1");
@@ -197,7 +212,7 @@ namespace ScienceAlert
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 GUILayout.Label("Globally Enable Animation", GUILayout.ExpandWidth(true));
-                                Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
+                                Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
                             }
                             GUILayout.EndHorizontal();
 
@@ -207,7 +222,7 @@ namespace ScienceAlert
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 GUILayout.Label(new GUIContent("Enable Minimum Science Threshold"), GUILayout.ExpandWidth(true));
-                                Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
+                                Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
                             }
                             GUILayout.EndHorizontal();
 
@@ -242,6 +257,38 @@ namespace ScienceAlert
                                             Log.Debug("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
                                         }
                                     }
+                            }
+                            GUILayout.EndHorizontal();
+                            GUILayout.Space(10f);
+
+                            // interface options
+                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            {
+                                var oldInterface = Settings.Instance.ScanInterfaceType;
+                                var prevColor = GUI.color;
+
+                                if (!SCANsatInterface.IsAvailable()) GUI.color = Color.red;
+
+                                bool enableSCANinterface = AudibleToggle(Settings.Instance.ScanInterfaceType == Settings.ScanInterface.ScanSat, "Enable SCANsat integration", null, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+
+                                GUI.color = prevColor;
+
+                                if (enableSCANinterface) // Settings won't return SCANsatInterface as the set interface if it wasn't found
+                                    if (!SCANsatInterface.IsAvailable())
+                                    {
+                                        PopupDialog.SpawnPopupDialog("SCANsat Not Found", "SCANsat was not found. You must install SCANsat to use this feature.", "Okay", false, Settings.Skin);
+#if DEBUG
+                                    }
+                                    //else Log.Debug("SCANsatInterface is an available option");
+#else
+                                    }
+#endif
+
+                                Settings.Instance.ScanInterfaceType = enableSCANinterface ? Settings.ScanInterface.ScanSat : Settings.ScanInterface.None;
+
+                                if (Settings.Instance.ScanInterfaceType != oldInterface)
+                                    creator.ScheduleInterfaceChange(Settings.Instance.ScanInterfaceType);
+
                             }
                             GUILayout.EndHorizontal();
                         }

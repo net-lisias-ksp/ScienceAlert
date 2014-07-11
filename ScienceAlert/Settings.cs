@@ -200,6 +200,8 @@ namespace ScienceAlert
                 EvaAtmospherePressureWarnThreshold = 0.00035;
                 EvaAtmosphereVelocityWarnThreshold = 30;
 
+                ScanInterfaceType = ScanInterface.None;
+
             Load();
         }
 
@@ -382,6 +384,10 @@ Re-saving config with default values for missing experiments.");
             }
 #endregion
 
+#region log settings
+            Log.LoadFrom(node);
+#endregion
+
             if (resave)
             {
                 Log.Debug("Resave flag set; re-saving settings");
@@ -391,9 +397,11 @@ Re-saving config with default values for missing experiments.");
 
         public void OnSave(ConfigNode node)
         {
-            Log.Debug("Settings.save");
+            try
+            {
+                Log.Debug("Settings.save");
 
-#region general settings
+                #region general settings
                 ConfigNode general = node.AddNode(new ConfigNode("GeneralSettings"));
 
                 general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
@@ -405,24 +413,24 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("SoundNotification", SoundNotification);
                 general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
                 general.AddValue("ScienceThreshold", ScienceThreshold);
-#endregion
+                #endregion
 
-#region scan interface settings
+                #region scan interface settings
 
                 ConfigNode si = node.AddNode(new ConfigNode("ScanInterface"));
 
                 si.AddValue("InterfaceType", ScanInterfaceType.ToString());
-#endregion
+                #endregion
 
-#region experiment settings
+                #region experiment settings
                 ConfigNode expSettings = node.AddNode(new ConfigNode("ExperimentSettings"));
 
                 foreach (var kvp in PerExperimentSettings)
                     kvp.Value.OnSave(expSettings.AddNode(new ConfigNode(kvp.Key)));
-            
-#endregion
 
-#region sound settings
+                #endregion
+
+                #region sound settings
 
                 var audioSettings = node.AddNode(new ConfigNode("AudioSettings"));
 
@@ -432,7 +440,17 @@ Re-saving config with default values for missing experiments.");
                     kvp.Value.OnSave(n);
                 }
 
-#endregion
+                #endregion
+
+                #region log settings
+                Log.SaveInto(node);
+                #endregion
+
+                Log.Debug("Finished saving settings");
+            } catch (Exception e)
+            {
+                Log.Error("There was an exception while saving settings: {0}", e);
+            }
         }
 
 
@@ -465,27 +483,34 @@ Re-saving config with default values for missing experiments.");
         #region Scan interface settings
 
 
-        protected ScanInterface ScanInterfaceType { get; private set; }
+        protected ScanInterface Interface;
 
-        public ScanInterface GetInterfaceType()
+        public ScanInterface ScanInterfaceType
         {
-
-            // confirm that the given interface type does exist
-            switch (ScanInterfaceType)
+            get
             {
-                case ScanInterface.ScanSat:
-                    if (AssemblyLoader.loadedAssemblies
-                        .SelectMany(loaded => loaded.assembly.GetExportedTypes())
-                        .ToList().Exists(t => string.Equals(t.FullName, "SCANsat.SCANdata")))
-                    {
-                        return ScanInterfaceType;
-                    }
-                    else return ScanInterface.None; 
+                // confirm that the given interface type does exist
+                switch (Interface)
+                {
+                    case ScanInterface.ScanSat:
+                        if (AssemblyLoader.loadedAssemblies
+                            .SelectMany(loaded => loaded.assembly.GetExportedTypes())
+                            .ToList().Exists(t => string.Equals(t.FullName, "SCANsat.SCANdata")))
+                        {
+                            return Interface;
+                        }
+                        else return ScanInterface.None;
 
-                default:
-                    return ScanInterfaceType;
+                    default:
+                        return Interface;
+                }
+            }
+            set
+            {
+                Interface = value;
             }
         }
+
 
         #endregion
 

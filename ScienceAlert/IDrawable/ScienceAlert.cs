@@ -115,6 +115,10 @@ using Toolbar;
 using LogTools;
 using ResourceTools;
 
+#if DEBUG
+using DebugTools;
+#endif
+
 // TODO: prevent users from clicking on science button multiple times in rapid
 //          succession, activating multiple science reports? Most apparent time
 //          is when activating goo, which has a delay as it plays the open animation
@@ -435,7 +439,7 @@ namespace ScienceAlert
             mainButton.OnClick += OnToolbarClick;
 
             effects = new EffectController(this); // requires toolbar button to exist
-            optionsWindow = new OptionsWindow(effects.AudioController);
+            optionsWindow = new OptionsWindow(this, effects.AudioController);
             biomeFilter = gameObject.AddComponent<BiomeFilter>();
             vesselStorage = gameObject.AddComponent<StorageCache>();
 
@@ -448,7 +452,7 @@ namespace ScienceAlert
             // 
             // it's delayed to make sure whichever interface (if not the
             // default) has initialized
-            ScheduleInterfaceChange(Settings.Instance.GetInterfaceType());
+            ScheduleInterfaceChange(Settings.Instance.ScanInterfaceType);
         }
 
 
@@ -560,17 +564,39 @@ namespace ScienceAlert
         {
             Log.Write("Scheduled interface change");
 
+
             if (SCANsatInterface.IsAvailable())
+            {
+                Log.Debug("Waiting for SCANsat ScenarioModule to exist");
+
                 while (!SCANsatInterface.ScenarioReady())
                     yield return 0;
+
+                Log.Debug("SANsat ScenarioModule ready");
+            }
 
 
             while (!FlightGlobals.ready || HighLogic.CurrentGame.scenarios.Any(psm =>
             {
+                // it's possible for a moduleRef to never become a valid value if
+                // an invalid ScenarioModule is left in the persistent file. The easiest
+                // way to find out if it'll ever exist is to examine ScenarioRunner's
+                // types directly
                 if (psm.moduleRef == null)
                 {
-                    Log.Write("PSM {0} moduleRef is null", psm.moduleName);
-                    return true;
+#if DEBUG
+                    ScenarioRunner.fetch.gameObject.PrintComponents();
+#endif
+                    return ScenarioRunner.fetch.gameObject.GetComponents<ScenarioModule>().ToList().Any(sm =>
+                    {
+#if DEBUG
+                        Log.Write("checking {0} against {1}", sm.GetType().FullName, psm.moduleName);
+
+                        if (sm.GetType().FullName == psm.moduleName)
+                            Log.Error("ScenarioModule '{0}' exists and so will be loaded; continue waiting", psm.moduleName);
+#endif
+                        return sm.GetType().FullName == psm.moduleName;
+                    });
                 }
                 else return false;
             }))
@@ -583,6 +609,8 @@ namespace ScienceAlert
             Log.Write("Performing interface change");
             SetInterfaceType(type);
         }
+
+
 
         internal void ScheduleInterfaceChange(Settings.ScanInterface type)
         {
@@ -630,7 +658,7 @@ namespace ScienceAlert
                         break;
 
                     default:
-                        throw new Exception(string.Format("Interface type '{0}' unrecognized", Settings.Instance.GetInterfaceType()));
+                        throw new Exception(string.Format("Interface type '{0}' unrecognized", Settings.Instance.ScanInterfaceType));
 
                 }
             }

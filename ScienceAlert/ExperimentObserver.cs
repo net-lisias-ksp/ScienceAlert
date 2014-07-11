@@ -362,14 +362,15 @@ namespace ScienceAlert
                             }
                         }
 
-                    } catch (NullReferenceException)
+                    } catch (NullReferenceException e)
                     {
                         // note to self: even with all the logging I did when
                         // I could sometimes reproduce the exception, nothing
                         // looked wrong except that biome string becomes null
 
                         Log.Error("Failed to create {0} ScienceSubject. If you can manage to reproduce this error, let me know.", experiment.id);
-                        Available = false;
+                        Log.Error("Exception was: {0}", e);
+                        Available = lastStatus;
                     }
                 }
                 else

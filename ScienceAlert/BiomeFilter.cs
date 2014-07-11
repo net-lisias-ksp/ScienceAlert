@@ -246,10 +246,11 @@ namespace ScienceAlert
                     pixels[y * projection.width + x] = (Color32)newBody.BiomeMap.GetAtt(lat, lon).mapColor;
                 }
 
-                Log.Debug("ScienceAlert.BiomeFilter: still working");
-
                 if (y % 5 == 0)
+                {
+                    Log.Performance("ScienceAlert.BiomeFilter: still working ({0}% complete)", ((y * projection.width) / (float)pixels.Length).ToString("P"));
                     yield return null;
+                }    
             }
 
             projection.SetPixels32(pixels);

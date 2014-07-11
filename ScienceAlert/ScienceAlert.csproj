@@ -54,6 +54,9 @@
     <Compile Include="..\..\DebugTools\ConfigUtil.cs">
       <Link>Tools\ConfigUtil.cs</Link>
     </Compile>
+    <Compile Include="..\..\DebugTools\DebugHelper.cs">
+      <Link>Tools\DebugHelper.cs</Link>
+    </Compile>
     <Compile Include="..\..\DebugTools\ImprovedAddonLoader.cs">
       <Link>Tools\ImprovedAddonLoader.cs</Link>
     </Compile>
@@ -62,6 +65,9 @@
     </Compile>
     <Compile Include="..\..\DebugTools\ResourceUtil.cs">
       <Link>Tools\ResourceUtil.cs</Link>
+    </Compile>
+    <Compile Include="..\..\DebugTools\ShaderUtil.cs">
+      <Link>Tools\ShaderUtil.cs</Link>
     </Compile>
     <Compile Include="AudioController.cs" />
     <Compile Include="BiomeFilter.cs" />

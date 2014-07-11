@@ -54,7 +54,7 @@ namespace ScienceAlert
 
         void Start()
         {
-            Log.Debug("SCANsatInterface Start");
+            Log.Verbose("SCANsatInterface Start");
 
             try
             {
@@ -156,7 +156,7 @@ namespace ScienceAlert
 
         void OnDestroy()
         {
-            Log.Debug("SCANsatInterface OnDestroy");
+            Log.Verbose("SCANsatInterface OnDestroy");
             GameEvents.onDominantBodyChange.Remove(OnBodyChange);
         }
 
@@ -164,7 +164,7 @@ namespace ScienceAlert
 
         public void OnBodyChange(GameEvents.FromToAction<CelestialBody, CelestialBody> bodies)
         {
-            Log.Debug("SCANsatInterface.OnBodyChange, from {0} to {1}", bodies.from != null ? bodies.from.GetName() : "<none>", bodies.to != null ? bodies.to.GetName() : "<none>");
+            Log.Verbose("SCANsatInterface.OnBodyChange, from {0} to {1}", bodies.from != null ? bodies.from.GetName() : "<none>", bodies.to != null ? bodies.to.GetName() : "<none>");
 
             dataInstance = getMethod.Invoke(controllerInstance, new object[] {bodies.to});
 
@@ -205,49 +205,43 @@ namespace ScienceAlert
 
         public static bool IsAvailable()
         {
-            var pScenario = HighLogic.CurrentGame.scenarios.Find(psm => psm.moduleName == "SCANcontroller");
+            // it's possible, if SCANsat is removed, for a ScenarioModule of the appropriate name
+            // to exist yet it will fail to load. Rely on finding the type instead
 
-            if (pScenario == null)
+            Type controllerType = AssemblyLoader.loadedAssemblies
+                .SelectMany(loaded => loaded.assembly.GetExportedTypes())
+                .SingleOrDefault(t => t.FullName == SCANcontrollerTypeName);
+
+            if (controllerType == null)
             {
-                // The SCANsat scenario hasn't been added to this game or doesn't exist
-                Type controllerType = AssemblyLoader.loadedAssemblies
-                    .SelectMany(loaded => loaded.assembly.GetExportedTypes())
-                    .SingleOrDefault(t => t.FullName == SCANcontrollerTypeName);
+                Log.Debug("SCANsatInterface.IsAvailable: Failed to find controller type. SCANsat interface will not be available.");
+                return false;
+            }
 
-                if (controllerType == null)
-                {
-                    Log.Error("SCANsatInterface.IsAvailable: Failed to find controller type");
-                    return false;
-                }
+            // we'll have to trigger the static SCANcontroller.controller property
+            // and leave ScenarioModule creation to it
+            try
+            {
 
-                // we'll have to trigger the static SCANcontroller.controller property
-                // and leave ScenarioModule creation to it
-                try
-                {
-                    Log.Debug("Accessing controller property...");
-                    
-                    controllerType.GetProperty("controller", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy).GetValue(null, null);
-                    ScenarioRunner.SetProtoModules(HighLogic.CurrentGame.scenarios);
+                controllerType.GetProperty("controller", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy).GetValue(null, null);
 
 #if DEBUG
-                    Log.Write("Dumping current list of ScenarioModules after using property to create SCANcontroller instance");
-                    HighLogic.CurrentGame.scenarios.ForEach(psm => Log.Write("ScenarioModule: {0}", psm.moduleName));
-                    //ScenarioRunner.GetLoadedModules().ForEach(sm => Log.Write("ScenarioModule {0} is loaded.", sm.snapshot.moduleName));
-                    ScenarioRunner.GetUpdatedProtoModules().ForEach(psm => Log.Write("Update scenario module: {0}", psm.moduleName));
-                    Log.Write("done");
+                //Log.Write("Dumping current list of ScenarioModules after using property to create SCANcontroller instance");
+                //HighLogic.CurrentGame.scenarios.ForEach(psm => Log.Write("ScenarioModule: {0}", psm.moduleName));
+                ////ScenarioRunner.GetLoadedModules().ForEach(sm => Log.Write("ScenarioModule {0} is loaded.", sm.snapshot.moduleName));
+                //ScenarioRunner.GetUpdatedProtoModules().ForEach(psm => Log.Write("Update scenario module: {0}", psm.moduleName));
+                //Log.Write("done");
 #endif
                     
-
-                    // confirm it did what we wanted:
-                    return HighLogic.CurrentGame.scenarios.Any(psm => psm.moduleName == SCANcontrollerModuleName);
-                }
-                catch (Exception e)
-                {
-                    Log.Error("SCANsatInterface.IsAvailable: exception occurred while trying to access controller property! {0}", e);
-                    return false;
-                }
+                // confirm it did what we wanted:
+                return HighLogic.CurrentGame.scenarios.Any(psm => psm.moduleName == SCANcontrollerModuleName) && controllerType != null;
             }
-            else return true; // note that although it's available, it might not be initialized yet
+            catch (Exception e)
+            {
+                Log.Error("SCANsatInterface.IsAvailable: exception occurred while trying to access controller property! {0}", e);
+                return false;
+            }
+           
         }
 
 
