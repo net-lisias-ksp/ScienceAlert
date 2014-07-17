@@ -22,8 +22,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Toolbar;
-using LogTools;
-using ResourceTools;
+using ReeperCommon;
 
 namespace ScienceAlert
 {

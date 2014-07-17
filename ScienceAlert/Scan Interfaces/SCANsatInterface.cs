@@ -1,10 +1,12 @@
-﻿using System;
+﻿//#define DEBUGSCANSAT
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using LogTools;
+using ReeperCommon;
+
 
 namespace ScienceAlert
 {
@@ -25,7 +27,7 @@ namespace ScienceAlert
             try {
                 if (isCoveredMethod != null && dataInstance != null)
                 {
-#if DEBUG
+#if (DEBUG && DEBUGSCANSAT)
                     bool result = (bool)isCoveredMethod.Invoke(dataInstance, new object[] { lon, lat, 8 });
                     bool real = SCANsat.SCANcontroller.controller.getData(FlightGlobals.currentMainBody).isCovered( lon, lat, SCANsat.SCANdata.SCANtype.Biome);
 
@@ -37,7 +39,7 @@ namespace ScienceAlert
                     return (bool)isCoveredMethod.Invoke(dataInstance, new object[] {lat, lon, 8});
                 }
 #endif
-#if DEBUG
+#if DEBUG && DEBUGSCANSAT
                 }
                 else Log.Error("isCoveredMethod = {0}, dataInstance = {1}", isCoveredMethod == null ? "null!" : "is fine", dataInstance == null ? "null!" : "is fine");
 #endif
@@ -111,7 +113,7 @@ namespace ScienceAlert
                 Log.Write("controllerType: {0}", controllerType.ToString());
 
 
-#if DEBUG
+#if DEBUG && DEBUGSCANSAT
                 Log.Write("Property value: {0}", SCANsat.SCANcontroller.controller);
                 if (SCANsat.SCANcontroller.controller == null) Log.Write("real controller is null!");
                 if (HighLogic.CurrentGame == null) Log.Write("CurrentGame is null!");
@@ -168,7 +170,7 @@ namespace ScienceAlert
 
             dataInstance = getMethod.Invoke(controllerInstance, new object[] {bodies.to});
 
-#if DEBUG
+#if DEBUG && DEBUGSCANSAT
             var real = SCANsat.SCANcontroller.controller.getData(bodies.to);
 
             if (real == null)

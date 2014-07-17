@@ -51,14 +51,17 @@
     <Compile Include="..\..\DebugTools\ConfigUtil.cs">
       <Link>Tools\ConfigUtil.cs</Link>
     </Compile>
-    <Compile Include="..\..\DebugTools\DebugHelper.cs">
-      <Link>Tools\DebugHelper.cs</Link>
+    <Compile Include="..\..\DebugTools\DebugUtil.cs">
+      <Link>Tools\DebugUtil.cs</Link>
     </Compile>
     <Compile Include="..\..\DebugTools\ImprovedAddonLoader.cs">
       <Link>Tools\ImprovedAddonLoader.cs</Link>
     </Compile>
     <Compile Include="..\..\DebugTools\Log.cs">
       <Link>Tools\Log.cs</Link>
+    </Compile>
+    <Compile Include="..\..\DebugTools\Misc.cs">
+      <Link>Tools\Misc.cs</Link>
     </Compile>
     <Compile Include="..\..\DebugTools\ResourceUtil.cs">
       <Link>Tools\ResourceUtil.cs</Link>

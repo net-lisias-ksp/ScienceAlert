@@ -112,12 +112,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Toolbar;
-using LogTools;
-using ResourceTools;
+using ReeperCommon;
 
-#if DEBUG
-using DebugTools;
-#endif
 
 // TODO: prevent users from clicking on science button multiple times in rapid
 //          succession, activating multiple science reports? Most apparent time

@@ -20,10 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using LogTools;
-#if DEBUG
-using ResourceTools;
-#endif
+using ReeperCommon;
 
 namespace ScienceAlert
 {
