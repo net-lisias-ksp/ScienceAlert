@@ -46,21 +46,29 @@ namespace ScienceAlert
     internal class BiomeFilter : MonoBehaviour
     {
         private const int HALF_SEARCH_DIMENSIONS = 2;    // box around the point on the biome map to
-                                                    // use to verify biome map results
+                                                         // use to verify biome map results
+
+
+        // --------------------------------------------------------------------
+        //    Members
+        // --------------------------------------------------------------------
 
         private CelestialBody current;      // which CelestialBody we've got a cached biome map texture for
         private Texture2D projectedMap;     // this is the cleaned biome map of the current CelestialBody
         private System.Collections.IEnumerator projector;   // this coroutine constructs the projectedMap from current CelestialBody
         private const float COLOR_THRESHOLD = 0.005f;       // Maximum color difference for two colors to be considered the same
 
-        internal BiomeFilter()
+/******************************************************************************
+ *                    Implementation Details
+ ******************************************************************************/
+        void Start()
         {
             GameEvents.onDominantBodyChange.Add(OnDominantBodyChanged);
             GameEvents.onVesselChange.Add(OnVesselChanged);
             ReprojectBiomeMap(FlightGlobals.currentMainBody);
         }
 
-        ~BiomeFilter()
+        void OnDestroy()
         {
             GameEvents.onVesselChange.Remove(OnVesselChanged);
             GameEvents.onDominantBodyChange.Remove(OnDominantBodyChanged);

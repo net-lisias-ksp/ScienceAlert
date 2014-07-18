@@ -29,21 +29,43 @@ namespace ScienceAlert
     /// This is an extra window accessible via the toolbar + middle mouse
     /// that should help in tracking down issues.
     /// </summary>
-    public class DebugWindow : IDrawable
+    public class DebugWindow : MonoBehaviour, IDrawable
     {
         private readonly int windowId = UnityEngine.Random.Range(0, int.MaxValue);
-        private Rect windowRect = new Rect(0, 0, 324, Screen.height / 5);
-        ScienceAlert indicator;
-        BiomeFilter biomeFilter;
-        StorageCache storage;
 
-        internal DebugWindow(ScienceAlert ind, BiomeFilter filter, StorageCache cache)
+        // --------------------------------------------------------------------
+        //    Members of DebugWindow
+        // --------------------------------------------------------------------
+        private Rect windowRect = new Rect(0, 0, 324, Screen.height / 5);
+        private ScienceAlert scienceAlert;
+        private BiomeFilter biomeFilter;
+        private StorageCache storage;
+
+
+
+/******************************************************************************
+ *                    Implementation Details
+ ******************************************************************************/
+        void Awake()
         {
-            indicator = ind;
-            biomeFilter = filter;
-            storage = cache;
+            scienceAlert = gameObject.GetComponent<ScienceAlert>();
+            biomeFilter = gameObject.GetComponent<BiomeFilter>();
+            storage = gameObject.GetComponent<StorageCache>();
         }
 
+
+        public void OnToolbarClicked(Toolbar.ClickInfo ci)
+        {
+            if (scienceAlert.Button.Drawable is DebugWindow)
+            {
+                AudioUtil.Play("click2", 0.05f);
+                scienceAlert.Button.Drawable = null;
+            } else if (scienceAlert.Button.Drawable == null && ci.button == 2)
+            {
+                AudioUtil.Play("click2", 0.05f);
+                scienceAlert.Button.Drawable = this;
+            }
+        }
 
 
         public Vector2 Draw(Vector2 position)
@@ -228,5 +250,32 @@ namespace ScienceAlert
         {
             // required by IDrawable
         }
+
+        #region Message handling functions
+
+        /// <summary>
+        /// This message will be sent by ScienceAlert when the user
+        /// changes scan interface types
+        /// </summary>
+        public void Notify_ScanInterfaceChanged()
+        {
+            Log.Debug("DebugWindow.Notify_ScanInterfaceChanged");
+
+        }
+
+
+
+        /// <summary>
+        /// This message sent when toolbar has changed and re-registering
+        /// for events is necessary
+        /// </summary>
+        public void Notify_ToolbarInterfaceChanged()
+        {
+            Log.Debug("ExperimentManager.Notify_ToolbarInterfaceChanged");
+
+            scienceAlert.Button.OnClick += OnToolbarClicked;
+        }
+
+        #endregion
     }
 }

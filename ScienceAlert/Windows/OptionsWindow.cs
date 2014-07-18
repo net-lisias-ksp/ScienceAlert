@@ -25,31 +25,39 @@ using ReeperCommon;
 
 namespace ScienceAlert
 {
-    internal class OptionsWindow : IDrawable
+    /// <summary>
+    /// It pretty much is what it sounds like
+    /// </summary>
+    internal class OptionsWindow : MonoBehaviour, IDrawable
     {
         private readonly int windowId = UnityEngine.Random.Range(0, int.MaxValue);
+
+        // --------------------------------------------------------------------
+        //    Members
+        // --------------------------------------------------------------------
 
         // Control position and scrollbars
         private Rect windowRect;
         private Vector2 scrollPos = new Vector2();
         private Vector2 additionalScrollPos = new Vector2();
-        //private AudioController audio;
         private Dictionary<string /* expid */, int /* selected index */> experimentIds = new Dictionary<string, int>();
         private List<GUIContent> filterList = new List<GUIContent>();
         private string sciMinValue = "0";
         private bool additionalOptions = false; // flag set when additional options subwindow is open
-
-        ScienceAlert creator;
+        private ScienceAlert scienceAlert;
 
         // Materials and textures
         Texture2D collapseButton = new Texture2D(24, 24);
         Texture2D expandButton = new Texture2D(24, 24);
         GUISkin whiteLabel;
-        //GUISkin redToggle;
 
-        public OptionsWindow(ScienceAlert sa)
+/******************************************************************************
+ *                    Implementation Details
+ ******************************************************************************/
+
+        void Awake()
         {
-            creator = sa;
+            scienceAlert = gameObject.GetComponent<ScienceAlert>();
 
             windowRect = new Rect(0, 0, 324, Screen.height / 5 * 3);
 
@@ -108,40 +116,89 @@ namespace ScienceAlert
 
 
 
-        ~OptionsWindow()
+        void OnDestroy()
         {
             Log.Debug("OptionsWindow destroyed");
         }
 
 
-
-        public Vector2 Draw(Vector2 position)
+        public void Update()
         {
-            var oldSkin = GUI.skin;
-            GUI.skin = Settings.Skin;
-
-                windowRect.x = position.x;
-                windowRect.y = position.y;
-
-                GUILayout.Window(windowId, windowRect, RenderControls, "Science Alert");
-
-            GUI.skin = oldSkin;
-
-            return new Vector2(windowRect.width, windowRect.height);
+            // required by IDrawable
         }
 
 
+        #region Events
+
+
+
+        /// <summary>
+        /// Called when ScienceAlert toolbar button was clicked
+        /// </summary>
+        /// <param name="ci"></param>
+        public void OnToolbarClicked(Toolbar.ClickInfo ci)
+        {
+            if (scienceAlert.Button.Drawable == null)
+            {
+                if (ci.button == 1) // right-click
+                {
+                    if (scienceAlert.Button.Drawable is OptionsWindow)
+                    {
+                        scienceAlert.Button.Drawable = null;
+                        AudioUtil.Play("click1");
+                    }
+                    else
+                    {
+                        scienceAlert.Button.Drawable = this;
+                        AudioUtil.Play("click1");
+                    }
+                }
+            }
+            else if (scienceAlert.Button.Drawable is OptionsWindow)
+            {
+                // we're open, non-right mouse button was clicked so close
+                // the window
+                scienceAlert.Button.Drawable = null;
+                AudioUtil.Play("click1", 0.05f);
+            }
+        }
+
+        #endregion
+
+
+
+        #region GUI helper methods
+
+        /// <summary>
+        /// Helper method
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="content"></param>
+        /// <param name="style"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         private bool AudibleToggle(bool value, string content, GUIStyle style = null, GUILayoutOption[] options = null)
         {
             return AudibleToggle(value, new GUIContent(content), style, options);
         }
 
+
+        /// <summary>
+        /// Just a wrapper around GUILayout.Toggle which plays a sound when
+        /// its value changes.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="content"></param>
+        /// <param name="style"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         private bool AudibleToggle(bool value, GUIContent content,  GUIStyle style = null, GUILayoutOption[] options = null)
         {
             bool result = GUILayout.Toggle(value, content, style == null ? Settings.Skin.toggle : style, options);
             if (result != value)
             {
                 //audio.PlaySound("click1");
+                AudioUtil.Play("click1");
 
 #if DEBUG
                 Log.Debug("Toggle '{0}' is now {1}", content, result);
@@ -151,13 +208,19 @@ namespace ScienceAlert
         }
 
 
-
+        /// <summary>
+        /// Simple wrapper
+        /// </summary>
+        /// <param name="currentValue"></param>
+        /// <param name="settings"></param>
+        /// <returns></returns>
         private int AudibleSelectionGrid(int currentValue, ref Settings.ExperimentSettings settings)
         {
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
             if (newValue != currentValue)
             {
                 //audio.PlaySound("click1");
+                AudioUtil.Play("click1");
                 settings.Filter = (Settings.ExperimentSettings.FilterMethod)newValue;
             }
 
@@ -165,7 +228,12 @@ namespace ScienceAlert
         }
 
 
-
+        /// <summary>
+        /// Simple wrapper
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         private bool AudibleButton(GUIContent content, GUILayoutOption[] options = null)
         {
             bool pressed = GUILayout.Button(content, options);
@@ -173,12 +241,37 @@ namespace ScienceAlert
             if (pressed)
             {
                 //audio.PlaySound("click1");
+                AudioUtil.Play("click1");
             }
 
             return pressed;
         }
 
+        #endregion
 
+
+        #region Drawing functions
+
+        /// <summary>
+        /// Called by the toolbar button (whichever implementation) when it's
+        /// time to draw the window.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns>Dimensions of rendered window</returns>
+        public Vector2 Draw(Vector2 position)
+        {
+            var oldSkin = GUI.skin;
+            GUI.skin = Settings.Skin;
+
+            windowRect.x = position.x;
+            windowRect.y = position.y;
+
+            GUILayout.Window(windowId, windowRect, RenderControls, "Science Alert");
+
+            GUI.skin = oldSkin;
+
+            return new Vector2(windowRect.width, windowRect.height);
+        }
 
         private void RenderControls(int windowId)
         {
@@ -285,7 +378,7 @@ namespace ScienceAlert
                                 Settings.Instance.ScanInterfaceType = enableSCANinterface ? Settings.ScanInterface.ScanSat : Settings.ScanInterface.None;
 
                                 if (Settings.Instance.ScanInterfaceType != oldInterface)
-                                    creator.ScheduleInterfaceChange(Settings.Instance.ScanInterfaceType);
+                                    scienceAlert.ScheduleInterfaceChange(Settings.Instance.ScanInterfaceType);
 
                             }
                             GUILayout.EndHorizontal();
@@ -338,12 +431,31 @@ namespace ScienceAlert
             GUILayout.EndVertical();
         }
 
+        #endregion
 
+        #region Message handling functions
 
-        public void Update()
+        /// <summary>
+        /// This message will be sent by ScienceAlert when the user
+        /// changes scan interface types
+        /// </summary>
+        public void Notify_ScanInterfaceChanged()
         {
-            // empty
+            Log.Debug("OptionsWindow.Notify_ScanInterfaceChanged");
         }
 
+
+
+        /// <summary>
+        /// This message sent when toolbar has changed and re-registering
+        /// for events is necessary
+        /// </summary>
+        public void Notify_ToolbarInterfaceChanged()
+        {
+            Log.Debug("OptionsWindow.Notify_ToolbarInterfaceChanged");
+            scienceAlert.Button.OnClick += OnToolbarClicked;
+        }
+
+#endregion
     }
 }

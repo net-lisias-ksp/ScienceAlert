@@ -70,6 +70,11 @@ namespace ScienceAlert
         private Dictionary<IScienceDataTransmitter, ScienceDataList> toBeTransmitted = new Dictionary<IScienceDataTransmitter, ScienceDataList>();
         internal StorageCache cacheOwner;
 
+
+/******************************************************************************
+ *                    Implementation Details
+ ******************************************************************************/
+
         /// <summary>
         /// Called just as the PartModule is added to a Part.  We can
         /// count on doing our initialization here because ScienceAlert

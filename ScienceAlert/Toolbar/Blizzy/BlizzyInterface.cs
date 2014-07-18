@@ -1,4 +1,22 @@
-﻿using System;
+﻿/******************************************************************************
+                   Science Alert for Kerbal Space Program                    
+ ******************************************************************************
+    Copyright (C) 2014 Allen Mrazek (amrazek@hotmail.com)
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *****************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,8 +32,11 @@ namespace ScienceAlert.Toolbar
     class BlizzyInterface : MonoBehaviour, IToolbar
     {
         private const string NormalFlaskTexture = "ScienceAlert/textures/flask";
-        private List<string> StarFlaskTextures = new List<string>();
 
+        // --------------------------------------------------------------------
+        //    Members
+        // --------------------------------------------------------------------
+        private List<string> StarFlaskTextures = new List<string>();
         private float FrameRate = 24f;
         private int FrameCount = 100;
         private int CurrentFrame = 0;
@@ -23,10 +44,11 @@ namespace ScienceAlert.Toolbar
         IButton button;
         new System.Collections.IEnumerator animation;
 
+        public event ToolbarClickHandler OnClick;
 
-//-----------------------------------------------------------------------------
-// Begin implementation
-//-----------------------------------------------------------------------------
+/******************************************************************************
+ *                    Implementation Details
+ ******************************************************************************/
 
         /// <summary>
         /// Create Toolbar and associated textures; setup event
@@ -41,7 +63,9 @@ namespace ScienceAlert.Toolbar
             button.Text = "Science Alert";
             button.ToolTip = "Left-click to view alert experiments; Right-click for settings";
             button.TexturePath = NormalFlaskTexture;
-            button.OnClick += ce => ToolbarButton.TriggerOnClick(new ClickInfo() { button = ce.MouseButton });
+            button.OnClick += ce => {
+                OnClick(new ClickInfo() { button = ce.MouseButton });
+            };
 
             FrameRate = Settings.Instance.StarFlaskFrameRate;
 
@@ -189,6 +213,13 @@ namespace ScienceAlert.Toolbar
         }
 
 
+        public void SetLit()
+        {
+            animation = null;
+            button.TexturePath = StarFlaskTextures[0];
+        }
+
+
         public IDrawable Drawable
         {
             get
@@ -212,6 +243,30 @@ namespace ScienceAlert.Toolbar
             set
             {
                 button.Important = value;
+            }
+        }
+
+        public bool IsAnimating
+        {
+            get
+            {
+                return animation != null;
+            }
+        }
+
+        public bool IsLit
+        {
+            get
+            {
+                return animation == null && button.TexturePath != NormalFlaskTexture;
+            }
+        }
+
+        public bool IsNormal
+        {
+            get
+            {
+                return !IsAnimating && !IsLit;
             }
         }
 

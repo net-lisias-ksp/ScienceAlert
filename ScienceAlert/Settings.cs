@@ -27,7 +27,7 @@ using ReeperCommon;
 
 namespace ScienceAlert
 {
-    internal class Settings
+    public class Settings
     {
         // Singleton pattern
         private static Settings instance;
@@ -51,6 +51,14 @@ namespace ScienceAlert
             None = 0,               // experiment status updates always allowed
             ScanSat = 1             // Use Scansat interface if available
         }
+
+
+        public enum ToolbarInterface : int
+        {
+            ApplicationLauncher = 0,
+            BlizzyToolbar
+        }
+
 
         // per-experiment settings
         public class ExperimentSettings
@@ -483,6 +491,7 @@ Re-saving config with default values for missing experiments.");
 
 
         protected ScanInterface Interface;
+        protected ToolbarInterface ToolbarType;
 
         public ScanInterface ScanInterfaceType
         {
@@ -510,6 +519,27 @@ Re-saving config with default values for missing experiments.");
             }
         }
 
+        public ToolbarInterface ToolbarInterfaceType
+        {
+            get
+            {
+                switch (ToolbarType)
+                {
+                    case ToolbarInterface.BlizzyToolbar:
+                        if (!ToolbarManager.ToolbarAvailable)
+                            return ToolbarInterface.ApplicationLauncher;
+                        return ToolbarInterface.ApplicationLauncher;
+
+                    default:
+                        return ToolbarType;
+                }
+            }
+
+            set
+            {
+                ToolbarType = value;
+            }
+        }
 
         #endregion
 
