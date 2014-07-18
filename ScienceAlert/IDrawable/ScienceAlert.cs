@@ -111,7 +111,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Toolbar;
+//using Toolbar;
 using ReeperCommon;
 
 
@@ -143,229 +143,229 @@ namespace ScienceAlert
     /// Combination of animation and sound effects on status
     /// changes for experiment observers
     /// </summary>
-    class EffectController
-    {
-        private const string NormalFlaskTexture = "ScienceAlert/textures/flask";
-        private List<string> StarFlaskTextures = new List<string>();
+//    class EffectController
+//    {
+//        private const string NormalFlaskTexture = "ScienceAlert/textures/flask";
+//        private List<string> StarFlaskTextures = new List<string>();
 
-        private float FrameRate = 24f;
-        private int FrameCount = 100;
-        private int CurrentFrame = 0;
-        private float ElapsedTime = 0f;
-        private ScienceAlert indicator;
+//        private float FrameRate = 24f;
+//        private int FrameCount = 100;
+//        private int CurrentFrame = 0;
+//        private float ElapsedTime = 0f;
+//        private ScienceAlert indicator;
 
-        AudioController audio = new AudioController();
+//        AudioController audio = new AudioController();
 
-        public EffectController(ScienceAlert indi)
-        {
-            Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
-            {
-                string str = frame.ToString();
+//        public EffectController(ScienceAlert indi)
+//        {
+//            Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
+//            {
+//                string str = frame.ToString();
 
-                while (str.Length < desiredLen)
-                    str = "0" + str;
+//                while (str.Length < desiredLen)
+//                    str = "0" + str;
 
-                return str;
-            };
-
-
-
-            // load textures
-            try
-            {
-                if (!GameDatabase.Instance.ExistsTexture(NormalFlaskTexture))
-                {
-                    // load normal flask texture
-                    Log.Debug("Loading normal flask texture");
-
-                    #region normal flask texture
-                    Texture2D nflask = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.flask.png", true);
-
-                    if (nflask == null)
-                    {
-                        Log.Error("Failed to create normal flask texture!");
-                    }
-                    else
-                    {
-                        GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(nflask, false, true, true);
-                        ti.name = NormalFlaskTexture;
-                        GameDatabase.Instance.databaseTexture.Add(ti);
-                        Log.Debug("Created normal flask texture {0}", ti.name);
-                    }
-
-                    #endregion
-                    #region sprite sheet textures
+//                return str;
+//            };
 
 
-                    // load sprite sheet
-                    Log.Debug("Loading sprite sheet textures...");
 
-                    Texture2D sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet.png", false, false);
+//            // load textures
+//            try
+//            {
+//                if (!GameDatabase.Instance.ExistsTexture(NormalFlaskTexture))
+//                {
+//                    // load normal flask texture
+//                    Log.Debug("Loading normal flask texture");
 
-                    if (sheet == null)
-                    {
-                        Log.Error("Failed to create sprite sheet texture!");
-                    }
-                    else
-                    {
-                        var rt = RenderTexture.GetTemporary(sheet.width, sheet.height);
-                        var oldRt = RenderTexture.active;
-                        int invertHeight = ((FrameCount - 1) / (sheet.width / 24)) * 24;
+//                    #region normal flask texture
+//                    Texture2D nflask = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.flask.png", true);
 
-                        Graphics.Blit(sheet, rt);
-                        RenderTexture.active = rt;
+//                    if (nflask == null)
+//                    {
+//                        Log.Error("Failed to create normal flask texture!");
+//                    }
+//                    else
+//                    {
+//                        GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(nflask, false, true, true);
+//                        ti.name = NormalFlaskTexture;
+//                        GameDatabase.Instance.databaseTexture.Add(ti);
+//                        Log.Debug("Created normal flask texture {0}", ti.name);
+//                    }
 
-                        for (int i = 0; i < FrameCount; ++i)
-                        {
-                            StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
-                            Texture2D sliced = new Texture2D(24, 24, TextureFormat.ARGB32, false);
+//                    #endregion
+//                    #region sprite sheet textures
 
-                            //Log.Debug("{0} = {1},{2}", i, (i % (sheet.width / 24)) * 24, invertHeight - (i / (sheet.width / 24)) * 24);
 
-                            sliced.ReadPixels(new Rect((i % (sheet.width / 24)) * 24, /*invertHeight -*/ (i / (sheet.width / 24)) * 24, 24, 24), 0, 0);
-                            sliced.Apply();
+//                    // load sprite sheet
+//                    Log.Debug("Loading sprite sheet textures...");
 
-                            //sliced.SaveToDisk(StarFlaskTextures.Last());
+//                    Texture2D sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet.png", false, false);
 
-                            GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(sliced, false, false, false);
-                            ti.name = StarFlaskTextures.Last();
+//                    if (sheet == null)
+//                    {
+//                        Log.Error("Failed to create sprite sheet texture!");
+//                    }
+//                    else
+//                    {
+//                        var rt = RenderTexture.GetTemporary(sheet.width, sheet.height);
+//                        var oldRt = RenderTexture.active;
+//                        int invertHeight = ((FrameCount - 1) / (sheet.width / 24)) * 24;
 
-                            GameDatabase.Instance.databaseTexture.Add(ti);
-                            Log.Debug("Added sheet texture {0}", ti.name);
-                        }
+//                        Graphics.Blit(sheet, rt);
+//                        RenderTexture.active = rt;
 
-                        //sheet.SaveToDisk("ScienceAlert/textures/sheet.png");
+//                        for (int i = 0; i < FrameCount; ++i)
+//                        {
+//                            StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
+//                            Texture2D sliced = new Texture2D(24, 24, TextureFormat.ARGB32, false);
 
-                        RenderTexture.active = oldRt;
-                        RenderTexture.ReleaseTemporary(rt);
-                    }
+//                            //Log.Debug("{0} = {1},{2}", i, (i % (sheet.width / 24)) * 24, invertHeight - (i / (sheet.width / 24)) * 24);
 
-                    Log.Debug("Finished loading sprite sheet textures.");
-                    #endregion
-                }
-                else
-                { // textures already loaded
-                    for (int i = 0; i < FrameCount; ++i)
-                        StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
-                }
-            } catch (Exception e)
-            {
-                Log.Error("Failed to load textures: {0}", e);
-            }
+//                            sliced.ReadPixels(new Rect((i % (sheet.width / 24)) * 24, /*invertHeight -*/ (i / (sheet.width / 24)) * 24, 24, 24), 0, 0);
+//                            sliced.Apply();
+
+//                            //sliced.SaveToDisk(StarFlaskTextures.Last());
+
+//                            GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(sliced, false, false, false);
+//                            ti.name = StarFlaskTextures.Last();
+
+//                            GameDatabase.Instance.databaseTexture.Add(ti);
+//                            Log.Debug("Added sheet texture {0}", ti.name);
+//                        }
+
+//                        //sheet.SaveToDisk("ScienceAlert/textures/sheet.png");
+
+//                        RenderTexture.active = oldRt;
+//                        RenderTexture.ReleaseTemporary(rt);
+//                    }
+
+//                    Log.Debug("Finished loading sprite sheet textures.");
+//                    #endregion
+//                }
+//                else
+//                { // textures already loaded
+//                    for (int i = 0; i < FrameCount; ++i)
+//                        StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
+//                }
+//            } catch (Exception e)
+//            {
+//                Log.Error("Failed to load textures: {0}", e);
+//            }
             
 
 
-            indicator = indi;
-            indicator.ToolbarButton.TexturePath = NormalFlaskTexture;
+//            indicator = indi;
+//            indicator.ToolbarButton.TexturePath = NormalFlaskTexture;
 
-            CurrentFrame = 0;
-            ElapsedTime = 0f;
-            FrameRate = Settings.Instance.StarFlaskFrameRate;
-        }
-
-
-
-        public System.Collections.IEnumerator FlaskAnimation()
-        {
-            while (true)
-            {
-                //.Debug("FlaskAnimation, current state {0}", indicator.State);
-
-                if (indicator)
-                    switch (indicator.State)
-                    {
-                        case ScienceAlert.IconState.NewResearch:
-                            if (StarFlaskTextures.Count > 0)
-                            {
-                                if (ElapsedTime > TimePerFrame)
-                                {
-                                    while (ElapsedTime > TimePerFrame)
-                                    {
-                                        ElapsedTime -= TimePerFrame;
-                                        CurrentFrame = (CurrentFrame + 1) % StarFlaskTextures.Count;
-                                    }
-
-                                    indicator.ToolbarButton.TexturePath = StarFlaskTextures[CurrentFrame];
-                                }
-                                else
-                                {
-                                    ElapsedTime += Time.deltaTime;
-                                }
-                            }
-                            else
-                            {
-#if DEBUG
-                                Log.Error("No star flask animation frames loaded.");
-#endif
-                                indicator.ToolbarButton.TexturePath = NormalFlaskTexture; // this is an error; we should have frames loaded
-                            }
-                            break;
-
-                        case ScienceAlert.IconState.ResearchAvailable:
-                            indicator.ToolbarButton.TexturePath = StarFlaskTextures[0];
-                            break;
-
-                        case ScienceAlert.IconState.NoResearch:
-                            indicator.ToolbarButton.TexturePath = NormalFlaskTexture;
-                            break;
-                    }
-
-                yield return null;
-            }
-        }
+//            CurrentFrame = 0;
+//            ElapsedTime = 0f;
+//            FrameRate = Settings.Instance.StarFlaskFrameRate;
+//        }
 
 
 
-        /// <summary>
-        /// Determine whether to play a sound and/or change the indicator's
-        /// IconStatus based on the newly-available status of experiment
-        /// </summary>
-        /// <param name="experiment"></param>
-        public void OnExperimentAvailable(ExperimentObserver experiment)
-        {
-            //Log.Verbose("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
+//        public System.Collections.IEnumerator FlaskAnimation()
+//        {
+//            while (true)
+//            {
+//                //.Debug("FlaskAnimation, current state {0}", indicator.State);
 
-            // firstly, handle sound
-            if (experiment.SoundOnDiscovery || Settings.Instance.SoundNotification == Settings.SoundNotifySetting.Always)
-                if (Settings.Instance.SoundNotification != Settings.SoundNotifySetting.Never)
-                    audio.PlaySound("bubbles");
+//                if (indicator)
+//                    switch (indicator.State)
+//                    {
+//                        case ScienceAlert.IconState.NewResearch:
+//                            if (StarFlaskTextures.Count > 0)
+//                            {
+//                                if (ElapsedTime > TimePerFrame)
+//                                {
+//                                    while (ElapsedTime > TimePerFrame)
+//                                    {
+//                                        ElapsedTime -= TimePerFrame;
+//                                        CurrentFrame = (CurrentFrame + 1) % StarFlaskTextures.Count;
+//                                    }
 
-            // now handle state
-            if (experiment.AnimateOnDiscovery && Settings.Instance.FlaskAnimationEnabled)
-            {
-                indicator.State = ScienceAlert.IconState.NewResearch;
-            }
-            else
-            {
-                if (Settings.Instance.FlaskAnimationEnabled)
-                {
-                    // if the icon is already animated, don't stop it because this
-                    // particular experiment wouldn't produce one
-                    indicator.State = indicator.State == ScienceAlert.IconState.NewResearch ? ScienceAlert.IconState.NewResearch : ScienceAlert.IconState.ResearchAvailable;
-                }
-                else indicator.State = ScienceAlert.IconState.ResearchAvailable;
-            }
+//                                    indicator.ToolbarButton.TexturePath = StarFlaskTextures[CurrentFrame];
+//                                }
+//                                else
+//                                {
+//                                    ElapsedTime += Time.deltaTime;
+//                                }
+//                            }
+//                            else
+//                            {
+//#if DEBUG
+//                                Log.Error("No star flask animation frames loaded.");
+//#endif
+//                                indicator.ToolbarButton.TexturePath = NormalFlaskTexture; // this is an error; we should have frames loaded
+//                            }
+//                            break;
 
-            // menu status (open/closed) is handled by ScienceAlert;
-            // we needn't bother with its effects on state here
-        }
+//                        case ScienceAlert.IconState.ResearchAvailable:
+//                            indicator.ToolbarButton.TexturePath = StarFlaskTextures[0];
+//                            break;
+
+//                        case ScienceAlert.IconState.NoResearch:
+//                            indicator.ToolbarButton.TexturePath = NormalFlaskTexture;
+//                            break;
+//                    }
+
+//                yield return null;
+//            }
+//        }
 
 
 
-        private float TimePerFrame
-        {
-            get
-            {
-                return 1f / FrameRate;
-            }
-        }
+//        /// <summary>
+//        /// Determine whether to play a sound and/or change the indicator's
+//        /// IconStatus based on the newly-available status of experiment
+//        /// </summary>
+//        /// <param name="experiment"></param>
+//        public void OnExperimentAvailable(ExperimentObserver experiment)
+//        {
+//            //Log.Verbose("OnExperimentAvailable: Experiment {0} just become available!", experiment.ExperimentTitle);
 
-        public AudioController AudioController
-        {
-            get
-            { return audio; }
-        }
-    }
+//            // firstly, handle sound
+//            if (experiment.SoundOnDiscovery || Settings.Instance.SoundNotification == Settings.SoundNotifySetting.Always)
+//                if (Settings.Instance.SoundNotification != Settings.SoundNotifySetting.Never)
+//                    audio.PlaySound("bubbles");
+
+//            // now handle state
+//            if (experiment.AnimateOnDiscovery && Settings.Instance.FlaskAnimationEnabled)
+//            {
+//                indicator.State = ScienceAlert.IconState.NewResearch;
+//            }
+//            else
+//            {
+//                if (Settings.Instance.FlaskAnimationEnabled)
+//                {
+//                    // if the icon is already animated, don't stop it because this
+//                    // particular experiment wouldn't produce one
+//                    indicator.State = indicator.State == ScienceAlert.IconState.NewResearch ? ScienceAlert.IconState.NewResearch : ScienceAlert.IconState.ResearchAvailable;
+//                }
+//                else indicator.State = ScienceAlert.IconState.ResearchAvailable;
+//            }
+
+//            // menu status (open/closed) is handled by ScienceAlert;
+//            // we needn't bother with its effects on state here
+//        }
+
+
+
+//        private float TimePerFrame
+//        {
+//            get
+//            {
+//                return 1f / FrameRate;
+//            }
+//        }
+
+//        public AudioController AudioController
+//        {
+//            get
+//            { return audio; }
+//        }
+//    }
 
 
 
@@ -394,16 +394,16 @@ namespace ScienceAlert
         ExperimentObserverList observers = new ExperimentObserverList();
         private StorageCache vesselStorage;
         private System.Collections.IEnumerator watcher;
-        new private System.Collections.IEnumerator animation;
+        //new private System.Collections.IEnumerator animation;
         private System.Collections.IEnumerator rebuilder;
         private IconState researchState = IconState.NoResearch;
 
         // related controls
-        private Toolbar.IButton mainButton;
+        private Toolbar.ToolbarButton button;
         private OptionsWindow optionsWindow;
 
         // animation and audio effects from experiment observers
-        EffectController effects;
+        //EffectController effects;
 
         // cleans up biome maps
         BiomeFilter biomeFilter;
@@ -429,18 +429,29 @@ namespace ScienceAlert
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
 
             // toolbar setup
-            mainButton = Toolbar.ToolbarManager.Instance.add("ScienceAlert", "PopupOpen");
-            mainButton.Text = "Science Alert";
-            mainButton.ToolTip = "Left Click to Open Experiments; Right Click for Settings";
-            mainButton.OnClick += OnToolbarClick;
+            Log.Debug("ScienceAlert.Start: initializing toolbar");
 
-            effects = new EffectController(this); // requires toolbar button to exist
-            optionsWindow = new OptionsWindow(this, effects.AudioController);
+            button = gameObject.AddComponent<Toolbar.ToolbarButton>();
+            Toolbar.ToolbarButton.OnClick += OnToolbarClick;
+
+            Log.Debug("Toolbar button ready");
+
+            Log.Debug("Loading sounds...");
+           // effects = new EffectController(this); // requires toolbar button to exist
+            AudioUtil.LoadSoundsFrom("/ScienceAlert/sounds", AudioType.WAV);
+            Log.Debug("Sounds ready.");
+
+            Log.Debug("Creating options window");
+            optionsWindow = new OptionsWindow(this/*, effects.AudioController*/);
+
+            Log.Debug("Creating biome filter");
             biomeFilter = gameObject.AddComponent<BiomeFilter>();
+
+            Log.Debug("Creating vessel storage");
             vesselStorage = gameObject.AddComponent<StorageCache>();
 
             // set up coroutines
-            animation = effects.FlaskAnimation();
+            //animation = effects.FlaskAnimation();
             //rebuilder = RebuildObserverList();      // no longer necessary; interface change will kick this off now
 
             // set up whichever interface we're using to determine when it's
@@ -456,7 +467,6 @@ namespace ScienceAlert
         public void OnDestroy()
         {
             Log.Debug("ScienceAlert destroyed");
-            mainButton.Destroy();
 
         }
 
@@ -492,7 +502,6 @@ namespace ScienceAlert
                 {
                     if (!PauseMenu.isOpen)
                         if (watcher != null) watcher.MoveNext();
-                    animation.MoveNext();
                 } 
             }
         }
@@ -833,11 +842,11 @@ namespace ScienceAlert
                                 }
 
 
-                        effects.OnExperimentAvailable(observer);
+                        //effects.OnExperimentAvailable(observer);
 
                         // the button is important; if it's auto-hidden we should
                         // show it to the player
-                        if (!OptionsOpen && !MenuOpen && Settings.Instance.FlaskAnimationEnabled) ToolbarButton.Important = true;
+                        if (!OptionsOpen && !MenuOpen && Settings.Instance.FlaskAnimationEnabled) button.Important = true;
 
                         UpdateMenuState();
                     } else if (!observers.Any(ob => ob.Available)) {
@@ -920,7 +929,7 @@ namespace ScienceAlert
                         if (GUILayout.Button(content))
                         {
                             Log.Debug("Deploying {0}", observer.ExperimentTitle);
-                            effects.AudioController.PlaySound("click2");
+                            //effects.AudioController.PlaySound("click2");
                             observer.Deploy();
                         }
                     }
@@ -930,11 +939,12 @@ namespace ScienceAlert
 
 
 
-        public void OnToolbarClick(ClickEvent ce)
+        public void OnToolbarClick(Toolbar.ClickInfo ci)
         {
-            effects.AudioController.PlaySound("click1");
+            //effects.AudioController.PlaySound("click1");
 
-            if (ce.MouseButton == 0)
+            //if (ce.MouseButton == 0)
+            if (ci.button == 0)
             {
                 Log.Debug("Toolbar left clicked");
 
@@ -947,7 +957,8 @@ namespace ScienceAlert
             }
             else // right or middle click
             {
-                if (ce.MouseButton == 2 && Settings.Instance.DebugMode) // middle
+                //if (ce.MouseButton == 2 && Settings.Instance.DebugMode) // middle
+                if (ci.button == 2 && Settings.Instance.DebugMode) // middle
                 {
                     Log.Debug("DebugMode enabled, middle-click on toolbar button. Opening debug menu.");
                     DebugOpen = !DebugOpen;
@@ -976,7 +987,7 @@ namespace ScienceAlert
                 if (State == IconState.NewResearch)
                 {
                     State = IconState.ResearchAvailable;
-                    ToolbarButton.Important = false;
+                    button.Important = false;
                 }
             }
         }
@@ -999,11 +1010,11 @@ namespace ScienceAlert
             }
         }
 
-        public IButton ToolbarButton
+        public Toolbar.ToolbarButton Button
         {
             get
             {
-                return mainButton;
+                return button;
             }
         }
 
@@ -1011,13 +1022,13 @@ namespace ScienceAlert
         {
             get
             {
-                return mainButton.Drawable != null && mainButton.Drawable is ScienceAlert;
+                return button.Drawable != null && button.Drawable is ScienceAlert;
             }
             set
             {
-                mainButton.Drawable = value ? this : null;
+                button.Drawable = value ? this : null;
                 UpdateMenuState();
-                ToolbarButton.Important = false;
+                button.Important = false;
             }
         }
 
@@ -1027,18 +1038,18 @@ namespace ScienceAlert
         {
             get
             {
-                return mainButton.Drawable != null && mainButton.Drawable is OptionsWindow;
+                return button.Drawable != null && button.Drawable is OptionsWindow;
             }
             set
             {
                 if (value)
                 {
-                    mainButton.Drawable = optionsWindow;
-                    ToolbarButton.Important = false;
+                    button.Drawable = optionsWindow;
+                    button.Important = false;
                 }
                 else if (OptionsOpen)
                 {
-                    mainButton.Drawable = null;
+                    button.Drawable = null;
                     Settings.Instance.Save();
                 }
                 UpdateMenuState();
@@ -1049,18 +1060,18 @@ namespace ScienceAlert
         {
             get
             {
-                return mainButton.Drawable != null && mainButton.Drawable is DebugWindow;
+                return button.Drawable != null && button.Drawable is DebugWindow;
             }
             set
             {
                 if (!value)
                 {
                     if (DebugOpen)
-                        mainButton.Drawable = null;
+                        button.Drawable = null;
                 }
                 else if (!DebugOpen)
                 {
-                    mainButton.Drawable = new DebugWindow(this, biomeFilter, vesselStorage);
+                    button.Drawable = new DebugWindow(this, biomeFilter, vesselStorage);
                     UpdateMenuState();
                 }
             }

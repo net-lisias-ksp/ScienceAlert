@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Toolbar;
 using ReeperCommon;
 
 namespace ScienceAlert
@@ -34,7 +33,7 @@ namespace ScienceAlert
         private Rect windowRect;
         private Vector2 scrollPos = new Vector2();
         private Vector2 additionalScrollPos = new Vector2();
-        private AudioController audio;
+        //private AudioController audio;
         private Dictionary<string /* expid */, int /* selected index */> experimentIds = new Dictionary<string, int>();
         private List<GUIContent> filterList = new List<GUIContent>();
         private string sciMinValue = "0";
@@ -48,7 +47,7 @@ namespace ScienceAlert
         GUISkin whiteLabel;
         //GUISkin redToggle;
 
-        public OptionsWindow(ScienceAlert sa, AudioController audioDevice)
+        public OptionsWindow(ScienceAlert sa)
         {
             creator = sa;
 
@@ -74,7 +73,7 @@ namespace ScienceAlert
             filterList.Add(new GUIContent("< 50% collected"));
             filterList.Add(new GUIContent("< 90% collected"));
 
-            audio = audioDevice;
+            //audio = audioDevice;
             sciMinValue = Settings.Instance.ScienceThreshold.ToString();
 
             var tex = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnExpand.png", false);
@@ -142,7 +141,7 @@ namespace ScienceAlert
             bool result = GUILayout.Toggle(value, content, style == null ? Settings.Skin.toggle : style, options);
             if (result != value)
             {
-                audio.PlaySound("click1");
+                //audio.PlaySound("click1");
 
 #if DEBUG
                 Log.Debug("Toggle '{0}' is now {1}", content, result);
@@ -158,7 +157,7 @@ namespace ScienceAlert
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
             if (newValue != currentValue)
             {
-                audio.PlaySound("click1");
+                //audio.PlaySound("click1");
                 settings.Filter = (Settings.ExperimentSettings.FilterMethod)newValue;
             }
 
@@ -173,7 +172,7 @@ namespace ScienceAlert
 
             if (pressed)
             {
-                audio.PlaySound("click1");
+                //audio.PlaySound("click1");
             }
 
             return pressed;
@@ -251,7 +250,7 @@ namespace ScienceAlert
                                         }
                                         else
                                         {
-                                            audio.PlaySound("error");
+                                            //audio.PlaySound("error");
                                             Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
                                             Log.Debug("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
                                         }
