@@ -33,6 +33,10 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>C:\Program Files (x86)\Steam\SteamApps\common\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -64,7 +68,7 @@
     </Compile>
     <Compile Include="AudioController.cs" />
     <Compile Include="BiomeFilter.cs" />
-    <Compile Include="Toolbar\ApplicationLauncher\ApplicationLauncher.cs" />
+    <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
     <Compile Include="Windows\ExperimentManager.cs" />
     <Compile Include="Windows\DebugWindow.cs" />
     <Compile Include="ScienceAlert.cs" />

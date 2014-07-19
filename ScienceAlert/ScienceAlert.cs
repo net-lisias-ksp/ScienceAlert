@@ -210,7 +210,7 @@ namespace ScienceAlert
 
 
             Log.Debug("ScienceAlert.Start: initializing toolbar");
-            ToolbarType = Settings.ToolbarInterface.BlizzyToolbar;
+            ToolbarType = Settings.ToolbarInterface.ApplicationLauncher;
             Log.Debug("Toolbar button ready");
         }
 
@@ -491,7 +491,10 @@ namespace ScienceAlert
                             break;
 
                         case Settings.ToolbarInterface.ApplicationLauncher:
-                            throw new NotImplementedException();
+                            Log.Verbose("Setting Toolbar interface to Application Launcher");
+
+                            button = gameObject.AddComponent<Toolbar.AppLauncherInterface>();
+                            break;
                     }
 
                     buttonInterfaceType = value;

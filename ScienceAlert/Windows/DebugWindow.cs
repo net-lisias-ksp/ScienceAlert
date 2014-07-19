@@ -271,7 +271,7 @@ namespace ScienceAlert
         /// </summary>
         public void Notify_ToolbarInterfaceChanged()
         {
-            Log.Debug("ExperimentManager.Notify_ToolbarInterfaceChanged");
+            Log.Debug("DebugWindow.Notify_ToolbarInterfaceChanged");
 
             scienceAlert.Button.OnClick += OnToolbarClicked;
         }
