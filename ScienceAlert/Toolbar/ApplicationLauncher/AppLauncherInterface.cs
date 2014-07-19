@@ -135,6 +135,8 @@ namespace ScienceAlert.Toolbar
             {
                 frames[frame] = new SPRITE_FRAME(0);
                 frames[frame].uvs = atlas.GetUV(string.Format("flask{0}", GetFrame(frame + 1, 4)));
+
+                Log.Write("frame {0} = {1}", frame, frames[frame].uvs);
             }
 
             anim.framerate = 24f;
