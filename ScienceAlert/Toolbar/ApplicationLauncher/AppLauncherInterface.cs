@@ -37,7 +37,7 @@ namespace ScienceAlert.Toolbar
 
         private IDrawable drawable;
         private ApplicationLauncherButton button;
-        private PackedSprite animationSprite;
+        private PackedSprite sprite; // animations: Spin, Unlit
 
 /******************************************************************************
  *                    Implementation Details
@@ -54,100 +54,32 @@ namespace ScienceAlert.Toolbar
             while (!ApplicationLauncher.Ready)
                 yield return null;
 
-            Log.Write("Testing app launcher textures");
-
-            Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
-            {
-                string str = frame.ToString();
-
-                while (str.Length < desiredLen)
-                    str = "0" + str;
-
-                return str;
-            };
-
-            #region atlas creation
-
-#if (DEBUG && GENERATE_ATLAS)
-            //Log.Write("Generating atlas");
-
-            //ConfigNode node;
-            //var textures = new List<Texture2D>();
-
-            //Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
-            //{
-            //    string str = frame.ToString();
-
-            //    while (str.Length < desiredLen)
-            //        str = "0" + str;
-
-            //    return str;
-            //};
-
-            //for (int i = 0; i < 100; ++i)
-            //{
-            //    var intermediate = GameDatabase.Instance.GetTexture(string.Format("/flask{0}", GetFrame(i + 1, 4)), false);
-            //    if (intermediate == null) Log.Error("failed to find frame " + string.Format("flask{0}", GetFrame(i + 1, 4)));
-
-            //    textures.Add(intermediate);
-            //}
-            //var atlasTexture = GuiUtil.CreateAtlas(512, 512, out node, textures);
-            //atlasTexture.SaveToDisk("finished_atlas.png");
-#endif
-            #endregion
-
-            // looks like we need to use a PackedSprite if we want
-            // button animations
-            //var normalTex = GameDatabase.Instance.GetTexture("ScienceAlert/normal", false);
-            //if (normalTex == null) Log.Error("normal is null");
 
             var sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet_app.png", true, false);
             if (sheet == null) Log.Error("Failed to locate embedded app sheet texture!");
 
-            sheet.CreateReadable().SaveToDisk("extracted.png");
-
-            //Log.Write("loaded normaltex");
-            //normalTex.SaveToDisk("saved.png");
-
-            animationSprite = PackedSprite.Create("ScienceAlert.Button.Animation", Vector3.zero);
-            animationSprite.SetMaterial(new Material(Shader.Find("Sprite/Vertex Colored")) { mainTexture = sheet });
-            
+            sprite = PackedSprite.Create("ScienceAlert.Button.Animation", Vector3.zero);
+            sprite.SetMaterial(new Material(Shader.Find("Sprite/Vertex Colored")) { mainTexture = sheet });
+            sprite.Setup(38f, 38f);
+            sprite.SetFramerate(24f);
+            sprite.SetAnchor(SpriteRoot.ANCHOR_METHOD.UPPER_LEFT);
+            //sprite.renderCamera = Camera.allCameras.ToList().Find(c => (c.cullingMask & (1 << LayerMask.NameToLayer("EzGUI_UI"))) != 0);
+            sprite.gameObject.layer = LayerMask.NameToLayer("EzGUI_UI");
 
             Log.Write("setup sprite");
 
             // normal state
-                // todo
+            UVAnimation normal = new UVAnimation() { name = "Unlit", loopCycles = 0, framerate = 24f };
+            normal.BuildUVAnim(sprite.PixelCoordToUVCoord(9 * 38, 8 * 38), sprite.PixelSpaceToUVSpace(38, 38), 1, 1, 1);
 
             // animated state
-            animationSprite.Setup(38f, 38f);
-            animationSprite.SetFramerate(24f);
-            animationSprite.SetAnchor(SpriteRoot.ANCHOR_METHOD.UPPER_LEFT);
+            UVAnimation anim = new UVAnimation() { name = "Spin", loopCycles = -1, framerate = 24f };
+            anim.BuildWrappedUVAnim(new Vector2(0, 1f - sprite.PixelSpaceToUVSpace(38, 38).y), sprite.PixelSpaceToUVSpace(38, 38), 100);
 
-            UVAnimation anim = new UVAnimation();
-            SPRITE_FRAME[] frames = new SPRITE_FRAME[100];
-            UvAtlas atlas = UvAtlas.LoadFromResource("ScienceAlert.Resources.atlas.txt", sheet.width, sheet.height);
-            
-            Log.Write("zero at {0}", animationSprite.PixelCoordToUVCoord(0, 0));
-            Log.Write("dimensions: {0}", animationSprite.PixelSpaceToUVSpace(38, 38));
+            // add animations to button
+            sprite.AddAnimation(normal);
+            sprite.AddAnimation(anim);
 
-
-            for (int frame = 0; frame < 100; ++frame)
-            {
-                frames[frame] = new SPRITE_FRAME(0);
-                frames[frame].uvs = atlas.GetUV(string.Format("flask{0}", GetFrame(frame + 1, 4)));
-
-                Log.Write("frame {0} = {1}", frame, frames[frame].uvs);
-            }
-
-            anim.framerate = 24f;
-            anim.loopCycles = -1;
-            anim.name = "Spin";
-            anim.SetAnim(frames);
-
-            animationSprite.AddAnimation(anim);
-            animationSprite.renderCamera = Camera.allCameras.ToList().Find(c => (c.cullingMask & (1 << LayerMask.NameToLayer("EzGUI_UI"))) != 0);
-            animationSprite.gameObject.layer = LayerMask.NameToLayer("EzGUI_UI");
-  
 
             Log.Debug("Creating mod button...");
             button = ApplicationLauncher.Instance.AddModApplication(
@@ -158,12 +90,9 @@ namespace ScienceAlert.Toolbar
                                                         () => { },
                                                         () => { },
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
-                                                        animationSprite);
+                                                        sprite);
 
-
-            Log.Write("playing anim");
-            //button.PlayAnim();
-            animationSprite.PlayAnim("Spin");
+            sprite.PlayAnim("Unlit");
 
             Log.Debug("Finished creating mod button");
         }
@@ -191,22 +120,26 @@ namespace ScienceAlert.Toolbar
 
         public void PlayAnimation()
         {
-            
+            sprite.PlayAnim("Spin");
         }
 
         public void StopAnimation()
         {
-            
+            sprite.PauseAnim();
         }
 
         public void SetUnlit()
         {
-            
+            sprite.PlayAnim("Unlit");
         }
 
         public void SetLit()
         {
-
+            if (sprite.GetCurAnim().name != "Spin")
+            {
+                sprite.SetFrame("Spin", 0);
+            }
+            else sprite.PauseAnim();
         }
 
 
@@ -218,7 +151,7 @@ namespace ScienceAlert.Toolbar
         {
             get
             {
-                return false;
+                return sprite.IsAnimating();
             }
         }
 
@@ -226,7 +159,7 @@ namespace ScienceAlert.Toolbar
         {
             get
             {
-                return false;
+                return sprite.GetCurAnim().name == "Unlit";
             }
         }
 
@@ -234,7 +167,7 @@ namespace ScienceAlert.Toolbar
         {
             get
             {
-                return false;
+                return sprite.GetCurAnim().name == "Spin" && !sprite.IsAnimating();
             }
         }
 
