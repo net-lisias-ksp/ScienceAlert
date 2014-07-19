@@ -57,6 +57,9 @@
     <Compile Include="..\..\DebugTools\DebugUtil.cs">
       <Link>Tools\DebugUtil.cs</Link>
     </Compile>
+    <Compile Include="..\..\DebugTools\GuiUtil.cs">
+      <Link>Tools\GuiUtil.cs</Link>
+    </Compile>
     <Compile Include="..\..\DebugTools\ImprovedAddonLoader.cs">
       <Link>Tools\ImprovedAddonLoader.cs</Link>
     </Compile>
@@ -93,7 +96,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\btnExpand.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\sheet_app.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\atlas.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program\GameData

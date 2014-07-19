@@ -27,6 +27,8 @@ using ReeperCommon;
 
 namespace ScienceAlert
 {
+    delegate bool IsCoveredDelegate(double lat, double lon, int mask);
+
     internal class SCANsatInterface : DefaultScanInterface
     {
         private const string SCANcontrollerTypeName = "SCANsat.SCANcontroller";
@@ -38,6 +40,7 @@ namespace ScienceAlert
         ScenarioModule controllerInstance;
         object dataInstance;
         MethodInfo getMethod;
+        IsCoveredDelegate coveredDelegate; // supposedly is faster than invoke
 
 /******************************************************************************
  *                    Implementation Details
@@ -56,7 +59,8 @@ namespace ScienceAlert
 
                     return result;
 #else
-                    return (bool)isCoveredMethod.Invoke(dataInstance, new object[] {lat, lon, 8});
+                    //return (bool)isCoveredMethod.Invoke(dataInstance, new object[] {lat, lon, 8});
+                    return coveredDelegate(lat, lon, 8);
                 }
 #endif
 #if DEBUG && DEBUGSCANSAT
@@ -220,6 +224,8 @@ namespace ScienceAlert
                 else
                 {
                     Log.Debug("SCANsatInterface: successfully retrieved SCANdata.isCovered.");
+                    coveredDelegate = (IsCoveredDelegate)Delegate.CreateDelegate(typeof(IsCoveredDelegate), isCoveredMethod); 
+
                 }
             }
         }

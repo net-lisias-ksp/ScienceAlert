@@ -16,10 +16,15 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
+#define GENERATE_ATLAS
 using UnityEngine;
 using System.Linq;
+using System.Collections.Generic;
 using ReeperCommon;
 using ImprovedAddonLoader;
+#if DEBUG
+using System;
+#endif
 
 namespace ScienceAlert.Toolbar
 {
@@ -51,70 +56,96 @@ namespace ScienceAlert.Toolbar
 
             Log.Write("Testing app launcher textures");
 
-            Log.Debug("Generating button texture...");
-            var tex = new Texture2D(38, 38, TextureFormat.ARGB32, false);
-            tex.GenerateRandom();
-            tex.SaveToDisk("random.png");
-            Log.Debug("Generated debug texture and saved to disk.");
+            Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
+            {
+                string str = frame.ToString();
+
+                while (str.Length < desiredLen)
+                    str = "0" + str;
+
+                return str;
+            };
+
+            #region atlas creation
+
+#if (DEBUG && GENERATE_ATLAS)
+            //Log.Write("Generating atlas");
+
+            //ConfigNode node;
+            //var textures = new List<Texture2D>();
+
+            //Func<int, int, string> GetFrame = delegate(int frame, int desiredLen)
+            //{
+            //    string str = frame.ToString();
+
+            //    while (str.Length < desiredLen)
+            //        str = "0" + str;
+
+            //    return str;
+            //};
+
+            //for (int i = 0; i < 100; ++i)
+            //{
+            //    var intermediate = GameDatabase.Instance.GetTexture(string.Format("/flask{0}", GetFrame(i + 1, 4)), false);
+            //    if (intermediate == null) Log.Error("failed to find frame " + string.Format("flask{0}", GetFrame(i + 1, 4)));
+
+            //    textures.Add(intermediate);
+            //}
+            //var atlasTexture = GuiUtil.CreateAtlas(512, 512, out node, textures);
+            //atlasTexture.SaveToDisk("finished_atlas.png");
+#endif
+            #endregion
 
             // looks like we need to use a PackedSprite if we want
             // button animations
-            var normalTex = GameDatabase.Instance.GetTexture("ScienceAlert/normal", false);
-            if (normalTex == null) Log.Error("normal is null");
+            //var normalTex = GameDatabase.Instance.GetTexture("ScienceAlert/normal", false);
+            //if (normalTex == null) Log.Error("normal is null");
 
-            Log.Write("loaded normaltex");
-            normalTex.SaveToDisk("saved.png");
+            var sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet_app.png", true, false);
+            if (sheet == null) Log.Error("Failed to locate embedded app sheet texture!");
+
+            sheet.CreateReadable().SaveToDisk("extracted.png");
+
+            //Log.Write("loaded normaltex");
+            //normalTex.SaveToDisk("saved.png");
 
             animationSprite = PackedSprite.Create("ScienceAlert.Button.Animation", Vector3.zero);
-            animationSprite.SetMaterial(new Material(Shader.Find("KSP/Unlit" /*Sprite/Vertex Colored"*/)) { mainTexture = normalTex });
+            animationSprite.SetMaterial(new Material(Shader.Find("Sprite/Vertex Colored")) { mainTexture = sheet });
             
 
             Log.Write("setup sprite");
 
             // normal state
-            //var normal = new CSpriteFrame();
-            //normal.uvs = new Rect(0f, 0f, 1f, 1f);
+                // todo
 
-            //Log.Write("set anim");
-            //UVAnimation animate = new UVAnimation();
-            //animate.framerate = 24f;
-            ////animate.BuildUVAnim(animationSprite.PixelSpaceToUVSpace(Vector2.zero), animationSprite.PixelSpaceToUVSpace(new Vector2(38f, 38f)), 1, 1, 1);
-            //animate.loopCycles = -1;
-            //animate.SetAnim(new SPRITE_FRAME[] { normal.ToStruct() });
-
-            //Log.Write("38,38 into uv space: {0}", animationSprite.PixelSpaceToUVSpace(new Vector2(38f, 38f)).ToString());
-
-            //animationSprite.AddAnimation(animate);
-            
-
-            ////animationSprite.animations[0].SetAnim(new SPRITE_FRAME[] { normal.ToStruct() });
-
-            //Log.Write("init uvs");
-            //animationSprite.InitUVs();
-
-
+            // animated state
             animationSprite.Setup(38f, 38f);
             animationSprite.SetFramerate(24f);
             animationSprite.SetAnchor(SpriteRoot.ANCHOR_METHOD.UPPER_LEFT);
 
             UVAnimation anim = new UVAnimation();
-            SPRITE_FRAME[] frames = new SPRITE_FRAME[1];
+            SPRITE_FRAME[] frames = new SPRITE_FRAME[100];
+            UvAtlas atlas = UvAtlas.LoadFromResource("ScienceAlert.Resources.atlas.txt", sheet.width, sheet.height);
+            
+            Log.Write("zero at {0}", animationSprite.PixelCoordToUVCoord(0, 0));
+            Log.Write("dimensions: {0}", animationSprite.PixelSpaceToUVSpace(38, 38));
 
-            // Adjust each frame's properties here
-            // There might be a way to get each frame information but I haven't found it yet
-            //frames[0] = new SPRITE_FRAME(0);
-            //frames[0].uvs = new Rect(0.25f, 0.25f, .75f, .75f);
 
-            //anim.SetAnim(frames);
-            anim.BuildUVAnim(Vector2.zero, new Vector2(0.05f, 0.05f), 20, 1, 20);
+            for (int frame = 0; frame < 100; ++frame)
+            {
+                frames[frame] = new SPRITE_FRAME(0);
+                frames[frame].uvs = atlas.GetUV(string.Format("flask{0}", GetFrame(frame + 1, 4)));
+            }
+
             anim.framerate = 24f;
             anim.loopCycles = -1;
-            
+            anim.name = "Spin";
+            anim.SetAnim(frames);
 
             animationSprite.AddAnimation(anim);
             animationSprite.renderCamera = Camera.allCameras.ToList().Find(c => (c.cullingMask & (1 << LayerMask.NameToLayer("EzGUI_UI"))) != 0);
             animationSprite.gameObject.layer = LayerMask.NameToLayer("EzGUI_UI");
-            animationSprite.gameObject.SetActive(true);
+  
 
             Log.Debug("Creating mod button...");
             button = ApplicationLauncher.Instance.AddModApplication(
@@ -125,16 +156,12 @@ namespace ScienceAlert.Toolbar
                                                         () => { },
                                                         () => { },
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
-
                                                         animationSprite);
-                                                        //normalTex);
 
-            //button.Setup(animationSprite);
-            //button.SetTexture(tex);
-            //button.Setup(tex);
 
             Log.Write("playing anim");
-            button.PlayAnim();
+            //button.PlayAnim();
+            animationSprite.PlayAnim("Spin");
 
             Log.Debug("Finished creating mod button");
         }
