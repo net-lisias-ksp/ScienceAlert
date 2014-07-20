@@ -28,6 +28,8 @@ using System;
 
 namespace ScienceAlert.Toolbar
 {
+    delegate void HoverCallback();
+
     /// <summary>
     /// Unfortunately there's some peculiar, potentially annoying behaviour
     /// with the ApplicationLauncher. Specifically, there are cases where
@@ -47,27 +49,46 @@ namespace ScienceAlert.Toolbar
 
         class ButtonWrapper
         {
-            public ApplicationLauncherButton button;
-            public RUIToggleButton.OnHover onHover;
-            public RUIToggleButton.OnTrue onTrue;
-            public RUIToggleButton.OnClickBtn onClick;
+            ApplicationLauncherButton button;
+            RUIToggleButton.OnHover onHover;
+            RUIToggleButton.OnHoverBtn onHoverBtn;
+            RUIToggleButton.OnHoverBtnActive onHoverBtnActive;
+            HoverCallback callback;
+
+            //public RUIToggleButton.OnTrue onTrue;
+            //public RUIToggleButton.OnClickBtn onClick;
+
+            internal ButtonWrapper(ApplicationLauncherButton b, HoverCallback h)
+            {
+                button = b;
+                onHover = b.toggleButton.onHover;
+                onHoverBtn = b.toggleButton.onHoverBtn;
+                onHoverBtnActive = b.toggleButton.onHoverBtnActive;
+
+                b.toggleButton.onHover = HoverStub;
+                b.toggleButton.onHoverBtn = HoverBtnStub;
+                b.toggleButton.onHoverBtnActive = HoverBtnActiveStub;
+
+                callback = h;
+            }
 
             public void HoverStub()
             {
-                Log.Write("hoverstub");
+                Log.Write("HoverStub");
                 onHover();
+                callback();
             }
 
-            public void TrueStub()
+            public void HoverBtnStub(RUIToggleButton b)
             {
-                Log.Write("truestub");
-                onTrue();
+                Log.Write("HoverBtnStub");
+                onHoverBtn(b);
             }
 
-            public void ClickStub(RUIToggleButton button)
+            public void HoverBtnActiveStub(RUIToggleButton b)
             {
-                Log.Write("clickstub");
-                onClick(button);
+                Log.Write("HoverBtnActiveStub");
+                onHoverBtnActive(b);
             }
         }
 
@@ -76,9 +97,13 @@ namespace ScienceAlert.Toolbar
         // --------------------------------------------------------------------
         //List<ButtonWrapper> stockButtons = new List<ButtonWrapper>();
         List<ApplicationLauncherButton> stockButtons = new List<ApplicationLauncherButton>();
+        List<ButtonWrapper> wrappers = new List<ButtonWrapper>();
 
         CurrencyWidgetsApp currency;
         AppLauncherInterface button;
+        System.Collections.IEnumerator waitRoutine;
+        EZInputDelegate hoverDelegate;
+        bool mouseHover = false;
 
 /******************************************************************************
  *                    Implementation Details
@@ -91,6 +116,26 @@ namespace ScienceAlert.Toolbar
 
             var appl = ApplicationLauncher.Instance.gameObject.transform;
 
+            hoverDelegate = delegate(ref POINTER_INFO ptr)
+            {
+                switch (ptr.evt)
+                {
+                    case POINTER_INFO.INPUT_EVENT.MOVE:
+                        if (this.button.Drawable != null && waitRoutine == null)
+                        {
+                            waitRoutine = TemporarilyHideDrawable();
+                            Log.Debug("Started wait routine");
+                        }
+                        mouseHover = true;
+                        break;
+
+                    case POINTER_INFO.INPUT_EVENT.MOVE_OFF:
+                        Log.Debug("Mouse moved off hover area");
+                        mouseHover = false;
+                        break;
+                }
+            };
+
             var holder = appl.Find("anchor/List");
             if (holder == null)
             {
@@ -99,40 +144,16 @@ namespace ScienceAlert.Toolbar
             else
             {
                 stockButtons = holder.GetComponentsInChildren<ApplicationLauncherButton>().ToList();
-                
-                //for (int i = 0; i < appl.childCount; ++i)
-                //    if (appl.GetChild(i).GetComponent<ApplicationLauncherButton>() != null)
-                //    {
-                //        buttons.Add(appl.GetChild(i).GetComponent<ApplicationLauncherButton>());
-                //        break;
-                //    }
 
-                //foreach (var b in buttons)
-                //{
-                //    var wrapped = new ButtonWrapper()
-                //    {
-                //        button = b,
-                //        onHover = b.toggleButton.onHover,
-                //        onTrue = b.toggleButton.onTrue,
-                //        onClick = b.toggleButton.onClickBtn
-                //    };
-
-                //    b.toggleButton.onTrue = wrapped.TrueStub;
-                //    b.toggleButton.onHover = wrapped.HoverStub;
-
-                //    b.toggleButton.onClickBtn = wrapped.ClickStub;
-                   
-                //    stockButtons.Add(wrapped);
-                //}
+                foreach (var b in stockButtons)
+                    wrappers.Add(new ButtonWrapper(b, () => {}));
 
                 // nope foreach (var b in appl.GetComponentsInChildren<RUIToggleButton>())
                 // nope foreach (var b in appl.GetComponentsInChildren<UIButton>())
                 // nope foreach (var b in appl.GetComponentsInChildren<UIListItemContainer>())
                 // nope foreach (var b in appl.GetComponentsInChildren<BTButton>())
-                foreach (var b in appl.GetComponentsInChildren<UIScrollList>()) // AH HA!!
+                foreach (var b in holder.GetComponentsInChildren<UIScrollList>()) // AH HA!!
                 {
-                    //b.AddValueChangedDelegate(delegate(IUIObject o) { Log.Write("victory"); });
-                    //b.AddInputDelegate(delegate(ref POINTER_INFO ptr) { Log.Write("ptr delegtate"); });
                     b.AddValueChangedDelegate(StockButtonClick);
                 }
             }
@@ -155,9 +176,13 @@ namespace ScienceAlert.Toolbar
         }
 
 
+        /// <summary>
+        /// Close the drawable
+        /// </summary>
+        /// <param name="o"></param>
         public void StockButtonClick(IUIObject o)
         {
-            Log.Write("stock button click");
+            Log.Debug("stock button click");
             button.Drawable = null;
         }
 
@@ -167,20 +192,57 @@ namespace ScienceAlert.Toolbar
             while (!currency.widgetSpawner.Spawned)
                 yield return 0;
 
-            var button = currency.gameObject.transform.Find("anchor/WidgetHoverArea").GetComponent<UIButton>();
-            button.AddInputDelegate(delegate(ref POINTER_INFO ptr) { Log.Write("widget hover area"); });
-            button.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("widgethoverarea changed"); });
+            
 
-            var button2 = currency.gameObject.transform.Find("anchor/hoverComponent").GetComponent<UIButton>();
-            button2.AddInputDelegate(delegate(ref POINTER_INFO ptr) { Log.Write("hoverComponent area"); });
-            button2.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("hoverComponent changed"); });
+            var mainHoverArea = currency.gameObject.transform.Find("anchor/WidgetHoverArea").GetComponent<UIButton>();
+            mainHoverArea.AddInputDelegate(hoverDelegate);
+            //mainHoverArea.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("widgethoverarea changed"); });
+
+            var buttonHover = currency.gameObject.transform.Find("anchor/hoverComponent").GetComponent<UIButton>();
+            buttonHover.AddInputDelegate(hoverDelegate);
+            //button2.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("hoverComponent changed"); });
         }
 
+
+
+        /// <summary>
+        /// wait for user to move mouse off of the hover area
+        /// </summary>
+        /// <returns></returns>
+        System.Collections.IEnumerator TemporarilyHideDrawable()
+        {
+            IDrawable drawable = button.Drawable;
+
+            if (drawable == null) yield break;
+
+            Log.Debug("DrawableManners: Temporarily hiding drawable");
+            button.Drawable = null;
+
+            while (mouseHover && button.Drawable == null)
+                yield return 0;
+
+            // check to see if a new drawable was added
+            if (button.Drawable != null)
+            {
+                Log.Debug("DrawableManners: Did not restore drawable; is too old");
+                yield break;
+            }
+            // restore drawable
+            button.Drawable = drawable;
+            Log.Debug("DrawableManners: Restored drawable");
+        }
+
+
+
+        /// <summary>
+        /// Why update the coroutine manually? I like this way better than
+        /// using a flag to avoid duplicate coroutines from being created
+        /// </summary>
         void Update()
         {
-            // seems to be always active. todo
-            //if (currency.gameObject.transform.Find("anchor/WidgetHoverArea").gameObject.renderer.enabled)
-            //    Log.Write("WidgetHoverarea active!");
+            if (waitRoutine != null)
+                if (!waitRoutine.MoveNext())
+                    waitRoutine = null;
         }
 
 
@@ -190,26 +252,15 @@ namespace ScienceAlert.Toolbar
             Log.Write("DrawableManners: OnButton");
         }
 
-
-
         public bool ShouldHide
         {
             get
             {
-                return false;
+                return waitRoutine != null || stockButtons.Any(b => b.toggleButton.IsHovering || b.toggleButton.State == RUIToggleButton.ButtonState.TRUE);
             }
         }
-
-
-
-        //public bool ShouldClose
-        //{
-        //    get
-        //    {
-        //        return false;
-        //    }
-        //}
     }
+
 
     class AppLauncherInterface : MonoBehaviour, IToolbar
     {
@@ -222,6 +273,8 @@ namespace ScienceAlert.Toolbar
         private IDrawable drawable;
         private bool movedDrawable = false;
         private Vector2 drawablePosition = Vector2.zero;
+
+        private DrawableManners manners;
 
         private ApplicationLauncherButton button;
         private PackedSprite sprite; // animations: Spin, Unlit
@@ -251,11 +304,14 @@ namespace ScienceAlert.Toolbar
 
                 // well ... without it we're sunk. Something is better than
                 // nothing. We can't let the stock behaviour fail
+                Log.Warning("Creating dummy sprite texture");
+
                 sheet = new Texture2D(512, 512, TextureFormat.ARGB32, false);
                 sheet.SetPixels32(Enumerable.Repeat((Color32)Color.clear, 512 * 512).ToArray());
                 sheet.Apply();
             }
 
+            Log.Verbose("Setting up sprite");
             sprite = PackedSprite.Create("ScienceAlert.Button.Sprite", Vector3.zero);
             sprite.SetMaterial(new Material(Shader.Find("Sprite/Vertex Colored")) { mainTexture = sheet });
             sprite.renderer.sharedMaterial.mainTexture.filterMode = FilterMode.Point;
@@ -264,13 +320,15 @@ namespace ScienceAlert.Toolbar
             sprite.SetAnchor(SpriteRoot.ANCHOR_METHOD.UPPER_LEFT);
             sprite.gameObject.layer = LayerMask.NameToLayer("EzGUI_UI");
 
-            Log.Write("setup sprite");
+            
 
             // normal state
+            Log.Verbose("Setting up normal animation");
             UVAnimation normal = new UVAnimation() { name = "Unlit", loopCycles = 0, framerate = 24f };
             normal.BuildUVAnim(sprite.PixelCoordToUVCoord(9 * 38, 8 * 38), sprite.PixelSpaceToUVSpace(38, 38), 1, 1, 1);
 
             // animated state
+            Log.Verbose("Setting up star flask animation");
             UVAnimation anim = new UVAnimation() { name = "Spin", loopCycles = -1, framerate = 24f };
             anim.BuildWrappedUVAnim(new Vector2(0, 1f - sprite.PixelSpaceToUVSpace(38, 38).y), sprite.PixelSpaceToUVSpace(38, 38), 100);
 
@@ -279,7 +337,8 @@ namespace ScienceAlert.Toolbar
             sprite.AddAnimation(anim);
 
             sprite.PlayAnim("Unlit");
-            Log.Debug("Creating mod button...");
+
+            Log.Verbose("Creating mod button...");
             button = ApplicationLauncher.Instance.AddModApplication(
                                                         OnToggleOn,
                                                         OnToggleOff,
@@ -289,61 +348,13 @@ namespace ScienceAlert.Toolbar
                                                         OnDisable,
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                                                         sprite);
-            gameObject.AddComponent<DrawableManners>();
 
+            Log.Verbose("Creating DrawableManners...");
+            manners = gameObject.AddComponent<DrawableManners>();
+
+
+            Log.Verbose("AppLauncherInterface ready");
             ApplicationLauncher.Instance.gameObject.PrintComponents();
-
-            //// having the drawable window overlapping stock buttons is extremely
-            //// annoying. We'll temporarily hide the drawable whenever one is
-            //// displaying. Of course, that means we need to actually get the 
-            //// stock button list
-            //var appButtonList = ApplicationLauncher.Instance.gameObject.transform.Find("anchor/List");
-            //if (appButtonList == null)
-            //{
-            //    Log.Error("AppLauncherInterface: ApplicationLauncher Application list not found!");
-            //}
-            //else
-            //{
-            //    Log.Write("normal buttons");
-            //    foreach (var b in ApplicationLauncher.Instance.gameObject.transform.Find("anchor/List").GetComponentsInChildren<ApplicationLauncherButton>().ToList())
-            //    {
-            //        //appButtonList.GetComponent<UIScrollList>().AddValueChangedDelegate(StockButtonClick);
-            //        //appButtonList.GetComponent<UIScrollList>().AddInputDelegate(TestInput);
-            //        b.container.AddInputDelegate(TestInput);
-                   
-            //    }
-            //}
-
-            //Log.Write("missing button");
-
-            //for (int i = 0; i < ApplicationLauncher.Instance.gameObject.transform.childCount; ++i)
-            //{
-            //    var c = ApplicationLauncher.Instance.gameObject.transform.GetChild(i).GetComponent<ApplicationLauncherButton>();
-            //    if (c != null)
-            //    {
-            //        c.container.AddInputDelegate(TestInput);
-            //        break;
-            //    }
-            //}
-            //foreach (var b in ApplicationLauncher.Instance.gameObject.GetComponentsInChildren<ApplicationLauncherButton>().ToList())
-            //{
-
-            //    //appButtonList.GetComponent<UIScrollList>().AddValueChangedDelegate(StockButtonClick);
-            //    //appButtonList.GetComponent<UIScrollList>().AddInputDelegate(TestInput);
-                
-
-            //}
-
-            //var obj = GameObject.FindObjectOfType<CurrencyWidget>();
-            //if (obj != null) Log.Write("found currency widget: {0}", obj.name);
-
-            ////obj.gameObject.PrintComponents();
-
-            //var obj2 = GameObject.FindObjectOfType<CurrencyWidgetsApp>();
-            //if (obj2 != null) Log.Write("found curr widget app: {0}", obj2.name);
-
-            //obj2.gameObject.PrintComponents();
-
         }
 
         void OnDestroy()
@@ -354,11 +365,7 @@ namespace ScienceAlert.Toolbar
                 ApplicationLauncher.Instance.RemoveModApplication(button);
             }
 
-            //var appButtonList = ApplicationLauncher.Instance.gameObject.transform.Find("anchor/List");
-            //if (appButtonList != null)
-            //    appButtonList.GetComponent<UIScrollList>().RemoveValueChangedDelegate(StockButtonClick);
-
-            if (gameObject.GetComponent<DrawableManners>()) GameObject.Destroy(gameObject.GetComponent<DrawableManners>());
+            if (manners != null) Component.Destroy(manners);
         }
 
 
@@ -371,7 +378,7 @@ namespace ScienceAlert.Toolbar
             rect.y = Screen.height - button.sprite.RenderCamera.WorldToScreenPoint(button.transform.position).y + 38f * 1.25f;
             rect = KSPUtil.ClampRectToScreen(rect);
 
-            var transformedY = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, Screen.height - rect.y /* inverted remember */)).y;// +38f * 1.25f;
+            var transformedY = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, Screen.height - rect.y /* inverted remember */)).y;
             var transformedX = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, 0f, 0f)).x;
  
             return new Vector2(rect.x, rect.y);
@@ -380,26 +387,13 @@ namespace ScienceAlert.Toolbar
 
         #region GUI events
 
-        public void TestInput(ref POINTER_INFO ptr)
-        {
-            Log.Write("TestInput");
-            Log.Write("target = {0}", ptr.targetObj.name);
 
-            //if ((UIListItemContainer)ptr.targetObj == button.container) Log.Write("That's us!");
-           
-            if (ptr.evt == POINTER_INFO.INPUT_EVENT.MOVE || ptr.evt == POINTER_INFO.INPUT_EVENT.PRESS)
-                Drawable = null;
-        }
-
-        public void StockButtonClick(IUIObject obj)
-        {
-            Drawable = null;    
-        }
 
         public void OnGUI()
         {
             if (drawable == null) return;
             if (!button.gameObject.activeSelf) return;
+            if (manners.ShouldHide) return;
 
             // don't draw anything if one of the stock buttons is lit. We'll
             // just have to hope other mod buttons handle things reasonably since
@@ -416,6 +410,8 @@ namespace ScienceAlert.Toolbar
             // unity to be in OnGUI, it'd break
             if (!movedDrawable)
             {
+                Log.Debug("Dummy render to position drawable");
+
                 var old = RenderTexture.active;
                 RenderTexture.active = RenderTexture.GetTemporary(Screen.width, Screen.height);
                 movedDrawable = true;
