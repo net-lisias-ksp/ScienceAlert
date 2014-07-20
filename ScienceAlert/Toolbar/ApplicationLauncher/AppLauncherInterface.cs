@@ -125,9 +125,11 @@ namespace ScienceAlert.Toolbar
             background.Hide(false);
             background.SetUVs(new Rect(0f, 0f, 1f, 1f));
 
+            background.pixelPerfect = false;
             background.InitUVs();
             background.SetPixelToUV(background.renderer.sharedMaterial.mainTexture);
             background.UpdateCamera();
+            
 
             background.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("ezbutton click!"); });
 
@@ -208,15 +210,13 @@ namespace ScienceAlert.Toolbar
 
             rect.x = Screen.width - size.x;
             rect.y = Screen.height - button.sprite.RenderCamera.WorldToScreenPoint(button.transform.position).y + 38f * 1.25f;
-            var transformedY = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, Screen.height - rect.y /* inverted remember */)).y;// +38f * 1.25f;
-            var transformedX = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, 0f, 0f)).x;
-
-
             rect = KSPUtil.ClampRectToScreen(rect);
 
+            var transformedY = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, Screen.height - rect.y /* inverted remember */)).y;// +38f * 1.25f;
+            var transformedX = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, 0f, 0f)).x;
  
-            background.transform.position = new Vector3(transformedX, transformedY, button.transform.position.z);
-
+            //background.transform.position = new Vector3(transformedX, transformedY, button.transform.position.z - 50f);
+            //background.Setup(rect.width, rect.height + 38f * 0.5f * 1.25f);
 
             return new Vector2(rect.x, rect.y);
         }
@@ -251,6 +251,10 @@ namespace ScienceAlert.Toolbar
 
             var dimensions = drawable.Draw(drawablePosition);
             drawablePosition = CalculateDrawablePosition(dimensions);
+
+            background.transform.Translate(new Vector3(0f, 0f, -1f) * Time.deltaTime, Space.Self);
+            Log.Write("background.pos = {0}", background.transform.position);
+
         }
 
 
