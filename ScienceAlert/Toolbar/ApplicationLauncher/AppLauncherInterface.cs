@@ -30,6 +30,14 @@ namespace ScienceAlert.Toolbar
 {
     delegate void HoverCallback();
 
+    class Whiny : MonoBehaviour
+    {
+        void OnMouseOver()
+        {
+            Log.Write("OnMouseOver!!111");
+        }
+    }
+
     /// <summary>
     /// Unfortunately there's some peculiar, potentially annoying behaviour
     /// with the ApplicationLauncher. Specifically, there are cases where
@@ -98,6 +106,7 @@ namespace ScienceAlert.Toolbar
         //List<ButtonWrapper> stockButtons = new List<ButtonWrapper>();
         List<ApplicationLauncherButton> stockButtons = new List<ApplicationLauncherButton>();
         List<ButtonWrapper> wrappers = new List<ButtonWrapper>();
+        List<GameObject> currencyWidgetParts = new List<GameObject>();
 
         CurrencyWidgetsApp currency;
         AppLauncherInterface button;
@@ -105,9 +114,11 @@ namespace ScienceAlert.Toolbar
         EZInputDelegate hoverDelegate;
         bool mouseHover = false;
 
+
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
+
         void Start()
         {
             Log.Debug("DrawableManners start");
@@ -148,6 +159,11 @@ namespace ScienceAlert.Toolbar
                 foreach (var b in stockButtons)
                     wrappers.Add(new ButtonWrapper(b, () => {}));
 
+                // not a collider
+                //foreach (var c in holder.GetComponentsInChildren<Collider>())
+                //{
+                //    c.gameObject.AddComponent<Whiny>();
+                //}
                 // nope foreach (var b in appl.GetComponentsInChildren<RUIToggleButton>())
                 // nope foreach (var b in appl.GetComponentsInChildren<UIButton>())
                 // nope foreach (var b in appl.GetComponentsInChildren<UIListItemContainer>())
@@ -155,6 +171,15 @@ namespace ScienceAlert.Toolbar
                 foreach (var b in holder.GetComponentsInChildren<UIScrollList>()) // AH HA!!
                 {
                     b.AddValueChangedDelegate(StockButtonClick);
+
+                    //b.AddInputDelegate(delegate(ref POINTER_INFO ptr)
+                    //{
+                    //    if (ptr.evt == POINTER_INFO.INPUT_EVENT.MOVE)
+                    //        Log.Write("MovePtr");
+
+                    //    if (ptr.evt == POINTER_INFO.INPUT_EVENT.PRESS)
+                    //        Log.Write("pressptr");
+                    //});
                 }
             }
 
@@ -192,15 +217,23 @@ namespace ScienceAlert.Toolbar
             while (!currency.widgetSpawner.Spawned)
                 yield return 0;
 
-            
+#if DEBUG
+            currency.gameObject.PrintComponents();
+#endif
 
-            var mainHoverArea = currency.gameObject.transform.Find("anchor/WidgetHoverArea").GetComponent<UIButton>();
+            var t = currency.gameObject.transform;
+            var mainHoverArea = t.Find("anchor/WidgetHoverArea").GetComponent<UIButton>();
             mainHoverArea.AddInputDelegate(hoverDelegate);
             //mainHoverArea.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("widgethoverarea changed"); });
 
-            var buttonHover = currency.gameObject.transform.Find("anchor/hoverComponent").GetComponent<UIButton>();
+            var buttonHover = t.Find("anchor/hoverComponent").GetComponent<UIButton>();
             buttonHover.AddInputDelegate(hoverDelegate);
             //button2.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("hoverComponent changed"); });
+
+            // we also need to know if the widget is actually being displayed
+            currencyWidgetParts.Add(t.Find("anchor/FundsWidget/Frame").gameObject);
+            currencyWidgetParts.Add(t.Find("anchor/RepWidget/Frame").gameObject);
+            currencyWidgetParts.Add(t.Find("anchor/SciWidget/Frame").gameObject);
         }
 
 
@@ -243,6 +276,12 @@ namespace ScienceAlert.Toolbar
             if (waitRoutine != null)
                 if (!waitRoutine.MoveNext())
                     waitRoutine = null;
+
+            //if (currency.gameObject.transform.Find("anchor/FundsWidget").GetComponentsInChildren<Renderer>().ToList().Any(r => r.enabled))
+            //    Log.Write("widget visible!");
+
+            if (currencyWidgetParts.Any(go => go.activeInHierarchy))
+                Log.Write("widget visible!");
         }
 
 
@@ -256,7 +295,9 @@ namespace ScienceAlert.Toolbar
         {
             get
             {
-                return waitRoutine != null || stockButtons.Any(b => b.toggleButton.IsHovering || b.toggleButton.State == RUIToggleButton.ButtonState.TRUE);
+                return waitRoutine != null ||
+                        stockButtons.Any(b => b.toggleButton.IsHovering || b.toggleButton.State == RUIToggleButton.ButtonState.TRUE)
+                        || currencyWidgetParts.Any(go => go.activeInHierarchy);
             }
         }
     }
