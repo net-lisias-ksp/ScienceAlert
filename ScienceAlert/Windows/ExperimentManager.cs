@@ -327,8 +327,29 @@ namespace ScienceAlert
                         // the button is important; if it's auto-hidden we should
                         // show it to the player
                         scienceAlert.Button.Important = true;
-                        scienceAlert.Button.PlayAnimation();
-                        AudioUtil.Play("bubbles", 1f);
+
+
+                        if (observer.settings.AnimationOnDiscovery)
+                        {
+                            scienceAlert.Button.PlayAnimation();
+                        }
+                        else if (scienceAlert.Button.IsNormal) scienceAlert.Button.SetLit();
+
+                        Log.Write("observer soundOnDiscovery: {0}", observer.settings.SoundOnDiscovery);
+                        Log.Write("observer animateOnDiscovery: {0}", observer.settings.AnimationOnDiscovery);
+
+                        switch (Settings.Instance.SoundNotification)
+                        {
+                            case Settings.SoundNotifySetting.ByExperiment:
+                                if (observer.settings.SoundOnDiscovery)
+                                    AudioUtil.Play("bubbles", 2f);
+                                
+                                break;
+
+                            case Settings.SoundNotifySetting.Always:
+                                AudioUtil.Play("bubbles", 2f);
+                                break;
+                        }
                     }
                     else if (!observers.Any(ob => ob.Available))
                     {

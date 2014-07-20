@@ -28,8 +28,192 @@ using System;
 
 namespace ScienceAlert.Toolbar
 {
+    /// <summary>
+    /// Unfortunately there's some peculiar, potentially annoying behaviour
+    /// with the ApplicationLauncher. Specifically, there are cases where
+    /// mousing over a stock button would cause it to overlap with the
+    /// Drawable. The goal of this object is to make the drawable behave
+    /// nicely by:
+    /// 
+    /// - temporarily hiding the drawable if a stock button is hovered
+    /// - temporarily hiding the drawable if the currency widget is visible
+    /// - closing the drawable if a stock button is clicked
+    /// </summary>
+    class DrawableManners : MonoBehaviour
+    {
+        // goals:
+        //      temporarily hide drawable on hover
+        //      permanently hide drawable on click
+
+        class ButtonWrapper
+        {
+            public ApplicationLauncherButton button;
+            public RUIToggleButton.OnHover onHover;
+            public RUIToggleButton.OnTrue onTrue;
+            public RUIToggleButton.OnClickBtn onClick;
+
+            public void HoverStub()
+            {
+                Log.Write("hoverstub");
+                onHover();
+            }
+
+            public void TrueStub()
+            {
+                Log.Write("truestub");
+                onTrue();
+            }
+
+            public void ClickStub(RUIToggleButton button)
+            {
+                Log.Write("clickstub");
+                onClick(button);
+            }
+        }
+
+        // --------------------------------------------------------------------
+        //    Members
+        // --------------------------------------------------------------------
+        //List<ButtonWrapper> stockButtons = new List<ButtonWrapper>();
+        List<ApplicationLauncherButton> stockButtons = new List<ApplicationLauncherButton>();
+
+        CurrencyWidgetsApp currency;
+        AppLauncherInterface button;
+
+/******************************************************************************
+ *                    Implementation Details
+ ******************************************************************************/
+        void Start()
+        {
+            Log.Debug("DrawableManners start");
+
+            button = GetComponent<AppLauncherInterface>();
+
+            var appl = ApplicationLauncher.Instance.gameObject.transform;
+
+            var holder = appl.Find("anchor/List");
+            if (holder == null)
+            {
+                Log.Error("AppLauncherInterface.DrawableManners: stock buttons not found!");
+            }
+            else
+            {
+                stockButtons = holder.GetComponentsInChildren<ApplicationLauncherButton>().ToList();
+                
+                //for (int i = 0; i < appl.childCount; ++i)
+                //    if (appl.GetChild(i).GetComponent<ApplicationLauncherButton>() != null)
+                //    {
+                //        buttons.Add(appl.GetChild(i).GetComponent<ApplicationLauncherButton>());
+                //        break;
+                //    }
+
+                //foreach (var b in buttons)
+                //{
+                //    var wrapped = new ButtonWrapper()
+                //    {
+                //        button = b,
+                //        onHover = b.toggleButton.onHover,
+                //        onTrue = b.toggleButton.onTrue,
+                //        onClick = b.toggleButton.onClickBtn
+                //    };
+
+                //    b.toggleButton.onTrue = wrapped.TrueStub;
+                //    b.toggleButton.onHover = wrapped.HoverStub;
+
+                //    b.toggleButton.onClickBtn = wrapped.ClickStub;
+                   
+                //    stockButtons.Add(wrapped);
+                //}
+
+                // nope foreach (var b in appl.GetComponentsInChildren<RUIToggleButton>())
+                // nope foreach (var b in appl.GetComponentsInChildren<UIButton>())
+                // nope foreach (var b in appl.GetComponentsInChildren<UIListItemContainer>())
+                // nope foreach (var b in appl.GetComponentsInChildren<BTButton>())
+                foreach (var b in appl.GetComponentsInChildren<UIScrollList>()) // AH HA!!
+                {
+                    //b.AddValueChangedDelegate(delegate(IUIObject o) { Log.Write("victory"); });
+                    //b.AddInputDelegate(delegate(ref POINTER_INFO ptr) { Log.Write("ptr delegtate"); });
+                    b.AddValueChangedDelegate(StockButtonClick);
+                }
+            }
+
+            // the currency button is a little different
+            currency = GameObject.FindObjectOfType<CurrencyWidgetsApp>();
+            currency.gameObject.PrintComponents();
+
+            if (currency == null)
+            {
+                Log.Error("AppLauncherInterface: CurrencyWidgetsApp is null!");
+            }
+            else StartCoroutine(WaitAndModifyCurrencyWidget());
+        }
+
+
+        void OnDestroy()
+        {
+            
+        }
+
+
+        public void StockButtonClick(IUIObject o)
+        {
+            Log.Write("stock button click");
+            button.Drawable = null;
+        }
+
+
+        System.Collections.IEnumerator WaitAndModifyCurrencyWidget()
+        {
+            while (!currency.widgetSpawner.Spawned)
+                yield return 0;
+
+            var button = currency.gameObject.transform.Find("anchor/WidgetHoverArea").GetComponent<UIButton>();
+            button.AddInputDelegate(delegate(ref POINTER_INFO ptr) { Log.Write("widget hover area"); });
+            button.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("widgethoverarea changed"); });
+
+            var button2 = currency.gameObject.transform.Find("anchor/hoverComponent").GetComponent<UIButton>();
+            button2.AddInputDelegate(delegate(ref POINTER_INFO ptr) { Log.Write("hoverComponent area"); });
+            button2.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("hoverComponent changed"); });
+        }
+
+        void Update()
+        {
+            // seems to be always active. todo
+            //if (currency.gameObject.transform.Find("anchor/WidgetHoverArea").gameObject.renderer.enabled)
+            //    Log.Write("WidgetHoverarea active!");
+        }
+
+
+
+        public void OnButton(IUIObject obj)
+        {
+            Log.Write("DrawableManners: OnButton");
+        }
+
+
+
+        public bool ShouldHide
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+
+
+        //public bool ShouldClose
+        //{
+        //    get
+        //    {
+        //        return false;
+        //    }
+        //}
+    }
+
     class AppLauncherInterface : MonoBehaviour, IToolbar
     {
+
         // --------------------------------------------------------------------
         //    Members
         // --------------------------------------------------------------------
@@ -41,7 +225,6 @@ namespace ScienceAlert.Toolbar
 
         private ApplicationLauncherButton button;
         private PackedSprite sprite; // animations: Spin, Unlit
-        private UIButton background; // prevent clickthrough ;)
 
 /******************************************************************************
  *                    Implementation Details
@@ -77,7 +260,7 @@ namespace ScienceAlert.Toolbar
             sprite.SetMaterial(new Material(Shader.Find("Sprite/Vertex Colored")) { mainTexture = sheet });
             sprite.renderer.sharedMaterial.mainTexture.filterMode = FilterMode.Point;
             sprite.Setup(38f, 38f);
-            sprite.SetFramerate(24f);
+            sprite.SetFramerate(Settings.Instance.StarFlaskFrameRate);
             sprite.SetAnchor(SpriteRoot.ANCHOR_METHOD.UPPER_LEFT);
             sprite.gameObject.layer = LayerMask.NameToLayer("EzGUI_UI");
 
@@ -95,7 +278,7 @@ namespace ScienceAlert.Toolbar
             sprite.AddAnimation(normal);
             sprite.AddAnimation(anim);
 
-
+            sprite.PlayAnim("Unlit");
             Log.Debug("Creating mod button...");
             button = ApplicationLauncher.Instance.AddModApplication(
                                                         OnToggleOn,
@@ -106,91 +289,61 @@ namespace ScienceAlert.Toolbar
                                                         OnDisable,
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                                                         sprite);
+            gameObject.AddComponent<DrawableManners>();
 
-            sprite.PlayAnim("Unlit");
-            if (sprite.plane != SpriteRoot.SPRITE_PLANE.XY) Log.Error("sprite plane isn't xy!");
+            ApplicationLauncher.Instance.gameObject.PrintComponents();
 
-            // create invisible background button
-            background = GuiUtil.CreateButton("AppLauncher.ScienceAlert.Background", Vector2.zero);
-            background.SetAnchor(SpriteRoot.ANCHOR_METHOD.UPPER_LEFT);
+            //// having the drawable window overlapping stock buttons is extremely
+            //// annoying. We'll temporarily hide the drawable whenever one is
+            //// displaying. Of course, that means we need to actually get the 
+            //// stock button list
+            //var appButtonList = ApplicationLauncher.Instance.gameObject.transform.Find("anchor/List");
+            //if (appButtonList == null)
+            //{
+            //    Log.Error("AppLauncherInterface: ApplicationLauncher Application list not found!");
+            //}
+            //else
+            //{
+            //    Log.Write("normal buttons");
+            //    foreach (var b in ApplicationLauncher.Instance.gameObject.transform.Find("anchor/List").GetComponentsInChildren<ApplicationLauncherButton>().ToList())
+            //    {
+            //        //appButtonList.GetComponent<UIScrollList>().AddValueChangedDelegate(StockButtonClick);
+            //        //appButtonList.GetComponent<UIScrollList>().AddInputDelegate(TestInput);
+            //        b.container.AddInputDelegate(TestInput);
+                   
+            //    }
+            //}
 
-            background.renderCamera = sprite.renderCamera;
-            var bgTex = new Texture2D(256, 256, TextureFormat.ARGB32, false);
-            bgTex.GenerateRandom();
+            //Log.Write("missing button");
 
-            Material bgMat = new Material(Shader.Find("Sprite/Vertex Colored")) { mainTexture = bgTex };
-            background.Setup(128f, 128f, bgMat);
+            //for (int i = 0; i < ApplicationLauncher.Instance.gameObject.transform.childCount; ++i)
+            //{
+            //    var c = ApplicationLauncher.Instance.gameObject.transform.GetChild(i).GetComponent<ApplicationLauncherButton>();
+            //    if (c != null)
+            //    {
+            //        c.container.AddInputDelegate(TestInput);
+            //        break;
+            //    }
+            //}
+            //foreach (var b in ApplicationLauncher.Instance.gameObject.GetComponentsInChildren<ApplicationLauncherButton>().ToList())
+            //{
 
-            background.gameObject.SetActive(true);
-            background.Hide(false);
-            background.SetUVs(new Rect(0f, 0f, 1f, 1f));
+            //    //appButtonList.GetComponent<UIScrollList>().AddValueChangedDelegate(StockButtonClick);
+            //    //appButtonList.GetComponent<UIScrollList>().AddInputDelegate(TestInput);
+                
 
-            background.pixelPerfect = false;
-            background.InitUVs();
-            background.SetPixelToUV(background.renderer.sharedMaterial.mainTexture);
-            background.UpdateCamera();
-            
+            //}
 
-            background.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("ezbutton click!"); });
+            //var obj = GameObject.FindObjectOfType<CurrencyWidget>();
+            //if (obj != null) Log.Write("found currency widget: {0}", obj.name);
 
+            ////obj.gameObject.PrintComponents();
 
-            Transform t = button.transform;
+            //var obj2 = GameObject.FindObjectOfType<CurrencyWidgetsApp>();
+            //if (obj2 != null) Log.Write("found curr widget app: {0}", obj2.name);
 
-            while (t.parent != null) t = t.parent;
+            //obj2.gameObject.PrintComponents();
 
-            Log.Write("Dumping components");
-            t.gameObject.PrintComponents();
-
-            Log.Debug("Finished creating mod button");
-
-            foreach (var c in Camera.allCameras)
-                Log.Write("cam: {0}", c.name);
-
-
-            // adjust background position
-                //var screenPos = background.RenderCamera.WorldToScreenPoint(button
-
-                // wasn't visible
-                //background.transform.position = button.transform.position + new Vector3(0f, 100f, 0f);
-
-                // visible, but skewed right and half off screen
-                //background.transform.position = button.transform.position - new Vector3(0f, 100f, 0f);
-
-                // top-left position is at upper-right of icon
-                //background.transform.position = button.transform.position;
-
-                // y looks right, but half scaled off right of screen
-                // background button position: (424.5, 385.5, 1035.0)
-                //background.transform.position = button.sprite.transform.position;
-
-                // sort of right, but y is off by a few pixels and x is off by width
-                // whole button does fit on screen though
-                // background button position: (383.5, 344.5, 1045.0)
-                // background.transform.position = button.GetAnchor();
-
-                // gets local space center of sprite apparently
-                // background button position: (19.0, -19.0, 0.0)
-                //background.transform.position = button.sprite.GetCenterPoint();
-
-                // y is right but x is off by about width in + dir
-                // background button position: (399.5, 366.5, 1045.0)
-                //background.transform.position = button.transform.position + button.sprite.GetCenterPoint();
-
-                // about half a size too much on on both dir. Y is too far up, x not far enough left
-                // (361.5, 404.5, 1045.0)
-                //background.transform.position = button.transform.position - button.sprite.GetCenterPoint();
-
-                // correct! top-left of button. It really makes no sense when you think about it though
-                //background.transform.position = button.transform.position - button.sprite.GetCenterPoint() + new Vector3(-38f * 0.5f, -38f * 0.5f);
-            background.transform.position = button.transform.position - new Vector3(38f, 38f * 1.0f);
-
-                // perfect!
-                //background.transform.position = button.transform.position - new Vector3(38f, 38f, 0f);
-                //background.transform.position = background.transform.position - new Vector3(0f, 38f, 0f);
-            //background.transform.position = background.transform.position - new Vector3(0f, 38f, 0f);
-                Log.Write("background button position: {0}", background.transform.position);
-                Log.Write("offset = {0}", button.sprite.offset);
-                Log.Write("center = {0}", button.sprite.GetCenterPoint());
         }
 
         void OnDestroy()
@@ -200,6 +353,12 @@ namespace ScienceAlert.Toolbar
                 Log.Verbose("Removing ApplicationLauncherButton");
                 ApplicationLauncher.Instance.RemoveModApplication(button);
             }
+
+            //var appButtonList = ApplicationLauncher.Instance.gameObject.transform.Find("anchor/List");
+            //if (appButtonList != null)
+            //    appButtonList.GetComponent<UIScrollList>().RemoveValueChangedDelegate(StockButtonClick);
+
+            if (gameObject.GetComponent<DrawableManners>()) GameObject.Destroy(gameObject.GetComponent<DrawableManners>());
         }
 
 
@@ -215,21 +374,37 @@ namespace ScienceAlert.Toolbar
             var transformedY = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, Screen.height - rect.y /* inverted remember */)).y;// +38f * 1.25f;
             var transformedX = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, 0f, 0f)).x;
  
-            //background.transform.position = new Vector3(transformedX, transformedY, button.transform.position.z - 50f);
-            //background.Setup(rect.width, rect.height + 38f * 0.5f * 1.25f);
-
             return new Vector2(rect.x, rect.y);
         }
 
 
         #region GUI events
 
+        public void TestInput(ref POINTER_INFO ptr)
+        {
+            Log.Write("TestInput");
+            Log.Write("target = {0}", ptr.targetObj.name);
+
+            //if ((UIListItemContainer)ptr.targetObj == button.container) Log.Write("That's us!");
+           
+            if (ptr.evt == POINTER_INFO.INPUT_EVENT.MOVE || ptr.evt == POINTER_INFO.INPUT_EVENT.PRESS)
+                Drawable = null;
+        }
+
+        public void StockButtonClick(IUIObject obj)
+        {
+            Drawable = null;    
+        }
+
         public void OnGUI()
         {
-
-            
-
             if (drawable == null) return;
+            if (!button.gameObject.activeSelf) return;
+
+            // don't draw anything if one of the stock buttons is lit. We'll
+            // just have to hope other mod buttons handle things reasonably since
+            // I can't predict their behaviour
+            //if (appButtons.Any(b => b.State == RUIToggleButton.ButtonState.TRUE || b.toggleButton.IsHovering)) return;
 
             // if drawables were switched, there could be one frame
             // where the new drawable uses the old position which is
@@ -251,10 +426,6 @@ namespace ScienceAlert.Toolbar
 
             var dimensions = drawable.Draw(drawablePosition);
             drawablePosition = CalculateDrawablePosition(dimensions);
-
-            background.transform.Translate(new Vector3(0f, 0f, -1f) * Time.deltaTime, Space.Self);
-            Log.Write("background.pos = {0}", background.transform.position);
-
         }
 
 
@@ -314,7 +485,11 @@ namespace ScienceAlert.Toolbar
         /// </summary>
         public void PlayAnimation()
         {
-            sprite.PlayAnim("Spin");
+            if (Settings.Instance.FlaskAnimationEnabled)
+            {
+                sprite.PlayAnim("Spin");
+            }
+            else SetLit();
         }
 
 
@@ -347,6 +522,7 @@ namespace ScienceAlert.Toolbar
             if (sprite.GetCurAnim().name != "Spin")
             {
                 sprite.SetFrame("Spin", 0);
+                sprite.PauseAnim();
             }
             else sprite.PauseAnim();
         }

@@ -304,6 +304,7 @@ namespace ScienceAlert
                             {
                                 GUILayout.Label("Globally Enable Animation", GUILayout.ExpandWidth(true));
                                 Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
+                                if (!Settings.Instance.FlaskAnimationEnabled && scienceAlert.Button.IsAnimating) scienceAlert.Button.SetLit();
                             }
                             GUILayout.EndHorizontal();
 
@@ -402,8 +403,14 @@ namespace ScienceAlert
                         GUILayout.Space(8f);
 
                         var settings = Settings.Instance.GetExperimentSettings(key);
-                        GUILayout.Box(ResearchAndDevelopment.GetExperiment(key).experimentTitle, GUILayout.ExpandWidth(true));
 
+                        // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
+                        var title = ResearchAndDevelopment.GetExperiment(key).experimentTitle;
+#if DEBUG
+                        GUILayout.Box(title + string.Format(" ({0})", ResearchAndDevelopment.GetExperiment(key).id), GUILayout.ExpandWidth(true));
+#else
+                        GUILayout.Box(title, GUILayout.ExpandWidth(true));
+#endif
                         //GUILayout.Space(4f);
                         settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
                         settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");

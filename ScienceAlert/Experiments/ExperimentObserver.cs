@@ -39,7 +39,7 @@ namespace ScienceAlert
         private ScienceModuleList modules;                  // all ModuleScienceExperiments onboard that represent our experiment
         protected ScienceExperiment experiment;             // The actual experiment that will be performed
         protected StorageCache storage;                     // Represents possible storage locations on the vessel
-        protected Settings.ExperimentSettings settings;     // settings for this experiment
+        public Settings.ExperimentSettings settings;        // settings for this experiment
         protected string lastAvailableId;                   // Id of the last time the experiment was available
         protected string lastBiomeQuery;                    // the last good biome result we had
         protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)

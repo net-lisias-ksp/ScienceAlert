@@ -181,9 +181,19 @@ namespace ScienceAlert
  *                    Implementation Details
  ******************************************************************************/
 
-        //public System.Collections.IEnumerator Start()
         void Start()
         {
+
+
+// just in case this has unforseen consequences later...
+// it should be okay since asteroidSample isn't actually defined
+// in scienceDefs
+#warning Changes asteroidSample title
+            Log.Normal("Renaming asteroidSample title");
+            var exp = ResearchAndDevelopment.GetExperiment("asteroidSample");
+            if (exp != null) exp.experimentTitle = "Sample (Asteroid)";
+            
+
             Log.Debug("Loading sounds...");
             AudioUtil.LoadSoundsFrom("/ScienceAlert/sounds", AudioType.WAV);
             Log.Debug("Sounds ready.");

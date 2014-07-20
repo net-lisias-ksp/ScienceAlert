@@ -132,49 +132,49 @@ namespace ScienceAlert
 
 
         // per-sound settings
-        public class SoundSettings
-        {
-            internal SoundSettings()
-            {
-                Enabled = true;
-                MinDelay = 0f;
-            }
+        //public class SoundSettings
+        //{
+        //    internal SoundSettings()
+        //    {
+        //        Enabled = true;
+        //        MinDelay = 0f;
+        //    }
 
-            public void OnLoad(ConfigNode node)
-            {
-                Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
-                MinDelay = ConfigUtil.Parse<float>(node, "MinDelay", 0f);
-            }
+        //    public void OnLoad(ConfigNode node)
+        //    {
+        //        Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
+        //        MinDelay = ConfigUtil.Parse<float>(node, "MinDelay", 0f);
+        //    }
 
-            public void OnSave(ConfigNode node)
-            {
-                node.AddValue("Enabled", Enabled);
-                node.AddValue("MinDelay", MinDelay);
-            }
+        //    public void OnSave(ConfigNode node)
+        //    {
+        //        node.AddValue("Enabled", Enabled);
+        //        node.AddValue("MinDelay", MinDelay);
+        //    }
 
-            public bool Enabled
-            {
-                get;
-                private set;
-            }
+        //    public bool Enabled
+        //    {
+        //        get;
+        //        private set;
+        //    }
 
-            public float MinDelay
-            {
-                get;
-                private set;
-            }
+        //    public float MinDelay
+        //    {
+        //        get;
+        //        private set;
+        //    }
 
-            public override string ToString()
-            {
-                return string.Format("Enabled = {0}, MinDelay = {1}", Enabled, MinDelay);
-            }
-        }
+        //    public override string ToString()
+        //    {
+        //        return string.Format("Enabled = {0}, MinDelay = {1}", Enabled, MinDelay);
+        //    }
+        //}
 
 
 
 
         private Dictionary<string /* expid */, ExperimentSettings> PerExperimentSettings;
-        private Dictionary<string /* name */, SoundSettings> PerSoundSettings;
+        //private Dictionary<string /* name */, SoundSettings> PerSoundSettings;
 
         private GUISkin skin;
 
@@ -185,7 +185,7 @@ namespace ScienceAlert
         {
             // set default values
             PerExperimentSettings = new Dictionary<string, ExperimentSettings>();
-            PerSoundSettings = new Dictionary<string, SoundSettings>();
+            //PerSoundSettings = new Dictionary<string, SoundSettings>();
 
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 PerExperimentSettings[expid] = new ExperimentSettings();
@@ -363,32 +363,32 @@ Re-saving config with default values for missing experiments.");
 #endregion
 
 #region sound settings
-            try
-            {
-                var audioNode = node.GetNode("AudioSettings");
+            //try
+            //{
+            //    var audioNode = node.GetNode("AudioSettings");
 
-                if (audioNode != null)
-                {
-                    if (audioNode.nodes != null)
-                    {
-                        foreach (var audioSetting in audioNode.nodes.DistinctNames())
-                        {
-                            var settings = new SoundSettings();
+            //    if (audioNode != null)
+            //    {
+            //        if (audioNode.nodes != null)
+            //        {
+            //            foreach (var audioSetting in audioNode.nodes.DistinctNames())
+            //            {
+            //                var settings = new SoundSettings();
 
-                            Log.Debug("Loading sound settings for '{0}'", audioSetting);
-                            settings.OnLoad(audioNode.GetNode(audioSetting));
+            //                Log.Debug("Loading sound settings for '{0}'", audioSetting);
+            //                settings.OnLoad(audioNode.GetNode(audioSetting));
 
-                            PerSoundSettings[audioSetting] = settings;
-                        }
-                    }
-                    else Log.Error("No individual audio nodes found in AudioSettings");
-                }
-                else Log.Error("No AudioSettings ConfigNode found in settings.cfg");
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occurred while loading AudioSettings section: {0}", e);
-            }
+            //                PerSoundSettings[audioSetting] = settings;
+            //            }
+            //        }
+            //        else Log.Error("No individual audio nodes found in AudioSettings");
+            //    }
+            //    else Log.Error("No AudioSettings ConfigNode found in settings.cfg");
+            //}
+            //catch (Exception e)
+            //{
+            //    Log.Error("Exception occurred while loading AudioSettings section: {0}", e);
+            //}
 #endregion
 
 #region log settings
@@ -439,13 +439,13 @@ Re-saving config with default values for missing experiments.");
 
                 #region sound settings
 
-                var audioSettings = node.AddNode(new ConfigNode("AudioSettings"));
+                //var audioSettings = node.AddNode(new ConfigNode("AudioSettings"));
 
-                foreach (var kvp in PerSoundSettings)
-                {
-                    var n = audioSettings.AddNode(new ConfigNode(kvp.Key));
-                    kvp.Value.OnSave(n);
-                }
+                //foreach (var kvp in PerSoundSettings)
+                //{
+                //    var n = audioSettings.AddNode(new ConfigNode(kvp.Key));
+                //    kvp.Value.OnSave(n);
+                //}
 
                 #endregion
 
@@ -563,22 +563,22 @@ Re-saving config with default values for missing experiments.");
 
         #region sound settings
 
-        public SoundSettings GetSoundSettings(string soundName)
-        {
-            if (PerSoundSettings.ContainsKey(soundName))
-            {
-                return PerSoundSettings[soundName];
-            } else {
-                // return default settings
-                Log.Debug("No loaded settings found for '{0}' -- creating default settings", soundName);
+        //public SoundSettings GetSoundSettings(string soundName)
+        //{
+        //    if (PerSoundSettings.ContainsKey(soundName))
+        //    {
+        //        return PerSoundSettings[soundName];
+        //    } else {
+        //        // return default settings
+        //        Log.Debug("No loaded settings found for '{0}' -- creating default settings", soundName);
 
-                var newSound = new SoundSettings();
+        //        var newSound = new SoundSettings();
 
-                PerSoundSettings.Add(soundName, newSound);
+        //        PerSoundSettings.Add(soundName, newSound);
 
-                return newSound;
-            }
-        }
+        //        return newSound;
+        //    }
+        //}
 
         #endregion
     }
