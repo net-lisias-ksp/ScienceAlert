@@ -168,8 +168,12 @@ namespace ScienceAlert.Toolbar
         /// <returns></returns>
         System.Collections.IEnumerator WaitForCurrencyWidget()
         {
+            Log.Debug("Waiting for currency widget ...");
+
             while (!currency.widgetSpawner.Spawned)
                 yield return 0;
+
+            Log.Debug("Found currency widget");
 
 #if DEBUG
             currency.gameObject.PrintComponents();
@@ -197,6 +201,8 @@ namespace ScienceAlert.Toolbar
             while (MessageSystem.Instance == null)
                 yield return 0;
 
+            Log.Debug("Found messager widget");
+
             messager = MessageSystem.Instance;
             
             widgets.Add(messager.gameObject.transform.Find("listArea/bg").gameObject);
@@ -211,8 +217,12 @@ namespace ScienceAlert.Toolbar
         /// <returns></returns>
         System.Collections.IEnumerator WaitForResourceWidget()
         {
+            Log.Debug("Waiting for resource widget...");
+
             while (ResourceDisplay.Instance == null)
                 yield return 0;
+
+            Log.Debug("Found resource widget");
 
             resources = ResourceDisplay.Instance;
             widgets.Add(resources.transform.Find("header").gameObject);
@@ -243,16 +253,16 @@ namespace ScienceAlert.Toolbar
         /// </summary>
         public void CloseOpenWidgets()
         {
-            resources.HideResourceList();
-            messager.Hide();
-            currency.widgetSpawner.gameObject.SetActive(false);
+            if (resources != null) resources.HideResourceList();
+            if (messager != null) messager.Hide();
+            if (currency != null) { currency.widgetSpawner.gameObject.SetActive(false); currency.gameObject.SendMessage("Hide"); }
+            if (contracts != null) { contracts.gameObject.SendMessage("Hide"); }
+
 
             // note: doesn't get currency widget button state =\
             foreach (var b in stockButtons)
                 if (b.toggleButton.State == RUIToggleButton.ButtonState.TRUE)
-                    b.toggleButton.SetFalse();
-
-            currency.gameObject.SendMessage("Hide");
+                    b.toggleButton.SetFalse();    
         }
 
 

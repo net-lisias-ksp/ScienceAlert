@@ -27,70 +27,75 @@ using ReeperCommon;
 
 namespace ScienceAlert
 {
-    delegate bool IsCoveredDelegate(double lat, double lon, int mask);
-
-    internal class SCANsatInterface : DefaultScanInterface
+    
+    internal class SCANsatInterface : ScanInterface
     {
-        private const string SCANcontrollerTypeName = "SCANsat.SCANcontroller";
-        private const string SCANdataTypeName = "SCANsat.SCANdata";
-        private const string SCANcontrollerModuleName = "SCANcontroller";
-        private const int SCANdataBiomeFlag = 8;
+        private const string SCANutilTypeName = "SCANsat.SCANUtil";
+        delegate bool IsCoveredDelegate(double lat, double lon, CelestialBody body, int mask);
 
-        MethodInfo isCoveredMethod;
-        ScenarioModule controllerInstance;
-        object dataInstance;
-        MethodInfo getMethod;
-        IsCoveredDelegate coveredDelegate; // supposedly is faster than invoke
+        // --------------------------------------------------------------------
+        //    Members
+        // --------------------------------------------------------------------
+#if DEBUG
+        private static IsCoveredDelegate _isCovered;
+#else
+        private static IsCoveredDelegate _isCovered = delegate(double lat, double lon, CelestialBody body, int mask) { return true; };
+#endif
+        private static MethodInfo _method;
+        private static bool _ran = false;
 
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
-        public override bool HaveScanData(double lat, double lon)
+        void OnDestroy()
         {
-            try {
-                if (isCoveredMethod != null && dataInstance != null)
-                {
-#if (DEBUG && DEBUGSCANSAT)
-                    bool result = (bool)isCoveredMethod.Invoke(dataInstance, new object[] { lon, lat, 8 });
-                    bool real = SCANsat.SCANcontroller.controller.getData(FlightGlobals.currentMainBody).isCovered( lon, lat, SCANsat.SCANdata.SCANtype.Biome);
-
-                    if (real != result)
-                        Log.Error("actually have data yet was reported as none!");
-
-                    return result;
-#else
-                    //return (bool)isCoveredMethod.Invoke(dataInstance, new object[] {lat, lon, 8});
-                    return coveredDelegate(lat, lon, 8);
-                }
-#endif
-#if DEBUG && DEBUGSCANSAT
-                }
-                else Log.Error("isCoveredMethod = {0}, dataInstance = {1}", isCoveredMethod == null ? "null!" : "is fine", dataInstance == null ? "null!" : "is fine");
-#endif
-
-            } catch (Exception e)
-            {
-                Log.Error("SCANsatInterface.HaveScanData failed with: {0}", e);
-            }
-
-            return false;
+            _ran = false;
         }
 
 
 
-        void Start()
+        /// <summary>
+        /// Returns true if SCANsat has biome data for the given latitude,
+        /// longitude and body
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <param name="body"></param>
+        /// <returns></returns>
+        public override bool HaveScanData(double lat, double lon, CelestialBody body)
         {
-            Log.Verbose("SCANsatInterface Start");
+#if DEBUG
+            bool covered = _isCovered(lat, lon, body, 8 /* biome */);
+            //Log.Write("SCANsat.HaveScanData: {0}", covered ? "Yes" : "No data");
+            return covered;
+#else
+            return _isCovered(lat, lon, body, 8 /* biome */);
+#endif
+        }
+
+
+
+        /// <summary>
+        /// Checks to ensure the SCANsat interface is available
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsAvailable()
+        {
+            if (_method != null && _isCovered != null) return true;
+            if (_ran)
+            {
+                Log.Debug("SCANsatInterface.IsAvailable already ran; not available.");
+                return false;
+            }
+
+            Log.Verbose("Performing SCANsat check...");
+            _ran = true;
 
             try
             {
-                Type controllerType = AssemblyLoader.loadedAssemblies
+                Type utilType = AssemblyLoader.loadedAssemblies
                     .SelectMany(loaded => loaded.assembly.GetExportedTypes())
-                    .SingleOrDefault(t => t.FullName == SCANcontrollerTypeName);
-
-                Type scanDataType = AssemblyLoader.loadedAssemblies
-                    .SelectMany(loaded => loaded.assembly.GetExportedTypes())
-                    .SingleOrDefault(t => t.FullName == SCANdataTypeName);
+                    .SingleOrDefault(t => t.FullName == SCANutilTypeName);
 #if DEBUG
                 AssemblyLoader.loadedAssemblies.ToList().ForEach(a =>
                 {
@@ -107,176 +112,37 @@ namespace ScienceAlert
                 });
 #endif
 
-                if (controllerType == null) throw new Exception("SCANsatInterface: Failed to locate SCANcontroller type!");
-                if (scanDataType == null) throw new Exception("SCANsatInterface: Failed to locate SCANdata type!");
-
-
-
-#if DEBUG
-                Log.Write("SCANcontroller properties:");
-
-                controllerType.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy).ToList().ForEach(p =>
+                if (utilType == null)
                 {
-                    Log.Write("   property: {0}", p.Name);
-                });
+                    Log.Warning("SCANsatInterface.IsAvailable: Failed to find SCANsat.SCANutil type. SCANsat interface will not be available.");
+                    return false;
+                }
 
-                Log.Write("SCANcontroller fields:");
+                _method = utilType.GetMethod("isCovered", new Type[] { typeof(double), typeof(double), typeof(CelestialBody), typeof(int) });
 
-                controllerType.GetFields().ToList().ForEach(f => Log.Write("  field: {0}", f.Name));
-
-                Log.Write("SCANController methods:");
-
-                controllerType.GetMethods().ToList().ForEach(m => Log.Write("  method: {0}", m.Name));
-#endif
-
-
-                PropertyInfo controllerProperty = controllerType.GetProperty("controller", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy);
-                Log.Write("controllerProperty = {0}", controllerProperty.ToString());
-
-                if (controllerProperty == null) throw new Exception("SCANsatInterface: Failed to locate SCANcontroller.controller property!");
-                Log.Write("controllerType: {0}", controllerType.ToString());
-
-
-#if DEBUG && DEBUGSCANSAT
-                Log.Write("Property value: {0}", SCANsat.SCANcontroller.controller);
-                if (SCANsat.SCANcontroller.controller == null) Log.Write("real controller is null!");
-                if (HighLogic.CurrentGame == null) Log.Write("CurrentGame is null!");
-
-                HighLogic.CurrentGame.scenarios.ForEach(psm => Log.Write("ScenarioModule: {0}", psm.moduleName));
-
-                HighLogic.CurrentGame.scenarios.ForEach(psm =>
+                if (_method == null)
                 {
-                    if (psm.moduleRef == null) Log.Error("PSM {0} moduleRef is null after passing check!", psm.moduleName);
-                });
-#endif
-
-
-                var pcontrollerInstance = HighLogic.CurrentGame.scenarios.Find(psm => psm.moduleName == "SCANcontroller");
-
-                if (pcontrollerInstance == null) throw new Exception("SCANsatInterface: Controller instance is null!");
-                if (pcontrollerInstance.moduleRef == null) throw new Exception("SCANsatInterface: moduleRef is null!");
-
-                controllerInstance = pcontrollerInstance.moduleRef;
-
-
-                // now we can use the instance to get a reference to the SCANdata object we're
-                // after. Technically we'll get that by using the controller instance's getData(CelestialBody) method
-
-                getMethod = controllerType.GetMethod("getData", new Type[] { typeof(CelestialBody) });
-                if (getMethod == null) throw new Exception("SCANsatInterface: Failed to retrieve get method");
-            } catch (Exception e)
-            {
-                Log.Error("SCANsatInterface initialization failed with following: {0}", e);
-                Log.Error("Switching to default scan interface.");
-
-                creator.ScheduleInterfaceChange(Settings.ScanInterface.None);
-                return;
-            }
-
-            GameEvents.onDominantBodyChange.Add(OnBodyChange);
-
-            OnBodyChange(new GameEvents.FromToAction<CelestialBody, CelestialBody>(null, FlightGlobals.currentMainBody));
-        }
-
-
-
-        void OnDestroy()
-        {
-            Log.Verbose("SCANsatInterface OnDestroy");
-            GameEvents.onDominantBodyChange.Remove(OnBodyChange);
-        }
-
-
-
-        public void OnBodyChange(GameEvents.FromToAction<CelestialBody, CelestialBody> bodies)
-        {
-            Log.Verbose("SCANsatInterface.OnBodyChange, from {0} to {1}", bodies.from != null ? bodies.from.GetName() : "<none>", bodies.to != null ? bodies.to.GetName() : "<none>");
-
-            dataInstance = getMethod.Invoke(controllerInstance, new object[] {bodies.to});
-
-#if DEBUG && DEBUGSCANSAT
-            var real = SCANsat.SCANcontroller.controller.getData(bodies.to);
-
-            if (real == null)
-            {
-                Log.Error("SCANsatInterface.OnBodyChange: SCANsat data is null!");
-            }
-            else if (real != dataInstance) Log.Error("real != data instance from scansat");
-#endif
-
-
-            if (dataInstance == null)
-            {
-                Log.Error("SCANsatInterface: failed to get SCANdata on body change!");
-                isCoveredMethod = null;
-                return;
-            }
-            else
-            {
-                isCoveredMethod = dataInstance.GetType().GetMethod("isCovered", BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance);
-
-                
-                if (isCoveredMethod == null)
-                {
-                    Log.Error("SCANsatInterface: failed to get SCANdata.isCovered! Interface failure");
-                    creator.ScheduleInterfaceChange(Settings.ScanInterface.None);
+                    Log.Error("SCANsatInterface: Failed to locate SCANutil.isCovered!");
+                    return false;
                 }
                 else
-                {
-                    Log.Debug("SCANsatInterface: successfully retrieved SCANdata.isCovered.");
-                    coveredDelegate = (IsCoveredDelegate)Delegate.CreateDelegate(typeof(IsCoveredDelegate), isCoveredMethod); 
+                { 
+                    _isCovered = (IsCoveredDelegate)Delegate.CreateDelegate(typeof(IsCoveredDelegate), _method);
 
+                    if (_isCovered == null)
+                    {
+                        Log.Error("SCANsatInterface: Failed to create method delegate");
+                    }
+                    else Log.Normal("SCANsatInterface: Interface available");
+
+                    return _isCovered != null;
                 }
-            }
-        }
-
-
-        public static bool IsAvailable()
-        {
-            // it's possible, if SCANsat is removed, for a ScenarioModule of the appropriate name
-            // to exist yet it will fail to load. Rely on finding the type instead
-
-            Type controllerType = AssemblyLoader.loadedAssemblies
-                .SelectMany(loaded => loaded.assembly.GetExportedTypes())
-                .SingleOrDefault(t => t.FullName == SCANcontrollerTypeName);
-
-            if (controllerType == null)
+            } catch (Exception e)
             {
-                //Log.Debug("SCANsatInterface.IsAvailable: Failed to find controller type. SCANsat interface will not be available.");
-                return false;
+                Log.Error("Exception in SCANsatInterface.IsAvailable: {0}", e);
             }
 
-            // we'll have to trigger the static SCANcontroller.controller property
-            // and leave ScenarioModule creation to it
-            try
-            {
-
-                controllerType.GetProperty("controller", BindingFlags.Static | BindingFlags.Public | BindingFlags.FlattenHierarchy).GetValue(null, null);
-
-#if DEBUG
-                //Log.Write("Dumping current list of ScenarioModules after using property to create SCANcontroller instance");
-                //HighLogic.CurrentGame.scenarios.ForEach(psm => Log.Write("ScenarioModule: {0}", psm.moduleName));
-                ////ScenarioRunner.GetLoadedModules().ForEach(sm => Log.Write("ScenarioModule {0} is loaded.", sm.snapshot.moduleName));
-                //ScenarioRunner.GetUpdatedProtoModules().ForEach(psm => Log.Write("Update scenario module: {0}", psm.moduleName));
-                //Log.Write("done");
-#endif
-                    
-                // confirm it did what we wanted:
-                return HighLogic.CurrentGame.scenarios.Any(psm => psm.moduleName == SCANcontrollerModuleName) && controllerType != null;
-            }
-            catch (Exception e)
-            {
-                Log.Error("SCANsatInterface.IsAvailable: exception occurred while trying to access controller property! {0}", e);
-                return false;
-            }
-           
-        }
-
-
-
-        public static bool ScenarioReady()
-        {
-            return HighLogic.CurrentGame.scenarios.Any(psm => psm.moduleName == SCANcontrollerModuleName && psm.moduleRef != null);
+            return false;
         }
     }
 }

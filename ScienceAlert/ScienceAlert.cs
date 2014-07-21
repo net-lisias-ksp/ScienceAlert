@@ -166,18 +166,32 @@ namespace ScienceAlert
         // --------------------------------------------------------------------
         //    Members of ScienceAlert
         // --------------------------------------------------------------------
-        // related controls
+
+        // owned objects
         private Toolbar.IToolbar button;
+        private ScanInterface scanInterface;
 
         // interfaces
         private Settings.ToolbarInterface buttonInterfaceType = Settings.ToolbarInterface.ApplicationLauncher;
-        private ScanInterface scanInterface;
+        private Settings.ScanInterface scanInterfaceType = Settings.ScanInterface.None;
+        
 
 
 
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                Log.Write("Current interface: {0}", scanInterface.GetType().FullName);
+            }
+
+            if (Input.GetKeyDown(KeyCode.O))
+                gameObject.PrintComponents();
+
+        }
 
         void Start()
         {
@@ -214,7 +228,8 @@ namespace ScienceAlert
             // 
             // it's delayed to make sure whichever interface (if not the
             // default) has initialized
-            ScheduleInterfaceChange(Settings.Instance.ScanInterfaceType);
+            ScanInterfaceType = Settings.Instance.ScanInterfaceType;
+            
 
 
             Log.Debug("ScienceAlert.Start: initializing toolbar");
@@ -228,148 +243,6 @@ namespace ScienceAlert
         {
             Log.Debug("ScienceAlert destroyed");
 
-        }
-
-
-        /// <summary>
-        /// The main reason this exists is that I found it's a good idea to
-        /// wait for ScenarioModules to be loaded before trying to interact
-        /// with them...
-        /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        private System.Collections.IEnumerator ScheduledInterfaceChange(Settings.ScanInterface type)
-        {
-            Log.Normal("Scheduled interface change");
-
-
-            if (SCANsatInterface.IsAvailable())
-            {
-                Log.Debug("Waiting for SCANsat ScenarioModule to exist");
-
-                while (!SCANsatInterface.ScenarioReady())
-                    yield return 0;
-
-                Log.Debug("SANsat ScenarioModule ready");
-            }
-
-
-            while (!FlightGlobals.ready || HighLogic.CurrentGame.scenarios.Any(psm =>
-            {
-                // it's possible for a moduleRef to never become a valid value if
-                // an invalid ScenarioModule is left in the persistent file. The easiest
-                // way to find out if it'll ever exist is to examine ScenarioRunner's
-                // types directly
-                if (psm.moduleRef == null)
-                {
-#if DEBUG
-                    ScenarioRunner.fetch.gameObject.PrintComponents();
-#endif
-                    return ScenarioRunner.fetch.gameObject.GetComponents<ScenarioModule>().ToList().Any(sm =>
-                    {
-#if DEBUG
-                        Log.Debug("checking {0} against {1}", sm.GetType().FullName, psm.moduleName);
-
-                        if (sm.GetType().FullName == psm.moduleName)
-                            Log.Error("ScenarioModule '{0}' exists and so will be loaded; continue waiting", psm.moduleName);
-#endif
-                        return sm.GetType().FullName == psm.moduleName;
-                    });
-                }
-                else return false;
-            }))
-            {
-                Log.Debug("waiting on scenario moduleRefs");
-                yield return 0;
-            }
-
-
-            Log.Normal("Performing interface change to {0}", type.ToString());
-            SetScanInterfaceType(type);
-        }
-
-
-
-        /// <summary>
-        /// Only purpose is to kick off the ScheduledInterfaceChange 
-        /// Coroutine without bothering to make the caller do it
-        /// </summary>
-        /// <param name="type"></param>
-        internal void ScheduleInterfaceChange(Settings.ScanInterface type)
-        {
-            StartCoroutine(ScheduledInterfaceChange(type));
-        }
-
-
-
-        /// <summary>
-        /// Sets scan interface to specified type, assuming it's available.
-        /// If it's not, will default to stock ("none") behaviour.
-        /// 
-        /// Precondition: SCANsat ScenarioModule (if available) has an existing
-        /// instance.
-        /// </summary>
-        /// <param name="type"></param>
-        private void SetScanInterfaceType(Settings.ScanInterface type)
-        {
-            // remove any existing interfaces
-            StripComponent<DefaultScanInterface>(gameObject);
-            StripComponent<SCANsatInterface>(gameObject);
-
-            scanInterface = null;
-
-            Log.Normal("Setting scan interface type to {0}", type.ToString());
-
-            try
-            {
-                switch (type)
-                {
-                    case Settings.ScanInterface.None:
-                        scanInterface = gameObject.AddComponent<DefaultScanInterface>();
-                        break;
-
-                    case Settings.ScanInterface.ScanSat:
-                        if (!SCANsatInterface.IsAvailable())
-                        {
-                            Log.Error("SCANsatInterface unavailable! Using default.");
-                            SetScanInterfaceType(Settings.ScanInterface.None);
-                            break;
-                        }
-
-                        var ssInterface = gameObject.AddComponent<SCANsatInterface>();
-                        ssInterface.creator = this;
-                        scanInterface = ssInterface;
-
-                        break;
-
-                    default:
-                        throw new Exception(string.Format("Interface type '{0}' unrecognized", Settings.Instance.ScanInterfaceType));
-
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception in ScienceAlert.UpdateInterfaceType: {0}", e);
-                Log.Warning("Using default interface");
-
-                SetScanInterfaceType(Settings.ScanInterface.None);
-            }
-
-            gameObject.SendMessage("Notify_ScanInterfaceChanged");
-        }
-
-
-
-        private bool StripComponent<T>(GameObject target) where T : Component
-        {
-            T c = target.GetComponent<T>();
-
-            if (c != null)
-            {
-                GameObject.Destroy(c);
-                return true;
-            }
-            else return false;
         }
 
 
@@ -439,6 +312,68 @@ namespace ScienceAlert
             }
         }
 
+
+
+        /// <summary>
+        /// Switch between scan interfaces (used to determine whether the
+        /// player "knows about" a biome and can be alerted if the experiment
+        /// in question uses the biome mask for a given situation)
+        /// </summary>
+        public Settings.ScanInterface ScanInterfaceType
+        {
+            get
+            {
+                return scanInterfaceType;
+            }
+            set
+            {
+                if (value != scanInterfaceType || scanInterface == null)
+                {
+                    if (scanInterface != null) Component.DestroyImmediate(GetComponent<ScanInterface>());
+
+                    Log.Normal("Setting scan interface type to {0}", value.ToString());
+
+                    try
+                    {
+                        switch (value)
+                        {
+                            case Settings.ScanInterface.None:
+                                scanInterface = gameObject.AddComponent<DefaultScanInterface>();
+                                break;
+
+                            case Settings.ScanInterface.ScanSat:
+                                if (SCANsatInterface.IsAvailable())
+                                {
+                                    scanInterface = gameObject.AddComponent<SCANsatInterface>();
+                                    break;
+                                }
+                                else
+                                {
+                                    Log.Write("SCANsat Interface is not available. Using default.");
+                                    ScanInterfaceType = Settings.ScanInterface.None;
+                                    return;
+                                }
+
+                            default:
+                                throw new NotImplementedException("Unrecognized interface type");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error("ScienceAlert.ScanInterfaceType failed with exception {0}", e);
+
+                        // default interface should always be available, that should be safe
+                        // unless things are completely unrecoverable
+                        ScanInterfaceType = Settings.ScanInterface.None;
+                        return;
+                    }
+
+                    gameObject.SendMessage("Notify_ScanInterfaceChanged");
+                    scanInterfaceType = value;
+                    Log.Normal("Scan interface type is now {0}", ScanInterfaceType.ToString());
+                }
+            }
+        }
 
 #endregion 
     }

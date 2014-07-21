@@ -264,7 +264,7 @@ namespace ScienceAlert
                     if (experiment.BiomeIsRelevantWhile(experimentSituation))
                     {
                         // biome matters; check to make sure we have biome data available
-                        if (scanInterface.HaveScanData(vessel.latitude, vessel.longitude))
+                        if (scanInterface.HaveScanData(vessel.latitude, vessel.longitude, vessel.mainBody))
                         {
                             if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
                             {

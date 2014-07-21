@@ -27,8 +27,6 @@ namespace ScienceAlert
     /// </summary>
     internal class ScanInterface : MonoBehaviour
     {
-        public ScienceAlert creator;
-
         /// <summary>
         /// Returns true if the projected location on the biome map has been 
         /// revealed.
@@ -36,9 +34,7 @@ namespace ScienceAlert
         /// <param name="lat"></param>
         /// <param name="lon"></param>
         /// <returns></returns>
-        public virtual bool HaveScanData(double lat, double lon) { return true; }
-        //public virtual bool ReadyToBeCreated()
-        
+        public virtual bool HaveScanData(double lat, double lon, CelestialBody body) { return true; }
     }
 
     internal class DefaultScanInterface : ScanInterface

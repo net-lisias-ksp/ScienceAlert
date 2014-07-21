@@ -153,7 +153,7 @@ namespace ScienceAlert
             // current form
 
                 skin.button.fixedHeight = 24f;
-                skin.button.padding = new RectOffset() { left = 2, right = 2, top = 2, bottom = 2 };
+                skin.button.padding = new RectOffset() { left = 2, right = 2, top = 0, bottom = 0 };
 
                 skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
                 //skin.toggle.padding.left = skin.toggle.padding.right = skin.toggle.padding.top = skin.toggle.padding.bottom = 0;
@@ -498,14 +498,17 @@ Re-saving config with default values for missing experiments.");
                 switch (Interface)
                 {
                     case ScanInterface.ScanSat:
-                        if (AssemblyLoader.loadedAssemblies
-                            .SelectMany(loaded => loaded.assembly.GetExportedTypes())
-                            .ToList().Exists(t => string.Equals(t.FullName, "SCANsat.SCANdata")))
+                        if (SCANsatInterface.IsAvailable())
                         {
                             return Interface;
                         }
-                        else return ScanInterface.None;
-
+                        else
+                        {
+#if DEBUG
+                            Log.Error("Settings.ScanInterfaceType: SCANsatInterface unavailable");
+#endif
+                            return ScanInterface.None;
+                        }
                     default:
                         return Interface;
                 }

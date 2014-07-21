@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+//using System.Text;
 using UnityEngine;
 using ReeperCommon;
 
@@ -376,6 +376,8 @@ namespace ScienceAlert
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 var oldInterface = Settings.Instance.ScanInterfaceType;
+                                //Log.Write("old interface = {0}", oldInterface.ToString());
+
                                 var prevColor = GUI.color;
 
                                 if (!SCANsatInterface.IsAvailable()) GUI.color = Color.red;
@@ -384,22 +386,19 @@ namespace ScienceAlert
 
                                 GUI.color = prevColor;
 
-                                if (enableSCANinterface) // Settings won't return SCANsatInterface as the set interface if it wasn't found
+                                if (enableSCANinterface && oldInterface != Settings.ScanInterface.ScanSat) // Settings won't return SCANsatInterface as the set interface if it wasn't found
                                     if (!SCANsatInterface.IsAvailable())
                                     {
                                         PopupDialog.SpawnPopupDialog("SCANsat Not Found", "SCANsat was not found. You must install SCANsat to use this feature.", "Okay", false, Settings.Skin);
-#if DEBUG
+                                        enableSCANinterface = false;
                                     }
-                                //else Log.Debug("SCANsatInterface is an available option");
-#else
-                                    }
-#endif
 
                                 Settings.Instance.ScanInterfaceType = enableSCANinterface ? Settings.ScanInterface.ScanSat : Settings.ScanInterface.None;
 
-                                if (Settings.Instance.ScanInterfaceType != oldInterface)
-                                    scienceAlert.ScheduleInterfaceChange(Settings.Instance.ScanInterfaceType);
+                                scienceAlert.ScanInterfaceType = Settings.Instance.ScanInterfaceType;
 
+                                //Log.Write("new interface = {0}", Settings.Instance.ScanInterfaceType.ToString());
+    
                             }
                             GUILayout.EndHorizontal();
                             #endregion
