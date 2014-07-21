@@ -153,12 +153,19 @@ namespace ScienceAlert
             // current form
 
                 skin.button.fixedHeight = 24f;
+                skin.button.padding = new RectOffset() { left = 2, right = 2, top = 2, bottom = 2 };
+
                 skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
                 //skin.toggle.padding.left = skin.toggle.padding.right = skin.toggle.padding.top = skin.toggle.padding.bottom = 0;
-                skin.toggle.margin = new RectOffset(0, 0, 0, 0);
+                skin.toggle.margin = new RectOffset(5, 0, 0, 0);
+                skin.toggle.padding = new RectOffset() { left = 5, top = 3, right = 3, bottom = 3 };
+
                 skin.box.alignment = TextAnchor.MiddleCenter;
-                skin.box.padding = new RectOffset(5, 5, 15, 10);
+                skin.box.padding = new RectOffset(2, 2, 8, 5);
                 skin.box.contentOffset = new Vector2(0, 0f);
+
+                //skin.label.fontSize = skin.label.fontSize - 2;
+                
 
             // default sane values, just in case the config doesn't exist
                 EvaAtmospherePressureWarnThreshold = 0.00035;

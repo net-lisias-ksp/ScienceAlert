@@ -307,7 +307,7 @@ namespace ScienceAlert
                 {
                     GUI.skin = whiteLabel;
 
-                    additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.MinHeight(128f));
+                    additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.ExpandHeight(true));
                     {
                         GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
                         {
@@ -382,7 +382,7 @@ namespace ScienceAlert
                                         PopupDialog.SpawnPopupDialog("SCANsat Not Found", "SCANsat was not found. You must install SCANsat to use this feature.", "Okay", false, Settings.Skin);
 #if DEBUG
                                     }
-                                    //else Log.Debug("SCANsatInterface is an available option");
+                                //else Log.Debug("SCANsatInterface is an available option");
 #else
                                     }
 #endif
@@ -426,50 +426,53 @@ namespace ScienceAlert
                     }
                     GUILayout.EndScrollView();
                 }
-
-
-                scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
+                else // additional options not open
                 {
-                    GUI.skin = Settings.Skin;
 
-                    var keys = new List<string>(experimentIds.Keys);
 
-                    foreach (var key in keys)
+                    scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
                     {
-                        GUILayout.Space(8f);
+                        GUI.skin = Settings.Skin;
 
-                        var settings = Settings.Instance.GetExperimentSettings(key);
+                        var keys = new List<string>(experimentIds.Keys);
 
-                        // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
-                        var title = ResearchAndDevelopment.GetExperiment(key).experimentTitle;
+                        foreach (var key in keys)
+                        {
+                            GUILayout.Space(4f);
+
+                            var settings = Settings.Instance.GetExperimentSettings(key);
+
+                            // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
+                            var title = ResearchAndDevelopment.GetExperiment(key).experimentTitle;
 #if DEBUG
-                        GUILayout.Box(title + string.Format(" ({0})", ResearchAndDevelopment.GetExperiment(key).id), GUILayout.ExpandWidth(true));
+                            GUILayout.Box(title + string.Format(" ({0})", ResearchAndDevelopment.GetExperiment(key).id), GUILayout.ExpandWidth(true));
 #else
-                        GUILayout.Box(title, GUILayout.ExpandWidth(true));
+                            GUILayout.Box(title, GUILayout.ExpandWidth(true));
 #endif
-                        //GUILayout.Space(4f);
-                        settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
-                        settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
-                        settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
-                        settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
+                            //GUILayout.Space(4f);
+                            settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
+                            settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
+                            settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
+                            settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
 
-                        // only add the Assume Onboard option if the experiment isn't
-                        // one of the default types
-                        if (!settings.IsDefault)
-                            settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
+                            // only add the Assume Onboard option if the experiment isn't
+                            // one of the default types
+                            if (!settings.IsDefault)
+                                settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
 
-                        GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
+                            GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
 
-                        int oldSel = experimentIds[key];
-                        experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
+                            int oldSel = experimentIds[key];
+                            experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
 
-                        if (oldSel != experimentIds[key])
-                            Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
+                            if (oldSel != experimentIds[key])
+                                Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
 
 
+                        }
                     }
+                    GUILayout.EndScrollView();
                 }
-                GUILayout.EndScrollView();
             }
             GUILayout.EndVertical();
         }
