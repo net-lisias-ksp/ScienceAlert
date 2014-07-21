@@ -105,8 +105,8 @@ namespace ScienceAlert
             if (float.IsNaN(maximumTextLength) && observers.Count > 0 && rebuilder == null)
             {
                 // construct the experiment observer list ...
-                maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle)).x);
-                experimentButtonRect.width = maximumTextLength + 16 /* a little extra for report value */;
+                maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle + "(123)")).x);
+                experimentButtonRect.width = maximumTextLength /* a little extra for report value */;
 
                 Log.Debug("MaximumTextLength = {0}", maximumTextLength);
 
@@ -115,6 +115,11 @@ namespace ScienceAlert
             }
         }
 
+
+        private void RecalculateRect()
+        {
+            
+        }
 
         /// <summary>
         /// Whichever toolbar button (stock or blizzy) is in use will call
@@ -176,10 +181,8 @@ namespace ScienceAlert
 
                 experimentButtonRect.x = position.x;
                 experimentButtonRect.y = position.y;
-                experimentButtonRect.height = necessaryHeight;
 
-                GUILayout.Window(experimentMenuID, experimentButtonRect, DrawButtonMenu, "Available Experiments");
-
+                experimentButtonRect = KSPUtil.ClampRectToScreen( GUILayout.Window(experimentMenuID, experimentButtonRect, DrawButtonMenu, "Available Experiments"));
 
                 GUI.skin = old;
             }
@@ -189,7 +192,7 @@ namespace ScienceAlert
                 scienceAlert.Button.Drawable = null;
             }
 
-            return new Vector2(experimentButtonRect.width, necessaryHeight);
+            return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
         }
 
 
@@ -284,19 +287,9 @@ namespace ScienceAlert
                 Log.Warning("ExperimentManager: Waited to open list, but timed out after {0:0.#} seconds", Time.realtimeSinceStartup - start);
                 yield break;
             }
-            else
-            {
-                scienceAlert.Button.Drawable = this;
-
-
-                //if (scienceAlert.Button.Drawable != null)
-                //{
-                //    Log.Debug("Reopening experiment list...");
-                //    scienceAlert.Button.Drawable = this;
-                //}
-                //else Log.Warning("ExperimentManager.WaitAndReopenList: button already has a drawable assigned.");
-            }
+            else scienceAlert.Button.Drawable = this;
         }
+
 
 
         public void ScheduleRebuildObserverList()
@@ -304,6 +297,7 @@ namespace ScienceAlert
             observers.Clear();
             rebuilder = RebuildObserverList();
         }
+
 
 
         public void OnVesselDestroyed(Vessel vessel)
@@ -339,6 +333,7 @@ namespace ScienceAlert
         /// <returns></returns>
         private System.Collections.IEnumerator UpdateObservers()
         {
+
             while (true)
             {
                 if (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)

@@ -21,6 +21,26 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.7 
+ *      Feature: ApplicationLauncher (stock toolbar) support
+ *      
+ *      Feature: Blizzy's toolbar is now optional. If you have it installed,
+ *               you can choose between the stock toolbar and Blizzy's toolbar
+ *               in the options menu
+ *               
+ *      Feature: (Option) Experiment buttons can show next report value
+ *      
+ *      Feature: (Option) EVA report button can be set to always appear at
+ *               the top of the list
+ *               
+ *      Feature: (Option) Experiment popup can be configured to automatically
+ *               reappear on EVA if it was visible before leaving the vessel
+ *      
+ * 
+ *      Bugfix: Fixed issue that caused the popup windows to flicker (especially
+ *              the options window)
+ *              
+ *      
  * 1.6
  *      Bugfix: Fixed issue where alerts could appear for science reports worth
  *              no science

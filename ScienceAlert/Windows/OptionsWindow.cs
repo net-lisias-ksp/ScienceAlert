@@ -40,6 +40,7 @@ namespace ScienceAlert
         private Rect windowRect;
         private Vector2 scrollPos = new Vector2();
         private Vector2 additionalScrollPos = new Vector2();
+
         private Dictionary<string /* expid */, int /* selected index */> experimentIds = new Dictionary<string, int>();
         private List<GUIContent> filterList = new List<GUIContent>();
         private string sciMinValue = "0";
@@ -277,7 +278,7 @@ namespace ScienceAlert
             windowRect.x = position.x;
             windowRect.y = position.y;
 
-            GUILayout.Window(windowId, windowRect, RenderControls, "Science Alert");
+            windowRect = GUILayout.Window(windowId, windowRect, RenderControls, "Science Alert");
 
             GUI.skin = oldSkin;
 
@@ -286,7 +287,9 @@ namespace ScienceAlert
 
         private void RenderControls(int windowId)
         {
-            GUILayout.BeginVertical(GUILayout.ExpandWidth(true), GUILayout.Height(windowRect.height));
+            //GUILayout.BeginVertical(GUILayout.ExpandWidth(true), GUILayout.Height(windowRect.height));
+
+            GUILayout.BeginVertical(GUILayout.ExpandWidth(true), GUILayout.Height(Screen.height / 5 * 3));
             {
 
                 GUILayout.Label(new GUIContent("Global Warp Settings"), GUILayout.ExpandWidth(true));

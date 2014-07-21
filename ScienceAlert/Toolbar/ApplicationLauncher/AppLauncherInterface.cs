@@ -245,6 +245,7 @@ namespace ScienceAlert.Toolbar
         }
 
 
+
         /// <summary>
         /// If the ScienceAlert button is pressed, it should supercede any
         /// open widgets
@@ -260,6 +261,7 @@ namespace ScienceAlert.Toolbar
                 if (b.toggleButton.State == RUIToggleButton.ButtonState.TRUE)
                     b.toggleButton.SetFalse();
         }
+
 
 
         /// <summary>
@@ -295,6 +297,7 @@ namespace ScienceAlert.Toolbar
         public ApplicationLauncherButton button;
         private PackedSprite sprite; // animations: Spin, Unlit
 
+
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
@@ -323,8 +326,8 @@ namespace ScienceAlert.Toolbar
                 // nothing. We can't let the stock behaviour fail
                 Log.Warning("Creating dummy sprite texture");
 
-                sheet = new Texture2D(512, 512, TextureFormat.ARGB32, false);
-                sheet.SetPixels32(Enumerable.Repeat((Color32)Color.clear, 512 * 512).ToArray());
+                sheet = new Texture2D(38, 38, TextureFormat.ARGB32, false);
+                sheet.SetPixels32(Enumerable.Repeat((Color32)Color.clear, 38 * 38).ToArray());
                 sheet.Apply();
             }
 
@@ -348,6 +351,7 @@ namespace ScienceAlert.Toolbar
             Log.Verbose("Setting up star flask animation");
             UVAnimation anim = new UVAnimation() { name = "Spin", loopCycles = -1, framerate = 24f };
             anim.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, 38).y), sprite.PixelSpaceToUVSpace(38, 38), 100);
+
 
             // add animations to button
             sprite.AddAnimation(normal);
@@ -374,6 +378,8 @@ namespace ScienceAlert.Toolbar
             ApplicationLauncher.Instance.gameObject.PrintComponents();
         }
 
+
+
         void OnDestroy()
         {
             if (button != null)
@@ -386,14 +392,19 @@ namespace ScienceAlert.Toolbar
         }
 
 
+
         Vector2 CalculateDrawablePosition(Vector2 size)
         {
+            Log.Write("Drawable size = {0}", size);
+
             // Rect.xy == top left
             Rect rect = new Rect(0, 0, size.x, size.y);
 
             rect.x = Screen.width - size.x;
             rect.y = Screen.height - button.sprite.RenderCamera.WorldToScreenPoint(button.transform.position).y + 38f * 1.25f;
             rect = KSPUtil.ClampRectToScreen(rect);
+
+            Log.Write("clamped: {0}", rect);
 
             var transformedY = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, Screen.height - rect.y /* inverted remember */)).y;
             var transformedX = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, 0f, 0f)).x;
@@ -411,11 +422,6 @@ namespace ScienceAlert.Toolbar
             if (drawable == null) return;
             if (!button.gameObject.activeSelf) return;
             if (manners.ShouldHide) return;
-
-            // don't draw anything if one of the stock buttons is lit. We'll
-            // just have to hope other mod buttons handle things reasonably since
-            // I can't predict their behaviour
-            //if (appButtons.Any(b => b.State == RUIToggleButton.ButtonState.TRUE || b.toggleButton.IsHovering)) return;
 
             // if drawables were switched, there could be one frame
             // where the new drawable uses the old position which is
@@ -469,6 +475,7 @@ namespace ScienceAlert.Toolbar
 
             OnClick(new ClickInfo() { button = button });
         }
+
 
 
         public void OnToggleOff()
