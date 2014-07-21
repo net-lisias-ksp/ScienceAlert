@@ -91,18 +91,18 @@ namespace ScienceAlert
         {
             var containers = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataContainer>();
 
-            Log.Write("Dumping all science found in {0} containers aboard {1}", containers.Count, FlightGlobals.ActiveVessel.vesselName);
-            Log.Write("StorageCache is keeping track of {0} containers", storage.StorageContainerCount);
+            Log.Normal("Dumping all science found in {0} containers aboard {1}", containers.Count, FlightGlobals.ActiveVessel.vesselName);
+            Log.Normal("StorageCache is keeping track of {0} containers", storage.StorageContainerCount);
 
             foreach (var can in containers)
             {
                 var storedData = can.GetData();
 
                 foreach (var data in storedData)
-                    Log.Write("{0} - {1}", data.subjectID, data.title);
+                    Log.Normal("{0} - {1}", data.subjectID, data.title);
             }
 
-            Log.Write("End science dump.");
+            Log.Normal("End science dump.");
         }
 
         private float GetBodyScienceValueMultipler(ExperimentSituations sit)
@@ -138,24 +138,24 @@ namespace ScienceAlert
                 ScienceExperiment exp = ResearchAndDevelopment.GetExperiment(expid);
                 ScienceSubject subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, ScienceUtil.GetExperimentBiome(FlightGlobals.currentMainBody, FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude));
 
-                Log.Write("---- {0} -----", exp.experimentTitle);
- 
-                Log.Write("Current main body: {0}", FlightGlobals.currentMainBody.name);
-                Log.Write("Current subject: {0}", subject.id);
+                Log.Normal("---- {0} -----", exp.experimentTitle);
 
-                Log.Write("exp baseValue = {0}", exp.baseValue);
-                Log.Write("exp dataScale = {0}", exp.dataScale);
-                Log.Write("exp body multiplier = {0}", GetBodyScienceValueMultipler(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)));
-                Log.Write("sub dataScale = {0}", subject.dataScale);
-                Log.Write("sub subjectValue = {0}", ResearchAndDevelopment.GetSubjectValue(exp.baseValue * exp.dataScale, subject));
-                Log.Write("sub scientificValue = {0}", subject.scientificValue);
+                Log.Normal("Current main body: {0}", FlightGlobals.currentMainBody.name);
+                Log.Normal("Current subject: {0}", subject.id);
+
+                Log.Normal("exp baseValue = {0}", exp.baseValue);
+                Log.Normal("exp dataScale = {0}", exp.dataScale);
+                Log.Normal("exp body multiplier = {0}", GetBodyScienceValueMultipler(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)));
+                Log.Normal("sub dataScale = {0}", subject.dataScale);
+                Log.Normal("sub subjectValue = {0}", ResearchAndDevelopment.GetSubjectValue(exp.baseValue * exp.dataScale, subject));
+                Log.Normal("sub scientificValue = {0}", subject.scientificValue);
                 
                 // for my reference: these are all correct
-                Log.Write("reference value = {0}", ResearchAndDevelopment.GetReferenceDataValue(exp.baseValue * exp.dataScale, subject));
-                Log.Write("this value = {0}", ResearchAndDevelopment.GetScienceValue(exp.dataScale * exp.baseValue, subject));
-                Log.Write("next value = {0}", ResearchAndDevelopment.GetNextScienceValue(exp.baseValue * exp.dataScale, subject));
+                Log.Normal("reference value = {0}", ResearchAndDevelopment.GetReferenceDataValue(exp.baseValue * exp.dataScale, subject));
+                Log.Normal("this value = {0}", ResearchAndDevelopment.GetScienceValue(exp.dataScale * exp.baseValue, subject));
+                Log.Normal("next value = {0}", ResearchAndDevelopment.GetNextScienceValue(exp.baseValue * exp.dataScale, subject));
 
-                Log.Write("//////////////");
+                Log.Normal("//////////////");
             }
         }
 
@@ -206,7 +206,7 @@ namespace ScienceAlert
         {
             var txs = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
 
-            Log.Write("There are {0} total transmitters - {1} real, {2} magic", txs.Count, txs.Count(tx => !(tx is MagicDataTransmitter)), txs.Count(tx => tx is MagicDataTransmitter));
+            Log.Normal("There are {0} total transmitters - {1} real, {2} magic", txs.Count, txs.Count(tx => !(tx is MagicDataTransmitter)), txs.Count(tx => tx is MagicDataTransmitter));
 
             var magics = txs.Where(tx => tx is MagicDataTransmitter).ToList();
 
@@ -214,10 +214,10 @@ namespace ScienceAlert
             {
                 var magic = tx as MagicDataTransmitter;
 
-                Log.Write("MagicDataTransmitter {0} has {1} queued transmissions", magic.part.ConstructID, magic.QueuedData.Count);
+                Log.Normal("MagicDataTransmitter {0} has {1} queued transmissions", magic.part.ConstructID, magic.QueuedData.Count);
 
                 foreach (var data in magic.QueuedData)
-                    Log.Write("  - {0}", data.subjectID);
+                    Log.Normal("  - {0}", data.subjectID);
             }
         }
 

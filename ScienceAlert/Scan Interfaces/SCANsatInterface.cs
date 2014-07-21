@@ -96,14 +96,14 @@ namespace ScienceAlert
                 {
                     if (a.name == "SCANsat")
                     {
-                        Log.Write("Assembly {0}:", a.assembly.FullName);
+                        Log.Debug("Assembly {0}:", a.assembly.FullName);
 
                         a.assembly.GetExportedTypes().ToList().ForEach(t =>
                         {
-                            Log.Write("   exports: {0}", t.FullName);
+                            Log.Debug("   exports: {0}", t.FullName);
                         });
                     }
-                    else Log.Write("Assembly [brief]: {0}", a.name);
+                    else Log.Debug("Assembly [brief]: {0}", a.name);
                 });
 #endif
 
@@ -242,7 +242,7 @@ namespace ScienceAlert
 
             if (controllerType == null)
             {
-                Log.Debug("SCANsatInterface.IsAvailable: Failed to find controller type. SCANsat interface will not be available.");
+                //Log.Debug("SCANsatInterface.IsAvailable: Failed to find controller type. SCANsat interface will not be available.");
                 return false;
             }
 

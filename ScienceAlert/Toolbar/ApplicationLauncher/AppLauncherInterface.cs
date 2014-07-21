@@ -28,16 +28,6 @@ using System;
 
 namespace ScienceAlert.Toolbar
 {
-    delegate void HoverCallback();
-
-    class Whiny : MonoBehaviour
-    {
-        void OnMouseOver()
-        {
-            Log.Write("OnMouseOver!!111");
-        }
-    }
-
     /// <summary>
     /// Unfortunately there's some peculiar, potentially annoying behaviour
     /// with the ApplicationLauncher. Specifically, there are cases where
@@ -48,6 +38,9 @@ namespace ScienceAlert.Toolbar
     /// - temporarily hiding the drawable if a stock button is hovered
     /// - temporarily hiding the drawable if the currency widget is visible
     /// - closing the drawable if a stock button is clicked
+    /// 
+    /// Note: this whole thing is essentially a bugfix for the issue 
+    /// described at http://forum.kerbalspaceprogram.com/threads/86682-Appilcation-Launcher-and-Mods?p=1280014#post1280014
     /// </summary>
     class DrawableManners : MonoBehaviour
     {
@@ -64,7 +57,6 @@ namespace ScienceAlert.Toolbar
 
         AppLauncherInterface button;
         System.Collections.IEnumerator waitRoutine;
-        EZInputDelegate hoverDelegate;
         bool mouseHover = false;
 
 
@@ -79,28 +71,8 @@ namespace ScienceAlert.Toolbar
             button = GetComponent<AppLauncherInterface>();
 
             var appl = ApplicationLauncher.Instance.gameObject.transform;
-
-            hoverDelegate = delegate(ref POINTER_INFO ptr)
-            {
-                switch (ptr.evt)
-                {
-                    case POINTER_INFO.INPUT_EVENT.MOVE:
-                        if (this.button.Drawable != null && waitRoutine == null)
-                        {
-                            waitRoutine = TemporarilyHideDrawable();
-                            Log.Debug("Started wait routine");
-                        }
-                        mouseHover = true;
-                        break;
-
-                    case POINTER_INFO.INPUT_EVENT.MOVE_OFF:
-                        Log.Debug("Mouse moved off hover area");
-                        mouseHover = false;
-                        break;
-                }
-            };
-
             var holder = appl.Find("anchor/List");
+
             if (holder == null)
             {
                 Log.Error("AppLauncherInterface.DrawableManners: stock buttons not found!");
@@ -219,8 +191,6 @@ namespace ScienceAlert.Toolbar
         /// <returns></returns>
         System.Collections.IEnumerator WaitAndModifyResourceWidget()
         {
-            Log.Debug("Waiting for resource widget...");
-
             while (ResourceDisplay.Instance == null)
                 yield return 0;
 
@@ -322,7 +292,7 @@ namespace ScienceAlert.Toolbar
 
         private DrawableManners manners;
 
-        private ApplicationLauncherButton button;
+        public ApplicationLauncherButton button;
         private PackedSprite sprite; // animations: Spin, Unlit
 
 /******************************************************************************
@@ -344,7 +314,7 @@ namespace ScienceAlert.Toolbar
 
             Log.Verbose("Retrieving animation sheet.");
             var sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet_app.png", false, false);
-            //var sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet_app.png", true, false);
+            
             if (sheet == null)
             {
                 Log.Error("Failed to locate embedded app sheet texture!");
@@ -377,8 +347,7 @@ namespace ScienceAlert.Toolbar
             // animated state
             Log.Verbose("Setting up star flask animation");
             UVAnimation anim = new UVAnimation() { name = "Spin", loopCycles = -1, framerate = 24f };
-            anim.BuildWrappedUVAnim(new Vector2(0, 1f - sprite.PixelSpaceToUVSpace(38, 38).y), sprite.PixelSpaceToUVSpace(38, 38), 100);
-
+            anim.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, 38).y), sprite.PixelSpaceToUVSpace(38, 38), 100);
 
             // add animations to button
             sprite.AddAnimation(normal);
@@ -388,8 +357,8 @@ namespace ScienceAlert.Toolbar
 
             Log.Verbose("Creating mod button...");
             button = ApplicationLauncher.Instance.AddModApplication(
-                                                        OnToggle,
-                                                        OnToggle,
+                                                        OnToggleOn,
+                                                        OnToggleOff,
                                                         () => { },
                                                         () => { },
                                                         () => { },
@@ -477,7 +446,7 @@ namespace ScienceAlert.Toolbar
         /// close open stock widgets and let our listeners know about
         /// the click
         /// </summary>
-        public void OnToggle()
+        public void OnToggleOn()
         {
             int button = 0;
 
@@ -496,10 +465,15 @@ namespace ScienceAlert.Toolbar
                 button = 2;
             }
 
-            this.button.SetFalse(false);
             manners.CloseOpenWidgets();
 
             OnClick(new ClickInfo() { button = button });
+        }
+
+
+        public void OnToggleOff()
+        {
+            Drawable = null;
         }
 
         #endregion
@@ -619,6 +593,12 @@ namespace ScienceAlert.Toolbar
                 {
                     drawable = value;
                     movedDrawable = false;
+
+                    if (button.State == RUIToggleButton.ButtonState.TRUE && value == null)
+                        button.SetFalse(false);
+
+                    if (button.State == RUIToggleButton.ButtonState.FALSE && value != null)
+                        button.SetTrue(false);
                 }
             }
         }

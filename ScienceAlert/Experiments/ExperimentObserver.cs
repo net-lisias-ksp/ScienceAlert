@@ -330,15 +330,13 @@ namespace ScienceAlert
                             // make sure any experiment we alert on will produce at
                             // least X science, or we should ignore it even if it
                             // would otherwise match the filter
-#if DEBUG
-                            Log.Write("next report value of {0}: {1}", experiment.id, CalculateNextReportValue(subject, experimentSituation, data));
-#endif
+                            Log.Debug("next report value of {0}: {1}", experiment.id, CalculateNextReportValue(subject, experimentSituation, data));
+
 
                             Available = Available && nextReport >= Settings.Instance.ScienceThreshold;
-#if DEBUG
+
                             if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
-                                Log.Warning("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
-#endif
+                                Log.Verbose("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
                         }
 
                         if (Available)
@@ -350,15 +348,13 @@ namespace ScienceAlert
 
                             if (Available != lastStatus && Available)
                             {
-                                Log.Write("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, nextReport);
+                                Log.Normal("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, nextReport);
 
-#if DEBUG
-                            if (data.Count() > 0)
-                            {
-                                Log.Write("Raw dataAmount = {0}, nextScience = {1}", data.First().dataAmount, ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject));
-                                Log.Write("Total science value = {0}", GetScienceTotal(subject, out data));
-                            }
-#endif
+                                if (data.Count() > 0)
+                                {
+                                    Log.Debug("Raw dataAmount = {0}, nextScience = {1}", data.First().dataAmount, ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject));
+                                    Log.Debug("Total science value = {0}", GetScienceTotal(subject, out data));
+                                }
                             }
                         }
 
@@ -659,8 +655,8 @@ namespace ScienceAlert
 
         protected void OnConfirmEva()
         {
-            Log.Write("EvaObserver: User confirmed eva despite conditions");
-            Log.Write("Expelling... {0}", ExpelCrewman() ? "success!" : "failed");
+            Log.Normal("EvaObserver: User confirmed eva despite conditions");
+            Log.Normal("Expelling... {0}", ExpelCrewman() ? "success!" : "failed");
         }
 
 
@@ -704,7 +700,7 @@ namespace ScienceAlert
                 // like KSP doesn't switch cameras automatically
                 if ((CameraManager.Instance.currentCameraMode & (CameraManager.CameraMode.Internal | CameraManager.CameraMode.IVA)) != 0)
                 {
-                    Log.Write("Detected IVA or internal cam; switching to flight cam");
+                    Log.Normal("Detected IVA or internal cam; switching to flight cam");
                     CameraManager.Instance.SetCameraFlight();
                 }
 

@@ -131,51 +131,9 @@ namespace ScienceAlert
 
 
 
-        // per-sound settings
-        //public class SoundSettings
-        //{
-        //    internal SoundSettings()
-        //    {
-        //        Enabled = true;
-        //        MinDelay = 0f;
-        //    }
-
-        //    public void OnLoad(ConfigNode node)
-        //    {
-        //        Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
-        //        MinDelay = ConfigUtil.Parse<float>(node, "MinDelay", 0f);
-        //    }
-
-        //    public void OnSave(ConfigNode node)
-        //    {
-        //        node.AddValue("Enabled", Enabled);
-        //        node.AddValue("MinDelay", MinDelay);
-        //    }
-
-        //    public bool Enabled
-        //    {
-        //        get;
-        //        private set;
-        //    }
-
-        //    public float MinDelay
-        //    {
-        //        get;
-        //        private set;
-        //    }
-
-        //    public override string ToString()
-        //    {
-        //        return string.Format("Enabled = {0}, MinDelay = {1}", Enabled, MinDelay);
-        //    }
-        //}
-
-
 
 
         private Dictionary<string /* expid */, ExperimentSettings> PerExperimentSettings;
-        //private Dictionary<string /* name */, SoundSettings> PerSoundSettings;
-
         private GUISkin skin;
 
 /******************************************************************************
@@ -185,7 +143,6 @@ namespace ScienceAlert
         {
             // set default values
             PerExperimentSettings = new Dictionary<string, ExperimentSettings>();
-            //PerSoundSettings = new Dictionary<string, SoundSettings>();
 
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 PerExperimentSettings[expid] = new ExperimentSettings();
@@ -240,7 +197,7 @@ namespace ScienceAlert
         {
             var path = GetConfigPath();
 
-            Log.Write("Loading settings from {0}", path);
+            Log.Normal("Loading settings from {0}", path);
             if (File.Exists(path))
             {
                 ConfigNode node = ConfigNode.Load(path);
@@ -264,7 +221,7 @@ namespace ScienceAlert
         {
             var path = GetConfigPath();
 
-            Log.Write("Saving settings to {0}", path);
+            Log.Normal("Saving settings to {0}", path);
             ConfigNode saved = new ConfigNode();
             OnSave(saved);
 
@@ -306,7 +263,9 @@ namespace ScienceAlert
             }
 #endregion
 
-#region scan interface settings
+#region interface settings
+
+            // scan interface
             try
             {
                 ConfigNode si = node.GetNode("ScanInterface");
@@ -319,6 +278,21 @@ namespace ScienceAlert
             } catch (Exception e)
             {
                 Log.Error("Exception occurred while loading ScanInterface section: {0}", e);
+            }
+
+
+            // toolbar interface
+            try
+            {
+                ConfigNode ti = node.GetNode("ToolbarInterface");
+                if (ti == null) ti = node.AddNode(new ConfigNode("ToolbarInterface"));
+
+                ToolbarInterfaceType = ti.ParseEnum<ToolbarInterface>("ToolbarType", ToolbarInterface.ApplicationLauncher);
+                Log.Debug("ToolbarInterface = {0}", ToolbarInterfaceType);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception occurred while loading ToolbarInterface section: {0}", e);
             }
 #endregion
 #region experiment settings
@@ -422,11 +396,14 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("ScienceThreshold", ScienceThreshold);
                 #endregion
 
-                #region scan interface settings
+                #region interface settings
 
                 ConfigNode si = node.AddNode(new ConfigNode("ScanInterface"));
 
                 si.AddValue("InterfaceType", ScanInterfaceType.ToString());
+
+                node.AddNode(new ConfigNode("ToolbarInterface")).AddValue("ToolbarType", ToolbarInterfaceType.ToString());
+
                 #endregion
 
                 #region experiment settings
@@ -487,7 +464,7 @@ Re-saving config with default values for missing experiments.");
 
         #endregion
 
-        #region Scan interface settings
+        #region interface settings
 
 
         protected ScanInterface Interface;
@@ -528,7 +505,7 @@ Re-saving config with default values for missing experiments.");
                     case ToolbarInterface.BlizzyToolbar:
                         if (!ToolbarManager.ToolbarAvailable)
                             return ToolbarInterface.ApplicationLauncher;
-                        return ToolbarInterface.ApplicationLauncher;
+                        return ToolbarInterface.BlizzyToolbar;
 
                     default:
                         return ToolbarType;
@@ -538,6 +515,7 @@ Re-saving config with default values for missing experiments.");
             set
             {
                 ToolbarType = value;
+                Log.Debug("Settings.ToolbarType is now {0}", value.ToString());
             }
         }
 
@@ -560,6 +538,7 @@ Re-saving config with default values for missing experiments.");
 
         #endregion
 
+ 
 
         #region sound settings
 

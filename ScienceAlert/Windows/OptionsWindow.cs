@@ -128,6 +128,16 @@ namespace ScienceAlert
         }
 
 
+        System.Collections.IEnumerator WaitAndSave()
+        {
+            while (scienceAlert.Button.Drawable is OptionsWindow)
+                yield return 0;
+
+            Log.Normal("Saving settings");
+            Settings.Instance.Save();
+            Log.Normal("Settings saved.");
+        }
+
         #region Events
 
 
@@ -150,6 +160,7 @@ namespace ScienceAlert
                     else
                     {
                         scienceAlert.Button.Drawable = this;
+                        StartCoroutine(WaitAndSave());
                         AudioUtil.Play("click1");
                     }
                 }
@@ -201,7 +212,7 @@ namespace ScienceAlert
                 AudioUtil.Play("click1");
 
 #if DEBUG
-                Log.Debug("Toggle '{0}' is now {1}", content, result);
+                Log.Debug("Toggle '{0}' is now {1}", content.text, result);
 #endif
             }
             return result;
@@ -353,7 +364,7 @@ namespace ScienceAlert
                             GUILayout.EndHorizontal();
                             GUILayout.Space(10f);
 
-                            // interface options
+                            // scan interface options
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 var oldInterface = Settings.Instance.ScanInterfaceType;
@@ -381,6 +392,31 @@ namespace ScienceAlert
                                 if (Settings.Instance.ScanInterfaceType != oldInterface)
                                     scienceAlert.ScheduleInterfaceChange(Settings.Instance.ScanInterfaceType);
 
+                            }
+                            GUILayout.EndHorizontal();
+
+                            // toolbar interface option
+                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            {
+                                var oldInterface = Settings.Instance.ToolbarInterfaceType;
+                                var prevColor = GUI.color;
+
+                                if (!ToolbarManager.ToolbarAvailable) GUI.color = Color.red;
+
+                                bool enableBlizzyToolbar = AudibleToggle(Settings.Instance.ToolbarInterfaceType == Settings.ToolbarInterface.BlizzyToolbar, "Use Blizzy toolbar");
+                                GUI.color = prevColor;
+
+                                if (enableBlizzyToolbar && oldInterface != Settings.ToolbarInterface.BlizzyToolbar)
+                                    if (!ToolbarManager.ToolbarAvailable)
+                                    {
+                                        PopupDialog.SpawnPopupDialog("Blizzy Toolbar Not Found", "Blizzy's toolbar was not found. You must install Blizzy's toolbar to use this feature.", "Okay", false, Settings.Skin);
+                                        enableBlizzyToolbar = false;
+                                    }
+
+                                Settings.Instance.ToolbarInterfaceType = enableBlizzyToolbar ? Settings.ToolbarInterface.BlizzyToolbar : Settings.ToolbarInterface.ApplicationLauncher;
+
+                                if (scienceAlert.ToolbarType != Settings.Instance.ToolbarInterfaceType)
+                                    scienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
                             }
                             GUILayout.EndHorizontal();
                         }

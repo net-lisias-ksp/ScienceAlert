@@ -228,10 +228,10 @@ namespace ScienceAlert
         {
             if (vessel == FlightGlobals.ActiveVessel)
             {
-                Log.Write("Vessel was modified; refreshing observer caches...");
+                Log.Normal("Vessel was modified; refreshing observer caches...");
                 foreach (var obs in observers)
                     obs.Rebuild();
-                Log.Write("Done");
+                Log.Normal("Done");
             }
         }
 
@@ -335,9 +335,6 @@ namespace ScienceAlert
                         }
                         else if (scienceAlert.Button.IsNormal) scienceAlert.Button.SetLit();
 
-                        Log.Write("observer soundOnDiscovery: {0}", observer.settings.SoundOnDiscovery);
-                        Log.Write("observer animateOnDiscovery: {0}", observer.settings.AnimationOnDiscovery);
-
                         switch (Settings.Instance.SoundNotification)
                         {
                             case Settings.SoundNotifySetting.ByExperiment:
@@ -391,7 +388,7 @@ namespace ScienceAlert
         /// <returns></returns>
         private System.Collections.IEnumerator RebuildObserverList()
         {
-            Log.Write("Rebuilding observer list...");
+            Log.Normal("Rebuilding observer list...");
 
             observers.Clear();
             maximumTextLength = float.NaN;
@@ -435,13 +432,13 @@ namespace ScienceAlert
 
                 watcher = UpdateObservers();
 
-                Log.Write("Observer list rebuilt");
+                Log.Normal("Observer list rebuilt");
             }
             catch (Exception e)
             {
                 Log.Error("CRITICAL: Exception RebuildObserverList(): {0}", e);
 
-                Log.Write("Listing current experiment definitions:");
+                Log.Normal("Listing current experiment definitions:");
 
                 // It's usually something to do with duplicate crew reports
                 foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
@@ -453,10 +450,10 @@ namespace ScienceAlert
 
                     snipped.RemoveNode("RESULTS");
 
-                    Log.Write("{0}", snipped.ToString());
+                    Log.Normal("{0}", snipped.ToString());
                 }
 
-                Log.Write("Finished listing experiment definitions.");
+                Log.Normal("Finished listing experiment definitions.");
 
                 // find any duplicates
                 HashSet<string /* id */> alreadyKnown = new HashSet<string>();
@@ -476,7 +473,7 @@ namespace ScienceAlert
                             Log.Error("Duplicate science definition found for '{0}'", id);
                         }
                     }
-                    else Log.Write("no value id found");
+                    else Log.Normal("no value id found");
                 }
             }
         }

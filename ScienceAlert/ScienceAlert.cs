@@ -198,17 +198,17 @@ namespace ScienceAlert
             AudioUtil.LoadSoundsFrom("/ScienceAlert/sounds", AudioType.WAV);
             Log.Debug("Sounds ready.");
 
-            Log.Write("Creating options window");
+            Log.Normal("Creating options window");
             gameObject.AddComponent<OptionsWindow>();
             //optionsWindow = new OptionsWindow(this/*, effects.AudioController*/);
 
-            Log.Write("Creating experiment manager");
+            Log.Normal("Creating experiment manager");
             gameObject.AddComponent<ExperimentManager>();
 
-            Log.Write("Creating debug window");
+            Log.Normal("Creating debug window");
             gameObject.AddComponent<DebugWindow>();
 
-            Log.Write("Finished creating windows");
+            Log.Normal("Finished creating windows");
 
 
             // set up whichever interface we're using to determine when it's
@@ -221,7 +221,7 @@ namespace ScienceAlert
 
             Log.Debug("ScienceAlert.Start: initializing toolbar");
             ToolbarType = Settings.ToolbarInterface.ApplicationLauncher;
-            Log.Debug("Toolbar button ready");
+            Log.Normal("Toolbar button ready");
         }
 
 
@@ -242,7 +242,7 @@ namespace ScienceAlert
         /// <returns></returns>
         private System.Collections.IEnumerator ScheduledInterfaceChange(Settings.ScanInterface type)
         {
-            Log.Write("Scheduled interface change");
+            Log.Normal("Scheduled interface change");
 
 
             if (SCANsatInterface.IsAvailable())
@@ -270,7 +270,7 @@ namespace ScienceAlert
                     return ScenarioRunner.fetch.gameObject.GetComponents<ScenarioModule>().ToList().Any(sm =>
                     {
 #if DEBUG
-                        Log.Write("checking {0} against {1}", sm.GetType().FullName, psm.moduleName);
+                        Log.Debug("checking {0} against {1}", sm.GetType().FullName, psm.moduleName);
 
                         if (sm.GetType().FullName == psm.moduleName)
                             Log.Error("ScenarioModule '{0}' exists and so will be loaded; continue waiting", psm.moduleName);
@@ -286,7 +286,7 @@ namespace ScienceAlert
             }
 
 
-            Log.Write("Performing interface change");
+            Log.Normal("Performing interface change to {0}", type.ToString());
             SetScanInterfaceType(type);
         }
 
@@ -320,7 +320,7 @@ namespace ScienceAlert
 
             scanInterface = null;
 
-            Log.Write("Setting scan interface type to {0}", type.ToString());
+            Log.Normal("Setting scan interface type to {0}", type.ToString());
 
             try
             {
@@ -375,13 +375,7 @@ namespace ScienceAlert
         }
 
 
-        
-
-
-
-        
-
-
+      
 
         
 
@@ -403,63 +397,6 @@ namespace ScienceAlert
 
 
 
-
-
-        //public void OnToolbarClick(Toolbar.ClickInfo ci)
-        //{
-        //    //effects.AudioController.PlaySound("click1");
-
-        //    //if (ce.MouseButton == 0)
-        //    if (ci.button == 0)
-        //    {
-        //        Log.Debug("Toolbar left clicked");
-
-        //        if (!OptionsOpen)
-        //        {
-        //            MenuOpen = !MenuOpen;
-        //        }
-        //        else OptionsOpen = false; // if options is open, left click will close it.  Another click
-        //                                    // should be required to open the menu
-        //    }
-        //    else // right or middle click
-        //    {
-        //        //if (ce.MouseButton == 2 && Settings.Instance.DebugMode) // middle
-        //        if (ci.button == 2 && Settings.Instance.DebugMode) // middle
-        //        {
-        //            Log.Debug("DebugMode enabled, middle-click on toolbar button. Opening debug menu.");
-        //            DebugOpen = !DebugOpen;
-        //        }
-        //        else
-        //        {
-        //            Log.Debug("Toolbar right or middle clicked");
-
-        //            OptionsOpen = !OptionsOpen;
-        //        }
-        //    }
-        //}
-
-
-        #region invoked functions
-
-        //private void UpdateMenuState()
-        //{
-        //    // quick recap on button image logic:
-        //    //      no experiments available at all = normal icon
-        //    //      new experiments are available and user hasn't looked at the menu => animated star flask
-        //    //      experiments are available and user looked at them (or is looking at them) => non-animated star flask
-        //    if (MenuOpen)
-        //    {
-        //        // stop the star flask animation, if it's running
-        //        if (State == IconState.NewResearch)
-        //        {
-        //            State = IconState.ResearchAvailable;
-        //            button.Important = false;
-        //        }
-        //    }
-        //}
-
-
-        #endregion
 
 
         #region properties
@@ -491,7 +428,7 @@ namespace ScienceAlert
                     if (button != null)
                     {
                         var c = gameObject.GetComponent(button.GetType());
-                        if (c == null) Log.Warning("ToolbalInterface: Did not find previous interface");
+                        if (c == null) Log.Warning("ToolbarInterface: Did not find previous interface");
 
                         Destroy(c);
                         button = null;

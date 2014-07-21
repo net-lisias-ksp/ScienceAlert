@@ -289,7 +289,7 @@ namespace ScienceAlert
         /// <param name="bodies"></param>
         private void OnDominantBodyChanged(GameEvents.FromToAction<CelestialBody, CelestialBody> bodies)
         {
-            Log.Write("BiomeFilter.OnDominantBodyChanged from {0} to {1}", bodies.from, bodies.to);
+            Log.Normal("BiomeFilter.OnDominantBodyChanged from {0} to {1}", bodies.from, bodies.to);
             ReprojectBiomeMap(bodies.to);
         }
 
