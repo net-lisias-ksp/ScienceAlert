@@ -331,7 +331,7 @@ namespace ScienceAlert
                             }
                             GUILayout.EndHorizontal();
 
-                            
+
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 GUILayout.Space(24f);
@@ -440,11 +440,19 @@ namespace ScienceAlert
                             #region Eva report on top toggle
                             {
                                 var prev = Settings.Instance.EvaReportOnTop;
-                                
+
                                 Settings.Instance.EvaReportOnTop = AudibleToggle(Settings.Instance.EvaReportOnTop, "List EVA report first");
 
                                 if (Settings.Instance.EvaReportOnTop != prev)
                                     GetComponent<ExperimentManager>().ScheduleRebuildObserverList();
+                            }
+                            #endregion
+
+                            GUILayout.Space(10f);
+
+                            #region Keep experiment window open on vessel switch toggle
+                            {
+                                Settings.Instance.ReopenOnEva = AudibleToggle(Settings.Instance.ReopenOnEva, "Re-open list on EVA");
                             }
                             #endregion
                         }

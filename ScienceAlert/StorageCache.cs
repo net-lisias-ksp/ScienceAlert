@@ -80,7 +80,7 @@ namespace ScienceAlert
         /// <param name="v"></param>
         public void OnVesselChange(Vessel v)
         {
-            Log.Debug("StorageCache.OnVesselChange");
+            Log.Debug("StorageCache.OnVesselChange to {0}", v.vesselName);
 
             RemoveMagicTransmitter();
             vessel = v;

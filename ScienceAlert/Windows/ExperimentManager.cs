@@ -55,6 +55,7 @@ namespace ScienceAlert
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
+            GameEvents.onCrewOnEva.Add(OnCrewGoingEva);
         }
 
 
@@ -64,6 +65,7 @@ namespace ScienceAlert
             GameEvents.onVesselWasModified.Remove(OnVesselWasModified);
             GameEvents.onVesselChange.Remove(OnVesselChanged);
             GameEvents.onVesselDestroy.Remove(OnVesselDestroyed);
+            GameEvents.onCrewOnEva.Remove(OnCrewGoingEva);
         }
 
 
@@ -242,8 +244,58 @@ namespace ScienceAlert
         public void OnVesselChanged(Vessel newVessel)
         {
             Log.Debug("OnVesselChange: {0}", newVessel.name);
+
+            
+
             ScheduleRebuildObserverList();
             watcher = null;
+        }
+
+
+
+        private void OnCrewGoingEva(GameEvents.FromToAction<Part, Part> relevant)
+        {
+            if (Settings.Instance.ReopenOnEva && scienceAlert.Button.Drawable is ExperimentManager)
+            {
+                Log.Debug("ExperimentManager.OnCrewGoingEva: from {0} to {1}", relevant.from.partName, relevant.to.partName);
+                StartCoroutine(WaitAndReopenList(relevant.to.vessel));
+            }
+        }
+
+
+
+        /// <summary>
+        /// Will wait for the specified vessel to become active and for
+        /// experiments to become available before reopening experiment
+        /// list
+        /// </summary>
+        /// <param name="timeOut"></param>
+        /// <returns></returns>
+        private System.Collections.IEnumerator WaitAndReopenList(Vessel target)
+        {
+            float start = Time.realtimeSinceStartup;
+            Log.Verbose("ExperimentManager: Waiting to reopen window");
+
+            while ((FlightGlobals.ActiveVessel != target || !observers.Any(o => o.Available)) && Time.realtimeSinceStartup - start < 2f /* 2 second timeout */)
+                yield return 0;
+
+            if (!observers.Any(o => o.Available))
+            {
+                Log.Warning("ExperimentManager: Waited to open list, but timed out after {0:0.#} seconds", Time.realtimeSinceStartup - start);
+                yield break;
+            }
+            else
+            {
+                scienceAlert.Button.Drawable = this;
+
+
+                //if (scienceAlert.Button.Drawable != null)
+                //{
+                //    Log.Debug("Reopening experiment list...");
+                //    scienceAlert.Button.Drawable = this;
+                //}
+                //else Log.Warning("ExperimentManager.WaitAndReopenList: button already has a drawable assigned.");
+            }
         }
 
 
