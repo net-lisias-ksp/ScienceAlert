@@ -343,7 +343,8 @@ namespace ScienceAlert.Toolbar
                 yield return null;
 
             Log.Verbose("Retrieving animation sheet.");
-            var sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet_app.png", true, false);
+            var sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet_app.png", false, false);
+            //var sheet = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.sheet_app.png", true, false);
             if (sheet == null)
             {
                 Log.Error("Failed to locate embedded app sheet texture!");
@@ -377,6 +378,7 @@ namespace ScienceAlert.Toolbar
             Log.Verbose("Setting up star flask animation");
             UVAnimation anim = new UVAnimation() { name = "Spin", loopCycles = -1, framerate = 24f };
             anim.BuildWrappedUVAnim(new Vector2(0, 1f - sprite.PixelSpaceToUVSpace(38, 38).y), sprite.PixelSpaceToUVSpace(38, 38), 100);
+
 
             // add animations to button
             sprite.AddAnimation(normal);
