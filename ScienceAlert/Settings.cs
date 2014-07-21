@@ -173,6 +173,7 @@ namespace ScienceAlert
 
                 ScanInterfaceType = ScanInterface.None;
                 ShowReportValue = false;
+                EvaReportOnTop = false;
 
             Load();
         }
@@ -262,6 +263,7 @@ namespace ScienceAlert
                 EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
                 ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
                 ShowReportValue = general.Parse<bool>("ShowReportValue", false);
+                EvaReportOnTop = general.Parse<bool>("EvaReportOnTop", false);
 
                 Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
                 Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
@@ -404,6 +406,8 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
                 general.AddValue("ScienceThreshold", ScienceThreshold);
                 general.AddValue("ShowReportValue", ShowReportValue);
+                general.AddValue("EvaReportOnTop", EvaReportOnTop);
+
                 #endregion
 
                 #region interface settings
@@ -472,6 +476,7 @@ Re-saving config with default values for missing experiments.");
         public bool EnableScienceThreshold { get; set; }
         public float ScienceThreshold { get; set; }
         public bool ShowReportValue { get; set; }
+        public bool EvaReportOnTop { get; set; }
 
         #endregion
 

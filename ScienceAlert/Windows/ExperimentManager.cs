@@ -242,11 +242,16 @@ namespace ScienceAlert
         public void OnVesselChanged(Vessel newVessel)
         {
             Log.Debug("OnVesselChange: {0}", newVessel.name);
-            observers.Clear();
-            rebuilder = RebuildObserverList();
+            ScheduleRebuildObserverList();
             watcher = null;
         }
 
+
+        public void ScheduleRebuildObserverList()
+        {
+            observers.Clear();
+            rebuilder = RebuildObserverList();
+        }
 
 
         public void OnVesselDestroyed(Vessel vessel)
@@ -428,9 +433,18 @@ namespace ScienceAlert
                 // Observer type that will account for these changes and any others
                 // that might not necessarily trigger a VesselModified event
                 if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
-                    observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter, scanInterface));
-
-                observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+                {
+                    if (Settings.Instance.EvaReportOnTop)
+                    {
+                        observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+                        observers.Insert(0, new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter, scanInterface));
+                    }
+                    else
+                    {
+                        observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter, scanInterface));
+                        observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+                    }
+                } else observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
 
                 watcher = UpdateObservers();
 
@@ -494,8 +508,7 @@ namespace ScienceAlert
             Log.Debug("ExperimentManager.Notify_ScanInterfaceChanged");
 
             scanInterface = gameObject.GetComponent<ScanInterface>();
-            observers.Clear();
-            rebuilder = RebuildObserverList();
+            ScheduleRebuildObserverList();
         }
 
 
@@ -509,8 +522,7 @@ namespace ScienceAlert
             Log.Debug("ExperimentManager.Notify_ToolbarInterfaceChanged");
 
             scienceAlert.Button.OnClick += OnToolbarClicked;
-            observers.Clear();
-            rebuilder = RebuildObserverList(); // why? to update toolbar button state
+            ScheduleRebuildObserverList(); // why? to update toolbar button state
         }
 
 #endregion

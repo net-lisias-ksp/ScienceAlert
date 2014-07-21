@@ -311,6 +311,7 @@ namespace ScienceAlert
                     {
                         GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
                         {
+                            #region global flask animation
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 GUILayout.Label("Globally Enable Animation", GUILayout.ExpandWidth(true));
@@ -318,10 +319,11 @@ namespace ScienceAlert
                                 if (!Settings.Instance.FlaskAnimationEnabled && scienceAlert.Button.IsAnimating) scienceAlert.Button.SetLit();
                             }
                             GUILayout.EndHorizontal();
+                            #endregion
 
                             GUILayout.Space(8f);
 
-
+                            #region Ignore reports threshold
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 GUILayout.Label(new GUIContent("Enable Minimum Science Threshold"), GUILayout.ExpandWidth(true));
@@ -329,6 +331,7 @@ namespace ScienceAlert
                             }
                             GUILayout.EndHorizontal();
 
+                            
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 GUILayout.Space(24f);
@@ -362,9 +365,11 @@ namespace ScienceAlert
                                     }
                             }
                             GUILayout.EndHorizontal();
-                            GUILayout.Space(10f);
+                            #endregion
 
-                            // scan interface options
+                            GUILayout.Space(8f);
+
+                            #region scan interface options
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 var oldInterface = Settings.Instance.ScanInterfaceType;
@@ -394,8 +399,9 @@ namespace ScienceAlert
 
                             }
                             GUILayout.EndHorizontal();
+                            #endregion
 
-                            // toolbar interface option
+                            #region toolbar interface options
                             GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                             {
                                 var oldInterface = Settings.Instance.ToolbarInterfaceType;
@@ -419,13 +425,28 @@ namespace ScienceAlert
                                     scienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
                             }
                             GUILayout.EndHorizontal();
+                            #endregion
+
                             GUILayout.Space(8f);
 
-                            // Display report value in button
+                            #region Display report value in button
                             {
                                 Settings.Instance.ShowReportValue = AudibleToggle(Settings.Instance.ShowReportValue, "Display Report Value");
-
                             }
+                            #endregion
+
+                            GUILayout.Space(10f);
+
+                            #region Eva report on top toggle
+                            {
+                                var prev = Settings.Instance.EvaReportOnTop;
+                                
+                                Settings.Instance.EvaReportOnTop = AudibleToggle(Settings.Instance.EvaReportOnTop, "List EVA report first");
+
+                                if (Settings.Instance.EvaReportOnTop != prev)
+                                    GetComponent<ExperimentManager>().ScheduleRebuildObserverList();
+                            }
+                            #endregion
                         }
                         GUILayout.EndVertical();
 
