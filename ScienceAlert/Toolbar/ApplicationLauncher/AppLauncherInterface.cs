@@ -51,64 +51,17 @@ namespace ScienceAlert.Toolbar
     /// </summary>
     class DrawableManners : MonoBehaviour
     {
-        // goals:
-        //      temporarily hide drawable on hover
-        //      permanently hide drawable on click
-
-        class ButtonWrapper
-        {
-            ApplicationLauncherButton button;
-            RUIToggleButton.OnHover onHover;
-            RUIToggleButton.OnHoverBtn onHoverBtn;
-            RUIToggleButton.OnHoverBtnActive onHoverBtnActive;
-            HoverCallback callback;
-
-            //public RUIToggleButton.OnTrue onTrue;
-            //public RUIToggleButton.OnClickBtn onClick;
-
-            internal ButtonWrapper(ApplicationLauncherButton b, HoverCallback h)
-            {
-                button = b;
-                onHover = b.toggleButton.onHover;
-                onHoverBtn = b.toggleButton.onHoverBtn;
-                onHoverBtnActive = b.toggleButton.onHoverBtnActive;
-
-                b.toggleButton.onHover = HoverStub;
-                b.toggleButton.onHoverBtn = HoverBtnStub;
-                b.toggleButton.onHoverBtnActive = HoverBtnActiveStub;
-
-                callback = h;
-            }
-
-            public void HoverStub()
-            {
-                Log.Write("HoverStub");
-                onHover();
-                callback();
-            }
-
-            public void HoverBtnStub(RUIToggleButton b)
-            {
-                Log.Write("HoverBtnStub");
-                onHoverBtn(b);
-            }
-
-            public void HoverBtnActiveStub(RUIToggleButton b)
-            {
-                Log.Write("HoverBtnActiveStub");
-                onHoverBtnActive(b);
-            }
-        }
 
         // --------------------------------------------------------------------
         //    Members
         // --------------------------------------------------------------------
-        //List<ButtonWrapper> stockButtons = new List<ButtonWrapper>();
         List<ApplicationLauncherButton> stockButtons = new List<ApplicationLauncherButton>();
-        List<ButtonWrapper> wrappers = new List<ButtonWrapper>();
-        List<GameObject> currencyWidgetParts = new List<GameObject>();
+        List<GameObject> widgets = new List<GameObject>();
 
         CurrencyWidgetsApp currency;
+        MessageSystem messager;
+        ResourceDisplay resources;
+
         AppLauncherInterface button;
         System.Collections.IEnumerator waitRoutine;
         EZInputDelegate hoverDelegate;
@@ -156,53 +109,52 @@ namespace ScienceAlert.Toolbar
             {
                 stockButtons = holder.GetComponentsInChildren<ApplicationLauncherButton>().ToList();
 
-                foreach (var b in stockButtons)
-                    wrappers.Add(new ButtonWrapper(b, () => {}));
-
-                // not a collider
-                //foreach (var c in holder.GetComponentsInChildren<Collider>())
-                //{
-                //    c.gameObject.AddComponent<Whiny>();
-                //}
                 // nope foreach (var b in appl.GetComponentsInChildren<RUIToggleButton>())
                 // nope foreach (var b in appl.GetComponentsInChildren<UIButton>())
                 // nope foreach (var b in appl.GetComponentsInChildren<UIListItemContainer>())
                 // nope foreach (var b in appl.GetComponentsInChildren<BTButton>())
+
+                // Looking for ApplicationLauncherButtons would be the obvious route but for
+                // some reason the currency widget doesn't seem to be one. We can get click
+                // events this way instead
                 foreach (var b in holder.GetComponentsInChildren<UIScrollList>()) // AH HA!!
-                {
                     b.AddValueChangedDelegate(StockButtonClick);
-
-                    //b.AddInputDelegate(delegate(ref POINTER_INFO ptr)
-                    //{
-                    //    if (ptr.evt == POINTER_INFO.INPUT_EVENT.MOVE)
-                    //        Log.Write("MovePtr");
-
-                    //    if (ptr.evt == POINTER_INFO.INPUT_EVENT.PRESS)
-                    //        Log.Write("pressptr");
-                    //});
-                }
+                
             }
 
             // the currency button is a little different
             currency = GameObject.FindObjectOfType<CurrencyWidgetsApp>();
             currency.gameObject.PrintComponents();
-
-            if (currency == null)
-            {
-                Log.Error("AppLauncherInterface: CurrencyWidgetsApp is null!");
-            }
-            else StartCoroutine(WaitAndModifyCurrencyWidget());
+            
+            StartCoroutine(WaitAndModifyCurrencyWidget());
+            StartCoroutine(WaitAndModifyMessageWidget());
+            StartCoroutine(WaitAndModifyResourceWidget());
         }
+
 
 
         void OnDestroy()
         {
-            
+            // remove hooks from stock buttons
+            var holder = ApplicationLauncher.Instance.gameObject.transform.Find("anchor/List");
+
+            foreach (var b in holder.GetComponentsInChildren<UIScrollList>())
+            {
+                try
+                {
+                    b.RemoveValueChangedDelegate(StockButtonClick);
+                }
+                catch (Exception e)
+                {
+                    Log.Error("AppLauncherInterface: Exception while remove stock app button delegates: {0}", e);
+                }
+            }
         }
 
 
+
         /// <summary>
-        /// Close the drawable
+        /// Close the drawable if the player clicks on a stock button
         /// </summary>
         /// <param name="o"></param>
         public void StockButtonClick(IUIObject o)
@@ -212,6 +164,16 @@ namespace ScienceAlert.Toolbar
         }
 
 
+
+        /// <summary>
+        /// The CurrencyWidgetsApp button is a strange one. It acts little
+        /// differently than the others so we need a specific solution to
+        /// avoid overlapping the experiment drawable on it if it's visible.
+        /// 
+        /// To begin with, we need to wait for the NestedPrefabSpawner to run.
+        /// After that we can add delegates to notify us
+        /// </summary>
+        /// <returns></returns>
         System.Collections.IEnumerator WaitAndModifyCurrencyWidget()
         {
             while (!currency.widgetSpawner.Spawned)
@@ -222,18 +184,52 @@ namespace ScienceAlert.Toolbar
 #endif
 
             var t = currency.gameObject.transform;
-            var mainHoverArea = t.Find("anchor/WidgetHoverArea").GetComponent<UIButton>();
-            mainHoverArea.AddInputDelegate(hoverDelegate);
-            //mainHoverArea.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("widgethoverarea changed"); });
-
-            var buttonHover = t.Find("anchor/hoverComponent").GetComponent<UIButton>();
-            buttonHover.AddInputDelegate(hoverDelegate);
-            //button2.AddValueChangedDelegate(delegate(IUIObject obj) { Log.Write("hoverComponent changed"); });
 
             // we also need to know if the widget is actually being displayed
-            currencyWidgetParts.Add(t.Find("anchor/FundsWidget/Frame").gameObject);
-            currencyWidgetParts.Add(t.Find("anchor/RepWidget/Frame").gameObject);
-            currencyWidgetParts.Add(t.Find("anchor/SciWidget/Frame").gameObject);
+            widgets.Add(t.Find("anchor/FundsWidget/Frame").gameObject);
+            widgets.Add(t.Find("anchor/RepWidget/Frame").gameObject);
+            widgets.Add(t.Find("anchor/SciWidget/Frame").gameObject);
+        }
+
+
+
+        /// <summary>
+        /// Wait for the messager to exist and then locate a child object
+        /// we can poll to see if the panel is being displayed
+        /// </summary>
+        /// <returns></returns>
+        System.Collections.IEnumerator WaitAndModifyMessageWidget()
+        {
+            Log.Debug("Waiting for message widget...");
+
+            while (MessageSystem.Instance == null)
+                yield return 0;
+
+            messager = MessageSystem.Instance;
+            
+            widgets.Add(messager.gameObject.transform.Find("listArea/bg").gameObject);
+            Log.Debug("AppLauncherInterface: Found message widget background");
+        }
+
+
+
+        /// <summary>
+        /// Same idea as the messager widget
+        /// </summary>
+        /// <returns></returns>
+        System.Collections.IEnumerator WaitAndModifyResourceWidget()
+        {
+            Log.Debug("Waiting for resource widget...");
+
+            while (ResourceDisplay.Instance == null)
+                yield return 0;
+
+            resources = ResourceDisplay.Instance;
+            widgets.Add(resources.transform.Find("header").gameObject);
+
+#if DEBUG
+            resources.gameObject.PrintComponents();
+#endif
         }
 
 
@@ -276,28 +272,37 @@ namespace ScienceAlert.Toolbar
             if (waitRoutine != null)
                 if (!waitRoutine.MoveNext())
                     waitRoutine = null;
-
-            //if (currency.gameObject.transform.Find("anchor/FundsWidget").GetComponentsInChildren<Renderer>().ToList().Any(r => r.enabled))
-            //    Log.Write("widget visible!");
-
-            if (currencyWidgetParts.Any(go => go.activeInHierarchy))
-                Log.Write("widget visible!");
         }
 
 
-
-        public void OnButton(IUIObject obj)
+        /// <summary>
+        /// If the ScienceAlert button is pressed, it should supercede any
+        /// open widgets
+        /// </summary>
+        public void CloseOpenWidgets()
         {
-            Log.Write("DrawableManners: OnButton");
+            resources.HideResourceList();
+            messager.Hide();
+            currency.widgetSpawner.gameObject.SetActive(false);
+
+            // note: doesn't get currency widget button state =\
+            foreach (var b in stockButtons)
+                if (b.toggleButton.State == RUIToggleButton.ButtonState.TRUE)
+                    b.toggleButton.SetFalse();
         }
 
+
+        /// <summary>
+        /// ExperimentManager will query this to decide whether the drawable
+        /// should be visible or not. 
+        /// </summary>
         public bool ShouldHide
         {
             get
             {
                 return waitRoutine != null ||
                         stockButtons.Any(b => b.toggleButton.IsHovering || b.toggleButton.State == RUIToggleButton.ButtonState.TRUE)
-                        || currencyWidgetParts.Any(go => go.activeInHierarchy);
+                        || widgets.Any(go => go.activeInHierarchy);
             }
         }
     }
@@ -381,19 +386,19 @@ namespace ScienceAlert.Toolbar
 
             Log.Verbose("Creating mod button...");
             button = ApplicationLauncher.Instance.AddModApplication(
-                                                        OnToggleOn,
-                                                        OnToggleOff,
-                                                        OnHover,
-                                                        OnHover,
-                                                        OnEnable,
-                                                        OnDisable,
+                                                        OnToggle,
+                                                        OnToggle,
+                                                        () => { },
+                                                        () => { },
+                                                        () => { },
+                                                        () => { },
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                                                         sprite);
 
             Log.Verbose("Creating DrawableManners...");
             manners = gameObject.AddComponent<DrawableManners>();
 
-
+ 
             Log.Verbose("AppLauncherInterface ready");
             ApplicationLauncher.Instance.gameObject.PrintComponents();
         }
@@ -466,30 +471,12 @@ namespace ScienceAlert.Toolbar
         }
 
 
-        public void OnToggleOff()
+        /// <summary>
+        /// close open stock widgets and let our listeners know about
+        /// the click
+        /// </summary>
+        public void OnToggle()
         {
-            Log.Write("ToggleOff");
-        }
-
-        public void OnHover()
-        {
-            Log.Write("Hover");
-        }
-
-        public void OnEnable()
-        {
-            Log.Write("Enable");
-        }
-
-        public void OnDisable()
-        {
-            Log.Write("Disable");
-        }
-
-        public void OnToggleOn()
-        {
-            Log.Write("ToggleOn");
-
             int button = 0;
 
             if (Input.GetMouseButtonUp(0))
@@ -508,6 +495,7 @@ namespace ScienceAlert.Toolbar
             }
 
             this.button.SetFalse(false);
+            manners.CloseOpenWidgets();
 
             OnClick(new ClickInfo() { button = button });
         }
