@@ -16,7 +16,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
-#define GENERATE_ATLAS
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
@@ -54,10 +53,10 @@ namespace ScienceAlert.Toolbar
         CurrencyWidgetsApp currency;
         MessageSystem messager;
         ResourceDisplay resources;
+        ContractsApp contracts;
 
         AppLauncherInterface button;
         System.Collections.IEnumerator waitRoutine;
-        bool mouseHover = false;
 
 
 /******************************************************************************
@@ -98,9 +97,10 @@ namespace ScienceAlert.Toolbar
             currency = GameObject.FindObjectOfType<CurrencyWidgetsApp>();
             currency.gameObject.PrintComponents();
             
-            StartCoroutine(WaitAndModifyCurrencyWidget());
-            StartCoroutine(WaitAndModifyMessageWidget());
-            StartCoroutine(WaitAndModifyResourceWidget());
+            StartCoroutine(WaitForCurrencyWidget());
+            StartCoroutine(WaitForMessageWidget());
+            StartCoroutine(WaitForResourceWidget());
+            StartCoroutine(WaitForContractsWidget());
         }
 
 
@@ -136,17 +136,37 @@ namespace ScienceAlert.Toolbar
         }
 
 
-
         /// <summary>
-        /// The CurrencyWidgetsApp button is a strange one. It acts little
-        /// differently than the others so we need a specific solution to
-        /// avoid overlapping the experiment drawable on it if it's visible.
-        /// 
-        /// To begin with, we need to wait for the NestedPrefabSpawner to run.
-        /// After that we can add delegates to notify us
+        /// The usual: find some important-looking bits of the widget that
+        /// will be displayed on mouseover and track them
         /// </summary>
         /// <returns></returns>
-        System.Collections.IEnumerator WaitAndModifyCurrencyWidget()
+        System.Collections.IEnumerator WaitForContractsWidget()
+        {
+            Log.Debug("Waiting for contracts widget...");
+
+            while (ContractsApp.Instance == null)
+            {
+                yield return 0;
+            }
+
+            Log.Debug("Found contracts widget!");
+            contracts = ContractsApp.Instance;
+            widgets.Add(contracts.transform.Find("anchor/header").gameObject);
+
+#if DEBUG
+            contracts.gameObject.PrintComponents();
+#endif
+        }
+
+
+
+        /// <summary>
+        /// The usual: find some important-looking bits of the widget that
+        /// will be displayed on mouseover and track them
+        /// </summary>
+        /// <returns></returns>
+        System.Collections.IEnumerator WaitForCurrencyWidget()
         {
             while (!currency.widgetSpawner.Spawned)
                 yield return 0;
@@ -170,7 +190,7 @@ namespace ScienceAlert.Toolbar
         /// we can poll to see if the panel is being displayed
         /// </summary>
         /// <returns></returns>
-        System.Collections.IEnumerator WaitAndModifyMessageWidget()
+        System.Collections.IEnumerator WaitForMessageWidget()
         {
             Log.Debug("Waiting for message widget...");
 
@@ -189,7 +209,7 @@ namespace ScienceAlert.Toolbar
         /// Same idea as the messager widget
         /// </summary>
         /// <returns></returns>
-        System.Collections.IEnumerator WaitAndModifyResourceWidget()
+        System.Collections.IEnumerator WaitForResourceWidget()
         {
             while (ResourceDisplay.Instance == null)
                 yield return 0;
@@ -200,35 +220,6 @@ namespace ScienceAlert.Toolbar
 #if DEBUG
             resources.gameObject.PrintComponents();
 #endif
-        }
-
-
-
-        /// <summary>
-        /// wait for user to move mouse off of the hover area
-        /// </summary>
-        /// <returns></returns>
-        System.Collections.IEnumerator TemporarilyHideDrawable()
-        {
-            IDrawable drawable = button.Drawable;
-
-            if (drawable == null) yield break;
-
-            Log.Debug("DrawableManners: Temporarily hiding drawable");
-            button.Drawable = null;
-
-            while (mouseHover && button.Drawable == null)
-                yield return 0;
-
-            // check to see if a new drawable was added
-            if (button.Drawable != null)
-            {
-                Log.Debug("DrawableManners: Did not restore drawable; is too old");
-                yield break;
-            }
-            // restore drawable
-            button.Drawable = drawable;
-            Log.Debug("DrawableManners: Restored drawable");
         }
 
 
@@ -260,6 +251,8 @@ namespace ScienceAlert.Toolbar
             foreach (var b in stockButtons)
                 if (b.toggleButton.State == RUIToggleButton.ButtonState.TRUE)
                     b.toggleButton.SetFalse();
+
+            currency.gameObject.SendMessage("Hide");
         }
 
 
@@ -395,16 +388,12 @@ namespace ScienceAlert.Toolbar
 
         Vector2 CalculateDrawablePosition(Vector2 size)
         {
-            Log.Write("Drawable size = {0}", size);
-
             // Rect.xy == top left
             Rect rect = new Rect(0, 0, size.x, size.y);
 
             rect.x = Screen.width - size.x;
             rect.y = Screen.height - button.sprite.RenderCamera.WorldToScreenPoint(button.transform.position).y + 38f * 1.25f;
             rect = KSPUtil.ClampRectToScreen(rect);
-
-            Log.Write("clamped: {0}", rect);
 
             var transformedY = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, Screen.height - rect.y /* inverted remember */)).y;
             var transformedX = button.sprite.RenderCamera.ScreenToWorldPoint(new Vector3(rect.x, 0f, 0f)).x;

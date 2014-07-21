@@ -336,8 +336,9 @@ namespace ScienceAlert
 
                             Available = Available && nextReportValue >= Settings.Instance.ScienceThreshold;
 
-                            if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
-                                Log.Verbose("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
+                            // was using for debugging
+                            //if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
+                            //    Log.Verbose("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
                         }
 
                         if (Available)

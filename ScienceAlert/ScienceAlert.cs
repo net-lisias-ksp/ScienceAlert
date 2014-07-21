@@ -163,37 +163,15 @@ namespace ScienceAlert
     [ImprovedAddonLoader.KSPAddonImproved(ImprovedAddonLoader.KSPAddonImproved.Startup.Flight, false)]
     public class ScienceAlert : MonoBehaviour
     {
-        //public enum IconState
-        //{
-        //    NoResearch,             // no experiments available, basic flask icon
-
-        //    NewResearch,            // spinning star flask icon to let user know something new happened
-
-        //    ResearchAvailable       // Once the user opens the menu and has a look at whatever new thing we have to show,
-        //                            // NewResearch becomes ResearchAvailable and the spinning star stops (but flask keeps
-        //                            // its star-behind icon)
-        //}
-
-
-        
-
         // --------------------------------------------------------------------
         //    Members of ScienceAlert
         // --------------------------------------------------------------------
-        //ExperimentManager eManager; // workhorse of the plugin
-
-        //ExperimentObserverList observers = new ExperimentObserverList();
-        //private StorageCache vesselStorage;
-
-        //private IconState researchState = IconState.NoResearch;
-
         // related controls
         private Toolbar.IToolbar button;
+
+        // interfaces
         private Settings.ToolbarInterface buttonInterfaceType = Settings.ToolbarInterface.ApplicationLauncher;
-
-
-        // for interfacing with Scansat (or similar)
-        ScanInterface scanInterface;
+        private ScanInterface scanInterface;
 
 
 
@@ -240,7 +218,7 @@ namespace ScienceAlert
 
 
             Log.Debug("ScienceAlert.Start: initializing toolbar");
-            ToolbarType = Settings.ToolbarInterface.ApplicationLauncher;
+            ToolbarType = Settings.Instance.ToolbarInterfaceType;
             Log.Normal("Toolbar button ready");
         }
 
