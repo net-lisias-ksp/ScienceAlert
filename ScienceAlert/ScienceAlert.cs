@@ -375,29 +375,6 @@ namespace ScienceAlert
         }
 
 
-      
-
-        
-
-
-        void OnGUI()
-        {
-            if (GUI.Button(new Rect(300, 300, 128f, 32f), "Switch interface"))
-                switch (buttonInterfaceType)
-                {
-                    case Settings.ToolbarInterface.ApplicationLauncher:
-                        ToolbarType = Settings.ToolbarInterface.BlizzyToolbar;
-                        break;
-
-                    case Settings.ToolbarInterface.BlizzyToolbar:
-                        ToolbarType = Settings.ToolbarInterface.ApplicationLauncher;
-                        break;
-                }
-        }
-
-
-
-
 
         #region properties
 

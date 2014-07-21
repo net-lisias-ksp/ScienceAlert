@@ -104,7 +104,7 @@ namespace ScienceAlert
             {
                 // construct the experiment observer list ...
                 maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle)).x);
-                experimentButtonRect.width = maximumTextLength + 5;
+                experimentButtonRect.width = maximumTextLength + 16 /* a little extra for report value */;
 
                 Log.Debug("MaximumTextLength = {0}", maximumTextLength);
 
@@ -200,6 +200,8 @@ namespace ScienceAlert
                     if (observer.Available)
                     {
                         var content = new GUIContent(observer.ExperimentTitle);
+
+                        if (Settings.Instance.ShowReportValue) content.text += string.Format(" ({0:0.#})", observer.NextReportValue);
 
                         if (GUILayout.Button(content))
                         {

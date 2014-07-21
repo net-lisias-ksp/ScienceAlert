@@ -172,6 +172,7 @@ namespace ScienceAlert
                 EvaAtmosphereVelocityWarnThreshold = 30;
 
                 ScanInterfaceType = ScanInterface.None;
+                ShowReportValue = false;
 
             Load();
         }
@@ -260,6 +261,7 @@ namespace ScienceAlert
                 SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
                 EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
                 ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
+                ShowReportValue = general.Parse<bool>("ShowReportValue", false);
 
                 Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
                 Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
@@ -401,6 +403,7 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("SoundNotification", SoundNotification);
                 general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
                 general.AddValue("ScienceThreshold", ScienceThreshold);
+                general.AddValue("ShowReportValue", ShowReportValue);
                 #endregion
 
                 #region interface settings
@@ -468,6 +471,7 @@ Re-saving config with default values for missing experiments.");
         public SoundNotifySetting SoundNotification { get; set; }
         public bool EnableScienceThreshold { get; set; }
         public float ScienceThreshold { get; set; }
+        public bool ShowReportValue { get; set; }
 
         #endregion
 
@@ -522,7 +526,7 @@ Re-saving config with default values for missing experiments.");
             set
             {
                 ToolbarType = value;
-                Log.Debug("Settings.ToolbarType is now {0}", value.ToString());
+                //Log.Debug("Settings.ToolbarType is now {0}", value.ToString());
             }
         }
 

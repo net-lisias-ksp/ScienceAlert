@@ -419,6 +419,13 @@ namespace ScienceAlert
                                     scienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
                             }
                             GUILayout.EndHorizontal();
+                            GUILayout.Space(8f);
+
+                            // Display report value in button
+                            {
+                                Settings.Instance.ShowReportValue = AudibleToggle(Settings.Instance.ShowReportValue, "Display Report Value");
+
+                            }
                         }
                         GUILayout.EndVertical();
 

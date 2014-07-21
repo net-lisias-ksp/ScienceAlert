@@ -44,6 +44,7 @@ namespace ScienceAlert
         protected string lastBiomeQuery;                    // the last good biome result we had
         protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
         protected ScanInterface scanInterface;              // Determines whether we're allowed to know if an experiment is available
+        protected float nextReportValue;                    // take a guess
 
 /******************************************************************************
  *                    Implementation Details
@@ -321,8 +322,8 @@ namespace ScienceAlert
 
                         // bugfix: also ensure the experiment will generate >0 science, else
                         //         we could produce alerts for reports that won't generate any science
-                        float nextReport = CalculateNextReportValue(subject, experimentSituation, data);
-                        Available = Available && nextReport > 0.01f;
+                        nextReportValue = CalculateNextReportValue(subject, experimentSituation, data);
+                        Available = Available && nextReportValue > 0.01f;
 
                         // check the science threshold
                         if (Available && Settings.Instance.EnableScienceThreshold)
@@ -333,7 +334,7 @@ namespace ScienceAlert
                             Log.Debug("next report value of {0}: {1}", experiment.id, CalculateNextReportValue(subject, experimentSituation, data));
 
 
-                            Available = Available && nextReport >= Settings.Instance.ScienceThreshold;
+                            Available = Available && nextReportValue >= Settings.Instance.ScienceThreshold;
 
                             if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
                                 Log.Verbose("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
@@ -348,7 +349,7 @@ namespace ScienceAlert
 
                             if (Available != lastStatus && Available)
                             {
-                                Log.Normal("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, nextReport);
+                                Log.Normal("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, nextReportValue);
 
                                 if (data.Count() > 0)
                                 {
@@ -531,6 +532,18 @@ namespace ScienceAlert
             get
             {
                 return settings.StopWarpOnDiscovery;
+            }
+        }
+
+        public float NextReportValue
+        {
+            get
+            {
+                return nextReportValue;
+            }
+            private set
+            {
+                nextReportValue = value;
             }
         }
 
