@@ -53,11 +53,13 @@ namespace ScienceAlert.Toolbar
         event ToolbarClickHandler OnClick;
     }
 
-    public struct ClickInfo
+    public class ClickInfo
     {
         public int button;
         public bool used;
 
-        ClickInfo() { used = false; button = 0; }
+        public ClickInfo() { button = 0; used = false; }
+        public void Consume() { used = true; }
+        public bool Unused { get { return !used; } }
     }
 }

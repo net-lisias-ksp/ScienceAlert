@@ -149,10 +149,14 @@ namespace ScienceAlert
         /// <param name="ci"></param>
         public void OnToolbarClicked(Toolbar.ClickInfo ci)
         {
+            if (ci.used) return;
+
             if (scienceAlert.Button.Drawable == null)
             {
                 if (ci.button == 1) // right-click
                 {
+                    ci.Consume();
+
                     if (scienceAlert.Button.Drawable is OptionsWindow)
                     {
                         scienceAlert.Button.Drawable = null;
@@ -170,6 +174,7 @@ namespace ScienceAlert
             {
                 // we're open, non-right mouse button was clicked so close
                 // the window
+                ci.Consume();
                 scienceAlert.Button.Drawable = null;
                 AudioUtil.Play("click1", 0.05f);
             }

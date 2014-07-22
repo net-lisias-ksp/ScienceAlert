@@ -456,7 +456,7 @@ namespace ScienceAlert.Toolbar
 
             manners.CloseOpenWidgets();
 
-            OnClick(new ClickInfo() { button = button });
+            OnClick(new ClickInfo() { button = button, used = false });
         }
 
 

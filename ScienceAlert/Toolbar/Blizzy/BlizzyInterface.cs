@@ -64,7 +64,7 @@ namespace ScienceAlert.Toolbar
             button.ToolTip = "Left-click to view alert experiments; Right-click for settings";
             button.TexturePath = NormalFlaskTexture;
             button.OnClick += ce => {
-                OnClick(new ClickInfo() { button = ce.MouseButton });
+                OnClick(new ClickInfo() { button = ce.MouseButton, used = false });
             };
 
             FrameRate = Settings.Instance.StarFlaskFrameRate;

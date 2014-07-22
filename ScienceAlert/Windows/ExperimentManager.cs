@@ -143,6 +143,9 @@ namespace ScienceAlert
         /// <param name="ci"></param>
         public void OnToolbarClicked(ClickInfo ci)
         {
+            if (ci.used)
+                return;
+
             // if left-click and we're not already displayed...
             if (ci.button == 0)
             {
@@ -152,6 +155,7 @@ namespace ScienceAlert
                 }
                 else
                 {
+                    ci.Consume();
                     AudioUtil.Play("click1");
 
                     if (scienceAlert.Button.Drawable is ExperimentManager)
@@ -164,10 +168,13 @@ namespace ScienceAlert
             }
             else if (scienceAlert.Button.Drawable is ExperimentManager)
             {
+                ci.Consume();
+
                 // close menu
                 AudioUtil.Play("click1", 0.05f); // set min delay in case other drawables open their window
                                                  // and play a sound on this event as well
                 scienceAlert.Button.Drawable = null;
+                
             }
         }
 
