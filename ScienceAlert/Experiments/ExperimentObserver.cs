@@ -39,7 +39,7 @@ namespace ScienceAlert
         public RequiresCrew(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid)
             : base(cache, settings, filter, scanInterface, expid)
         {
-
+            this.requireControllable = false; 
         }
 
         /// <summary>
@@ -288,6 +288,7 @@ namespace ScienceAlert
         protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
         protected ScanInterface scanInterface;              // Determines whether we're allowed to know if an experiment is available
         protected float nextReportValue;                    // take a guess
+        protected bool requireControllable;                 // Vessel needs to be controllable for the experiment to be available
 
 /******************************************************************************
  *                    Implementation Details
@@ -298,6 +299,7 @@ namespace ScienceAlert
         {
             settings = expSettings;
             biomeFilter = filter;
+            requireControllable = true;
 
             if (scanMapInterface == null)
             {
@@ -483,12 +485,14 @@ namespace ScienceAlert
                 return false;
             }
 
-            if (!settings.Enabled)
+            if (!settings.Enabled ||
+                (requireControllable && !FlightGlobals.ActiveVessel.IsControllable))
             {
                 Available = false;
                 lastAvailableId = "";
                 return false;
             }
+
 
             bool lastStatus = Available;
             var vessel = FlightGlobals.ActiveVessel;
@@ -649,6 +653,13 @@ namespace ScienceAlert
             if (FlightGlobals.ActiveVessel == null)
             {
                 Log.Error("Deploy -- invalid active vessel");
+                return false;
+            }
+
+            if (requireControllable && !FlightGlobals.ActiveVessel.IsControllable)
+            {
+                // note to self: the user should never see this error
+                Log.Error("Cannot deploy '{0}' -- Vessel is not controllable.", experiment.experimentTitle);
                 return false;
             }
 
