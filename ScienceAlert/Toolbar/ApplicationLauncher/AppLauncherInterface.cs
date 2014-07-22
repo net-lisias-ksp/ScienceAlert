@@ -21,9 +21,7 @@ using System.Linq;
 using System.Collections.Generic;
 using ReeperCommon;
 using ImprovedAddonLoader;
-#if DEBUG
 using System;
-#endif
 
 namespace ScienceAlert.Toolbar
 {
