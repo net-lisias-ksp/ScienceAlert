@@ -257,19 +257,12 @@ namespace ScienceAlert
             {
                 if (FlightGlobals.ActiveVessel != null)
                 {
-                    Log.Debug("Checking if surface sample is available");
-
                     if (FlightGlobals.ActiveVessel.isEVA)
                     {
-                        Log.Debug("  - is eva, so {0} && {1}", settings.AssumeOnboard, this.GetNextOnboardExperimentModule() != null);
-
                         return settings.AssumeOnboard || this.GetNextOnboardExperimentModule() != null;
                     }
-                    else
-                    {
-                        Log.Normal("  - not eva, so {0} && {1}", Settings.Instance.CheckSurfaceSampleNotEva, base.IsReadyOnboard);
-                        return Settings.Instance.CheckSurfaceSampleNotEva && base.IsReadyOnboard;
-                    }
+                    else return Settings.Instance.CheckSurfaceSampleNotEva && base.IsReadyOnboard;
+                    
                 }
                 else return false;
             }

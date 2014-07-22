@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-//using System.Text;
+using System.Text;
 using UnityEngine;
 using ScienceAlert.Toolbar;
 using ReeperCommon;
@@ -58,6 +58,7 @@ namespace ScienceAlert
         private float maximumTextLength = float.NaN;
         private Rect experimentButtonRect = new Rect(0, 0, 0, 0);
 
+        string lastGoodBiome = string.Empty;
 
 /******************************************************************************
  *                    Implementation Details
@@ -123,8 +124,8 @@ namespace ScienceAlert
             if (float.IsNaN(maximumTextLength) && observers.Count > 0 && rebuilder == null)
             {
                 // construct the experiment observer list ...
-                maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle + "(123)")).x);
-                experimentButtonRect.width = maximumTextLength /* a little extra for report value */;
+                maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle + " (123)")).x);
+                experimentButtonRect.width = maximumTextLength + 10f/* a little extra for report value */;
 
                 Log.Debug("MaximumTextLength = {0}", maximumTextLength);
 
@@ -133,11 +134,6 @@ namespace ScienceAlert
             }
         }
 
-
-        private void RecalculateRect()
-        {
-            
-        }
 
         /// <summary>
         /// Whichever toolbar button (stock or blizzy) is in use will call
@@ -185,8 +181,8 @@ namespace ScienceAlert
         /// <returns></returns>
         public Vector2 Draw(Vector2 position)
         {
-            if (float.IsNaN(maximumTextLength))
-                return Vector2.zero; // text length isn't set yet
+            //if (float.IsNaN(maximumTextLength))
+            //    return Vector2.zero; // text length isn't set yet
 
             float maxHeight = 32f * observers.Count;
             float necessaryHeight = 32f * observers.Count(obs => obs.Available);
@@ -199,9 +195,21 @@ namespace ScienceAlert
 
                 experimentButtonRect.x = position.x;
                 experimentButtonRect.y = position.y;
+                //experimentButtonRect.height = necessaryHeight;
 
-                experimentButtonRect = KSPUtil.ClampRectToScreen( GUILayout.Window(experimentMenuID, experimentButtonRect, DrawButtonMenu, "Available Experiments"));
+                if (!Settings.Instance.DisplayCurrentBiome)
+                {
+                    experimentButtonRect = KSPUtil.ClampRectToScreen(GUILayout.Window(experimentMenuID, experimentButtonRect, DrawWindow, "Available Experiments"));
+                }
+                else
+                {
+                    necessaryHeight += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
+                    experimentButtonRect.height = necessaryHeight;
 
+                    DrawArea();
+
+                    //experimentButtonRect = KSPUtil.ClampRectToScreen(new Rect(experimentButtonRect.x, experimentButtonRect.y, experimentButtonRect.width, necessaryHeight));
+                }
                 GUI.skin = old;
             }
             else
@@ -209,16 +217,71 @@ namespace ScienceAlert
                 // no experiments
                 scienceAlert.Button.Drawable = null;
             }
+            return new Vector2(experimentButtonRect.width, necessaryHeight);
+            //return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
+        }
 
-            return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
+
+        /// <summary>
+        /// Window (does not display biome info)
+        /// </summary>
+        /// <param name="winid"></param>
+        private void DrawWindow(int winid)
+        {
+            DrawButtons();
         }
 
 
 
-        private void DrawButtonMenu(int winid)
+        /// <summary>
+        /// Instead of a window title, we'll put that space to use
+        /// to display current biome
+        /// </summary
+        private void DrawArea()
+        {
+            GUILayout.BeginArea(experimentButtonRect, Settings.Skin.box);
+            {
+                if (FlightGlobals.ActiveVessel == null)
+                {
+                    scienceAlert.Button.Drawable = null;
+                    return;
+                }
+
+                // Biome data
+                {
+                    if (biomeFilter.IsBusy || !scanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
+                    {
+                        GUILayout.Box("Biome: <working>");
+                    }
+                    else
+                    {
+                        string biome;
+
+                        if (!biomeFilter.GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out biome))
+                        {
+                            biome = lastGoodBiome;
+                        }
+                        else
+                        {
+                            lastGoodBiome = biome;
+                        }
+                        GUILayout.Box(string.Format(biome));
+                    }
+                }
+                DrawButtons();
+            }
+            GUILayout.EndArea();
+        }
+
+
+
+        private void DrawButtons()
         {
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
             {
+                //-----------------------------------------------------
+                // Experiment list
+                //-----------------------------------------------------
                 foreach (var observer in observers)
                     if (observer.Available)
                     {

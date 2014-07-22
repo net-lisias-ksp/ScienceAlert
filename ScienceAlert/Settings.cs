@@ -154,6 +154,7 @@ namespace ScienceAlert
 
                 skin.button.fixedHeight = 24f;
                 skin.button.padding = new RectOffset() { left = 2, right = 2, top = 0, bottom = 0 };
+                skin.button.border = new RectOffset() { left = 2, right = 2, top = 1, bottom = 1 };
 
                 skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
                 //skin.toggle.padding.left = skin.toggle.padding.right = skin.toggle.padding.top = skin.toggle.padding.bottom = 0;
@@ -176,6 +177,7 @@ namespace ScienceAlert
                 EvaReportOnTop = false;
                 ReopenOnEva = false;
                 CheckSurfaceSampleNotEva = false;
+                DisplayCurrentBiome = false;
 
             Load();
         }
@@ -264,6 +266,8 @@ namespace ScienceAlert
                 EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
                 ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
                 ShowReportValue = general.Parse<bool>("ShowReportValue", false);
+                DisplayCurrentBiome = general.Parse<bool>("DisplayCurrentBiome", false);
+
             }
             catch (Exception e)
             {
@@ -424,7 +428,8 @@ Re-saving config with default values for missing experiments.");
                 general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
                 general.AddValue("ScienceThreshold", ScienceThreshold);
                 general.AddValue("ShowReportValue", ShowReportValue);
-                
+                general.AddValue("DisplayCurrentBiome", DisplayCurrentBiome);
+
                 #endregion
 
                 #region crewed vessel settings
@@ -502,7 +507,7 @@ Re-saving config with default values for missing experiments.");
         public bool EnableScienceThreshold { get; set; }
         public float ScienceThreshold { get; set; }
         public bool ShowReportValue { get; set; }
-        
+        public bool DisplayCurrentBiome { get; set; }
         
 
         #endregion

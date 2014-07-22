@@ -192,12 +192,11 @@ namespace ScienceAlert
         {
             if (Input.GetKeyDown(KeyCode.P))
             {
-                Log.Write("Current interface: {0}", scanInterface.GetType().FullName);
+                FlightGlobals.currentMainBody.BiomeMap.Attributes.ToList().ForEach(attr => Log.Write("Attribute: {0}", attr.name));
             }
 
             if (Input.GetKeyDown(KeyCode.O))
-                gameObject.PrintComponents();
-
+                Log.Write("Attr: {0}", FlightGlobals.currentMainBody.BiomeMap.GetAtt(FlightGlobals.ship_latitude * Mathf.Deg2Rad, FlightGlobals.ship_longitude * Mathf.Deg2Rad).name);
         }
 
         void Start()

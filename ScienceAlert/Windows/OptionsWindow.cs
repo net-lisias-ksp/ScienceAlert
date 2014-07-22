@@ -446,6 +446,13 @@ namespace ScienceAlert
                         {
                             Settings.Instance.ShowReportValue = AudibleToggle(Settings.Instance.ShowReportValue, "Display Report Value");
                         }
+
+                        //-----------------------------------------------------
+                        // Display current biome in experiment list
+                        //-----------------------------------------------------
+                        {
+                            Settings.Instance.DisplayCurrentBiome = AudibleToggle(Settings.Instance.DisplayCurrentBiome, "Display Biome in Experiment List");
+                        }
                     } // end alert settings
                     #endregion
 

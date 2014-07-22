@@ -56,5 +56,8 @@ namespace ScienceAlert.Toolbar
     public struct ClickInfo
     {
         public int button;
+        public bool used;
+
+        ClickInfo() { used = false; button = 0; }
     }
 }

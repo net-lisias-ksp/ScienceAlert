@@ -283,17 +283,21 @@ namespace ScienceAlert.Toolbar
     }
 
 
+    /// <summary>
+    /// A concrete object hidden behind IToolbar which handles (almost) all
+    /// interactions with the ApplicationLauncher. The other important bit
+    /// is DrawableManners which is a workaround for some oversights/bugs
+    /// in the current implementation of AppLauncher
+    /// </summary>
     class AppLauncherInterface : MonoBehaviour, IToolbar
     {
-
         // --------------------------------------------------------------------
         //    Members
         // --------------------------------------------------------------------
         public event ToolbarClickHandler OnClick;
 
         private IDrawable drawable;
-        private bool movedDrawable = false;
-        private Vector2 drawablePosition = Vector2.zero;
+        private Vector2 drawablePosition = new Vector2(Screen.width, 0);
 
         private DrawableManners manners;
 
@@ -421,26 +425,6 @@ namespace ScienceAlert.Toolbar
             if (drawable == null) return;
             if (!button.gameObject.activeSelf) return;
             if (manners.ShouldHide) return;
-
-            // if drawables were switched, there could be one frame
-            // where the new drawable uses the old position which is
-            // ugly (jumps). As long as we know when the drawable changed, we 
-            // can do a temp render to get the new dimensions
-            //
-            // We do this here rather than when drawable switches because
-            // if the drawable implementor uses any method that requires
-            // unity to be in OnGUI, it'd break
-            if (!movedDrawable)
-            {
-                Log.Debug("Dummy render to position drawable");
-
-                var old = RenderTexture.active;
-                RenderTexture.active = RenderTexture.GetTemporary(Screen.width, Screen.height);
-                movedDrawable = true;
-                OnGUI();
-                RenderTexture.ReleaseTemporary(RenderTexture.active);
-                RenderTexture.active = old;
-            }
 
             var dimensions = drawable.Draw(drawablePosition);
             drawablePosition = CalculateDrawablePosition(dimensions);
@@ -598,7 +582,6 @@ namespace ScienceAlert.Toolbar
                 if (value != drawable)
                 {
                     drawable = value;
-                    movedDrawable = false;
 
                     if (button.State == RUIToggleButton.ButtonState.TRUE && value == null)
                         button.SetFalse(false);

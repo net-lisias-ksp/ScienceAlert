@@ -300,7 +300,7 @@ namespace ScienceAlert
         }
         
 
-        private bool IsBusy
+        public bool IsBusy
         {
             get
             {
