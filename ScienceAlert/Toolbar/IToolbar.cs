@@ -53,6 +53,11 @@ namespace ScienceAlert.Toolbar
         event ToolbarClickHandler OnClick;
     }
 
+
+
+    /// <summary>
+    /// This gets passed around to listeners during a click event
+    /// </summary>
     public class ClickInfo
     {
         public int button;
