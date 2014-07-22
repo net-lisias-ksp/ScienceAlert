@@ -190,13 +190,6 @@ namespace ScienceAlert
         /// <returns></returns>
         public Vector2 Draw(Vector2 position)
         {
-            //if (float.IsNaN(maximumTextLength))
-            //    return Vector2.zero; // text length isn't set yet
-
-            //float maxHeight = 32f * observers.Count;
-            //float necessaryHeight = 32f * observers.Count(obs => obs.Available);
-
-            //if (necessaryHeight > 31.9999f)
             if (experimentButtonRect.height > 0)
             {
                 var old = GUI.skin;
@@ -206,22 +199,15 @@ namespace ScienceAlert
                 experimentButtonRect.x = position.x;
                 experimentButtonRect.y = position.y;
                 
-
                 if (!Settings.Instance.DisplayCurrentBiome)
                 {
-                    //experimentButtonRect.height = necessaryHeight;
                     experimentButtonRect = KSPUtil.ClampRectToScreen(GUILayout.Window(experimentMenuID, experimentButtonRect, DrawWindow, "Available Experiments"));
                 }
                 else
                 {
-                    //necessaryHeight += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
-                    //experimentButtonRect.height = necessaryHeight;
-
                     experimentButtonRect.height += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
 
                     DrawArea();
-
-                    //experimentButtonRect = KSPUtil.ClampRectToScreen(new Rect(experimentButtonRect.x, experimentButtonRect.y, experimentButtonRect.width, necessaryHeight));
                 }
                 GUI.skin = old;
             }
@@ -231,7 +217,6 @@ namespace ScienceAlert
                 scienceAlert.Button.Drawable = null;
             }
             return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
-            //return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
         }
 
 
