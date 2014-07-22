@@ -308,161 +308,7 @@ namespace ScienceAlert
 
                 if (additionalOptions)
                 {
-                    GUI.skin = whiteLabel;
-
-                    additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.ExpandHeight(true));
-                    {
-                        GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
-                        {
-                            #region global flask animation
-                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            {
-                                GUILayout.Label("Globally Enable Animation", GUILayout.ExpandWidth(true));
-                                Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                                if (!Settings.Instance.FlaskAnimationEnabled && scienceAlert.Button.IsAnimating) scienceAlert.Button.SetLit();
-                            }
-                            GUILayout.EndHorizontal();
-                            #endregion
-
-                            GUILayout.Space(8f);
-
-                            #region Ignore reports threshold
-                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            {
-                                GUILayout.Label(new GUIContent("Enable Minimum Science Threshold"), GUILayout.ExpandWidth(true));
-                                Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                            }
-                            GUILayout.EndHorizontal();
-
-
-                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            {
-                                GUILayout.Space(24f);
-                                GUILayout.Label("Ignore reports worth less than:");
-                                string newValue = GUILayout.TextField(sciMinValue, 5, GUILayout.MinWidth(24f));
-                                newValue = newValue.Replace(',', '.');
-
-                                float converted = 0f;
-
-                                if (!string.Equals(sciMinValue, newValue))
-                                    if (string.IsNullOrEmpty(newValue))
-                                    {
-                                        Settings.Instance.ScienceThreshold = 0f;
-                                        sciMinValue = newValue;
-                                    }
-                                    else
-                                    {
-                                        if (float.TryParse(newValue, out converted))
-                                        {
-                                            Settings.Instance.ScienceThreshold = Mathf.Max(0f, converted);
-                                            sciMinValue = newValue;
-
-                                            Log.Debug("ScienceThreshold is now {0}", Settings.Instance.ScienceThreshold);
-                                        }
-                                        else
-                                        {
-                                            //audio.PlaySound("error");
-                                            Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
-                                            Log.Debug("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
-                                        }
-                                    }
-                            }
-                            GUILayout.EndHorizontal();
-                            #endregion
-
-                            GUILayout.Space(8f);
-
-                            #region scan interface options
-                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            {
-                                var oldInterface = Settings.Instance.ScanInterfaceType;
-                                //Log.Write("old interface = {0}", oldInterface.ToString());
-
-                                var prevColor = GUI.color;
-
-                                if (!SCANsatInterface.IsAvailable()) GUI.color = Color.red;
-
-                                bool enableSCANinterface = AudibleToggle(Settings.Instance.ScanInterfaceType == Settings.ScanInterface.ScanSat, "Enable SCANsat integration", null, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
-
-                                GUI.color = prevColor;
-
-                                if (enableSCANinterface && oldInterface != Settings.ScanInterface.ScanSat) // Settings won't return SCANsatInterface as the set interface if it wasn't found
-                                    if (!SCANsatInterface.IsAvailable())
-                                    {
-                                        PopupDialog.SpawnPopupDialog("SCANsat Not Found", "SCANsat was not found. You must install SCANsat to use this feature.", "Okay", false, Settings.Skin);
-                                        enableSCANinterface = false;
-                                    }
-
-                                Settings.Instance.ScanInterfaceType = enableSCANinterface ? Settings.ScanInterface.ScanSat : Settings.ScanInterface.None;
-
-                                scienceAlert.ScanInterfaceType = Settings.Instance.ScanInterfaceType;
-
-                                //Log.Write("new interface = {0}", Settings.Instance.ScanInterfaceType.ToString());
-    
-                            }
-                            GUILayout.EndHorizontal();
-                            #endregion
-
-                            #region toolbar interface options
-                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            {
-                                var oldInterface = Settings.Instance.ToolbarInterfaceType;
-                                var prevColor = GUI.color;
-
-                                if (!ToolbarManager.ToolbarAvailable) GUI.color = Color.red;
-
-                                bool enableBlizzyToolbar = AudibleToggle(Settings.Instance.ToolbarInterfaceType == Settings.ToolbarInterface.BlizzyToolbar, "Use Blizzy toolbar");
-                                GUI.color = prevColor;
-
-                                if (enableBlizzyToolbar && oldInterface != Settings.ToolbarInterface.BlizzyToolbar)
-                                    if (!ToolbarManager.ToolbarAvailable)
-                                    {
-                                        PopupDialog.SpawnPopupDialog("Blizzy Toolbar Not Found", "Blizzy's toolbar was not found. You must install Blizzy's toolbar to use this feature.", "Okay", false, Settings.Skin);
-                                        enableBlizzyToolbar = false;
-                                    }
-
-                                Settings.Instance.ToolbarInterfaceType = enableBlizzyToolbar ? Settings.ToolbarInterface.BlizzyToolbar : Settings.ToolbarInterface.ApplicationLauncher;
-
-                                if (scienceAlert.ToolbarType != Settings.Instance.ToolbarInterfaceType)
-                                    scienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
-                            }
-                            GUILayout.EndHorizontal();
-                            #endregion
-
-                            GUILayout.Space(8f);
-
-                            #region Display report value in button
-                            {
-                                Settings.Instance.ShowReportValue = AudibleToggle(Settings.Instance.ShowReportValue, "Display Report Value");
-                            }
-                            #endregion
-
-                            GUILayout.Space(10f);
-
-                            #region Eva report on top toggle
-                            {
-                                var prev = Settings.Instance.EvaReportOnTop;
-
-                                Settings.Instance.EvaReportOnTop = AudibleToggle(Settings.Instance.EvaReportOnTop, "List EVA report first");
-
-                                if (Settings.Instance.EvaReportOnTop != prev)
-                                    GetComponent<ExperimentManager>().ScheduleRebuildObserverList();
-                            }
-                            #endregion
-
-                            GUILayout.Space(10f);
-
-                            #region Keep experiment window open on vessel switch toggle
-                            {
-                                Settings.Instance.ReopenOnEva = AudibleToggle(Settings.Instance.ReopenOnEva, "Re-open list on EVA");
-                            }
-                            #endregion
-                        }
-                        GUILayout.EndVertical();
-
-                        GUI.skin = Settings.Skin;
-                    }
-                    GUILayout.EndScrollView();
+                    DrawAdditionalOptions();
                 }
                 else // additional options not open
                 {
@@ -516,6 +362,189 @@ namespace ScienceAlert
         }
 
         #endregion
+
+
+        private void DrawAdditionalOptions()
+        {
+            GUI.skin = whiteLabel;
+
+            additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.ExpandHeight(true));
+            {
+                GUILayout.Space(4f);
+
+                GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
+                {
+#region Alert settings
+                    {
+                        GUILayout.Box("Miscellaneous Alert Settings", GUILayout.ExpandWidth(true));
+
+                        //-----------------------------------------------------
+                        // global flask animation
+                        //-----------------------------------------------------
+                        GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                        {
+                            GUILayout.Label("Globally Enable Animation", GUILayout.ExpandWidth(true));
+                            Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
+                            if (!Settings.Instance.FlaskAnimationEnabled && scienceAlert.Button.IsAnimating) scienceAlert.Button.SetLit();
+                        }
+                        GUILayout.EndHorizontal();
+
+
+                        //-----------------------------------------------------
+                        // ignore report threshold
+                        //-----------------------------------------------------
+                        {
+                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            {
+                                GUILayout.Label(new GUIContent("Enable Minimum Science Threshold"), GUILayout.ExpandWidth(true));
+                                Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
+                            }
+                            GUILayout.EndHorizontal();
+
+
+                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            {
+                                GUILayout.Space(24f);
+                                GUILayout.Label("Ignore reports worth less than:");
+                                string newValue = GUILayout.TextField(sciMinValue, 5, GUILayout.MinWidth(24f));
+                                newValue = newValue.Replace(',', '.');
+
+                                float converted = 0f;
+
+                                if (!string.Equals(sciMinValue, newValue))
+                                    if (string.IsNullOrEmpty(newValue))
+                                    {
+                                        Settings.Instance.ScienceThreshold = 0f;
+                                        sciMinValue = newValue;
+                                    }
+                                    else
+                                    {
+                                        if (float.TryParse(newValue, out converted))
+                                        {
+                                            Settings.Instance.ScienceThreshold = Mathf.Max(0f, converted);
+                                            sciMinValue = newValue;
+
+                                            Log.Debug("ScienceThreshold is now {0}", Settings.Instance.ScienceThreshold);
+                                        }
+                                        else
+                                        {
+                                            //audio.PlaySound("error");
+                                            AudioUtil.Play("error");
+
+                                            Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
+                                            Log.Debug("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
+                                        }
+                                    }
+                            }
+                            GUILayout.EndHorizontal();
+                        }
+
+
+                        //-----------------------------------------------------
+                        // Display next report value in button
+                        //-----------------------------------------------------
+                        {
+                            Settings.Instance.ShowReportValue = AudibleToggle(Settings.Instance.ShowReportValue, "Display Report Value");
+                        }
+                    } // end alert settings
+                    #endregion
+
+
+                    //GUILayout.Space(8f);
+
+#region scan interface options
+                    // scan interface options
+                    {
+                        GUILayout.Box("Third-party Integration Options", GUILayout.ExpandWidth(true));
+
+                        GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                        {
+                            var oldInterface = Settings.Instance.ScanInterfaceType;
+                            var prevColor = GUI.color;
+
+                            if (!SCANsatInterface.IsAvailable()) GUI.color = Color.red;
+
+                            bool enableSCANinterface = AudibleToggle(Settings.Instance.ScanInterfaceType == Settings.ScanInterface.ScanSat, "Enable SCANsat integration", null, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+
+                            GUI.color = prevColor;
+
+                            if (enableSCANinterface && oldInterface != Settings.ScanInterface.ScanSat) // Settings won't return SCANsatInterface as the set interface if it wasn't found
+                                if (!SCANsatInterface.IsAvailable())
+                                {
+                                    PopupDialog.SpawnPopupDialog("SCANsat Not Found", "SCANsat was not found. You must install SCANsat to use this feature.", "Okay", false, Settings.Skin);
+                                    enableSCANinterface = false;
+                                }
+
+                            Settings.Instance.ScanInterfaceType = enableSCANinterface ? Settings.ScanInterface.ScanSat : Settings.ScanInterface.None;
+
+                            scienceAlert.ScanInterfaceType = Settings.Instance.ScanInterfaceType;
+                        }
+                        GUILayout.EndHorizontal();
+                    } // end scan interface options
+
+
+                    // toolbar interface options
+                    { 
+                        GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                        {
+                            var oldInterface = Settings.Instance.ToolbarInterfaceType;
+                            var prevColor = GUI.color;
+
+                            if (!ToolbarManager.ToolbarAvailable) GUI.color = Color.red;
+
+                            bool enableBlizzyToolbar = AudibleToggle(Settings.Instance.ToolbarInterfaceType == Settings.ToolbarInterface.BlizzyToolbar, "Use Blizzy toolbar");
+                            GUI.color = prevColor;
+
+                            if (enableBlizzyToolbar && oldInterface != Settings.ToolbarInterface.BlizzyToolbar)
+                                if (!ToolbarManager.ToolbarAvailable)
+                                {
+                                    PopupDialog.SpawnPopupDialog("Blizzy Toolbar Not Found", "Blizzy's toolbar was not found. You must install Blizzy's toolbar to use this feature.", "Okay", false, Settings.Skin);
+                                    enableBlizzyToolbar = false;
+                                }
+
+                            Settings.Instance.ToolbarInterfaceType = enableBlizzyToolbar ? Settings.ToolbarInterface.BlizzyToolbar : Settings.ToolbarInterface.ApplicationLauncher;
+
+                            if (scienceAlert.ToolbarType != Settings.Instance.ToolbarInterfaceType)
+                                scienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
+                        }
+                        GUILayout.EndHorizontal();
+                    } // end toolbar interface options
+#endregion
+
+
+#region crewed vessel settings
+                    {
+                        GUILayout.Box("Crewed Vessel Settings", GUILayout.ExpandWidth(true));
+
+                        Settings.Instance.ReopenOnEva = AudibleToggle(Settings.Instance.ReopenOnEva, "Re-open list on EVA");
+                        { // eva report on top
+                            var prev = Settings.Instance.EvaReportOnTop;
+
+                            Settings.Instance.EvaReportOnTop = AudibleToggle(Settings.Instance.EvaReportOnTop, "List EVA report first");
+
+                            if (Settings.Instance.EvaReportOnTop != prev)
+                                GetComponent<ExperimentManager>().ScheduleRebuildObserverList();
+                        }
+
+                        // Surface sample on vessel
+                        {
+                            var prev = Settings.Instance.CheckSurfaceSampleNotEva;
+
+                            Settings.Instance.CheckSurfaceSampleNotEva = AudibleToggle(prev, "Track surface sample in vessel");
+
+                            if (prev != Settings.Instance.CheckSurfaceSampleNotEva)
+                                GetComponent<ExperimentManager>().ScheduleRebuildObserverList();
+                        }
+
+                    } // end crewed vessel settings
+                    #endregion
+                }
+                GUILayout.EndVertical();
+
+                GUI.skin = Settings.Skin;
+            }
+            GUILayout.EndScrollView();
+        }
 
         #region Message handling functions
 

@@ -367,74 +367,80 @@ namespace ScienceAlert
 
                 foreach (var observer in observers)
                 {
+                    try
+                    {
 #if PROFILE
                     float start = Time.realtimeSinceStartup;
 #endif
 
-                    // Is exciting new research available?
-                    if (observer.UpdateStatus(expSituation))
-                    {
-                        // if we're timewarping, resume normal time if that setting
-                        // was used
-                        if (observer.StopWarpOnDiscovery || Settings.Instance.GlobalWarp == Settings.WarpSetting.GlobalOn)
-                            if (Settings.Instance.GlobalWarp != Settings.WarpSetting.GlobalOff)
-                                if (TimeWarp.CurrentRateIndex > 0)
-                                {
-                                    // Simply setting warp index to zero causes some kind of
-                                    // accuracy problem that can seriously affect the
-                                    // orbit of the vessel.
-                                    //
-                                    // to avoid this, we'll take a snapshot of the orbit
-                                    // pre-warp and then apply it again after we've changed
-                                    // the warp rate
-                                    OrbitSnapshot snap = new OrbitSnapshot(FlightGlobals.ActiveVessel.GetOrbitDriver().orbit);
-                                    TimeWarp.SetRate(0, true);
-                                    FlightGlobals.ActiveVessel.GetOrbitDriver().orbit = snap.Load();
-                                    FlightGlobals.ActiveVessel.GetOrbitDriver().orbit.UpdateFromUT(Planetarium.GetUniversalTime());
-                                }
-
-
-
-
-                        // the button is important; if it's auto-hidden we should
-                        // show it to the player
-                        scienceAlert.Button.Important = true;
-
-
-                        if (observer.settings.AnimationOnDiscovery)
+                        // Is exciting new research available?
+                        if (observer.UpdateStatus(expSituation))
                         {
-                            scienceAlert.Button.PlayAnimation();
-                        }
-                        else if (scienceAlert.Button.IsNormal) scienceAlert.Button.SetLit();
+                            // if we're timewarping, resume normal time if that setting
+                            // was used
+                            if (observer.StopWarpOnDiscovery || Settings.Instance.GlobalWarp == Settings.WarpSetting.GlobalOn)
+                                if (Settings.Instance.GlobalWarp != Settings.WarpSetting.GlobalOff)
+                                    if (TimeWarp.CurrentRateIndex > 0)
+                                    {
+                                        // Simply setting warp index to zero causes some kind of
+                                        // accuracy problem that can seriously affect the
+                                        // orbit of the vessel.
+                                        //
+                                        // to avoid this, we'll take a snapshot of the orbit
+                                        // pre-warp and then apply it again after we've changed
+                                        // the warp rate
+                                        OrbitSnapshot snap = new OrbitSnapshot(FlightGlobals.ActiveVessel.GetOrbitDriver().orbit);
+                                        TimeWarp.SetRate(0, true);
+                                        FlightGlobals.ActiveVessel.GetOrbitDriver().orbit = snap.Load();
+                                        FlightGlobals.ActiveVessel.GetOrbitDriver().orbit.UpdateFromUT(Planetarium.GetUniversalTime());
+                                    }
 
-                        switch (Settings.Instance.SoundNotification)
-                        {
-                            case Settings.SoundNotifySetting.ByExperiment:
-                                if (observer.settings.SoundOnDiscovery)
+
+
+
+                            // the button is important; if it's auto-hidden we should
+                            // show it to the player
+                            scienceAlert.Button.Important = true;
+
+
+                            if (observer.settings.AnimationOnDiscovery)
+                            {
+                                scienceAlert.Button.PlayAnimation();
+                            }
+                            else if (scienceAlert.Button.IsNormal) scienceAlert.Button.SetLit();
+
+                            switch (Settings.Instance.SoundNotification)
+                            {
+                                case Settings.SoundNotifySetting.ByExperiment:
+                                    if (observer.settings.SoundOnDiscovery)
+                                        AudioUtil.Play("bubbles", 2f);
+
+                                    break;
+
+                                case Settings.SoundNotifySetting.Always:
                                     AudioUtil.Play("bubbles", 2f);
-                                
-                                break;
-
-                            case Settings.SoundNotifySetting.Always:
-                                AudioUtil.Play("bubbles", 2f);
-                                break;
+                                    break;
+                            }
                         }
-                    }
-                    else if (!observers.Any(ob => ob.Available))
-                    {
-                        // if no experiments are available, we should be looking
-                        // at a starless flask in the menu.  Note that this is
-                        // in an else statement because if UpdateStatus just
-                        // returned true, we know there's at least one experiment
-                        // available this frame
-                        //Log.Debug("No observers available: resetting state");
+                        else if (!observers.Any(ob => ob.Available))
+                        {
+                            // if no experiments are available, we should be looking
+                            // at a starless flask in the menu.  Note that this is
+                            // in an else statement because if UpdateStatus just
+                            // returned true, we know there's at least one experiment
+                            // available this frame
+                            //Log.Debug("No observers available: resetting state");
 
-                        scienceAlert.Button.SetUnlit();
-                        scienceAlert.Button.Important = false;
-                    }
+                            scienceAlert.Button.SetUnlit();
+                            scienceAlert.Button.Important = false;
+                        }
 #if PROFILE
                     Log.Warning("Tick time ({1}): {0} ms", (Time.realtimeSinceStartup - start) * 1000f, observer.ExperimentTitle);
 #endif
+                    } catch (Exception e)
+                    {
+                        Log.Debug("ExperimentManager.UpdateObservers: exception {0}", e);
+                    }
 
                     // if the user accelerated time it's possible to have some
                     // experiments checked too late. If the user is time warping
@@ -470,17 +476,17 @@ namespace ScienceAlert
                 yield return 0;
 
 
-
             // critical: there's a quiet issue where sometimes user get multiple
             //           experimentIds loaded (the one I know of at the moment is
             //           through a small bug in MM), but if that happens, GetExperimentIDs()
             //           will throw an exception and the whole plugin goes down in flames.
 
+
             try
             {
                 // construct the experiment observer list ...
                 foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                    if (expid != "evaReport") // evaReport is a special case
+                    if (expid != "evaReport" && expid != "surfaceSample") // special cases
                         if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
                         {   // we can't monitor this experiment, so no need to clutter the
                             // ui with it
@@ -488,6 +494,18 @@ namespace ScienceAlert
 
                         }
                         else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, scanInterface, expid));
+
+                // surfaceSample is a special case: it's technically available on any
+                // crewed vessel
+                observers.Add(new SurfaceSampleObserver(vesselStorage, Settings.Instance.GetExperimentSettings("surfaceSample"), biomeFilter, scanInterface));
+
+                //if (Settings.Instance.CheckSurfaceSampleNotEva)
+                //    if (Settings.Instance.GetExperimentSettings("surfaceSample").Enabled)
+                //        if (!FlightGlobals.ActiveVessel.isEVA)
+                //        {
+                //            observers.Add(new SurfaceSampleObserver(vesselStorage, Settings.Instance.GetExperimentSettings("surfaceSample"), biomeFilter, scanInterface));
+                //        }
+                //        else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings("surfaceSample"), biomeFilter, scanInterface, "surfaceSample"));
 
                 // evaReport is a special case.  It technically exists on any crewed
                 // vessel.  That vessel won't report it normally though, unless

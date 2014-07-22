@@ -33,6 +33,10 @@
  *      Feature: (Option) EVA report button can be set to always appear at
  *               the top of the list
  *               
+ *      Feature: (Option) Surface sample availability can now be tracked while
+ *               not on EVA. Surface sample button while not EVA'ing will cause
+ *               kerbal to go EVA
+ *               
  *      Feature: (Option) Experiment popup can be configured to automatically
  *               reappear on EVA if it was visible before leaving the vessel
  *      
@@ -40,6 +44,9 @@
  *      Bugfix: Fixed issue that caused the popup windows to flicker (especially
  *              the options window)
  *              
+ *      Note: Sound config (other than per-experiment and global on/off) settings 
+ *            were removed while making some changes to the audio system. 
+ *            
  *      
  * 1.6
  *      Bugfix: Fixed issue where alerts could appear for science reports worth

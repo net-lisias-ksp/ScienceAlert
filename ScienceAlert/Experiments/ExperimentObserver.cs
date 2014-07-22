@@ -27,6 +27,256 @@ namespace ScienceAlert
 {
     using ScienceModuleList = List<ModuleScienceExperiment>;
 
+    /// <summary>
+    /// A special observer that uses the existence of crew, not
+    /// an available ModuleScienceExperiment, to determine whether
+    /// the experiment is possible
+    /// </summary>
+    class RequiresCrew : ExperimentObserver
+    {
+        protected List<Part> crewableParts = new List<Part>();
+
+        public RequiresCrew(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid)
+            : base(cache, settings, filter, scanInterface, expid)
+        {
+
+        }
+
+        /// <summary>
+        /// Note: ScienceAlert will look out for vessel changes for
+        /// us and call Rebuild() as necessary
+        /// </summary>
+        public override void Rebuild()
+        {
+            base.Rebuild();
+
+            crewableParts.Clear();
+
+            if (FlightGlobals.ActiveVessel == null)
+            {
+                Log.Debug("EvaReportObserver: active vessel null; observer will not function");
+                return;
+            }
+
+            // cache any part that can hold crew, so we don't have to
+            // wastefully go through the entire vessel part tree
+            // when updating status
+            FlightGlobals.ActiveVessel.parts.ForEach(p =>
+            {
+                if (p.CrewCapacity > 0) crewableParts.Add(p);
+            });
+
+        }
+
+
+        public override bool IsReadyOnboard
+        {
+            get
+            {
+                foreach (var crewable in crewableParts)
+                    if (crewable.protoModuleCrew.Count > 0)
+                        return true;
+                return false;
+            }
+        }
+    }
+
+
+
+    internal class EvaReportObserver : RequiresCrew
+    {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid = "evaReport")
+            : base(cache, settings, filter, scanInterface, expid)
+        {
+
+        }
+
+
+
+        /// <summary>
+        /// This function will do one of two things: if the active vessel
+        /// isn't an eva kerbal, it will choose a kerbal at random from
+        /// the crew and send them on eva (unless the conditions outside
+        /// would make it dangerous, in which case player will receive
+        /// a dialog instead).
+        /// 
+        /// On the other hand, if the active vessel is an eva kerbal, it
+        /// will deploy the experiment itself.
+        /// </summary>
+        /// <returns></returns>
+        public override bool Deploy()
+        {
+            if (!Available || !IsReadyOnboard)
+            {
+                Log.Error("Cannot deploy eva experiment {0}; Available = {1}, Onboard = {2}, experiment = {3}", Available, IsReadyOnboard, experiment.id);
+                return false;
+            }
+
+            if (FlightGlobals.ActiveVessel == null)
+            {
+                Log.Error("Deploy -- invalid active vessel");
+                return false;
+            }
+
+
+            // the current vessel IS NOT an eva'ing Kerbal, so
+            // find a kerbal and dump him into space
+            if (!FlightGlobals.ActiveVessel.isEVA)
+            {
+                // check conditions outside
+                Log.Warning("Current static pressure: {0}", FlightGlobals.getStaticPressure());
+
+                if (FlightGlobals.getStaticPressure() > Settings.Instance.EvaAtmospherePressureWarnThreshold)
+                    if (FlightGlobals.ActiveVessel.GetSrfVelocity().magnitude > Settings.Instance.EvaAtmosphereVelocityWarnThreshold)
+                    {
+                        Log.Debug("setting up dialog options to warn player about eva risk");
+
+                        var options = new DialogOption[2];
+
+                        options[0] = new DialogOption("Science is worth a little risk", new Callback(OnConfirmEva));
+                        options[1] = new DialogOption("No, it would be a PR nightmare", null);
+
+                        var dlg = new MultiOptionDialog("It looks dangerous out there. Are you sure you want to send someone out? They might lose their grip!", "Dangerous Condition Alert", Settings.Skin, options);
+
+
+                        PopupDialog.SpawnPopupDialog(dlg, false, Settings.Skin);
+                        return true;
+                    }
+
+
+
+                if (!ExpelCrewman())
+                {
+                    Log.Error("{0}.Deploy - Did not successfully send kerbal out the airlock.  Hatch might be blocked.", GetType().Name);
+                    return false;
+                }
+
+                return true;
+
+            }
+            else
+            {
+                // The vessel is indeed a kerbalEva, so we can expect to find the
+                // appropriate science module now
+                var evas = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
+                foreach (var exp in evas)
+                    if (!exp.Deployed && exp.experimentID == experiment.id)
+                    {
+                        exp.DeployExperiment();
+                        break;
+                    }
+
+                return true;
+            }
+        }
+
+
+
+        protected void OnConfirmEva()
+        {
+            Log.Normal("EvaObserver: User confirmed eva despite conditions");
+            Log.Normal("Expelling... {0}", ExpelCrewman() ? "success!" : "failed");
+        }
+
+
+
+        /// <summary>
+        /// Toss a random kerbal out the airlock
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool ExpelCrewman()
+        {
+            // You might think HighLogic.CurrentGame.CrewRoster.GetNextAvailableCrewMember
+            // is a logical function to use.  Actually it's possible for it to
+            // generate a crew member out of thin air and put it outside, so nope
+            // 
+            // luckily we can specify a particular onboard Kerbal.  We'll do so by
+            // finding the possibilities and then picking one totally at 
+            // pseudorandom
+
+            List<ProtoCrewMember> crewChoices = new List<ProtoCrewMember>();
+
+            foreach (var crewable in crewableParts)
+                crewChoices.AddRange(crewable.protoModuleCrew);
+
+            if (crewChoices.Count == 0)
+            {
+                Log.Error("{0}.Deploy - No crew choices available.  Check logic", GetType().Name);
+                return false;
+            }
+            else
+            {
+                // 1.4b bugfix for the 1.4a buxfix:
+                //  if the player is in map view, SetCameraFlight won't shut it
+                // down for us. Whoops
+                if (MapView.MapIsEnabled)
+                {
+                    MapView.ExitMapView();
+                }
+
+                // 1.4a bugfix:
+                //   if the player is in IVA view when we spawn eva, it looks
+                // like KSP doesn't switch cameras automatically
+                if ((CameraManager.Instance.currentCameraMode & (CameraManager.CameraMode.Internal | CameraManager.CameraMode.IVA)) != 0)
+                {
+                    Log.Normal("Detected IVA or internal cam; switching to flight cam");
+                    CameraManager.Instance.SetCameraFlight();
+                }
+
+
+                Log.Debug("Choices of kerbal:");
+                foreach (var crew in crewChoices)
+                    Log.Debug(" - {0}", crew.name);
+
+                // select a kerbal target...
+                var luckyKerbal = crewChoices[UnityEngine.Random.Range(0, crewChoices.Count - 1)];
+                Log.Debug("{0} is the lucky Kerbal.  Out the airlock with him!", luckyKerbal.name);
+
+                // out he goes!
+                return FlightEVA.SpawnEVA(luckyKerbal.KerbalRef);
+            }
+        }
+    }
+
+
+
+    internal class SurfaceSampleObserver : EvaReportObserver
+    {
+        public SurfaceSampleObserver(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
+            : base(cache, settings, filter, scanInterface, "surfaceSample")
+        {
+
+        }
+
+        public override bool IsReadyOnboard
+        {
+            get
+            {
+                if (FlightGlobals.ActiveVessel != null)
+                {
+                    Log.Debug("Checking if surface sample is available");
+
+                    if (FlightGlobals.ActiveVessel.isEVA)
+                    {
+                        Log.Debug("  - is eva, so {0} && {1}", settings.AssumeOnboard, this.GetNextOnboardExperimentModule() != null);
+
+                        return settings.AssumeOnboard || this.GetNextOnboardExperimentModule() != null;
+                    }
+                    else
+                    {
+                        Log.Normal("  - not eva, so {0} && {1}", Settings.Instance.CheckSurfaceSampleNotEva, base.IsReadyOnboard);
+                        return Settings.Instance.CheckSurfaceSampleNotEva && base.IsReadyOnboard;
+                    }
+                }
+                else return false;
+            }
+        }
+    }
+
+
 
     /// <summary>
     /// Given an experiment, monitor conditions for the experiment.  If
@@ -90,6 +340,8 @@ namespace ScienceAlert
         /// </summary>
         public virtual void Rebuild()
         {
+            Log.Debug("ExperimentObserver.Rebuild - {0}", experiment.id);
+
             modules = new ScienceModuleList();
             
             if (FlightGlobals.ActiveVessel == null)
@@ -460,8 +712,14 @@ namespace ScienceAlert
 
 
         #region Properties
-        private ModuleScienceExperiment GetNextOnboardExperimentModule()
+        protected ModuleScienceExperiment GetNextOnboardExperimentModule()
         {
+            if (modules == null)
+            {
+#if DEBUG
+                Log.Error("ExperimentObserver.NextExperimentModule[{0}] - modules list is null!", experiment.id);
+#endif
+            }
             foreach (var module in modules)
                 if (!module.Deployed && !module.Inoperable)
                     return module;
@@ -559,215 +817,4 @@ namespace ScienceAlert
     }
 
 
-
-    /// <summary>
-    /// Eva report is a special kind of experiment.  As long as a Kerbal
-    /// is aboard the active vessel, it's "available".  A ModuleScienceExperiment
-    /// won't appear in the way the other science modules do for other 
-    /// experiments though (unless the vessel is a kerbalEva part iself), 
-    /// so we'll be needing a special case to handle it.
-    /// 
-    /// To prevent duplicate reports, we take into account any stored experiment
-    /// data as normal.
-    /// </summary>
-    internal class EvaReportObserver : ExperimentObserver
-    {
-        List<Part> crewableParts = new List<Part>();
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
-            : base(cache, settings, filter, scanInterface, "evaReport")
-        {
-
-        }
-
-
-
-        /// <summary>
-        /// This function will do one of two things: if the active vessel
-        /// isn't an eva kerbal, it will choose a kerbal at random from
-        /// the crew and send them on eva (unless the conditions outside
-        /// would make it dangerous, in which case player will receive
-        /// a dialog instead).
-        /// 
-        /// On the other hand, if the active vessel is an eva kerbal, it
-        /// will deploy the experiment itself.
-        /// </summary>
-        /// <returns></returns>
-        public override bool Deploy()
-        {
-            if (!Available || !IsReadyOnboard)
-            {
-                Log.Error("Cannot deploy eva experiment {0}; Available = {1}, Onboard = {2}", Available, IsReadyOnboard);
-                return false;
-            }
-
-            if (FlightGlobals.ActiveVessel == null)
-            {
-                Log.Error("Deploy -- invalid active vessel");
-                return false;
-            }
-
-
-            // the current vessel IS NOT an eva'ing Kerbal, so
-            // find a kerbal and dump him into space
-            if (!FlightGlobals.ActiveVessel.isEVA)
-            {
-                // check conditions outside
-                Log.Warning("Current static pressure: {0}", FlightGlobals.getStaticPressure());
-
-                if (FlightGlobals.getStaticPressure() > Settings.Instance.EvaAtmospherePressureWarnThreshold)
-                    if (FlightGlobals.ActiveVessel.GetSrfVelocity().magnitude > Settings.Instance.EvaAtmosphereVelocityWarnThreshold)
-                    {
-                        Log.Debug("setting up dialog options to warn player about eva risk");
-
-                        var options = new DialogOption[2];
-
-                        options[0] = new DialogOption("Science is worth a little risk", new Callback(OnConfirmEva));
-                        options[1] = new DialogOption("No, it would be a PR nightmare", null);
-
-                        var dlg = new MultiOptionDialog("It looks dangerous out there. Are you sure you want to send someone out? They might lose their grip!", "Dangerous Condition Alert", Settings.Skin, options);
-
-
-                        PopupDialog.SpawnPopupDialog(dlg, false, Settings.Skin);
-                        return true;
-                    }
-
-                
-                
-                if (!ExpelCrewman())
-                {
-                    Log.Error("EvaReportObserver.Deploy - Did not successfully send kerbal out the airlock.  Hatch might be blocked.");
-                    return false;
-                }
-
-                // todo: schedule a coroutine to wait for it to exist and pop open
-                // the report?
-
-                return true;
-                
-            }
-            else
-            {
-                // The vessel is indeed a kerbalEva, so we can expect to find the
-                // appropriate science module now
-                var evas = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
-                foreach (var exp in evas)
-                    if (!exp.Deployed && exp.experimentID == experiment.id)
-                    {
-                        exp.DeployExperiment();
-                        break;
-                    }
-
-                return true;
-            }
-        }
-
-
-
-        protected void OnConfirmEva()
-        {
-            Log.Normal("EvaObserver: User confirmed eva despite conditions");
-            Log.Normal("Expelling... {0}", ExpelCrewman() ? "success!" : "failed");
-        }
-
-
-
-        /// <summary>
-        /// Toss a random kerbal out the airlock
-        /// </summary>
-        /// <returns></returns>
-        protected virtual bool ExpelCrewman()
-        {
-            // You might think HighLogic.CurrentGame.CrewRoster.GetNextAvailableCrewMember
-            // is a logical function to use.  Actually it's possible for it to
-            // generate a crew member out of thin air and put it outside, so nope
-            // 
-            // luckily we can specify a particular onboard Kerbal.  We'll do so by
-            // finding the possibilities and then picking one totally at 
-            // pseudorandom
-
-            List<ProtoCrewMember> crewChoices = new List<ProtoCrewMember>();
-
-            foreach (var crewable in crewableParts)
-            crewChoices.AddRange(crewable.protoModuleCrew);
-
-            if (crewChoices.Count == 0)
-            {
-                Log.Error("EvaReportObserver.Deploy - No crew choices available.  Check logic");
-                return false;
-            }
-            else
-            {
-                // 1.4b bugfix for the 1.4a buxfix:
-                //  if the player is in map view, SetCameraFlight won't shut it
-                // down for us. Whoops
-                if (MapView.MapIsEnabled)
-                {
-                    MapView.ExitMapView();
-                }
-
-                // 1.4a bugfix:
-                //   if the player is in IVA view when we spawn eva, it looks
-                // like KSP doesn't switch cameras automatically
-                if ((CameraManager.Instance.currentCameraMode & (CameraManager.CameraMode.Internal | CameraManager.CameraMode.IVA)) != 0)
-                {
-                    Log.Normal("Detected IVA or internal cam; switching to flight cam");
-                    CameraManager.Instance.SetCameraFlight();
-                }
-
-
-                Log.Debug("Choices of kerbal:");
-                foreach (var crew in crewChoices)
-                    Log.Debug(" - {0}", crew.name);
-
-                // select a kerbal target...
-                var luckyKerbal = crewChoices[UnityEngine.Random.Range(0, crewChoices.Count - 1)];
-                Log.Debug("{0} is the lucky Kerbal.  Out the airlock with him!", luckyKerbal.name);
-
-                // out he goes!
-                return FlightEVA.SpawnEVA(luckyKerbal.KerbalRef);
-            }
-        }
-
-
-
-        /// <summary>
-        /// Note: ScienceAlert will look out for vessel changes for
-        /// us and call Rebuild() as necessary
-        /// </summary>
-        public override void Rebuild()
-        {
-            crewableParts.Clear();
-
-            if (FlightGlobals.ActiveVessel == null)
-            {
-                Log.Debug("EvaReportObserver: active vessel null; observer will not function");
-                return;
-            }
-
-            // cache any part that can hold crew, so we don't have to
-            // wastefully go through the entire vessel part tree
-            // when updating status
-            foreach (var part in FlightGlobals.ActiveVessel.Parts)
-                if (part.CrewCapacity > 0)
-                    crewableParts.Add(part);
-
-        }
-
-
-
-        public override bool IsReadyOnboard
-        {
-            get
-            {
-                foreach (var crewable in crewableParts)
-                    if (crewable.protoModuleCrew.Count > 0)
-                        return true;
-                return false;
-            }
-        }
-    }
 }

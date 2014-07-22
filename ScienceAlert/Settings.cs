@@ -175,6 +175,7 @@ namespace ScienceAlert
                 ShowReportValue = false;
                 EvaReportOnTop = false;
                 ReopenOnEva = false;
+                CheckSurfaceSampleNotEva = false;
 
             Load();
         }
@@ -256,26 +257,40 @@ namespace ScienceAlert
 
                 FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
                 StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
-                EvaAtmospherePressureWarnThreshold = ConfigUtil.Parse<double>(general, "EvaAtmosPressureThreshold", 0.00035);
-                EvaAtmosphereVelocityWarnThreshold = ConfigUtil.Parse<float>(general, "EvaAtmosVelocityThreshold", 30);
+                
                 DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
                 GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
                 SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
                 EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
                 ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
                 ShowReportValue = general.Parse<bool>("ShowReportValue", false);
-                EvaReportOnTop = general.Parse<bool>("EvaReportOnTop", false);
-                ReopenOnEva = general.Parse<bool>("ReopenOnEva", false);
-
-
-                Log.Debug("FlaskAnimationEnabled = {0}", FlaskAnimationEnabled);
-                Log.Debug("StarFlaskFrameRate = {0}", StarFlaskFrameRate);
             }
             catch (Exception e)
             {
                 Log.Error("Exception occurred while loading GeneralSettings section: {0}", e);
             }
 #endregion
+
+#region crewed vessel settings
+
+            try
+            {
+                ConfigNode crewed = node.GetNode("CrewedVesselSettings");
+                if (crewed == null) crewed = node.AddNode(new ConfigNode("CrewedVesselSettings"));
+
+                ReopenOnEva = crewed.Parse<bool>("ReopenOnEva", false);
+                EvaAtmospherePressureWarnThreshold = crewed.Parse<double>("EvaAtmosPressureThreshold", 0.00035);
+                EvaAtmosphereVelocityWarnThreshold = crewed.Parse<float>("EvaAtmosVelocityThreshold", 30);
+                EvaReportOnTop = crewed.Parse<bool>("EvaReportOnTop", false);
+                CheckSurfaceSampleNotEva = crewed.Parse<bool>("CheckSurfaceSampleNotEva", false);
+
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception occurred while loading CrewedVesselSettings section: {0}", e);
+            }
+
+            #endregion
 
 #region interface settings
 
@@ -309,6 +324,7 @@ namespace ScienceAlert
                 Log.Error("Exception occurred while loading ToolbarInterface section: {0}", e);
             }
 #endregion
+
 #region experiment settings
             try
             {
@@ -401,16 +417,25 @@ Re-saving config with default values for missing experiments.");
 
                 general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
                 general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
-                general.AddValue("EvaAtmosPressureThreshold", EvaAtmospherePressureWarnThreshold);
-                general.AddValue("EvaAtmosVelocityThreshold", EvaAtmosphereVelocityWarnThreshold);
+                
                 general.AddValue("DebugMode", DebugMode);
                 general.AddValue("GlobalWarp", GlobalWarp);
                 general.AddValue("SoundNotification", SoundNotification);
                 general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
                 general.AddValue("ScienceThreshold", ScienceThreshold);
                 general.AddValue("ShowReportValue", ShowReportValue);
-                general.AddValue("EvaReportOnTop", EvaReportOnTop);
-                general.AddValue("ReopenOnEva", ReopenOnEva);
+                
+                #endregion
+
+                #region crewed vessel settings
+                ConfigNode crewed = node.AddNode(new ConfigNode("CrewedVesselSettings"));
+
+                crewed.AddValue("EvaReportOnTop", EvaReportOnTop);
+                crewed.AddValue("ReopenOnEva", ReopenOnEva);
+                crewed.AddValue("EvaAtmosPressureThreshold", EvaAtmospherePressureWarnThreshold);
+                crewed.AddValue("EvaAtmosVelocityThreshold", EvaAtmosphereVelocityWarnThreshold);
+                crewed.AddValue("CheckSurfaceSampleNotEva", CheckSurfaceSampleNotEva);
+
                 #endregion
 
                 #region interface settings
@@ -471,16 +496,24 @@ Re-saving config with default values for missing experiments.");
 
         public bool FlaskAnimationEnabled { get; set; }
         public float StarFlaskFrameRate { get; private set; }
-        public double EvaAtmospherePressureWarnThreshold { get; private set; }
-        public float EvaAtmosphereVelocityWarnThreshold { get; private set; }
         public bool DebugMode { get; private set; }
         public WarpSetting GlobalWarp { get; set; }
         public SoundNotifySetting SoundNotification { get; set; }
         public bool EnableScienceThreshold { get; set; }
         public float ScienceThreshold { get; set; }
         public bool ShowReportValue { get; set; }
-        public bool EvaReportOnTop { get; set; }
+        
+        
+
+        #endregion
+
+        #region Crewed vessel settings
+
         public bool ReopenOnEva { get; set; }
+        public bool EvaReportOnTop { get; set; }
+        public double EvaAtmospherePressureWarnThreshold { get; private set; }
+        public float EvaAtmosphereVelocityWarnThreshold { get; private set; }
+        public bool CheckSurfaceSampleNotEva { get; set; }
 
         #endregion
 
