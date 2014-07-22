@@ -132,6 +132,8 @@ namespace ScienceAlert
                 // note: we can't use CalcSize anywhere but inside OnGUI.  I know
                 // it's ugly, but it's the least ugly of the available alternatives
             }
+
+            experimentButtonRect.height = 32f * observers.Count(obs => obs.Available);
         }
 
 
@@ -191,10 +193,11 @@ namespace ScienceAlert
             //if (float.IsNaN(maximumTextLength))
             //    return Vector2.zero; // text length isn't set yet
 
-            float maxHeight = 32f * observers.Count;
-            float necessaryHeight = 32f * observers.Count(obs => obs.Available);
+            //float maxHeight = 32f * observers.Count;
+            //float necessaryHeight = 32f * observers.Count(obs => obs.Available);
 
-            if (necessaryHeight > 31.9999f)
+            //if (necessaryHeight > 31.9999f)
+            if (experimentButtonRect.height > 0)
             {
                 var old = GUI.skin;
 
@@ -202,16 +205,19 @@ namespace ScienceAlert
 
                 experimentButtonRect.x = position.x;
                 experimentButtonRect.y = position.y;
-                //experimentButtonRect.height = necessaryHeight;
+                
 
                 if (!Settings.Instance.DisplayCurrentBiome)
                 {
+                    //experimentButtonRect.height = necessaryHeight;
                     experimentButtonRect = KSPUtil.ClampRectToScreen(GUILayout.Window(experimentMenuID, experimentButtonRect, DrawWindow, "Available Experiments"));
                 }
                 else
                 {
-                    necessaryHeight += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
-                    experimentButtonRect.height = necessaryHeight;
+                    //necessaryHeight += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
+                    //experimentButtonRect.height = necessaryHeight;
+
+                    experimentButtonRect.height += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
 
                     DrawArea();
 
@@ -224,7 +230,7 @@ namespace ScienceAlert
                 // no experiments
                 scienceAlert.Button.Drawable = null;
             }
-            return new Vector2(experimentButtonRect.width, necessaryHeight);
+            return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
             //return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
         }
 
