@@ -93,7 +93,7 @@ namespace ScienceAlert.Toolbar
 
             // the currency button is a little different
             currency = GameObject.FindObjectOfType<CurrencyWidgetsApp>();
-            currency.gameObject.PrintComponents();
+            //currency.gameObject.PrintComponents();
             
             StartCoroutine(WaitForCurrencyWidget());
             StartCoroutine(WaitForMessageWidget());
@@ -380,7 +380,7 @@ namespace ScienceAlert.Toolbar
 
  
             Log.Verbose("AppLauncherInterface ready");
-            ApplicationLauncher.Instance.gameObject.PrintComponents();
+            //ApplicationLauncher.Instance.gameObject.PrintComponents();
         }
 
 
