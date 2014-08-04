@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="12.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>140</x>
+      <y>60</y>
+      <w>350</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>*ProfileStorage*
+--
+- Saved in ScienceAlert directory
+- Contains all profile settings created
+  by player. 
+- Kept separate from individual game sessions
+  to allow player to re-use profiles between
+  games
+- Contains actual instances of Profile
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>100</x>
+      <y>370</y>
+      <w>310</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>*Profile*
+--
+- Represents a set of ScienceAlert settings
+  for a given profile. 
+
+- Stored in ProfileStorage under a name key
+
+- Stored by SAProfileModule in vessel root part</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>500</x>
+      <y>370</y>
+      <w>330</w>
+      <h>240</h>
+    </coordinates>
+    <panel_attributes>*SAProfileModule*
+--
+- Attached to root part of vessel
+- Contains name of a profile assigned to a 
+  particular vessel
+- Watches its vessel for events like modified,
+  docked, self-docked, destroyed, etc and 
+  duplicates (or destroys) itself as required
+- *important* If modified flag set to true,
+  then this vessel has a profile that doesn't
+  match one of the saved ones and the one
+  attached to the module should be used rather
+  than retrieving the one named earlier, and
+  a star should be added to its display name
+  </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>500</x>
+      <y>330</y>
+      <w>140</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>These are attached
+to individual vessels
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>100</x>
+      <y>330</y>
+      <w>140</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Owned by 
+ProfileStorage
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Note</type>
+    <coordinates>
+      <x>140</x>
+      <y>20</y>
+      <w>140</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>Owned by 
+ScienceAlert
+bg=blue</panel_attributes>
+    <additional_attributes/>
+  </element>
+</diagram>

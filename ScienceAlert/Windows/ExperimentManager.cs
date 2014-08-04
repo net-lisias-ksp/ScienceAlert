@@ -536,6 +536,8 @@ namespace ScienceAlert
             while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed || scanInterface == null)
                 yield return 0;
 
+            while (Profile.Current == null)
+                yield return 0;
 
             // critical: there's a quiet issue where sometimes user get multiple
             //           experimentIds loaded (the one I know of at the moment is

@@ -231,14 +231,14 @@ namespace ScienceAlert
         /// <param name="currentValue"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        private int AudibleSelectionGrid(int currentValue, ref Settings.ExperimentSettings settings)
+        private int AudibleSelectionGrid(int currentValue, ref ProfileData.ExperimentSettings settings)
         {
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
             if (newValue != currentValue)
             {
                 //audio.PlaySound("click1");
                 AudioUtil.Play("click1");
-                settings.Filter = (Settings.ExperimentSettings.FilterMethod)newValue;
+                settings.Filter = (ProfileData.ExperimentSettings.FilterMethod)newValue;
             }
 
             return newValue;

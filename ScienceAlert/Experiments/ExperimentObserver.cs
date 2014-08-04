@@ -36,7 +36,7 @@ namespace ScienceAlert
     {
         protected List<Part> crewableParts = new List<Part>();
 
-        public RequiresCrew(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid)
+        public RequiresCrew(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid)
             : base(cache, settings, filter, scanInterface, expid)
         {
             this.requireControllable = false; 
@@ -88,7 +88,7 @@ namespace ScienceAlert
         /// <summary>
         /// Constructor
         /// </summary>
-        public EvaReportObserver(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid = "evaReport")
+        public EvaReportObserver(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid = "evaReport")
             : base(cache, settings, filter, scanInterface, expid)
         {
 
@@ -245,7 +245,7 @@ namespace ScienceAlert
 
     internal class SurfaceSampleObserver : EvaReportObserver
     {
-        public SurfaceSampleObserver(StorageCache cache, Settings.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
+        public SurfaceSampleObserver(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
             : base(cache, settings, filter, scanInterface, "surfaceSample")
         {
 
@@ -282,7 +282,7 @@ namespace ScienceAlert
         private ScienceModuleList modules;                  // all ModuleScienceExperiments onboard that represent our experiment
         protected ScienceExperiment experiment;             // The actual experiment that will be performed
         protected StorageCache storage;                     // Represents possible storage locations on the vessel
-        public Settings.ExperimentSettings settings;        // settings for this experiment
+        public ProfileData.ExperimentSettings settings;     // settings for this experiment
         protected string lastAvailableId;                   // Id of the last time the experiment was available
         protected string lastBiomeQuery;                    // the last good biome result we had
         protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
@@ -295,7 +295,7 @@ namespace ScienceAlert
  ******************************************************************************/
 
 
-        public ExperimentObserver(StorageCache cache, Settings.ExperimentSettings expSettings, BiomeFilter filter, ScanInterface scanMapInterface, string expid)
+        public ExperimentObserver(StorageCache cache, ProfileData.ExperimentSettings expSettings, BiomeFilter filter, ScanInterface scanMapInterface, string expid)
         {
             settings = expSettings;
             biomeFilter = filter;

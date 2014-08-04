@@ -60,80 +60,13 @@ namespace ScienceAlert
         }
 
 
-        // per-experiment settings
-        public class ExperimentSettings
-        {
-            public enum FilterMethod : int
-            {
-                Unresearched = 0,                           // only light on subjects for which no science has been confirmed at all
-                NotMaxed = 1,                               // light whenever the experiment subject isn't maxed
-                LessThanFiftyPercent = 2,                   // less than 50% researched
-                LessThanNinetyPercent = 3                   // less than 90% researched
-            }
-
-
-            public bool Enabled = true;
-            public bool SoundOnDiscovery = true;
-            public bool AnimationOnDiscovery = true;
-            public bool StopWarpOnDiscovery = false;
-
-            public FilterMethod Filter = FilterMethod.Unresearched;
-
-            public bool AssumeOnboard = false;      // part of a workaround I'm thinking of for
-                                                    // modded "experiments" that don't actually
-                                                    // inherit from ModuleScienceExperiment
-                                                    //
-                                                    // Those I've looked at seem to define the biome and
-                                                    // situation masks in ScienceDefs correctly, so although
-                                                    // we won't be able to interact directly with the experiment,
-                                                    // we should at least be able to tell when it could run under
-                                                    // our desired filter
-            public bool IsDefault = false;
-
-
-            public void OnLoad(ConfigNode node)
-            {
-                Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
-                SoundOnDiscovery = ConfigUtil.Parse<bool>(node, "SoundOnDiscovery", true);
-                AnimationOnDiscovery = ConfigUtil.Parse<bool>(node, "AnimationOnDiscovery", true);
-                AssumeOnboard = ConfigUtil.Parse<bool>(node, "AssumeOnboard", false);
-                StopWarpOnDiscovery = ConfigUtil.Parse<bool>(node, "StopWarpOnDiscovery", false);
-
-                var strFilterName = node.GetValue("Filter");
-                if (string.IsNullOrEmpty(strFilterName))
-                {
-                    Log.Error("Settings: invalid experiment filter");
-                    strFilterName = Enum.GetValues(typeof(FilterMethod)).GetValue(0).ToString();
-                }
-
-                Filter = (FilterMethod)Enum.Parse(typeof(FilterMethod), strFilterName);
-                IsDefault = ConfigUtil.Parse<bool>(node, "IsDefault", false);
-            }
-
-            public void OnSave(ConfigNode node)
-            {
-                node.AddValue("Enabled", Enabled);
-                node.AddValue("SoundOnDiscovery", SoundOnDiscovery);
-                node.AddValue("AnimationOnDiscovery", AnimationOnDiscovery);
-                node.AddValue("StopWarpOnDiscovery", StopWarpOnDiscovery);
-                node.AddValue("AssumeOnboard", AssumeOnboard);
-                node.AddValue("Filter", Filter);
-                node.AddValue("IsDefault", IsDefault);
-            }
-
-            public override string ToString()
-            {
-                ConfigNode node = new ConfigNode();
-                OnSave(node);
-                return node.ToString();
-            }
-        }
+        
 
 
 
 
 
-        private Dictionary<string /* expid */, ExperimentSettings> PerExperimentSettings;
+        
         private GUISkin skin;
 
 /******************************************************************************
@@ -330,44 +263,44 @@ namespace ScienceAlert
 #endregion
 
 #region experiment settings
-            try
-            {
-                ConfigNode experimentSettings = node.GetNode("ExperimentSettings");
+//            try
+//            {
+//                ConfigNode experimentSettings = node.GetNode("ExperimentSettings");
 
-                foreach (var nodeName in experimentSettings.nodes.DistinctNames())
-                {
-                    Log.Debug("Settings: Parsing experiment node '{0}'", nodeName);
+//                foreach (var nodeName in experimentSettings.nodes.DistinctNames())
+//                {
+//                    Log.Debug("Settings: Parsing experiment node '{0}'", nodeName);
 
-                    ConfigNode experimentNode = experimentSettings.GetNode(nodeName);
-                    Log.Debug("Its contents: {0}", experimentNode.ToString());
+//                    ConfigNode experimentNode = experimentSettings.GetNode(nodeName);
+//                    Log.Debug("Its contents: {0}", experimentNode.ToString());
 
-                    if (!PerExperimentSettings.ContainsKey(nodeName))
-                    {
-                        Log.Error("No experiment named '{0}' located.", nodeName);
-                    }
-                    else
-                    {
-                        PerExperimentSettings[nodeName].OnLoad(experimentNode);
-                        Log.Debug("OnLoad for {0}: enabled = {1}, sound = {2}, animation = {3}, assume onboard = {4}", nodeName, PerExperimentSettings[nodeName].Enabled, PerExperimentSettings[nodeName].SoundOnDiscovery, PerExperimentSettings[nodeName].AnimationOnDiscovery, PerExperimentSettings[nodeName].AssumeOnboard);
-                    }
-                }
+//                    if (!PerExperimentSettings.ContainsKey(nodeName))
+//                    {
+//                        Log.Error("No experiment named '{0}' located.", nodeName);
+//                    }
+//                    else
+//                    {
+//                        PerExperimentSettings[nodeName].OnLoad(experimentNode);
+//                        Log.Debug("OnLoad for {0}: enabled = {1}, sound = {2}, animation = {3}, assume onboard = {4}", nodeName, PerExperimentSettings[nodeName].Enabled, PerExperimentSettings[nodeName].SoundOnDiscovery, PerExperimentSettings[nodeName].AnimationOnDiscovery, PerExperimentSettings[nodeName].AssumeOnboard);
+//                    }
+//                }
 
-                if (PerExperimentSettings.Keys.Count != experimentSettings.nodes.DistinctNames().GetLength(0))
-                {
-                    // we don't have a match for experiments in the config
-                    // vs loaded experiments.  Save the default values to disk
-                    // immediately so they can be hand-edited if necessary.
-                    Log.Warning(@"
-Experiment config count does not match number of available experiments.  
-Re-saving config with default values for missing experiments.");
+//                if (PerExperimentSettings.Keys.Count != experimentSettings.nodes.DistinctNames().GetLength(0))
+//                {
+//                    // we don't have a match for experiments in the config
+//                    // vs loaded experiments.  Save the default values to disk
+//                    // immediately so they can be hand-edited if necessary.
+//                    Log.Warning(@"
+//Experiment config count does not match number of available experiments.  
+//Re-saving config with default values for missing experiments.");
 
-                    resave = true;
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occurred while loading ExperimentSettings section: {0}", e);
-            }
+//                    resave = true;
+//                }
+//            }
+//            catch (Exception e)
+//            {
+//                Log.Error("Exception occurred while loading ExperimentSettings section: {0}", e);
+//            }
 #endregion
 
 #region sound settings
@@ -454,10 +387,10 @@ Re-saving config with default values for missing experiments.");
                 #endregion
 
                 #region experiment settings
-                ConfigNode expSettings = node.AddNode(new ConfigNode("ExperimentSettings"));
+                //ConfigNode expSettings = node.AddNode(new ConfigNode("ExperimentSettings"));
 
-                foreach (var kvp in PerExperimentSettings)
-                    kvp.Value.OnSave(expSettings.AddNode(new ConfigNode(kvp.Key)));
+                //foreach (var kvp in PerExperimentSettings)
+                //    kvp.Value.OnSave(expSettings.AddNode(new ConfigNode(kvp.Key)));
 
                 #endregion
 
@@ -584,18 +517,18 @@ Re-saving config with default values for missing experiments.");
 
         #region experiment settings
 
-        public ExperimentSettings GetExperimentSettings(string expid)
-        {
-            if (PerExperimentSettings.ContainsKey(expid))
-            {
-                return PerExperimentSettings[expid];
-            }
-            else
-            {
-                Log.Error("Settings.GetExperimentSettings: a request to get settings for {0} was made; experiment id is unrecognized.", expid);
-                return null;
-            }
-        }
+        //public ExperimentSettings GetExperimentSettings(string expid)
+        //{
+        //    if (PerExperimentSettings.ContainsKey(expid))
+        //    {
+        //        return PerExperimentSettings[expid];
+        //    }
+        //    else
+        //    {
+        //        Log.Error("Settings.GetExperimentSettings: a request to get settings for {0} was made; experiment id is unrecognized.", expid);
+        //        return null;
+        //    }
+        //}
 
         #endregion
 

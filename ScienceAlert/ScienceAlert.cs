@@ -21,6 +21,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.7.2
+ *      Feature: Per-vessel profiles
+ *      
+ *      Feature: Draggable, pinnable windows
+ *      
+ *      Feature: surface sample at top
+ * 
  * 1.7 
  *      Feature: ApplicationLauncher (stock toolbar) support
  *      
