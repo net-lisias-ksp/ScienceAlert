@@ -4,8 +4,8 @@
   <element>
     <type>com.umlet.element.Class</type>
     <coordinates>
-      <x>140</x>
-      <y>60</y>
+      <x>530</x>
+      <y>130</y>
       <w>350</w>
       <h>160</h>
     </coordinates>
@@ -34,9 +34,8 @@
 - Represents a set of ScienceAlert settings
   for a given profile. 
 
-- Stored in ProfileStorage under a name key
-
-- Stored by SAProfileModule in vessel root part</panel_attributes>
+- Stored in ProfileManager under a GUID
+</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -93,8 +92,8 @@ bg=blue</panel_attributes>
   <element>
     <type>com.umlet.element.Note</type>
     <coordinates>
-      <x>140</x>
-      <y>20</y>
+      <x>90</x>
+      <y>50</y>
       <w>140</w>
       <h>40</h>
     </coordinates>
@@ -102,5 +101,65 @@ bg=blue</panel_attributes>
 ScienceAlert
 bg=blue</panel_attributes>
     <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>90</x>
+      <y>90</y>
+      <w>350</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>ProfileManager
+--
+- cfg stored in ScienceAlert directory
+- Vessels identified by GUID
+- Monitors events etc
+- Contains actual instances of Profile</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>430</x>
+      <y>310</y>
+      <w>430</w>
+      <h>340</h>
+    </coordinates>
+    <panel_attributes>lt==</panel_attributes>
+    <additional_attributes>30;30;410;320</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>450</x>
+      <y>310</y>
+      <w>420</w>
+      <h>330</h>
+    </coordinates>
+    <panel_attributes>lt==</panel_attributes>
+    <additional_attributes>400;30;30;310</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>490</x>
+      <y>90</y>
+      <w>420</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>lt==</panel_attributes>
+    <additional_attributes>30;200;400;30</additional_attributes>
+  </element>
+  <element>
+    <type>com.umlet.element.Relation</type>
+    <coordinates>
+      <x>490</x>
+      <y>90</y>
+      <w>420</w>
+      <h>230</h>
+    </coordinates>
+    <panel_attributes>lt==</panel_attributes>
+    <additional_attributes>30;30;400;210</additional_attributes>
   </element>
 </diagram>

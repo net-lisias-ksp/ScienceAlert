@@ -172,6 +172,29 @@ namespace ScienceAlert
         }
 
 
+        public ProfileData.ExperimentSettings this[string expid]
+        {
+            get
+            {
+                if (settings.ContainsKey(expid))
+                    return settings[expid];
+
+                // I never expect to see this. If it shows up, something in
+                // loading or initialization has broken
+                Log.Warning("Profile '{0}' has no settings for expid {1}; creating a default", name, expid);
+
+                settings[expid] = new ProfileData.ExperimentSettings();
+
+                return settings[expid];
+            }
+
+            private set
+            {
+                settings.Add(expid.ToLower(), value);
+            }
+        }
+
+
         /// <summary>
         /// merely a convenience property. Profile is just dumb data;
         /// its owner ProfileStorage is where the current profile is

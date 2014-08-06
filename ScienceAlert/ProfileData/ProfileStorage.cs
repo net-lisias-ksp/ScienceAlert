@@ -81,15 +81,21 @@ namespace ScienceAlert
                 Log.Warning("Vessel '{0}' does not have a ScienceAlert profile module. Adding ...", v.vesselName);
 
                 var pm = v.rootPart.AddModule("ModuleSAProfile");
-                pm.SendMessage("Awake");
-                pm.SendMessage("Start");
+                //pm.SendMessage("Awake");
+                //pm.SendMessage("Start");
 
-                var sap = pm as ProfileData.ModuleSAProfile;
                 
                 // since this is a brand new profile, we'll give it the saved default
+                Log.Debug("Assigning saved default to newly-added module");
+
+                var sap = pm as ProfileData.ModuleSAProfile;
                 sap.modified = false;
                 sap.profileName = GetDefault().name;
                 sap.Profile = GetDefault(); // note to self: module will clone this itself
+            }
+            else
+            {
+                Log.Debug("Vessel {0} does have an attached ModuleSAProfile; allowing module to handle this event.", v.vesselName);
             }
         }
 
@@ -273,6 +279,10 @@ namespace ScienceAlert
                 if (storage == null) return null;
 
                 return storage.current;
+            }
+            set
+            {
+                if (Instance != null) Instance.current = value;
             }
         }
     }
