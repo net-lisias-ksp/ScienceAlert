@@ -7,6 +7,8 @@ using ReeperCommon;
 
 namespace ScienceAlert.Windows
 {
+    using ProfileManager = ScienceAlertProfileManager;
+
     internal partial class OptionsWindow : MonoBehaviour, IDrawable
     {
         internal string editText = string.Empty;
@@ -16,7 +18,7 @@ namespace ScienceAlert.Windows
 #region save popup
         void SpawnSavePopup()
         {
-            editText = profiles.ActiveProfile.name;
+            editText = ProfileManager.ActiveProfile.name;
             LockControls("ScienceAlertSavePopup");
             popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawSaveWindow, "Choose a name for this profile"), false, HighLogic.Skin);
         }
@@ -57,7 +59,7 @@ namespace ScienceAlert.Windows
         {
             popup.Dismiss();
 
-            if (profiles.HaveStoredProfile(editText))
+            if (ProfileManager.HaveStoredProfile(editText))
             {
                 Log.Warning("Existing profile named '{0}' found! Asking user for overwrite permission.", editText);
                 popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog("Overwrite existing profile?", string.Format("Profile '{0}' already exists!", editText), HighLogic.Skin, new DialogOption[] { new DialogOption("Overwrite", new Callback(SaveCurrentProfileOverwrite)), new DialogOption("Cancel", new Callback(DismissPopup)) }), false, HighLogic.Skin);
@@ -74,7 +76,7 @@ namespace ScienceAlert.Windows
         private void SaveCurrentProfileOverwrite()
         {
             Log.Debug("OptionsWindow.SaveCurrentProfileOverwrite");
-            profiles.StoreActiveProfile(editText);
+            ProfileManager.StoreActiveProfile(editText);
             Settings.Instance.Save();
             DismissPopup();
         }

@@ -77,7 +77,7 @@
     <Compile Include="ProfileData\Mothballed\ModuleSAProfile.cs" />
     <Compile Include="ProfileData\Profile.cs" />
     <Compile Include="ProfileData\Mothballed\ProfileStorage.cs" />
-    <Compile Include="ProfileData\ProfileManager.cs" />
+    <Compile Include="ProfileData\ScienceAlertProfileManager.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
     <Compile Include="Windows\ExperimentManager.cs" />
     <Compile Include="Windows\DebugWindow.cs" />

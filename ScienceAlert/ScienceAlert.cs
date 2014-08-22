@@ -179,6 +179,9 @@ namespace ScienceAlert
             while (FlightGlobals.ActiveVessel == null) yield return 0;
             while (!FlightGlobals.ready) yield return 0;
 
+            Log.Write("Waiting on ProfileManager...");
+            while (ScienceAlertProfileManager.Instance == null) yield return 0;
+
             Log.Normal("Initializing ScienceAlert");
 
 // just in case this has unforseen consequences later...
@@ -193,9 +196,6 @@ namespace ScienceAlert
             Log.Debug("Loading sounds...");
             AudioUtil.LoadSoundsFrom("/ScienceAlert/sounds", AudioType.WAV);
             Log.Debug("Sounds ready.");
-
-            Log.Normal("Creating profile manager");
-            gameObject.AddComponent<ProfileManager>();
 
             Log.Normal("Creating options window");
             gameObject.AddComponent<Windows.OptionsWindow>();

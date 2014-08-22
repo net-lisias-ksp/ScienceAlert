@@ -31,9 +31,12 @@ namespace ScienceAlert
     using VesselTable = Dictionary<Guid, Profile>;     
 
     /// <summary>
-    /// It pretty much works like you'd expect
+    /// The main purpose of making this a ScenarioModule is to simplify
+    /// storing configs that have been "modified" per vessel, so that every
+    /// vessel can have its own custom profile if it differs from its
+    /// stored profile.
     /// </summary>
-    class ProfileManager : MonoBehaviour
+    class ScienceAlertProfileManager : ScenarioModule
     {
         private readonly string ProfileStoragePath = ConfigUtil.GetDllDirectoryPath() + "/profiles.cfg";
         ProfileTable storedProfiles;
@@ -64,7 +67,7 @@ namespace ScienceAlert
                 HighLogic.CurrentGame.config = new ConfigNode();
             }
 
-            Settings.Instance.OnSave += OnSettingsSave;
+            Settings.Instance.OnSave += OnSettingsSave; // this triggers saving of stored profiles
 
             GameEvents.onVesselChange.Add(OnVesselChange);
             GameEvents.onVesselDestroy.Add(OnVesselDestroy);
@@ -72,12 +75,14 @@ namespace ScienceAlert
             GameEvents.onVesselWasModified.Add(OnVesselModified);
             GameEvents.onFlightReady.Add(OnFlightReady);
             GameEvents.onVesselWillDestroy.Add(OnVesselWillDestroy);
-            GameEvents.onGameStateSave.Add(OnGameSave);
+            //GameEvents.onGameStateSave.Add(OnGameSave);
             //GameEvents.onGameStateLoad.Add(OnGameLoad);
 
 
             LoadStoredProfiles();
-            OnGameLoad(HighLogic.CurrentGame.config);
+            //OnGameLoad(HighLogic.CurrentGame.config);
+
+            // intentionally not set Instance yet; waiting for OnLoad to come from KSP
         }
 
 
@@ -88,6 +93,8 @@ namespace ScienceAlert
         /// </summary>
         void OnDestroy()
         {
+            Instance = null;
+
             Log.Debug("ProfileManager: OnDestroy");
 
             GameEvents.onVesselChange.Remove(OnVesselChange);
@@ -96,7 +103,7 @@ namespace ScienceAlert
             GameEvents.onVesselWasModified.Remove(OnVesselModified);
             GameEvents.onFlightReady.Remove(OnFlightReady);
             GameEvents.onVesselWillDestroy.Remove(OnVesselWillDestroy);
-            GameEvents.onGameStateSave.Remove(OnGameSave);
+            //GameEvents.onGameStateSave.Remove(OnGameSave);
             //GameEvents.onGameStateLoad.Remove(OnGameLoad);
 
             SaveStoredProfiles();
@@ -268,9 +275,12 @@ namespace ScienceAlert
         /// Load vessel-specific ConfigNodes from the persistent file
         /// </summary>
         /// <param name="node"></param>
-        private void OnGameLoad(ConfigNode node)
+        public override void OnLoad(ConfigNode node)
         {
-            Log.Verbose("ProfileManager.OnGameLoad = {0}", node.ToString());
+            base.OnLoad(node);
+            Instance = this;
+
+            Log.Verbose("ProfileManager.OnLoad = {0}", node.ToString());
 
             if (node == null) Log.Error("node is null!");
             if (!node.HasNode(PERSISTENT_NODE_NAME))
@@ -377,14 +387,16 @@ namespace ScienceAlert
         }
 
 
-
+     
         /// <summary>
         /// Save vessel-specific profiles to the persistent ConfigNode
         /// </summary>
         /// <param name="node"></param>
-        private void OnGameSave(ConfigNode node)
+        public override void OnSave(ConfigNode node)
         {
-            Log.Verbose("ProfileManager.OnGameSave: {0}", node.ToString());
+            base.OnSave(node);
+
+            Log.Verbose("ProfileManager.OnSave: {0}", node.ToString());
 
             if (!node.HasNode(PERSISTENT_NODE_NAME)) node.AddNode(PERSISTENT_NODE_NAME);
 
@@ -435,28 +447,29 @@ namespace ScienceAlert
 #endregion
 
 #region Interaction methods
+        public static ScienceAlertProfileManager Instance { private set; get; }
 
 
-        public Profile DefaultProfile
+        public static Profile DefaultProfile
         {
             get
             {
-                var key = storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals("default"));
+                var key = Instance.storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals("default"));
 
                 if (string.IsNullOrEmpty(key))
                 {
                     Log.Error("ProfileManager.DefaultProfile: failed to find a default profile! Creating one.");
                     key = "default";
-                    storedProfiles.Add(key, Profile.MakeDefault());
+                    Instance.storedProfiles.Add(key, Profile.MakeDefault());
                 }
 
-                return storedProfiles[key];
+                return Instance.storedProfiles[key];
             }
         }
 
 
 
-        public Profile ActiveProfile
+        public static Profile ActiveProfile
         {
             get
             {
@@ -467,20 +480,20 @@ namespace ScienceAlert
                     Log.Debug("WARN: ProfileManager.ActiveProfile: vessel is null");
                     return null;
                 }
-                if (!vesselProfiles.ContainsKey(vessel.id))
+                if (!Instance.vesselProfiles.ContainsKey(vessel.id))
                 {
-                    Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", VesselIdentifier(vessel.id));
-                    vesselProfiles.Add(vessel.id, DefaultProfile.Clone());
+                    Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", Instance.VesselIdentifier(vessel.id));
+                    Instance.vesselProfiles.Add(vessel.id, DefaultProfile.Clone());
                 }
 
-                return vesselProfiles[vessel.id];
+                return Instance.vesselProfiles[vessel.id];
             }
         }
 
 
 
 
-        public bool HasActiveProfile
+        public static bool HasActiveProfile
         {
             get
             {
@@ -490,27 +503,27 @@ namespace ScienceAlert
 
 
 
-        public int Count
+        public static int Count
         {
             get
             {
-                if (storedProfiles != null)
-                    return storedProfiles.Count;
+                if (Instance.storedProfiles != null)
+                    return Instance.storedProfiles.Count;
                 return 0;
             }
         }
 
 
 
-        public ProfileTable.KeyCollection Names
+        public static ProfileTable.KeyCollection Names
         {
             get
             {
-                return storedProfiles.Keys;
+                return Instance.storedProfiles.Keys;
             }
         }
 
-        public Profile GetProfileByName(string name)
+        public static Profile GetProfileByName(string name)
         {
             var p = FindStoredProfile(name);
             if (p == null)
@@ -519,11 +532,11 @@ namespace ScienceAlert
             return p;
         }
 
-        public ProfileTable Profiles
+        public static ProfileTable Profiles
         {
             get
             {
-                return storedProfiles;
+                return Instance.storedProfiles;
             }
         }
 
@@ -534,7 +547,7 @@ namespace ScienceAlert
         /// </summary>
         /// <param name="profile"></param>
         /// <returns></returns>
-        public void StoreActiveProfile(string name)
+        public static void StoreActiveProfile(string name)
         {
             Profile p = ActiveProfile;
 
@@ -546,9 +559,9 @@ namespace ScienceAlert
             Log.Verbose("Adding new profile '{0}'..", p.name);
 
             var existing = FindStoredProfile(newProfile.name);
-            if (existing != null) { Log.Warning("Overwriting existing profile"); storedProfiles.Remove(existing.name); }
+            if (existing != null) { Log.Warning("Overwriting existing profile"); Instance.storedProfiles.Remove(existing.name); }
 
-            storedProfiles.Add(name, newProfile);
+            Instance.storedProfiles.Add(name, newProfile);
             Log.Verbose("Successfully added or updated profile");
         }
 
@@ -558,16 +571,16 @@ namespace ScienceAlert
 
 #region internal methods
 
-        private Profile FindStoredProfile(string name)
+        private static Profile FindStoredProfile(string name)
         {
-            var key = storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals(name.ToLower()));
+            var key = Instance.storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals(name.ToLower()));
 
             if (string.IsNullOrEmpty(key))
                 return null;
-            return storedProfiles[key];
+            return Instance.storedProfiles[key];
         }
 
-        public bool HaveStoredProfile(string name)
+        public static bool HaveStoredProfile(string name)
         {
             return FindStoredProfile(name) != null;
         }
@@ -587,47 +600,47 @@ namespace ScienceAlert
     }
 
 
-    [KSPAddonImproved(KSPAddonImproved.Startup.Instantly, true)]
-    internal class PersistentDataPreserver : MonoBehaviour
-    {
-        ConfigNode preserved;
+    //[KSPAddonImproved(KSPAddonImproved.Startup.Instantly, true)]
+    //internal class PersistentDataPreserver : MonoBehaviour
+    //{
+    //    ConfigNode preserved;
 
-        void Awake()
-        {
-            DontDestroyOnLoad(this);
-            Log.Normal("PersistentDataPreserver Active");
+    //    void Awake()
+    //    {
+    //        DontDestroyOnLoad(this);
+    //        Log.Normal("PersistentDataPreserver Active");
 
-            GameEvents.onGameStateLoad.Add(OnLoad);
-            GameEvents.onGameStateCreated.Add(OnCreate);
-            GameEvents.onGameStateSave.Add(OnSave);
-        }
+    //        GameEvents.onGameStateLoad.Add(OnLoad);
+    //        GameEvents.onGameStateCreated.Add(OnCreate);
+    //        GameEvents.onGameStateSave.Add(OnSave);
+    //    }
 
-        void OnSave(ConfigNode node)
-        {
-            Log.Debug("PersistentDataPreserver.OnSave");
+    //    void OnSave(ConfigNode node)
+    //    {
+    //        Log.Debug("PersistentDataPreserver.OnSave");
 
-            if (preserved != null && !HighLogic.LoadedSceneIsFlight)
-                node.AddNode(preserved);
+    //        if (preserved != null && !HighLogic.LoadedSceneIsFlight)
+    //            node.AddNode(preserved);
 
-            if (HighLogic.LoadedSceneIsFlight) preserved = null;
-        }
+    //        if (HighLogic.LoadedSceneIsFlight) preserved = null;
+    //    }
 
-        void OnLoad(ConfigNode node)
-        {
-            Log.Debug("PersistentDataPreserver.OnLoad");
+    //    void OnLoad(ConfigNode node)
+    //    {
+    //        Log.Debug("PersistentDataPreserver.OnLoad");
 
-            if (node.HasNode(ProfileManager.PERSISTENT_NODE_NAME))
-            {
-                Log.Warning("PersistentDataPreserver: Persistent data exists!");
-                preserved = node.GetNode(ProfileManager.PERSISTENT_NODE_NAME);
-            }
-            else Log.Error("PersistentDataPreserver: Persistent data lost!");
-        }
+    //        if (node.HasNode(ProfileManager.PERSISTENT_NODE_NAME))
+    //        {
+    //            Log.Warning("PersistentDataPreserver: Persistent data exists!");
+    //            preserved = node.GetNode(ProfileManager.PERSISTENT_NODE_NAME);
+    //        }
+    //        else Log.Error("PersistentDataPreserver: Persistent data lost!");
+    //    }
 
-        void OnCreate(Game game)
-        {
-            Log.Debug("PersistentDataPreserver.OnCreate");
-            Log.Debug("Game.config = {0}", game.config.ToString());
-        }
-    }
+    //    void OnCreate(Game game)
+    //    {
+    //        Log.Debug("PersistentDataPreserver.OnCreate");
+    //        Log.Debug("Game.config = {0}", game.config.ToString());
+    //    }
+    //}
 }

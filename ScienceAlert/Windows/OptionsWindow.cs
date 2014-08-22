@@ -25,6 +25,8 @@ using ReeperCommon;
 
 namespace ScienceAlert.Windows
 {
+    using ProfileManager = ScienceAlertProfileManager;
+
     /// <summary>
     /// It pretty much is what it sounds like
     /// </summary>
@@ -58,7 +60,6 @@ namespace ScienceAlert.Windows
 
 
         private ScienceAlert scienceAlert;
-        private ProfileManager profiles;
 
         private UIButton blocker;
 
@@ -80,7 +81,6 @@ namespace ScienceAlert.Windows
         void Start()
         {
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
-            profiles = gameObject.GetComponent<ProfileManager>();
 
             windowRect = new Rect(0, 0, 324, Screen.height / 5 * 3);
 
@@ -91,7 +91,7 @@ namespace ScienceAlert.Windows
 
             foreach (var id in sortedIds)
             {
-                experimentIds.Add(id, (int)Convert.ChangeType(profiles.ActiveProfile[id].Filter, profiles.ActiveProfile[id].Filter.GetTypeCode()));
+                experimentIds.Add(id, (int)Convert.ChangeType(ProfileManager.ActiveProfile[id].Filter, ProfileManager.ActiveProfile[id].Filter.GetTypeCode()));
                 Log.Debug("Settings: experimentId {0} has filter index {1}", id, experimentIds[id]);
             }
 
@@ -569,15 +569,15 @@ namespace ScienceAlert.Windows
         /// </summary>
         private void DrawProfileSettings()
         {
-            if (profiles.HasActiveProfile)
+            if (ProfileManager.HasActiveProfile)
             {
                 // Active profile header with buttons
                 GUILayout.BeginHorizontal();
                 {
-                    GUILayout.Box(string.Format("Profile: {0}", profiles.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+                    GUILayout.Box(string.Format("Profile: {0}", ProfileManager.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
 
                     // Save profile (only enabled if profile was actually modified)
-                    GUI.enabled = profiles.ActiveProfile.modified;
+                    GUI.enabled = ProfileManager.ActiveProfile.modified;
                     if (AudibleButton(new GUIContent(saveButton), GUILayout.MaxWidth(24)))
                     {
                         // spawn popup window ...
@@ -612,7 +612,7 @@ namespace ScienceAlert.Windows
                     {
                         GUILayout.Space(4f);
 
-                        var settings = profiles.ActiveProfile[key];
+                        var settings = ProfileManager.ActiveProfile[key];
 
                         // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
                         //   note: band-aided this in ScienceAlert.Start; leaving this note here in case
@@ -660,19 +660,19 @@ namespace ScienceAlert.Windows
         {
             profileScrollPos = GUILayout.BeginScrollView(profileScrollPos, Settings.Skin.scrollView);
             {
-                if (profiles.Count > 0)
+                if (ProfileManager.Count > 0)
                 {
                     //DrawProfileList_HorizontalDivider();
                     GUILayout.Label("Select a profile to load");
                     GUILayout.Box(blackPixel, GUILayout.ExpandWidth(true), GUILayout.MinHeight(1f), GUILayout.MaxHeight(3f));
 
-                    var profileList = profiles.Profiles;
+                    var profileList = ProfileManager.Profiles;
 
                     // always draw default profile first
-                    DrawProfileList_ListItem(profiles.DefaultProfile);
+                    DrawProfileList_ListItem(ProfileManager.DefaultProfile);
 
                     foreach (ProfileData.Profile profile in profileList.Values)
-                        if (profile != profiles.DefaultProfile)
+                        if (profile != ProfileManager.DefaultProfile)
                             DrawProfileList_ListItem(profile);
 
                 }
@@ -701,7 +701,7 @@ namespace ScienceAlert.Windows
                 GUILayout.Box(profile.name, GUILayout.ExpandWidth(true));
 
                 // rename button
-                GUI.enabled = profile != profiles.DefaultProfile;
+                GUI.enabled = profile != ProfileManager.DefaultProfile;
                 AudibleButton(new GUIContent(renameButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
                 
                 // open button
@@ -709,7 +709,7 @@ namespace ScienceAlert.Windows
                 AudibleButton(new GUIContent(openButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
 
                 // delete button
-                GUI.enabled = profile != profiles.DefaultProfile;
+                GUI.enabled = profile != ProfileManager.DefaultProfile;
                 AudibleButton(new GUIContent(deleteButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
                 GUI.enabled = true;
             }
