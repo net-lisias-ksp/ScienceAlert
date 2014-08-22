@@ -23,12 +23,12 @@ using System.Linq;
 using UnityEngine;
 using ReeperCommon;
 
-namespace ScienceAlert
+namespace ScienceAlert.Windows
 {
     /// <summary>
     /// It pretty much is what it sounds like
     /// </summary>
-    internal class OptionsWindow : MonoBehaviour, IDrawable
+    internal partial class OptionsWindow : MonoBehaviour, IDrawable
     {
         private readonly int windowId = UnityEngine.Random.Range(0, int.MaxValue);
 
@@ -38,13 +38,24 @@ namespace ScienceAlert
 
         // Control position and scrollbars
         private Rect windowRect;
-        private Vector2 scrollPos = new Vector2();
-        private Vector2 additionalScrollPos = new Vector2();
+        private Vector2 scrollPos = new Vector2();                  // scrollbar for profile experiment settings
+        private Vector2 additionalScrollPos = new Vector2();        // scrollbar for additional options window
+        private Vector2 profileScrollPos = Vector2.zero;            // scrollbar for profile list window
 
         private Dictionary<string /* expid */, int /* selected index */> experimentIds = new Dictionary<string, int>();
         private List<GUIContent> filterList = new List<GUIContent>();
         private string sciMinValue = "0";
-        private bool additionalOptions = false; // flag set when additional options subwindow is open
+
+        internal enum OpenPane
+        {
+            None,
+            AdditionalOptions,
+            LoadProfiles
+        }
+
+        //private bool additionalOptions = false; // flag set when additional options subwindow is open
+        private OpenPane submenu = OpenPane.None;
+
 
         private ScienceAlert scienceAlert;
         private ProfileManager profiles;
@@ -56,7 +67,10 @@ namespace ScienceAlert
         Texture2D expandButton = new Texture2D(24, 24);
         Texture2D openButton = new Texture2D(24, 24);
         Texture2D saveButton = new Texture2D(24, 24);
-
+        Texture2D returnButton = new Texture2D(24, 24);
+        Texture2D deleteButton = new Texture2D(24, 24);
+        Texture2D renameButton = new Texture2D(24, 24);
+        Texture2D blackPixel = new Texture2D(1, 1);
         GUISkin whiteLabel;
 
 /******************************************************************************
@@ -92,11 +106,13 @@ namespace ScienceAlert
             filterList.Add(new GUIContent("< 50% collected"));
             filterList.Add(new GUIContent("< 90% collected"));
 
-            //audio = audioDevice;
             sciMinValue = Settings.Instance.ScienceThreshold.ToString();
 
             openButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnOpen.png", false);
             saveButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnSave.png", false);
+            returnButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnReturn.png", false);
+            deleteButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnDelete.png", false);
+            renameButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnRename.png", false);
 
             var tex = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnExpand.png", false);
 
@@ -116,6 +132,8 @@ namespace ScienceAlert
                 expandButton.Compress(false);
             }
 
+            blackPixel.SetPixel(0, 0, Color.black); blackPixel.Apply();
+            blackPixel.filterMode = FilterMode.Bilinear;
 
             whiteLabel = (GUISkin)GUISkin.Instantiate(Settings.Skin);
             whiteLabel.label.onNormal.textColor = Color.white;
@@ -129,6 +147,8 @@ namespace ScienceAlert
             //redToggle.toggle.normal.
 
             scienceAlert.Button.OnClick += OnToolbarClicked;
+
+            submenu = OpenPane.None;
 
             blocker = GuiUtil.CreateBlocker(windowRect);
             blocker.Hide(true);
@@ -150,23 +170,13 @@ namespace ScienceAlert
         public void Update()
         {
             // hide the blocking area if the player mouses over one of the stock widgets
-            blocker.Hide((scienceAlert.Button.Drawable is OptionsWindow) && scienceAlert.Button.Drawable != null ? false : true);
+            //blocker.Hide((scienceAlert.Button.Drawable is OptionsWindow) && scienceAlert.Button.Drawable != null || scienceAlert.Button.Drawable == null ? false : true);
+            blocker.Hide(scienceAlert.Button.Drawable == null);
 
             if (!blocker.IsHidden())
                 blocker.Move(windowRect);
         }
 
-
-
-        System.Collections.IEnumerator WaitAndSave()
-        {
-            while (scienceAlert.Button.Drawable is OptionsWindow)
-                yield return 0;
-
-            Log.Normal("Saving settings");
-            Settings.Instance.Save();
-            Log.Normal("Settings saved.");
-        }
 
         #region Events
 
@@ -178,8 +188,6 @@ namespace ScienceAlert
         /// <param name="ci"></param>
         public void OnToolbarClicked(Toolbar.ClickInfo ci)
         {
-            Log.Debug("options click");
-
             if (ci.used) return;
 
             if (scienceAlert.Button.Drawable == null)
@@ -191,25 +199,27 @@ namespace ScienceAlert
                     if (scienceAlert.Button.Drawable is OptionsWindow)
                     {
                         scienceAlert.Button.Drawable = null;
+                        Log.Debug("Closing options window");
                         AudioUtil.Play("click1");
                     }
                     else
                     {
                         scienceAlert.Button.Drawable = this;
-                        StartCoroutine(WaitAndSave());
                         AudioUtil.Play("click1");
                     }
                 }
             }
             else if (scienceAlert.Button.Drawable is OptionsWindow)
             {
-                // we're open, non-right mouse button was clicked so close
-                // the window
+                // we're open, non-right mouse button was clicked so close the window
                 ci.Consume();
+                Log.Debug("Closing options window");
                 scienceAlert.Button.Drawable = null;
                 AudioUtil.Play("click1", 0.05f);
             }
         }
+
+
 
         #endregion
 
@@ -231,6 +241,7 @@ namespace ScienceAlert
         }
 
 
+
         /// <summary>
         /// Just a wrapper around GUILayout.Toggle which plays a sound when
         /// its value changes.
@@ -245,7 +256,6 @@ namespace ScienceAlert
             bool result = GUILayout.Toggle(value, content, style == null ? Settings.Skin.toggle : style, options);
             if (result != value)
             {
-                //audio.PlaySound("click1");
                 AudioUtil.Play("click1");
 
 #if DEBUG
@@ -268,13 +278,13 @@ namespace ScienceAlert
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
             if (newValue != currentValue)
             {
-                //audio.PlaySound("click1");
                 AudioUtil.Play("click1");
                 settings.Filter = (ProfileData.ExperimentSettings.FilterMethod)newValue;
             }
 
             return newValue;
         }
+
 
 
         /// <summary>
@@ -288,10 +298,7 @@ namespace ScienceAlert
             bool pressed = GUILayout.Button(content, options);
 
             if (pressed)
-            {
-                //audio.PlaySound("click1");
                 AudioUtil.Play("click1");
-            }
 
             return pressed;
         }
@@ -315,17 +322,18 @@ namespace ScienceAlert
             windowRect.x = position.x;
             windowRect.y = position.y;
 
-            windowRect = GUILayout.Window(windowId, windowRect, RenderControls, "Science Alert");
+            if (!HasOpenPopup)
+                windowRect = GUILayout.Window(windowId, windowRect, RenderControls, "Science Alert");
 
             GUI.skin = oldSkin;
 
             return new Vector2(windowRect.width, windowRect.height);
         }
 
+
+
         private void RenderControls(int windowId)
         {
-            //GUILayout.BeginVertical(GUILayout.ExpandWidth(true), GUILayout.Height(windowRect.height));
-
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true), GUILayout.Height(Screen.height / 5 * 3));
             {
 
@@ -340,85 +348,26 @@ namespace ScienceAlert
                 GUILayout.BeginHorizontal();
                     GUILayout.Label(new GUIContent("Additional Options"));
                     GUILayout.FlexibleSpace();
-                    additionalOptions = AudibleButton(new GUIContent(additionalOptions ? collapseButton : expandButton)) ? !additionalOptions : additionalOptions;
+                    //additionalOptions = AudibleButton(new GUIContent(additionalOptions ? collapseButton : expandButton)) ? !additionalOptions : additionalOptions;
+
+                    if (AudibleButton(new GUIContent(submenu == OpenPane.AdditionalOptions ? collapseButton : expandButton)))
+                        submenu = submenu == OpenPane.AdditionalOptions ? OpenPane.None : OpenPane.AdditionalOptions;
+                    
                 GUILayout.EndHorizontal();
 
-                if (additionalOptions)
+                switch (submenu)
                 {
-                    DrawAdditionalOptions();
-                }
-                else // additional options not open
-                {
-                    if (profiles.HasActiveProfile)
-                    {
-                        // Active profile header with buttons
-                        GUILayout.BeginHorizontal();
-                        {
-                            GUILayout.Box(string.Format("Profile: {0}", profiles.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+                    case OpenPane.None:
+                        DrawProfileSettings();
+                        break;
 
-                            // Save profile (only enabled if profile was actually modified)
-                            GUI.enabled = profiles.ActiveProfile.modified;
-                            bool saveClicked = AudibleButton(new GUIContent(saveButton), GUILayout.MaxWidth(24) );
-                            GUI.enabled = true;
+                    case OpenPane.AdditionalOptions:
+                        DrawAdditionalOptions();
+                        break;
 
-                            // Open profile (always available, warn user if profile modified)
-                            bool openClicked = AudibleButton(new GUIContent(openButton), GUILayout.MaxWidth(24) );
-                            
-                        }
-                        GUILayout.EndHorizontal();
-
-                        // scrollview with experiment options
-                        scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
-                        {
-                            GUI.skin = Settings.Skin;
-
-                            var keys = new List<string>(experimentIds.Keys);
-
-                            foreach (var key in keys)
-                            {
-                                GUILayout.Space(4f);
-
-                                var settings = profiles.ActiveProfile[key];
-
-                                // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
-                                //   note: band-aided this in ScienceAlert.Start; leaving this note here in case
-                                //         just switching an experiment's title causes issues later
-                                var title = ResearchAndDevelopment.GetExperiment(key).experimentTitle;
-#if DEBUG
-                                GUILayout.Box(title + string.Format(" ({0})", ResearchAndDevelopment.GetExperiment(key).id), GUILayout.ExpandWidth(true));
-#else
-                            GUILayout.Box(title, GUILayout.ExpandWidth(true));
-#endif
-                                //GUILayout.Space(4f);
-                                settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
-                                settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
-                                settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
-                                settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
-
-                                // only add the Assume Onboard option if the experiment isn't
-                                // one of the default types
-                                if (!settings.IsDefault)
-                                    settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
-
-                                GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
-
-                                int oldSel = experimentIds[key];
-                                experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
-
-                                if (oldSel != experimentIds[key])
-                                    Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
-
-
-                            }
-                        }
-                        GUILayout.EndScrollView();
-                    }
-                    else
-                    { // no active profile
-                        GUI.color = Color.red;
-                        GUILayout.Label("No profile active");
-                    }
-
+                    case OpenPane.LoadProfiles:
+                        DrawProfileList();
+                        break;
                 }
             }
             GUILayout.EndVertical();
@@ -427,6 +376,9 @@ namespace ScienceAlert
         #endregion
 
 
+        /// <summary>
+        /// Regular, non-profile specific additional configuration options
+        /// </summary>
         private void DrawAdditionalOptions()
         {
             GUI.skin = whiteLabel;
@@ -491,7 +443,6 @@ namespace ScienceAlert
                                         }
                                         else
                                         {
-                                            //audio.PlaySound("error");
                                             AudioUtil.Play("error");
 
                                             Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
@@ -519,8 +470,6 @@ namespace ScienceAlert
                     } // end alert settings
                     #endregion
 
-
-                    //GUILayout.Space(8f);
 
 #region scan interface options
                     // scan interface options
@@ -615,6 +564,164 @@ namespace ScienceAlert
             }
             GUILayout.EndScrollView();
         }
+
+
+
+        /// <summary>
+        /// Draws modifyable settings for the current active profile, assuming one is
+        /// active and valid
+        /// </summary>
+        private void DrawProfileSettings()
+        {
+            if (profiles.HasActiveProfile)
+            {
+                // Active profile header with buttons
+                GUILayout.BeginHorizontal();
+                {
+                    GUILayout.Box(string.Format("Profile: {0}", profiles.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+
+                    // Save profile (only enabled if profile was actually modified)
+                    GUI.enabled = profiles.ActiveProfile.modified;
+                    if (AudibleButton(new GUIContent(saveButton), GUILayout.MaxWidth(24)))
+                    {
+                        // spawn popup window ...
+                        // 267441
+                        Log.Write("267441 popup dialog: {0}", ReeperCommon.StringDumper.GetKSPString(267441));
+
+                        // 267404 vesselRenameDialog
+                        Log.Write("267404 control lock: {0}", ReeperCommon.StringDumper.GetKSPString(267404));
+
+                        //InputLockManager.SetControlLock("vesselRenameDialog");
+                        //InputLockManager.SetControlLock(ControlTypes.ACTIONS_ALL, "SaveProfileLock");
+                        //PopupDialog.SpawnPopupDialog(new MultiOptionDialog("Save profile as ...", DrawRenameWindow, "Choose a name for this profile"), false, HighLogic.Skin);
+                        SpawnSavePopup();
+                    }
+                    GUI.enabled = true;
+
+                    // Open profile (always available, warn user if profile modified)
+                    if (AudibleButton(new GUIContent(openButton), GUILayout.MaxWidth(24)))
+                        submenu = OpenPane.LoadProfiles;
+
+                }
+                GUILayout.EndHorizontal();
+
+                // scrollview with experiment options
+                scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
+                {
+                    GUI.skin = Settings.Skin;
+
+                    var keys = new List<string>(experimentIds.Keys);
+
+                    foreach (var key in keys)
+                    {
+                        GUILayout.Space(4f);
+
+                        var settings = profiles.ActiveProfile[key];
+
+                        // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
+                        //   note: band-aided this in ScienceAlert.Start; leaving this note here in case
+                        //         just switching an experiment's title causes issues later
+                        var title = ResearchAndDevelopment.GetExperiment(key).experimentTitle;
+#if DEBUG
+                        GUILayout.Box(title + string.Format(" ({0})", ResearchAndDevelopment.GetExperiment(key).id), GUILayout.ExpandWidth(true));
+#else
+                            GUILayout.Box(title, GUILayout.ExpandWidth(true));
+#endif
+                        //GUILayout.Space(4f);
+                        settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
+                        settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
+                        settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
+                        settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
+
+                        // only add the Assume Onboard option if the experiment isn't
+                        // one of the default types
+                        if (!settings.IsDefault)
+                            settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
+
+                        GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
+
+                        int oldSel = experimentIds[key];
+                        experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
+
+                        if (oldSel != experimentIds[key])
+                            Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
+
+
+                    }
+                }
+                GUILayout.EndScrollView();
+            }
+            else
+            { // no active profile
+                GUI.color = Color.red;
+                GUILayout.Label("No profile active");
+            }
+        }
+
+
+
+        private void DrawProfileList()
+        {
+            profileScrollPos = GUILayout.BeginScrollView(profileScrollPos, Settings.Skin.scrollView);
+            {
+                if (profiles.Count > 0)
+                {
+                    //DrawProfileList_HorizontalDivider();
+                    GUILayout.Label("Select a profile to load");
+                    GUILayout.Box(blackPixel, GUILayout.ExpandWidth(true), GUILayout.MinHeight(1f), GUILayout.MaxHeight(3f));
+
+                    var profileList = profiles.Profiles;
+
+                    // always draw default profile first
+                    DrawProfileList_ListItem(profiles.DefaultProfile);
+
+                    foreach (ProfileData.Profile profile in profileList.Values)
+                        if (profile != profiles.DefaultProfile)
+                            DrawProfileList_ListItem(profile);
+
+                }
+                else // no profiles saved
+                {
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Box("No profiles saved", GUILayout.MinHeight(64f));
+                    GUILayout.FlexibleSpace();
+                }
+            }
+            GUILayout.Space(10f);
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.FlexibleSpace();
+                if (AudibleButton(new GUIContent("Cancel", "Cancel load operation"))) submenu = OpenPane.None;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndScrollView();
+        }
+
+
+        private void DrawProfileList_ListItem(ProfileData.Profile profile)
+        {
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Box(profile.name, GUILayout.ExpandWidth(true));
+
+                // rename button
+                GUI.enabled = profile != profiles.DefaultProfile;
+                AudibleButton(new GUIContent(renameButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
+                
+                // open button
+                GUI.enabled = true;
+                AudibleButton(new GUIContent(openButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
+
+                // delete button
+                GUI.enabled = profile != profiles.DefaultProfile;
+                AudibleButton(new GUIContent(deleteButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
+                GUI.enabled = true;
+            }
+            GUILayout.EndHorizontal();
+        }
+
+
+
 
         #region Message handling functions
 

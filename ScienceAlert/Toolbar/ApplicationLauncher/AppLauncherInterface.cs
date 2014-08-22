@@ -435,6 +435,8 @@ namespace ScienceAlert.Toolbar
         /// </summary>
         public void OnToggleOn()
         {
+            Log.Debug("OnToggleOn");
+
             int button = 0;
 
             if (Input.GetMouseButtonUp(0))
@@ -461,6 +463,7 @@ namespace ScienceAlert.Toolbar
 
         public void OnToggleOff()
         {
+            Log.Debug("AppLauncherInterface.OnToggleOff");
             Drawable = null;
         }
 

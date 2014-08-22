@@ -113,6 +113,7 @@ namespace ScienceAlert
                 HighLogic.CurrentGame.config = new ConfigNode();
             }
 
+            Settings.Instance.OnSave += OnSettingsSave;
 
             GameEvents.onVesselChange.Add(OnVesselChange);
             GameEvents.onVesselDestroy.Add(OnVesselDestroy);
@@ -270,42 +271,42 @@ namespace ScienceAlert
 #endregion
 
 #region GameEvents
-        
-        public void OnVesselChange(Vessel vessel)
+
+        private void OnVesselChange(Vessel vessel)
         {
             Log.Debug("OnVesselChange: {0}", vessel.vesselName);
         }
 
 
 
-        public void OnVesselDestroy(Vessel vessel)
+        private void OnVesselDestroy(Vessel vessel)
         {
             Log.Debug("OnVesselDestroy: {0}", vessel.vesselName);
         }
 
 
 
-        public void OnVesselCreate(Vessel newVessel)
+        private void OnVesselCreate(Vessel newVessel)
         {
             Log.Debug("OnVesselCreate: {0}", newVessel.vesselName);  
         }
 
 
 
-        public void OnVesselModified(Vessel vessel)
+        private void OnVesselModified(Vessel vessel)
         {
             Log.Debug("OnVesselModified: {0}", vessel.vesselName);   
         }
 
 
 
-        public void OnFlightReady()
+        private void OnFlightReady()
         {
             Log.Debug("OnFlightReady");
         }
 
 
-        public void OnVesselWillDestroy(Vessel vessel)
+        private void OnVesselWillDestroy(Vessel vessel)
         {
             Log.Debug("OnVesselWillDestroy: {0}", vessel.vesselName); 
         }
@@ -333,7 +334,7 @@ namespace ScienceAlert
             vesselProfiles = new VesselTable();
 
             var guidStrings = node.nodes.DistinctNames();
-            Log.Verbose("ProfileManager: vessel profile nodes found", guidStrings.Length);
+            Log.Verbose("ProfileManager: {0} vessel profile nodes found", guidStrings.Length);
 
             foreach (var strGuid in guidStrings)
             {
@@ -467,6 +468,21 @@ namespace ScienceAlert
 
 #endregion
 
+#region other events
+
+        /// <summary>
+        /// Called when Settings.Save is called
+        /// </summary>
+        /// <param name="node"></param>
+        public void OnSettingsSave(ConfigNode node)
+        {
+            Log.Debug("ProfileManager.OnSettingsSave");
+
+            SaveStoredProfiles();
+        }
+
+#endregion
+
 #region Interaction methods
 
 
@@ -503,7 +519,7 @@ namespace ScienceAlert
                 if (!vesselProfiles.ContainsKey(vessel.id))
                 {
                     Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", VesselIdentifier(vessel.id));
-                    vesselProfiles.Add(vessel.id, DefaultProfile);
+                    vesselProfiles.Add(vessel.id, DefaultProfile.Clone());
                 }
 
                 return vesselProfiles[vessel.id];
@@ -521,6 +537,72 @@ namespace ScienceAlert
             }
         }
 
+
+
+        public int Count
+        {
+            get
+            {
+                if (storedProfiles != null)
+                    return storedProfiles.Count;
+                return 0;
+            }
+        }
+
+
+
+        public ProfileTable.KeyCollection Names
+        {
+            get
+            {
+                return storedProfiles.Keys;
+            }
+        }
+
+        public Profile GetProfileByName(string name)
+        {
+            var p = FindStoredProfile(name);
+            if (p == null)
+                Log.Error("Failed to find profile with key '{0}'", name);
+
+            return p;
+        }
+
+        public ProfileTable Profiles
+        {
+            get
+            {
+                return storedProfiles;
+            }
+        }
+
+
+        /// <summary>
+        /// Adds the specified profile as an unmodified, stored profile.
+        ///   Important note: does NOT save to disk
+        /// </summary>
+        /// <param name="profile"></param>
+        /// <returns></returns>
+        public void StoreActiveProfile(string name)
+        {
+            Profile p = ActiveProfile;
+
+            p.name = name;
+            p.modified = false;
+
+            Profile newProfile = p.Clone();
+
+            Log.Verbose("Adding new profile '{0}'..", p.name);
+
+            var existing = FindStoredProfile(newProfile.name);
+            if (existing != null) { Log.Warning("Overwriting existing profile"); storedProfiles.Remove(existing.name); }
+
+            storedProfiles.Add(name, newProfile);
+            Log.Verbose("Successfully added or updated profile");
+        }
+
+
+
 #endregion
 
 #region internal methods
@@ -534,7 +616,7 @@ namespace ScienceAlert
             return storedProfiles[key];
         }
 
-        private bool HaveStoredProfile(string name)
+        public bool HaveStoredProfile(string name)
         {
             return FindStoredProfile(name) != null;
         }

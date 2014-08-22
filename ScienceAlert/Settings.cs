@@ -27,6 +27,8 @@ using ReeperCommon;
 
 namespace ScienceAlert
 {
+    public delegate void SaveCallback(ConfigNode node);
+
     public class Settings
     {
         // Singleton pattern
@@ -62,6 +64,7 @@ namespace ScienceAlert
 
         
         private GUISkin skin;
+        public event SaveCallback OnSave = delegate(ConfigNode node) { };
 
 /******************************************************************************
  *                      Implementation details
@@ -141,7 +144,7 @@ namespace ScienceAlert
                 {
                     Log.Error("Failed to load {0}", path);
                 }
-                else OnLoad(node);
+                else DoLoad(node);
             }
             else
             {
@@ -158,7 +161,7 @@ namespace ScienceAlert
 
             Log.Normal("Saving settings to {0}", path);
             ConfigNode saved = new ConfigNode();
-            OnSave(saved);
+            DoSave(saved);
 
             Log.Debug("About to save: {0}", saved.ToString());
             saved.Save(path);
@@ -166,7 +169,7 @@ namespace ScienceAlert
         }
 
 
-        public void OnLoad(ConfigNode node)
+        public void DoLoad(ConfigNode node)
         {
             Log.Debug("Settings.load");
             bool resave = false;
@@ -332,7 +335,7 @@ namespace ScienceAlert
             }
         }
 
-        public void OnSave(ConfigNode node)
+        public void DoSave(ConfigNode node)
         {
             try
             {
@@ -404,6 +407,8 @@ namespace ScienceAlert
             {
                 Log.Error("There was an exception while saving settings: {0}", e);
             }
+
+            OnSave(node);
         }
 
 

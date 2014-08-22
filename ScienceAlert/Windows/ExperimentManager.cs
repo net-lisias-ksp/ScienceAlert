@@ -169,6 +169,7 @@ namespace ScienceAlert
                     {
                         // close menu
                         scienceAlert.Button.Drawable = null;
+                        Log.Debug("Closing ExperimentManager");
                     }
                     else scienceAlert.Button.Drawable = this;
                 }
@@ -181,7 +182,7 @@ namespace ScienceAlert
                 AudioUtil.Play("click1", 0.05f); // set min delay in case other drawables open their window
                                                  // and play a sound on this event as well
                 scienceAlert.Button.Drawable = null;
-                
+                Log.Debug("Closing ExperimentManager");
             }
         }
 

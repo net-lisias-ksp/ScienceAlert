@@ -197,7 +197,7 @@ namespace ScienceAlert
             gameObject.AddComponent<ProfileManager>();
 
             Log.Normal("Creating options window");
-            gameObject.AddComponent<OptionsWindow>();
+            gameObject.AddComponent<Windows.OptionsWindow>();
 
             Log.Normal("Creating experiment manager");
             gameObject.AddComponent<ExperimentManager>();
@@ -228,8 +228,8 @@ namespace ScienceAlert
 
         public void OnDestroy()
         {
+            Settings.Instance.Save();
             Log.Debug("ScienceAlert destroyed");
-
         }
 
 #if DEBUG
