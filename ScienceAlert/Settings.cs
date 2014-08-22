@@ -504,25 +504,6 @@ namespace ScienceAlert
 
         #endregion
 
-        #region experiment settings
-
-        //public ExperimentSettings GetExperimentSettings(string expid)
-        //{
-        //    if (PerExperimentSettings.ContainsKey(expid))
-        //    {
-        //        return PerExperimentSettings[expid];
-        //    }
-        //    else
-        //    {
-        //        Log.Error("Settings.GetExperimentSettings: a request to get settings for {0} was made; experiment id is unrecognized.", expid);
-        //        return null;
-        //    }
-        //}
-
-        #endregion
-
- 
-
         #region sound settings
 
         //public SoundSettings GetSoundSettings(string soundName)

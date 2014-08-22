@@ -36,15 +36,113 @@ namespace ScienceAlert.ProfileData
             LessThanNinetyPercent = 3                   // less than 90% researched
         }
 
+        public event Callback OnChanged = delegate() { };
 
-        public bool Enabled = true;
-        public bool SoundOnDiscovery = true;
-        public bool AnimationOnDiscovery = true;
-        public bool StopWarpOnDiscovery = false;
+/******************************************************************************
+*                    Implementation Details
+******************************************************************************/
 
-        public FilterMethod Filter = FilterMethod.Unresearched;
+        //public bool Enabled = true;
+        private bool _enabled = true;
+        public bool Enabled
+        {
+            get
+            {
+                return _enabled;
+            }
+            set
+            {
+                if (value != _enabled)
+                {
+                    _enabled = value;
+                    OnChanged();
+                }
+            }
+        }
 
-        public bool AssumeOnboard = false;      // part of a workaround I'm thinking of for
+
+
+        //public bool SoundOnDiscovery = true;
+        private bool _soundOnDiscovery = true;
+        public bool SoundOnDiscovery
+        {
+            get
+            {
+                return _soundOnDiscovery;
+            }
+            set
+            {
+                if (_soundOnDiscovery != value)
+                {
+                    _soundOnDiscovery = value;
+                    OnChanged();
+                }
+            }
+        }
+
+
+
+        //public bool AnimationOnDiscovery = true;
+        private bool _animationOnDiscovery = true;
+        public bool AnimationOnDiscovery
+        {
+            get
+            {
+                return _animationOnDiscovery;
+            }
+            set
+            {
+                if (value != _animationOnDiscovery)
+                {
+                    _animationOnDiscovery = value;
+                    OnChanged();
+                }
+            }
+        }
+
+
+
+        //public bool StopWarpOnDiscovery = false;
+        private bool _stopWarpOnDiscovery = false;
+        public bool StopWarpOnDiscovery
+        {
+            get
+            {
+                return _stopWarpOnDiscovery;
+            }
+            set
+            {
+                if (value != _stopWarpOnDiscovery)
+                {
+                    _stopWarpOnDiscovery = value;
+                    OnChanged();
+                }
+            }
+        }
+
+
+
+        //public FilterMethod Filter = FilterMethod.Unresearched;
+        private FilterMethod _filter = FilterMethod.Unresearched;
+        public FilterMethod Filter
+        {
+            get
+            {
+                return _filter;
+            }
+            set
+            {
+                if (value != _filter)
+                {
+                    _filter = value;
+                    OnChanged();
+                }
+            }
+        }
+
+
+        
+        //public bool AssumeOnboard = false;      // part of a workaround I'm thinking of for
         // modded "experiments" that don't actually
         // inherit from ModuleScienceExperiment
         //
@@ -53,6 +151,25 @@ namespace ScienceAlert.ProfileData
         // we won't be able to interact directly with the experiment,
         // we should at least be able to tell when it could run under
         // our desired filter
+        private bool _assumeOnboard = false;
+        public bool AssumeOnboard
+        {
+            get
+            {
+                return _assumeOnboard;
+            }
+            set
+            {
+                if (value != _assumeOnboard)
+                {
+                    _assumeOnboard = value;
+                    OnChanged();
+                }
+            }
+        }
+
+
+
         public bool IsDefault = false;
 
         public ExperimentSettings() { }

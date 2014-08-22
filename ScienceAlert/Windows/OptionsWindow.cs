@@ -54,13 +54,16 @@ namespace ScienceAlert
         // Materials and textures
         Texture2D collapseButton = new Texture2D(24, 24);
         Texture2D expandButton = new Texture2D(24, 24);
+        Texture2D openButton = new Texture2D(24, 24);
+        Texture2D saveButton = new Texture2D(24, 24);
+
         GUISkin whiteLabel;
 
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
 
-        void Awake()
+        void Start()
         {
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
             profiles = gameObject.GetComponent<ProfileManager>();
@@ -69,6 +72,8 @@ namespace ScienceAlert
 
             var rawIds = ResearchAndDevelopment.GetExperimentIDs();
             var sortedIds = rawIds.OrderBy(expid => ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
+
+            Log.Debug("OptionsWindow: sorted {0} experiment IDs", sortedIds.Count());
 
             foreach (var id in sortedIds)
             {
@@ -90,6 +95,9 @@ namespace ScienceAlert
             //audio = audioDevice;
             sciMinValue = Settings.Instance.ScienceThreshold.ToString();
 
+            openButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnOpen.png", false);
+            saveButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnSave.png", false);
+
             var tex = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnExpand.png", false);
 
             if (tex == null)
@@ -108,6 +116,7 @@ namespace ScienceAlert
                 expandButton.Compress(false);
             }
 
+
             whiteLabel = (GUISkin)GUISkin.Instantiate(Settings.Skin);
             whiteLabel.label.onNormal.textColor = Color.white;
             whiteLabel.toggle.onNormal.textColor = Color.white;
@@ -119,6 +128,8 @@ namespace ScienceAlert
             //redToggle.toggle.onActive.textColor = Color.red;
             //redToggle.toggle.normal.
 
+            scienceAlert.Button.OnClick += OnToolbarClicked;
+
             blocker = GuiUtil.CreateBlocker(windowRect);
             blocker.Hide(true);
         }
@@ -128,17 +139,23 @@ namespace ScienceAlert
         void OnDestroy()
         {
             GameObject.Destroy(blocker.gameObject);
+
+            scienceAlert.Button.OnClick -= OnToolbarClicked;
+
             Log.Debug("OptionsWindow destroyed");
         }
 
 
+
         public void Update()
         {
-            blocker.Hide(scienceAlert.Button.Drawable is OptionsWindow ? false : true);
+            // hide the blocking area if the player mouses over one of the stock widgets
+            blocker.Hide((scienceAlert.Button.Drawable is OptionsWindow) && scienceAlert.Button.Drawable != null ? false : true);
 
             if (!blocker.IsHidden())
-                GuiUtil.RepositionButton(blocker, windowRect);
+                blocker.Move(windowRect);
         }
+
 
 
         System.Collections.IEnumerator WaitAndSave()
@@ -161,6 +178,8 @@ namespace ScienceAlert
         /// <param name="ci"></param>
         public void OnToolbarClicked(Toolbar.ClickInfo ci)
         {
+            Log.Debug("options click");
+
             if (ci.used) return;
 
             if (scienceAlert.Button.Drawable == null)
@@ -237,6 +256,7 @@ namespace ScienceAlert
         }
 
 
+
         /// <summary>
         /// Simple wrapper
         /// </summary>
@@ -263,7 +283,7 @@ namespace ScienceAlert
         /// <param name="content"></param>
         /// <param name="options"></param>
         /// <returns></returns>
-        private bool AudibleButton(GUIContent content, GUILayoutOption[] options = null)
+        private bool AudibleButton(GUIContent content, params GUILayoutOption[] options)
         {
             bool pressed = GUILayout.Button(content, options);
 
@@ -329,52 +349,76 @@ namespace ScienceAlert
                 }
                 else // additional options not open
                 {
-
-
-                    scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
+                    if (profiles.HasActiveProfile)
                     {
-                        GUI.skin = Settings.Skin;
-
-                        var keys = new List<string>(experimentIds.Keys);
-
-                        foreach (var key in keys)
+                        // Active profile header with buttons
+                        GUILayout.BeginHorizontal();
                         {
-                            GUILayout.Space(4f);
+                            GUILayout.Box(string.Format("Profile: {0}", profiles.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
 
-                            var settings = profiles.ActiveProfile[key];
+                            // Save profile (only enabled if profile was actually modified)
+                            GUI.enabled = profiles.ActiveProfile.modified;
+                            bool saveClicked = AudibleButton(new GUIContent(saveButton), GUILayout.MaxWidth(24) );
+                            GUI.enabled = true;
 
-                            // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
-                            //   note: band-aided this in ScienceAlert.Start; leaving this note here in case
-                            //         just switching an experiment's title causes issues later
-                            var title = ResearchAndDevelopment.GetExperiment(key).experimentTitle;
+                            // Open profile (always available, warn user if profile modified)
+                            bool openClicked = AudibleButton(new GUIContent(openButton), GUILayout.MaxWidth(24) );
+                            
+                        }
+                        GUILayout.EndHorizontal();
+
+                        // scrollview with experiment options
+                        scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
+                        {
+                            GUI.skin = Settings.Skin;
+
+                            var keys = new List<string>(experimentIds.Keys);
+
+                            foreach (var key in keys)
+                            {
+                                GUILayout.Space(4f);
+
+                                var settings = profiles.ActiveProfile[key];
+
+                                // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
+                                //   note: band-aided this in ScienceAlert.Start; leaving this note here in case
+                                //         just switching an experiment's title causes issues later
+                                var title = ResearchAndDevelopment.GetExperiment(key).experimentTitle;
 #if DEBUG
-                            GUILayout.Box(title + string.Format(" ({0})", ResearchAndDevelopment.GetExperiment(key).id), GUILayout.ExpandWidth(true));
+                                GUILayout.Box(title + string.Format(" ({0})", ResearchAndDevelopment.GetExperiment(key).id), GUILayout.ExpandWidth(true));
 #else
                             GUILayout.Box(title, GUILayout.ExpandWidth(true));
 #endif
-                            //GUILayout.Space(4f);
-                            settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
-                            settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
-                            settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
-                            settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
+                                //GUILayout.Space(4f);
+                                settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
+                                settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
+                                settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
+                                settings.StopWarpOnDiscovery = AudibleToggle(settings.StopWarpOnDiscovery, "Stop warp on discovery");
 
-                            // only add the Assume Onboard option if the experiment isn't
-                            // one of the default types
-                            if (!settings.IsDefault)
-                                settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
+                                // only add the Assume Onboard option if the experiment isn't
+                                // one of the default types
+                                if (!settings.IsDefault)
+                                    settings.AssumeOnboard = AudibleToggle(settings.AssumeOnboard, "Assume onboard");
 
-                            GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
+                                GUILayout.Label(new GUIContent("Filter Method"), GUILayout.ExpandWidth(true), GUILayout.MinHeight(24f));
 
-                            int oldSel = experimentIds[key];
-                            experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
+                                int oldSel = experimentIds[key];
+                                experimentIds[key] = AudibleSelectionGrid(oldSel, ref settings);
 
-                            if (oldSel != experimentIds[key])
-                                Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
+                                if (oldSel != experimentIds[key])
+                                    Log.Debug("Changed filter mode for {0} to {1}", key, settings.Filter);
 
 
+                            }
                         }
+                        GUILayout.EndScrollView();
                     }
-                    GUILayout.EndScrollView();
+                    else
+                    { // no active profile
+                        GUI.color = Color.red;
+                        GUILayout.Label("No profile active");
+                    }
+
                 }
             }
             GUILayout.EndVertical();

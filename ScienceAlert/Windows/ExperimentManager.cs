@@ -106,11 +106,12 @@ namespace ScienceAlert
             }
             else
             {
-                if (!vesselStorage.IsBusy && watcher != null)
-                {
-                    if (!PauseMenu.isOpen)
-                        if (watcher != null) watcher.MoveNext();
-                }
+                if (FlightGlobals.ActiveVessel != null)
+                    if (!vesselStorage.IsBusy && watcher != null)
+                    {
+                        if (!PauseMenu.isOpen)
+                            if (watcher != null) watcher.MoveNext();
+                    }
             }
         }
 
@@ -277,6 +278,9 @@ namespace ScienceAlert
 
 
 
+        /// <summary>
+        /// Draw experiment buttons in whichever style was requested
+        /// </summary>
         private void DrawButtons()
         {
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));

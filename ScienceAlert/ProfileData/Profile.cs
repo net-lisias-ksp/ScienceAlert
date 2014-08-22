@@ -53,6 +53,8 @@ namespace ScienceAlert.ProfileData
 
             // load from specified node
             OnLoad(node);
+
+            RegisterEvents();
         }
 
 
@@ -68,6 +70,7 @@ namespace ScienceAlert.ProfileData
             Log.Verbose("Creating profile '{0}' with default values", name);
             this.name = name;
             Setup();
+            RegisterEvents();
         }
 
 
@@ -86,6 +89,7 @@ namespace ScienceAlert.ProfileData
                 settings.Add(otherKey, new ProfileData.ExperimentSettings(other.settings[otherKey]));
 
             name = String.Copy(other.name);
+            RegisterEvents();
         }
 
 
@@ -103,15 +107,13 @@ namespace ScienceAlert.ProfileData
 
                 foreach (var id in expids)
                     settings.Add(id, new ProfileData.ExperimentSettings());
-
-                Log.Verbose("Profile '{0}' created successfully", name);
             }
             catch (Exception e)
             {
                 // this is most likely to happen on GetExperimentIDs, which
                 // will throw an exception if there are duplicate experiment
                 // id entries
-                Log.Error("Profile '{1}' constructor exception: {0}", e, name);
+                Log.Error("Profile '{1}' constructor exception: {0}", e, string.IsNullOrEmpty(name) ? "(unnamed)" : name);
             }
         }
 
@@ -215,6 +217,34 @@ namespace ScienceAlert.ProfileData
             {
                 settings.Add(expid.ToLower(), value);
             }
+        }
+
+
+        public string DisplayName
+        {
+            get
+            {
+                if (modified)
+                    return "*" + name + "*";
+                return name;
+            }
+        }
+
+
+        void SettingChanged()
+        {
+            Log.Debug("Profile '{0}' was modified!", name);
+            modified = true;
+        }
+
+
+        /// <summary>
+        /// Registers this Profile for all of its owned experiment changed events
+        /// </summary>
+        private void RegisterEvents()
+        {
+            foreach (var kvp in settings)
+                kvp.Value.OnChanged += SettingChanged;
         }
     }
 }

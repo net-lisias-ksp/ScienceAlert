@@ -84,7 +84,7 @@ namespace ScienceAlert
             if (_method != null && _isCovered != null) return true;
             if (_ran)
             {
-                Log.Debug("SCANsatInterface.IsAvailable already ran; not available.");
+                //Log.Debug("SCANsatInterface.IsAvailable already ran; not available.");
                 return false;
             }
 

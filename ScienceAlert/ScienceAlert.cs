@@ -175,7 +175,8 @@ namespace ScienceAlert
 
             Log.Write("Waiting on R&D...");
             while (ResearchAndDevelopment.Instance == null) yield return 0;
-
+            while (FlightGlobals.ActiveVessel == null) yield return 0;
+            while (!FlightGlobals.ready) yield return 0;
 
             Log.Normal("Initializing ScienceAlert");
 
