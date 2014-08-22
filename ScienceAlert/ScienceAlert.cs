@@ -146,12 +146,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using ReeperCommon;
+using ImprovedAddonLoader;
 
 
 namespace ScienceAlert
 {
 
-    [KSPAddon(KSPAddon.Startup.Flight, false)]
+    [KSPAddonImproved(KSPAddonImproved.Startup.Flight, false)]
     public class ScienceAlert : MonoBehaviour
     {
         // --------------------------------------------------------------------

@@ -23,6 +23,7 @@ using System.Text;
 using UnityEngine;
 using ReeperCommon;
 using ScienceAlert.ProfileData;
+using ImprovedAddonLoader;
 
 namespace ScienceAlert
 {
@@ -30,66 +31,16 @@ namespace ScienceAlert
     using VesselTable = Dictionary<Guid, Profile>;     
 
     /// <summary>
-    /// I thought long and hard and decided on a ScenarioModule for this logic.
-    /// 
-    /// I considered adding a PartModule on every ship's root part, but it's
-    /// messy to keep track of and there have been some reports of added modules
-    /// mysteriously vanishing.
-    /// 
-    /// I then considered something very similar to this object but as a 
-    /// regular KSPAddon. This ultimately was rejected because of the potential
-    /// to lose data (vessel-specific profiles) due to quicksaves. One solution 
-    /// was to never delete any profile that ever existed ... but when you
-    /// consider all the ways that "vessels" can be created (debris, asteroids,
-    /// and so on) then no matter how you slice it nor how good you filter out
-    /// non-interesting vessels, you still end up in a situation where file size
-    /// could snowball sooner or later.
-    /// 
-    /// I wanted to avoid having two separate ConfigNodes storing profiles but
-    /// it's ultimately the cleanest way to do this. Here's how things are
-    /// organized:
-    /// 
-    /// "Stored Profiles" - These are profiles the user specifically asked us
-    ///                     to save. One example would be a profile that always
-    ///                     alerts if any science whatsoever available on 
-    ///                     transmitted data.
-    ///                     
-    /// "Vessel Profiles" - These are very similar to stored profiles, except 
-    ///                     that every vessel has its own clone it can modify.
-    ///                     
-    ///                     They also get a "modified" flag. If this flag is
-    ///                     false, a stored profile of the same name will be
-    ///                     used instead of the vessel-stored version. If this
-    ///                     profile were to change in any way, however -- any
-    ///                     option changed -- then its "modified" flag is set
-    ///                     to true and it is essentially disconnected from
-    ///                     the stored profile. 
-    ///                     
-    ///                     When this vessel's profile is loaded from the 
-    ///                     persistence file and that flag is set, then 
-    ///                     the vessel's cloned (and now modified) version 
-    ///                     of the profile is used instead of any stored 
-    ///                     profile.
-    ///                     
-    ///                     And finally, should the vessel's profile name not
-    ///                     be found in the "stored" profiles on load (because 
-    ///                     it was deleted by the user previously), then the 
-    ///                     vessel will receive the vessel-specific profile
-    ///                     instead of a stored profile
+    /// It pretty much works like you'd expect
     /// </summary>
-    //[KSPScenario(ScenarioCreationOptions.AddToNewCareerGames            |
-    //             ScenarioCreationOptions.AddToExistingCareerGames       |
-    //             ScenarioCreationOptions.AddToNewScienceSandboxGames    |
-    //             ScenarioCreationOptions.AddToExistingScienceSandboxGames,
-
-    //             GameScenes.FLIGHT)] // note to self: this apparently only triggers on a main menu -> game transition;
-    //                                 // debug scene jumping code will break it
     class ProfileManager : MonoBehaviour
     {
         private readonly string ProfileStoragePath = ConfigUtil.GetDllDirectoryPath() + "/profiles.cfg";
         ProfileTable storedProfiles;
-        VesselTable vesselProfiles;    
+        VesselTable vesselProfiles;
 
+        public const string PERSISTENT_NODE_NAME = "ScienceAlert_Profiles";
+        public const string STORED_NODE_NAME = "Stored_Profiles";
 
 /******************************************************************************
  *                    Implementation Details
@@ -171,13 +122,13 @@ namespace ScienceAlert
 
                     ConfigNode stored = ConfigNode.Load(ProfileStoragePath);
 
-                    if (stored == null || !stored.HasNode("SCIENCEALERT_PROFILES"))
+                    if (stored == null || !stored.HasNode(STORED_NODE_NAME))
                     {
                         Log.Error("ProfileManager: Failed to load config");
                     }
                     else
                     {
-                        stored = stored.GetNode("SCIENCEALERT_PROFILES"); // to avoid having an empty cfg, which will
+                        stored = stored.GetNode(STORED_NODE_NAME); // to avoid having an empty cfg, which will
                                                                           // cause KSP to hang at load
 
                         var profiles = stored.GetNodes("PROFILE");
@@ -230,7 +181,7 @@ namespace ScienceAlert
         /// </summary>
         private void SaveStoredProfiles()
         {
-            ConfigNode profiles = new ConfigNode("SCIENCEALERT_PROFILES"); // note: gave it a name because an empty
+            ConfigNode profiles = new ConfigNode(STORED_NODE_NAME); // note: gave it a name because an empty
                                                                      // ConfigNode will cause KSP to choke on load
 
             foreach (var kvp in storedProfiles)
@@ -322,13 +273,13 @@ namespace ScienceAlert
             Log.Verbose("ProfileManager.OnGameLoad = {0}", node.ToString());
 
             if (node == null) Log.Error("node is null!");
-            if (!node.HasNode("SCIENCEALERT_PROFILES"))
+            if (!node.HasNode(PERSISTENT_NODE_NAME))
             {
                 Log.Warning("Persistent save has no saved profiles");
                 vesselProfiles = new VesselTable();
                 return;
             }
-            else node = node.GetNode("SCIENCEALERT_PROFILES");
+            else node = node.GetNode(PERSISTENT_NODE_NAME);
 
             List<string> errors = new List<string>();
             vesselProfiles = new VesselTable();
@@ -435,9 +386,9 @@ namespace ScienceAlert
         {
             Log.Verbose("ProfileManager.OnGameSave: {0}", node.ToString());
 
-            if (!node.HasNode("SCIENCEALERT_PROFILES")) node.AddNode("SCIENCEALERT_PROFILES");
+            if (!node.HasNode(PERSISTENT_NODE_NAME)) node.AddNode(PERSISTENT_NODE_NAME);
 
-            node = node.GetNode("SCIENCEALERT_PROFILES");
+            node = node.GetNode(PERSISTENT_NODE_NAME);
 
             Log.Verbose("ProfileManager.OnSave: Saving {0} vessel profiles", vesselProfiles.Count);
 
@@ -633,5 +584,50 @@ namespace ScienceAlert
             return string.Format("{0}:{1}", guid.ToString(), FindVesselName(guid));
         }
 #endregion
+    }
+
+
+    [KSPAddonImproved(KSPAddonImproved.Startup.Instantly, true)]
+    internal class PersistentDataPreserver : MonoBehaviour
+    {
+        ConfigNode preserved;
+
+        void Awake()
+        {
+            DontDestroyOnLoad(this);
+            Log.Normal("PersistentDataPreserver Active");
+
+            GameEvents.onGameStateLoad.Add(OnLoad);
+            GameEvents.onGameStateCreated.Add(OnCreate);
+            GameEvents.onGameStateSave.Add(OnSave);
+        }
+
+        void OnSave(ConfigNode node)
+        {
+            Log.Debug("PersistentDataPreserver.OnSave");
+
+            if (preserved != null && !HighLogic.LoadedSceneIsFlight)
+                node.AddNode(preserved);
+
+            if (HighLogic.LoadedSceneIsFlight) preserved = null;
+        }
+
+        void OnLoad(ConfigNode node)
+        {
+            Log.Debug("PersistentDataPreserver.OnLoad");
+
+            if (node.HasNode(ProfileManager.PERSISTENT_NODE_NAME))
+            {
+                Log.Warning("PersistentDataPreserver: Persistent data exists!");
+                preserved = node.GetNode(ProfileManager.PERSISTENT_NODE_NAME);
+            }
+            else Log.Error("PersistentDataPreserver: Persistent data lost!");
+        }
+
+        void OnCreate(Game game)
+        {
+            Log.Debug("PersistentDataPreserver.OnCreate");
+            Log.Debug("Game.config = {0}", game.config.ToString());
+        }
     }
 }

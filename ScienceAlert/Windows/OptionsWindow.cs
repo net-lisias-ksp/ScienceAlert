@@ -158,10 +158,6 @@ namespace ScienceAlert.Windows
 
         void OnDestroy()
         {
-            GameObject.Destroy(blocker.gameObject);
-
-            scienceAlert.Button.OnClick -= OnToolbarClicked;
-
             Log.Debug("OptionsWindow destroyed");
         }
 
