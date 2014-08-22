@@ -31,10 +31,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>C:\Program Files (x86)\Steam\SteamApps\common\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -44,7 +43,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>C:\Program Files (x86)\Steam\SteamApps\common\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -60,9 +59,6 @@
     <Compile Include="..\..\DebugTools\GuiUtil.cs">
       <Link>Tools\GuiUtil.cs</Link>
     </Compile>
-    <Compile Include="..\..\DebugTools\ImprovedAddonLoader.cs">
-      <Link>Tools\ImprovedAddonLoader.cs</Link>
-    </Compile>
     <Compile Include="..\..\DebugTools\Log.cs">
       <Link>Tools\Log.cs</Link>
     </Compile>
@@ -72,9 +68,10 @@
     <Compile Include="AudioController.cs" />
     <Compile Include="BiomeFilter.cs" />
     <Compile Include="ProfileData\ExperimentSettings.cs" />
-    <Compile Include="ProfileData\ModuleSAProfile.cs" />
+    <Compile Include="ProfileData\Mothballed\ModuleSAProfile.cs" />
     <Compile Include="ProfileData\Profile.cs" />
-    <Compile Include="ProfileData\ProfileStorage.cs" />
+    <Compile Include="ProfileData\Mothballed\ProfileStorage.cs" />
+    <Compile Include="ProfileData\ProfileManager.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
     <Compile Include="Windows\ExperimentManager.cs" />
     <Compile Include="Windows\DebugWindow.cs" />

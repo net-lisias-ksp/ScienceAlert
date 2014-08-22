@@ -47,6 +47,7 @@ namespace ScienceAlert
         private ScienceAlert scienceAlert;
         private StorageCache vesselStorage;
         private BiomeFilter biomeFilter;
+        private ProfileManager profiles;
 
         private System.Collections.IEnumerator watcher;
         private System.Collections.IEnumerator rebuilder;
@@ -69,6 +70,9 @@ namespace ScienceAlert
             vesselStorage = gameObject.AddComponent<StorageCache>();
             biomeFilter = gameObject.AddComponent<BiomeFilter>();
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
+            profiles = gameObject.GetComponent<ProfileManager>();
+
+            if (profiles == null) Log.Error("ExperimentManager: Failed to retrieve ProfileManager!");
 
             // event setup
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
@@ -536,8 +540,6 @@ namespace ScienceAlert
             while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed || scanInterface == null)
                 yield return 0;
 
-            while (Profile.Current == null)
-                yield return 0;
 
             // critical: there's a quiet issue where sometimes user get multiple
             //           experimentIds loaded (the one I know of at the moment is
@@ -556,19 +558,12 @@ namespace ScienceAlert
                             Log.Warning("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
 
                         }
-                        else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings(expid), biomeFilter, scanInterface, expid));
+                        else observers.Add(new ExperimentObserver(vesselStorage, profiles.ActiveProfile[expid], biomeFilter, scanInterface, expid));
 
                 // surfaceSample is a special case: it's technically available on any
                 // crewed vessel
-                observers.Add(new SurfaceSampleObserver(vesselStorage, Settings.Instance.GetExperimentSettings("surfaceSample"), biomeFilter, scanInterface));
+                observers.Add(new SurfaceSampleObserver(vesselStorage, profiles.ActiveProfile["surfaceSample"], biomeFilter, scanInterface));
 
-                //if (Settings.Instance.CheckSurfaceSampleNotEva)
-                //    if (Settings.Instance.GetExperimentSettings("surfaceSample").Enabled)
-                //        if (!FlightGlobals.ActiveVessel.isEVA)
-                //        {
-                //            observers.Add(new SurfaceSampleObserver(vesselStorage, Settings.Instance.GetExperimentSettings("surfaceSample"), biomeFilter, scanInterface));
-                //        }
-                //        else observers.Add(new ExperimentObserver(vesselStorage, Settings.Instance.GetExperimentSettings("surfaceSample"), biomeFilter, scanInterface, "surfaceSample"));
 
                 // evaReport is a special case.  It technically exists on any crewed
                 // vessel.  That vessel won't report it normally though, unless
@@ -578,16 +573,16 @@ namespace ScienceAlert
                 // so on) I think it's best we separate it out into its own
                 // Observer type that will account for these changes and any others
                 // that might not necessarily trigger a VesselModified event
-                if (Settings.Instance.GetExperimentSettings("evaReport").Enabled)
+                if (profiles.ActiveProfile["evaReport"].Enabled)
                 {
                     if (Settings.Instance.EvaReportOnTop)
                     {
                         observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-                        observers.Insert(0, new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter, scanInterface));
+                        observers.Insert(0, new EvaReportObserver(vesselStorage, profiles.ActiveProfile["evaReport"], biomeFilter, scanInterface));
                     }
                     else
                     {
-                        observers.Add(new EvaReportObserver(vesselStorage, Settings.Instance.GetExperimentSettings("evaReport"), biomeFilter, scanInterface));
+                        observers.Add(new EvaReportObserver(vesselStorage, profiles.ActiveProfile["evaReport"], biomeFilter, scanInterface));
                         observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
                     }
                 } else observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();

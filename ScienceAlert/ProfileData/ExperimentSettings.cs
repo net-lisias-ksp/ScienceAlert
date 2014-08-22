@@ -67,6 +67,8 @@ namespace ScienceAlert.ProfileData
             IsDefault = other.IsDefault;
         }
 
+
+
         public void OnLoad(ConfigNode node)
         {
             Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
@@ -86,6 +88,8 @@ namespace ScienceAlert.ProfileData
             IsDefault = ConfigUtil.Parse<bool>(node, "IsDefault", false);
         }
 
+
+
         public void OnSave(ConfigNode node)
         {
             node.AddValue("Enabled", Enabled);
@@ -96,6 +100,8 @@ namespace ScienceAlert.ProfileData
             node.AddValue("Filter", Filter);
             node.AddValue("IsDefault", IsDefault);
         }
+
+
 
         public override string ToString()
         {

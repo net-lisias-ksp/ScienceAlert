@@ -23,7 +23,7 @@ using System.Text;
 using UnityEngine;
 using ReeperCommon;
 
-namespace ScienceAlert
+namespace ScienceAlert.ProfileData
 {
     /// <summary>
     /// A set of experiment settings for a particular vessel
@@ -32,6 +32,9 @@ namespace ScienceAlert
     {
         [Persistent (isPersistant = true)]
         public string name = string.Empty;
+
+        [Persistent]
+        public bool modified = false;
 
         public Dictionary<string /* expid */, ProfileData.ExperimentSettings> settings;
 
@@ -63,6 +66,7 @@ namespace ScienceAlert
         {
             // default values
             Log.Verbose("Creating profile '{0}' with default values", name);
+            this.name = name;
             Setup();
         }
 
@@ -113,30 +117,40 @@ namespace ScienceAlert
 
 
 
+        /// <summary>
+        /// Saved into the node we're given
+        /// </summary>
+        /// <param name="node"></param>
         public void OnSave(ConfigNode node)
         {
             Log.Debug("Saving profile...");
 
-            Log.Debug("Created config: {0}", ConfigNode.CreateConfigFromObject(this, 0, node).ToString());
-
             ConfigNode.CreateConfigFromObject(this, 0, node);
 
             foreach (var kvp in settings)
-            {
                 kvp.Value.OnSave(node.AddNode(new ConfigNode(kvp.Key)));
-            }
 
             Log.Debug("Profile: OnSave config: {0}", node.ToString());
-#warning confirm this is right
         }
 
 
 
+        /// <summary>
+        /// Load from the node we're given
+        /// </summary>
+        /// <param name="node"></param>
         public void OnLoad(ConfigNode node)
         {
             Log.Debug("Loading profile...");
             ConfigNode.LoadObjectFromConfig(this, node);
-            Log.Debug("Profile name is '{0}'", name);
+            if (string.IsNullOrEmpty(name))
+            {
+                // the saved profile somehow doesn't have a name. Since we
+                // distinguish them this way, that's a pretty bad thing
+                name = "nameless." + Guid.NewGuid().ToString();
+                Log.Warning("Profile.OnLoad: Loaded a profile without a name specified! It has been renamed to '{0}'", name);
+                
+            } else Log.Debug("Profile name is '{0}'", name);
 
             // it's possible that the ConfigNode we're loading from has
             // extra experiment ids in it. Try to preserve those, if possible
@@ -155,11 +169,14 @@ namespace ScienceAlert
         }
 
 
+
         public Profile Clone()
         {
             Profile p = new Profile(this);
             return p;
         }
+
+
 
         /// <summary>
         /// Just a convenience function to make it more obvious what's 
@@ -172,6 +189,12 @@ namespace ScienceAlert
         }
 
 
+
+        /// <summary>
+        /// A shortcut to get experiment settings
+        /// </summary>
+        /// <param name="expid"></param>
+        /// <returns></returns>
         public ProfileData.ExperimentSettings this[string expid]
         {
             get
@@ -191,29 +214,6 @@ namespace ScienceAlert
             private set
             {
                 settings.Add(expid.ToLower(), value);
-            }
-        }
-
-
-        /// <summary>
-        /// merely a convenience property. Profile is just dumb data;
-        /// its owner ProfileStorage is where the current profile is
-        /// tracked
-        /// </summary>
-        public static Profile Current
-        {
-            get
-            {
-                if (ProfileStorage.Instance == null) return null;
-                return ProfileStorage.CurrentProfile;
-            }
-            set
-            {
-                if (ProfileStorage.Instance == null)
-                {
-                    Log.Error("Profile: ProfileStorage is null; cannot set current profile");
-                }
-                else ProfileStorage.CurrentProfile = value;
             }
         }
     }

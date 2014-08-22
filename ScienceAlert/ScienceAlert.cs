@@ -21,7 +21,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
- * 1.7.2
+ * 1.8
  *      Feature: Per-vessel profiles
  *      
  *      Feature: Draggable, pinnable windows
@@ -145,36 +145,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-//using Toolbar;
 using ReeperCommon;
-
-
-// TODO: prevent users from clicking on science button multiple times in rapid
-//          succession, activating multiple science reports? Most apparent time
-//          is when activating goo, which has a delay as it plays the open animation
-
-// TODO: manually selected transmitters ignore MagicTransmitter
-//          further thought: who really does this?  will think on it more
-
-// TODO: properly figure out total science value of all onboard reports
-//          (even multiple copies)
-
-// todo: separate science observer for surface samples like the eva one?
-
-// BUG: if an eva report is stored and the player goes on eva in the same
-// situation, ScienceAlert reports that an eva report is available
-//      haven't been able to verify this one
-
-
 
 
 namespace ScienceAlert
 {
-    
 
-
-
-    [ImprovedAddonLoader.KSPAddonImproved(ImprovedAddonLoader.KSPAddonImproved.Startup.Flight, false)]
+    [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ScienceAlert : MonoBehaviour
     {
         // --------------------------------------------------------------------
@@ -188,33 +165,25 @@ namespace ScienceAlert
         // interfaces
         private Settings.ToolbarInterface buttonInterfaceType = Settings.ToolbarInterface.ApplicationLauncher;
         private Settings.ScanInterface scanInterfaceType = Settings.ScanInterface.None;
-        
-
 
 
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                FlightGlobals.currentMainBody.BiomeMap.Attributes.ToList().ForEach(attr => Log.Write("Attribute: {0}", attr.name));
-            }
-
-            if (Input.GetKeyDown(KeyCode.O))
-                Log.Write("Attr: {0}", FlightGlobals.currentMainBody.BiomeMap.GetAtt(FlightGlobals.ship_latitude * Mathf.Deg2Rad, FlightGlobals.ship_longitude * Mathf.Deg2Rad).name);
-        }
-
-        void Start()
+        System.Collections.IEnumerator Start()
         {
 
+            Log.Write("Waiting on R&D...");
+            while (ResearchAndDevelopment.Instance == null) yield return 0;
+
+
+            Log.Normal("Initializing ScienceAlert");
 
 // just in case this has unforseen consequences later...
 // it should be okay since asteroidSample isn't actually defined
-// in scienceDefs
+// in scienceDefs, who would know to mess with it?
 #warning Changes asteroidSample title
-            Log.Normal("Renaming asteroidSample title");
+            Log.Verbose("Renaming asteroidSample title");
             var exp = ResearchAndDevelopment.GetExperiment("asteroidSample");
             if (exp != null) exp.experimentTitle = "Sample (Asteroid)";
             
@@ -223,9 +192,11 @@ namespace ScienceAlert
             AudioUtil.LoadSoundsFrom("/ScienceAlert/sounds", AudioType.WAV);
             Log.Debug("Sounds ready.");
 
+            Log.Normal("Creating profile manager");
+            gameObject.AddComponent<ProfileManager>();
+
             Log.Normal("Creating options window");
             gameObject.AddComponent<OptionsWindow>();
-            //optionsWindow = new OptionsWindow(this/*, effects.AudioController*/);
 
             Log.Normal("Creating experiment manager");
             gameObject.AddComponent<ExperimentManager>();
@@ -248,6 +219,8 @@ namespace ScienceAlert
             Log.Debug("ScienceAlert.Start: initializing toolbar");
             ToolbarType = Settings.Instance.ToolbarInterfaceType;
             Log.Normal("Toolbar button ready");
+
+            Log.Normal("ScienceAlert initialization finished.");
         }
 
 
@@ -257,6 +230,23 @@ namespace ScienceAlert
             Log.Debug("ScienceAlert destroyed");
 
         }
+
+#if DEBUG
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                var btns = GameObject.FindObjectsOfType<UIButton>();
+
+                btns.ToList().ForEach(b => Log.Write("UIButton: {0} at {1}", b.name, b.transform.position));
+
+                if (ScreenSafeUI.fetch.centerAnchor.bottom == null) Log.Error("nope");
+                Log.Write("center transform: {0}", ScreenSafeUI.fetch.centerAnchor.bottom.transform.position);
+                Log.Write("UImanager: {0}", UIManager.instance.transform.position);
+                Log.Write("ScreenSafeUI: {0}", ScreenSafeUI.fetch.transform.position);
+            }
+        }
+#endif
 
 
 

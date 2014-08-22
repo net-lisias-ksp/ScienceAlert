@@ -541,24 +541,24 @@ namespace ScienceAlert
 
                         switch (settings.Filter)
                         {
-                            case Settings.ExperimentSettings.FilterMethod.Unresearched:
+                            case ProfileData.ExperimentSettings.FilterMethod.Unresearched:
                                 // Fairly straightforward: total science + potential should be zero
                                 Available = scienceTotal < 0.0005f;
                                 break;
 
-                            case Settings.ExperimentSettings.FilterMethod.NotMaxed:
+                            case ProfileData.ExperimentSettings.FilterMethod.NotMaxed:
                                 // <98% of science cap
                                 Available = scienceTotal < subject.scienceCap * 0.98;
                                 break;
 
-                            case Settings.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
+                            case ProfileData.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
                                 // important note for these last two filters: we can only accurately
                                 // predict science for up to two of the same reports. After that,
                                 // it'll be highly overestimated
                                 Available = scienceTotal < subject.scienceCap * 0.5f;
                                 break;
 
-                            case Settings.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
+                            case ProfileData.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
                                 Available = scienceTotal < subject.scienceCap * 0.9f;
                                 break;
 

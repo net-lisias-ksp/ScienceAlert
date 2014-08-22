@@ -20,7 +20,6 @@ using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
 using ReeperCommon;
-using ImprovedAddonLoader;
 using System;
 
 namespace ScienceAlert.Toolbar
@@ -132,6 +131,7 @@ namespace ScienceAlert.Toolbar
             Log.Debug("stock button click");
             button.Drawable = null;
         }
+
 
 
         /// <summary>

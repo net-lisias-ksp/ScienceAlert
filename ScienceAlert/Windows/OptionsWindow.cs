@@ -45,7 +45,11 @@ namespace ScienceAlert
         private List<GUIContent> filterList = new List<GUIContent>();
         private string sciMinValue = "0";
         private bool additionalOptions = false; // flag set when additional options subwindow is open
+
         private ScienceAlert scienceAlert;
+        private ProfileManager profiles;
+
+        private UIButton blocker;
 
         // Materials and textures
         Texture2D collapseButton = new Texture2D(24, 24);
@@ -59,6 +63,7 @@ namespace ScienceAlert
         void Awake()
         {
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
+            profiles = gameObject.GetComponent<ProfileManager>();
 
             windowRect = new Rect(0, 0, 324, Screen.height / 5 * 3);
 
@@ -67,7 +72,7 @@ namespace ScienceAlert
 
             foreach (var id in sortedIds)
             {
-                experimentIds.Add(id, (int)Convert.ChangeType(Settings.Instance.GetExperimentSettings(id).Filter, Settings.Instance.GetExperimentSettings(id).Filter.GetTypeCode()));
+                experimentIds.Add(id, (int)Convert.ChangeType(profiles.ActiveProfile[id].Filter, profiles.ActiveProfile[id].Filter.GetTypeCode()));
                 Log.Debug("Settings: experimentId {0} has filter index {1}", id, experimentIds[id]);
             }
 
@@ -113,19 +118,26 @@ namespace ScienceAlert
             //redToggle.toggle.onHover.textColor =
             //redToggle.toggle.onActive.textColor = Color.red;
             //redToggle.toggle.normal.
+
+            blocker = GuiUtil.CreateBlocker(windowRect);
+            blocker.Hide(true);
         }
 
 
 
         void OnDestroy()
         {
+            GameObject.Destroy(blocker.gameObject);
             Log.Debug("OptionsWindow destroyed");
         }
 
 
         public void Update()
         {
-            // required by IDrawable
+            blocker.Hide(scienceAlert.Button.Drawable is OptionsWindow ? false : true);
+
+            if (!blocker.IsHidden())
+                GuiUtil.RepositionButton(blocker, windowRect);
         }
 
 
@@ -329,9 +341,11 @@ namespace ScienceAlert
                         {
                             GUILayout.Space(4f);
 
-                            var settings = Settings.Instance.GetExperimentSettings(key);
+                            var settings = profiles.ActiveProfile[key];
 
                             // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
+                            //   note: band-aided this in ScienceAlert.Start; leaving this note here in case
+                            //         just switching an experiment's title causes issues later
                             var title = ResearchAndDevelopment.GetExperiment(key).experimentTitle;
 #if DEBUG
                             GUILayout.Box(title + string.Format(" ({0})", ResearchAndDevelopment.GetExperiment(key).id), GUILayout.ExpandWidth(true));

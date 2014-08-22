@@ -61,12 +61,6 @@ namespace ScienceAlert
 
 
         
-
-
-
-
-
-        
         private GUISkin skin;
 
 /******************************************************************************
@@ -75,42 +69,37 @@ namespace ScienceAlert
         private Settings()
         {
             // set default values
-            PerExperimentSettings = new Dictionary<string, ExperimentSettings>();
+                skin = GameObject.Instantiate(HighLogic.Skin) as GUISkin;
 
-            foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                PerExperimentSettings[expid] = new ExperimentSettings();
+                // adjust the skin a little bit.  It wastes a lot of space in its
+                // current form
 
-            skin = GameObject.Instantiate(HighLogic.Skin) as GUISkin;
+                    skin.button.fixedHeight = 24f;
+                    skin.button.padding = new RectOffset() { left = 2, right = 2, top = 0, bottom = 0 };
+                    skin.button.border = new RectOffset() { left = 2, right = 2, top = 1, bottom = 1 };
 
-            // adjust the skin a little bit.  It wastes a lot of space in its
-            // current form
+                    skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
+                    //skin.toggle.padding.left = skin.toggle.padding.right = skin.toggle.padding.top = skin.toggle.padding.bottom = 0;
+                    skin.toggle.margin = new RectOffset(5, 0, 0, 0);
+                    skin.toggle.padding = new RectOffset() { left = 5, top = 3, right = 3, bottom = 3 };
 
-                skin.button.fixedHeight = 24f;
-                skin.button.padding = new RectOffset() { left = 2, right = 2, top = 0, bottom = 0 };
-                skin.button.border = new RectOffset() { left = 2, right = 2, top = 1, bottom = 1 };
+                    skin.box.alignment = TextAnchor.MiddleCenter;
+                    skin.box.padding = new RectOffset(2, 2, 8, 5);
+                    skin.box.contentOffset = new Vector2(0, 0f);
 
-                skin.toggle.border.top = skin.toggle.border.bottom = skin.toggle.border.left = skin.toggle.border.right = 0;
-                //skin.toggle.padding.left = skin.toggle.padding.right = skin.toggle.padding.top = skin.toggle.padding.bottom = 0;
-                skin.toggle.margin = new RectOffset(5, 0, 0, 0);
-                skin.toggle.padding = new RectOffset() { left = 5, top = 3, right = 3, bottom = 3 };
-
-                skin.box.alignment = TextAnchor.MiddleCenter;
-                skin.box.padding = new RectOffset(2, 2, 8, 5);
-                skin.box.contentOffset = new Vector2(0, 0f);
-
-                //skin.label.fontSize = skin.label.fontSize - 2;
+                    //skin.label.fontSize = skin.label.fontSize - 2;
                 
 
-            // default sane values, just in case the config doesn't exist
-                EvaAtmospherePressureWarnThreshold = 0.00035;
-                EvaAtmosphereVelocityWarnThreshold = 30;
+                // default sane values, just in case the config doesn't exist
+                    EvaAtmospherePressureWarnThreshold = 0.00035;
+                    EvaAtmosphereVelocityWarnThreshold = 30;
 
-                ScanInterfaceType = ScanInterface.None;
-                ShowReportValue = false;
-                EvaReportOnTop = false;
-                ReopenOnEva = false;
-                CheckSurfaceSampleNotEva = false;
-                DisplayCurrentBiome = false;
+                    ScanInterfaceType = ScanInterface.None;
+                    ShowReportValue = false;
+                    EvaReportOnTop = false;
+                    ReopenOnEva = false;
+                    CheckSurfaceSampleNotEva = false;
+                    DisplayCurrentBiome = false;
 
             Load();
         }

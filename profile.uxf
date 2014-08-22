@@ -110,7 +110,7 @@ bg=blue</panel_attributes>
       <w>350</w>
       <h>120</h>
     </coordinates>
-    <panel_attributes>ProfileManager
+    <panel_attributes>ScienceAlertProfileManager (ScenarioModule)
 --
 - cfg stored in ScienceAlert directory
 - Vessels identified by GUID
