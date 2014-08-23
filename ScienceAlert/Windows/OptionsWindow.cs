@@ -576,22 +576,15 @@ namespace ScienceAlert.Windows
                 {
                     GUILayout.Box(string.Format("Profile: {0}", ProfileManager.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
 
-                    // Save profile (only enabled if profile was actually modified)
-                    GUI.enabled = ProfileManager.ActiveProfile.modified;
+                    // rename profile (only enabled if modified)
+                    if (AudibleButton(new GUIContent(renameButton), GUILayout.MaxWidth(24)))
+                        SpawnRenamePopup(ProfileManager.ActiveProfile);
+
+                    // Save profile (only enabled if profile was actually modified, or if a stored profile of that name doesn't exist)
+                    GUI.enabled = ProfileManager.ActiveProfile.modified || !ProfileManager.HaveStoredProfile(ProfileManager.ActiveProfile.name);
                     if (AudibleButton(new GUIContent(saveButton), GUILayout.MaxWidth(24)))
-                    {
-                        // spawn popup window ...
-                        // 267441
-                        Log.Write("267441 popup dialog: {0}", ReeperCommon.StringDumper.GetKSPString(267441));
-
-                        // 267404 vesselRenameDialog
-                        Log.Write("267404 control lock: {0}", ReeperCommon.StringDumper.GetKSPString(267404));
-
-                        //InputLockManager.SetControlLock("vesselRenameDialog");
-                        //InputLockManager.SetControlLock(ControlTypes.ACTIONS_ALL, "SaveProfileLock");
-                        //PopupDialog.SpawnPopupDialog(new MultiOptionDialog("Save profile as ...", DrawRenameWindow, "Choose a name for this profile"), false, HighLogic.Skin);
                         SpawnSavePopup();
-                    }
+                    
                     GUI.enabled = true;
 
                     // Open profile (always available, warn user if profile modified)
@@ -623,7 +616,7 @@ namespace ScienceAlert.Windows
 #else
                             GUILayout.Box(title, GUILayout.ExpandWidth(true));
 #endif
-                        //GUILayout.Space(4f);
+
                         settings.Enabled = AudibleToggle(settings.Enabled, "Enabled");
                         settings.AnimationOnDiscovery = AudibleToggle(settings.AnimationOnDiscovery, "Animation on discovery");
                         settings.SoundOnDiscovery = AudibleToggle(settings.SoundOnDiscovery, "Sound on discovery");
@@ -702,15 +695,19 @@ namespace ScienceAlert.Windows
 
                 // rename button
                 GUI.enabled = profile != ProfileManager.DefaultProfile;
-                AudibleButton(new GUIContent(renameButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
+                if (AudibleButton(new GUIContent(renameButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24)))
+                    SpawnRenamePopup(profile);
                 
                 // open button
                 GUI.enabled = true;
-                AudibleButton(new GUIContent(openButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
+                if (AudibleButton(new GUIContent(openButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24)))
+                    SpawnOpenPopup(profile);
 
                 // delete button
                 GUI.enabled = profile != ProfileManager.DefaultProfile;
-                AudibleButton(new GUIContent(deleteButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24));
+                if (AudibleButton(new GUIContent(deleteButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24)))
+                    SpawnDeletePopup(profile);
+
                 GUI.enabled = true;
             }
             GUILayout.EndHorizontal();

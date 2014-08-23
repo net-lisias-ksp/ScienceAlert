@@ -13,6 +13,9 @@ namespace ScienceAlert.Windows
     {
         internal string editText = string.Empty;
         internal string lockName = string.Empty;
+        internal bool flag = false;
+        internal ProfileData.Profile editProfile;
+
         internal PopupDialog popup;
 
 #region save popup
@@ -55,6 +58,7 @@ namespace ScienceAlert.Windows
 
 
 
+
         private void SaveCurrentProfile()
         {
             popup.Dismiss();
@@ -82,6 +86,155 @@ namespace ScienceAlert.Windows
         }
         
 #endregion
+
+#region rename popup
+        /// <summary>
+        /// Renames the specified profile
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="clone"></param>
+        private void SpawnRenamePopup(ProfileData.Profile target)
+        {
+            editProfile = target;
+            editText = target.name;
+            LockControls("ScienceAlertRenamePopup");
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", ProfileManager.ActiveProfile.name), HighLogic.Skin, new DialogOption[] { new DialogOption("Rename", new Callback(RenameTargetProfile)), new DialogOption("Cancel", new Callback(DismissPopup)) }), false, HighLogic.Skin);
+        }
+
+
+
+        private void DrawRenameWindow()
+        {
+            GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+            {
+                GUI.SetNextControlName("ProfileName");
+                editText = GUILayout.TextField(editText, GUILayout.ExpandWidth(true));
+
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+
+                if (AudibleButton(new GUIContent("Accept"))) RenameTargetProfile();
+                if (AudibleButton(new GUIContent("Cancel"))) DismissPopup();
+
+                GUI.FocusControl("ProfileName");
+            }
+            GUILayout.EndVertical();
+
+            if (Event.current.type == EventType.KeyUp)
+            {
+                if (Event.current.keyCode == KeyCode.KeypadEnter || Event.current.keyCode == KeyCode.Return)
+                    RenameTargetProfile();
+
+                if (Event.current.keyCode == KeyCode.Escape)
+                    DismissPopup();
+            }
+        }
+
+
+
+        /// <summary>
+        /// Attempt to rename target profile. If it's a stored profile and one
+        /// of that name already exists, ask user for confirmation
+        /// </summary>
+        private void RenameTargetProfile()
+        {
+
+            if (editProfile.modified || !ProfileManager.HaveStoredProfile(editProfile.name))
+            {
+                // vessel profile: no need to check stored data
+                RenameTargetProfileOverwrite();
+                
+            }
+            else
+            {
+                // check to see if this stored profile already exists
+                if (ProfileManager.HaveStoredProfile(editText))
+                {
+                    // conflict!
+                    popup.Dismiss();
+                    popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("'{0}' already exists. Overwrite?", editText), HighLogic.Skin, new DialogOption[] { new DialogOption("Yes", new Callback(RenameTargetProfileOverwrite)), new DialogOption("No", new Callback(DismissPopup)) }), false, HighLogic.Skin);
+                    return;
+                }
+                else 
+                {
+                    RenameTargetProfileOverwrite(); // okay to overwrite
+                }
+            }
+            
+            DismissPopup();
+        }
+
+
+
+        /// <summary>
+        /// Rename target profile and don't ask user for permission
+        /// </summary>
+        private void RenameTargetProfileOverwrite()
+        {
+            if (editProfile.modified == false && ProfileManager.HaveStoredProfile(editProfile.name))
+            {
+                ProfileManager.RenameProfile(editProfile.name, editText);
+
+                // if the active profile is unmodified and links to the renamed stored 
+                // profile, then rename it as well
+                if (!ProfileManager.ActiveProfile.modified)
+                    ProfileManager.ActiveProfile.name = editText;
+            }
+            else
+            {
+                editProfile.name = editText;
+                editProfile.modified = true;
+            }
+
+            DismissPopup();
+        }
+
+#endregion
+
+#region delete popup
+
+        private void SpawnDeletePopup(ProfileData.Profile target)
+        {
+            editProfile = target;
+            LockControls("ScienceAlertDeletePopup");
+
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Are you sure you want to delete '{0}'?", target.name), HighLogic.Skin, new DialogOption("Confirm", DeleteTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
+        }
+
+
+
+        private void DeleteTargetProfile()
+        {
+            DismissPopup();
+            ProfileManager.DeleteProfile(editProfile.name);
+        }
+
+
+
+#endregion
+
+        #region load popup
+
+        private void SpawnOpenPopup(ProfileData.Profile target)
+        {
+            editProfile = target;
+            LockControls("ScienceAlertOpenPopup");
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Load '{0}'? Unsaved settings will be lost.", editProfile.name), HighLogic.Skin, new DialogOption("Confirm", LoadTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
+        }
+
+        private void LoadTargetProfile()
+        {
+            DismissPopup();
+
+            if (ProfileManager.AssignAsActiveProfile(editProfile.Clone()))
+            {
+                Log.Normal("Assigned new active profile: {0]", editProfile.name);
+                submenu = OpenPane.None; // close panel
+            }
+            else Log.Error("Failed to load '{0}'", editProfile.name);
+        }
+
+        #endregion
 
         private void LockControls(string lockName)
         {

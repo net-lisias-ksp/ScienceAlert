@@ -89,6 +89,8 @@ namespace ScienceAlert.ProfileData
                 settings.Add(otherKey, new ProfileData.ExperimentSettings(other.settings[otherKey]));
 
             name = String.Copy(other.name);
+            modified = other.modified;
+
             RegisterEvents();
         }
 
