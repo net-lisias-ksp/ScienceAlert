@@ -17,6 +17,8 @@ namespace ScienceAlert.Windows
         internal ProfileData.Profile editProfile;
 
         internal PopupDialog popup;
+        internal Rect popupRect = new Rect(Screen.width / 2f - 380f / 2f, Screen.height / 2 - 200f / 2f, 380f, 200f);
+        internal string badChars = "()[]?'\":#$%^&*~;\n\t\r!@,.{}/<>";
 
 #region save popup
         void SpawnSavePopup()
@@ -66,7 +68,7 @@ namespace ScienceAlert.Windows
             if (ProfileManager.HaveStoredProfile(editText))
             {
                 Log.Warning("Existing profile named '{0}' found! Asking user for overwrite permission.", editText);
-                popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog("Overwrite existing profile?", string.Format("Profile '{0}' already exists!", editText), HighLogic.Skin, new DialogOption[] { new DialogOption("Overwrite", new Callback(SaveCurrentProfileOverwrite)), new DialogOption("Cancel", new Callback(DismissPopup)) }), false, HighLogic.Skin);
+                popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog("Overwrite existing profile?", string.Format("Profile '{0}' already exists!", editText), HighLogic.Skin, new DialogOption[] { new DialogOption("Overwrite", new Callback(SaveCurrentProfileOverwrite)), new DialogOption("Cancel", new Callback(DismissPopup)) }) { dialogRect = popupRect }, false, HighLogic.Skin);
             }
             else SaveCurrentProfileOverwrite(); // save to go ahead and save since no existing profile with this key exists
         }
@@ -98,7 +100,8 @@ namespace ScienceAlert.Windows
             editProfile = target;
             editText = target.name;
             LockControls("ScienceAlertRenamePopup");
-            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", ProfileManager.ActiveProfile.name), HighLogic.Skin, new DialogOption[] { new DialogOption("Rename", new Callback(RenameTargetProfile)), new DialogOption("Cancel", new Callback(DismissPopup)) }), false, HighLogic.Skin);
+            //popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", ProfileManager.ActiveProfile.name), HighLogic.Skin, new DialogOption[] { new DialogOption("Rename", new Callback(RenameTargetProfile)), new DialogOption("Cancel", new Callback(DismissPopup)) }), false, HighLogic.Skin);
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", ProfileManager.ActiveProfile.name), HighLogic.Skin), false, HighLogic.Skin);
         }
 
 
@@ -108,6 +111,16 @@ namespace ScienceAlert.Windows
             GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
             {
                 GUI.SetNextControlName("ProfileName");
+
+                if (Event.current.isKey)
+                {
+                    if (Event.current.type == EventType.KeyDown)
+                        if (badChars.Contains(Event.current.character))
+                            Event.current.character = '\0';
+                    if (Event.current.keyCode == KeyCode.Space)
+                        Event.current.character = '_';
+                }
+
                 editText = GUILayout.TextField(editText, GUILayout.ExpandWidth(true));
 
                 GUILayout.BeginHorizontal();
@@ -116,12 +129,16 @@ namespace ScienceAlert.Windows
                 if (AudibleButton(new GUIContent("Accept"))) RenameTargetProfile();
                 if (AudibleButton(new GUIContent("Cancel"))) DismissPopup();
 
+                GUILayout.EndHorizontal();
+
                 GUI.FocusControl("ProfileName");
             }
             GUILayout.EndVertical();
 
-            if (Event.current.type == EventType.KeyUp)
+            if (Event.current.isKey)
             {
+                editText = editText.Replace(' ', '\0');
+
                 if (Event.current.keyCode == KeyCode.KeypadEnter || Event.current.keyCode == KeyCode.Return)
                     RenameTargetProfile();
 
@@ -143,7 +160,6 @@ namespace ScienceAlert.Windows
             {
                 // vessel profile: no need to check stored data
                 RenameTargetProfileOverwrite();
-                
             }
             else
             {
@@ -152,7 +168,7 @@ namespace ScienceAlert.Windows
                 {
                     // conflict!
                     popup.Dismiss();
-                    popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("'{0}' already exists. Overwrite?", editText), HighLogic.Skin, new DialogOption[] { new DialogOption("Yes", new Callback(RenameTargetProfileOverwrite)), new DialogOption("No", new Callback(DismissPopup)) }), false, HighLogic.Skin);
+                    popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("'{0}' already exists. Overwrite?", editText), HighLogic.Skin, new DialogOption[] { new DialogOption("Yes", new Callback(RenameTargetProfileOverwrite)), new DialogOption("No", new Callback(DismissPopup)) }) { dialogRect = popupRect }, false, HighLogic.Skin);
                     return;
                 }
                 else 
@@ -222,6 +238,8 @@ namespace ScienceAlert.Windows
             popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Load '{0}'? Unsaved settings will be lost.", editProfile.name), HighLogic.Skin, new DialogOption("Confirm", LoadTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
         }
 
+
+
         private void LoadTargetProfile()
         {
             DismissPopup();
@@ -242,6 +260,8 @@ namespace ScienceAlert.Windows
             InputLockManager.SetControlLock(ControlTypes.ACTIONS_ALL, lockName);
             Log.Debug("OptionsWindow_Popups: Locked controls with {0}", lockName);
         }
+
+
 
         private void DismissPopup()
         {
