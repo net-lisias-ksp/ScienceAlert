@@ -587,17 +587,45 @@ namespace ScienceAlert
         }
 
 
+
+        /// <summary>
+        /// Renames a profile. If it's stored, the stored name itself is changed otherwise only
+        /// the vessel profile is affected
+        /// </summary>
+        /// <param name="oldName"></param>
+        /// <param name="newName"></param>
         public static void RenameProfile(string oldName, string newName)
         {
             var p = FindStoredProfile(oldName);
 
             if (p != null)
             {
-                Log.Normal("Renaming stored profile '{0}' to '{1}'", oldName, newName);
-                p.name = newName;
+                if (DefaultProfile.Equals(p))
+                {
+                    Log.Warning("User attempting to rename default profile. Renaming a clone instead.");
+                    var cloned = p.Clone();
+
+                    cloned.name = newName;
+                    AssignAsActiveProfile(cloned);
+
+                    cloned.modified = p.modified;
+
+                    // if we're dealing with a stored profile here, we need to actually save the new clone
+                    // else it won't appear for other craft
+                    if (!cloned.modified)
+                        StoreActiveProfile(newName);
+                    
+                }
+                else
+                {
+                    Log.Normal("Renaming stored profile '{0}' to '{1}'", oldName, newName);
+                    p.name = newName;
+                }
             }
             else Log.Warning("ProfileManager: Cannot rename profile '{0}' because it was not found.");
         }
+
+
 
         /// <summary>
         /// Loads a stored profile

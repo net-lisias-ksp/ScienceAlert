@@ -157,10 +157,12 @@ namespace ScienceAlert.Windows
         }
 
 
+
         public void Update()
         {
             // Required by IDrawable
         }
+
 
 
         #region Events
