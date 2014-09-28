@@ -61,8 +61,6 @@ namespace ScienceAlert.Windows
 
         private ScienceAlert scienceAlert;
 
-        private UIButton blocker;
-
         // Materials and textures
         Texture2D collapseButton = new Texture2D(24, 24);
         Texture2D expandButton = new Texture2D(24, 24);
@@ -149,9 +147,6 @@ namespace ScienceAlert.Windows
             scienceAlert.Button.OnClick += OnToolbarClicked;
 
             submenu = OpenPane.None;
-
-            blocker = GuiUtil.CreateBlocker(windowRect);
-            blocker.Hide(true);
         }
 
 
@@ -162,15 +157,9 @@ namespace ScienceAlert.Windows
         }
 
 
-
         public void Update()
         {
-            // hide the blocking area if the player mouses over one of the stock widgets
-            //blocker.Hide((scienceAlert.Button.Drawable is OptionsWindow) && scienceAlert.Button.Drawable != null || scienceAlert.Button.Drawable == null ? false : true);
-            blocker.Hide(scienceAlert.Button.Drawable == null);
-
-            if (!blocker.IsHidden())
-                blocker.Move(windowRect);
+            // Required by IDrawable
         }
 
 
