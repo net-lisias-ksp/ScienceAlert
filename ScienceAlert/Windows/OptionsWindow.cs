@@ -19,8 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-//using System.Text;
 using UnityEngine;
+using System.Globalization;
 using ReeperCommon;
 
 namespace ScienceAlert.Windows
@@ -46,7 +46,7 @@ namespace ScienceAlert.Windows
 
         private Dictionary<string /* expid */, int /* selected index */> experimentIds = new Dictionary<string, int>();
         private List<GUIContent> filterList = new List<GUIContent>();
-        private string sciMinValue = "0";
+        private string thresholdValue = "0";                        // temporary threshold string
 
         internal enum OpenPane
         {
@@ -72,12 +72,25 @@ namespace ScienceAlert.Windows
         Texture2D blackPixel = new Texture2D(1, 1);
         GUISkin whiteLabel;
 
+        // locale
+        NumberFormatInfo formatter;
+
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
 
         void Start()
         {
+            // culture setting
+            Log.Normal("Configuring NumberFormatInfo for current locale");
+            formatter = (NumberFormatInfo)NumberFormatInfo.CurrentInfo.Clone();
+            formatter.CurrencySymbol = string.Empty;
+            formatter.CurrencyDecimalDigits = 2;
+            formatter.NumberDecimalDigits = 2;
+            formatter.PercentDecimalDigits = 2;
+            
+
+
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
 
             windowRect = new Rect(0, 0, 324, Screen.height / 5 * 3);
@@ -105,7 +118,7 @@ namespace ScienceAlert.Windows
             filterList.Add(new GUIContent("< 90% collected"));
 
             //sciMinValue = Settings.Instance.ScienceThreshold.ToString();
-            sciMinValue = ScienceAlertProfileManager.ActiveProfile.scienceThreshold.ToString();
+            //sciMinValue = ScienceAlertProfileManager.ActiveProfile.scienceThreshold.ToString();
 
             openButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnOpen.png", false);
             saveButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnSave.png", false);
@@ -155,6 +168,8 @@ namespace ScienceAlert.Windows
         void OnDestroy()
         {
             Log.Debug("OptionsWindow destroyed");
+
+
         }
 
 
@@ -176,6 +191,15 @@ namespace ScienceAlert.Windows
         /// <param name="ci"></param>
         public void OnToolbarClicked(Toolbar.ClickInfo ci)
         {
+            if (InputLockManager.GetControlLock("ScienceAlertThreshold") != ControlTypes.None)
+            {
+                Log.Debug("OptionsWindow.OnToolbarClicked: found threshold lock");
+                InputLockManager.RemoveControlLock("ScienceAlertThreshold");
+            }
+
+            
+
+
             if (ci.used) return;
 
             if (scienceAlert.Button.Drawable == null)
@@ -186,9 +210,7 @@ namespace ScienceAlert.Windows
 
                     if (scienceAlert.Button.Drawable is OptionsWindow)
                     {
-                        scienceAlert.Button.Drawable = null;
-                        Log.Debug("Closing options window");
-                        AudioUtil.Play("click1");
+                        CloseOptionsWindow();
                     }
                     else
                     {
@@ -201,10 +223,21 @@ namespace ScienceAlert.Windows
             {
                 // we're open, non-right mouse button was clicked so close the window
                 ci.Consume();
-                Log.Debug("Closing options window");
-                scienceAlert.Button.Drawable = null;
-                AudioUtil.Play("click1", 0.05f);
+                CloseOptionsWindow();
             }
+        }
+
+
+
+        private void CloseOptionsWindow()
+        {
+            if (!(scienceAlert.Button.Drawable is OptionsWindow)) Log.Warning("OptionsWindow.CloseOptionsWindow called with non-options window drawable"); // would indicate a bug
+
+            thresholdValue = string.Empty; // reset user-entered string; will be updated with proper value next time the options window is opened
+
+            Log.Debug("Closing options window");
+            scienceAlert.Button.Drawable = null;
+            AudioUtil.Play("click1", 0.05f);
         }
 
 
@@ -377,6 +410,7 @@ namespace ScienceAlert.Windows
 
                 GUILayout.BeginVertical(GUILayout.ExpandHeight(true));
                 {
+
 #region Alert settings
                     {
                         GUILayout.Box("Miscellaneous Alert Settings", GUILayout.ExpandWidth(true));
@@ -391,55 +425,6 @@ namespace ScienceAlert.Windows
                             if (!Settings.Instance.FlaskAnimationEnabled && scienceAlert.Button.IsAnimating) scienceAlert.Button.SetLit();
                         }
                         GUILayout.EndHorizontal();
-
-
-                        //-----------------------------------------------------
-                        // ignore report threshold
-                        //-----------------------------------------------------
-                        {
-                            //GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            //{
-                            //    GUILayout.Label(new GUIContent("Enable Minimum Science Threshold"), GUILayout.ExpandWidth(true));
-                            //    Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                            //}
-                            //GUILayout.EndHorizontal();
-
-
-                            //GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            //{
-                            //    GUILayout.Space(24f);
-                            //    GUILayout.Label("Ignore reports worth less than:");
-                            //    string newValue = GUILayout.TextField(sciMinValue, 5, GUILayout.MinWidth(24f));
-                            //    newValue = newValue.Replace(',', '.');
-
-                            //    float converted = 0f;
-
-                            //    if (!string.Equals(sciMinValue, newValue))
-                            //        if (string.IsNullOrEmpty(newValue))
-                            //        {
-                            //            Settings.Instance.ScienceThreshold = 0f;
-                            //            sciMinValue = newValue;
-                            //        }
-                            //        else
-                            //        {
-                            //            if (float.TryParse(newValue, out converted))
-                            //            {
-                            //                Settings.Instance.ScienceThreshold = Mathf.Max(0f, converted);
-                            //                sciMinValue = newValue;
-
-                            //                Log.Debug("ScienceThreshold is now {0}", Settings.Instance.ScienceThreshold);
-                            //            }
-                            //            else
-                            //            {
-                            //                AudioUtil.Play("error");
-
-                            //                Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
-                            //                Log.Debug("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
-                            //            }
-                            //        }
-                            //}
-                            //GUILayout.EndHorizontal();
-                        }
 
 
                         //-----------------------------------------------------
@@ -545,6 +530,7 @@ namespace ScienceAlert.Windows
 
                     } // end crewed vessel settings
                     #endregion
+
                 }
                 GUILayout.EndVertical();
 
@@ -563,20 +549,25 @@ namespace ScienceAlert.Windows
         {
             if (ProfileManager.HasActiveProfile)
             {
+                //-----------------------------------------------------
                 // Active profile header with buttons
+                //-----------------------------------------------------
+#region active profile header
+
                 GUILayout.BeginHorizontal();
                 {
                     GUILayout.Box(string.Format("Profile: {0}", ProfileManager.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
 
-                    // rename profile (only enabled if modified)
+                    // rename profile button
                     if (AudibleButton(new GUIContent(renameButton), GUILayout.MaxWidth(24)))
                         SpawnRenamePopup(ProfileManager.ActiveProfile);
 
-                    // Save profile (only enabled if profile was actually modified, or if a stored profile of that name doesn't exist)
-                    GUI.enabled = ProfileManager.ActiveProfile.modified || !ProfileManager.HaveStoredProfile(ProfileManager.ActiveProfile.name);
+                    // Save profile (only enabled if profile was actually modified)
+                    GUI.enabled = ProfileManager.ActiveProfile.modified;
                     if (AudibleButton(new GUIContent(saveButton), GUILayout.MaxWidth(24)))
-                        SpawnSavePopup();
-                    
+                    {
+                        SaveCurrentProfile();
+                    }
                     GUI.enabled = true;
 
                     // Open profile (always available, warn user if profile modified)
@@ -586,11 +577,102 @@ namespace ScienceAlert.Windows
                 }
                 GUILayout.EndHorizontal();
 
+                #endregion
+
+                //-----------------------------------------------------
                 // scrollview with experiment options
+                //-----------------------------------------------------
+#region experiment scrollview 
+
                 scrollPos = GUILayout.BeginScrollView(scrollPos, Settings.Skin.scrollView);
                 {
                     GUI.skin = Settings.Skin;
+                    GUILayout.Space(4f);
 
+
+                    //-----------------------------------------------------
+                    // min threshold slider ui
+                    //-----------------------------------------------------
+                    #region min threshold slider
+                    GUILayout.Box("Alert Threshold");
+
+                    GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true), GUILayout.MinHeight(14f));
+                    {
+                        if (ProfileManager.ActiveProfile.ScienceThreshold > 0f)
+                        {
+                            GUILayout.Label(string.Format("Alert Threshold: {0}", ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter)));
+                        }
+                        else
+                        {
+                            var prev = GUI.color;
+                            GUI.color = XKCDColors.Salmon;
+                            GUILayout.Label("(disabled)");
+                            GUI.color = prev;
+                        }
+
+                        GUILayout.FlexibleSpace();
+                        
+
+                        if (string.IsNullOrEmpty(thresholdValue)) thresholdValue = ProfileManager.ActiveProfile.scienceThreshold.ToString("F2", formatter);
+
+                        GUI.SetNextControlName("ThresholdText");
+                        string result = GUILayout.TextField(thresholdValue, GUILayout.MinWidth(60f));
+
+                        if (GUI.GetNameOfFocusedControl() == "ThresholdText") // only use text field value if it's focused; if we don't
+                        // do this, then it'll continuously overwrite the slider value
+                        {
+                            try
+                            {
+                                float parsed = float.Parse(result, formatter);
+                                ProfileManager.ActiveProfile.ScienceThreshold = parsed;
+
+                                thresholdValue = result;
+                            }
+                            catch (Exception) // just in case
+                            {
+                            }
+
+                            if (!InputLockManager.IsLocked(ControlTypes.ACTIONS_ALL))
+                                InputLockManager.SetControlLock(ControlTypes.ACTIONS_ALL, "ScienceAlertThreshold");
+                        }
+                        else if (InputLockManager.GetControlLock("ScienceAlertThreshold") != ControlTypes.None)
+                            InputLockManager.RemoveControlLock("ScienceAlertThreshold");
+
+
+                    }
+                    GUILayout.EndHorizontal();
+
+
+                    GUILayout.Space(3f); // otherwise the TextField will overlap the slider just slightly
+
+                    // threshold slider
+                    float newThreshold = GUILayout.HorizontalSlider(ProfileManager.ActiveProfile.ScienceThreshold, 0f, 100f, GUILayout.ExpandWidth(true), GUILayout.Height(14f));
+                    if (newThreshold != ProfileManager.ActiveProfile.scienceThreshold)
+                    {
+                        ProfileManager.ActiveProfile.ScienceThreshold = newThreshold;
+                        thresholdValue = newThreshold.ToString("F2", formatter);
+                    }
+
+
+                    // slider min/max value display. Put under slider because I couldn't get it centered on the sides
+                    // properly and it just looked strange
+                    GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true), GUILayout.MaxHeight(10f));
+                    var prevColor = GUI.color;
+                    GUI.color = XKCDColors.Dark;
+                    GUILayout.Label("0");
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("Science Amount");
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("100");
+                    GUILayout.EndHorizontal();
+
+                    GUI.color = prevColor;
+
+                    #endregion
+
+                    GUILayout.Space(10f);
+
+                    // individual experiment settings
                     var keys = new List<string>(experimentIds.Keys);
 
                     foreach (var key in keys)
@@ -631,6 +713,8 @@ namespace ScienceAlert.Windows
                     }
                 }
                 GUILayout.EndScrollView();
+
+                #endregion
             }
             else
             { // no active profile

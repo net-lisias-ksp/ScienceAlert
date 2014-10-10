@@ -63,7 +63,11 @@ namespace ScienceAlert.Windows
 
         private void SaveCurrentProfile()
         {
-            popup.Dismiss();
+            if (popup != null)
+            {
+                popup.Dismiss();
+            }
+            else editText = ProfileManager.ActiveProfile.name; // if there was no popup, SaveCurrentProfile was called directly
 
             if (ProfileManager.HaveStoredProfile(editText))
             {

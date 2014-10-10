@@ -43,8 +43,6 @@ namespace ScienceAlert.ProfileData
         //------------------------------------------------------
         // Science threshold
         //------------------------------------------------------
-        [Persistent]
-        public bool thresholdEnabled = false;
 
         [Persistent]
         public float scienceThreshold = 0f;
@@ -109,7 +107,6 @@ namespace ScienceAlert.ProfileData
 
             name = String.Copy(other.name);
             modified = other.modified;
-            thresholdEnabled = other.thresholdEnabled;
             scienceThreshold = other.scienceThreshold;
 
             RegisterEvents();
@@ -260,9 +257,13 @@ namespace ScienceAlert.ProfileData
         {
             get
             {
-                if (thresholdEnabled)
-                    return scienceThreshold;
-                return 0f;
+                return scienceThreshold;
+            }
+            set
+            {
+                if (value != scienceThreshold)
+                    modified = true;
+                scienceThreshold = value;
             }
         }
 

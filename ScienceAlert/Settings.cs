@@ -91,7 +91,7 @@ namespace ScienceAlert
                     skin.box.contentOffset = new Vector2(0, 0f);
 
                     //skin.label.fontSize = skin.label.fontSize - 2;
-                
+                    skin.horizontalSlider.margin = new RectOffset();
 
                 // default sane values, just in case the config doesn't exist
                     EvaAtmospherePressureWarnThreshold = 0.00035;
