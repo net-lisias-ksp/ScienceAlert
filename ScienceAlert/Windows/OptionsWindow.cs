@@ -104,7 +104,8 @@ namespace ScienceAlert.Windows
             filterList.Add(new GUIContent("< 50% collected"));
             filterList.Add(new GUIContent("< 90% collected"));
 
-            sciMinValue = Settings.Instance.ScienceThreshold.ToString();
+            //sciMinValue = Settings.Instance.ScienceThreshold.ToString();
+            sciMinValue = ScienceAlertProfileManager.ActiveProfile.scienceThreshold.ToString();
 
             openButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnOpen.png", false);
             saveButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnSave.png", false);
@@ -396,48 +397,48 @@ namespace ScienceAlert.Windows
                         // ignore report threshold
                         //-----------------------------------------------------
                         {
-                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            {
-                                GUILayout.Label(new GUIContent("Enable Minimum Science Threshold"), GUILayout.ExpandWidth(true));
-                                Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                            }
-                            GUILayout.EndHorizontal();
+                            //GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            //{
+                            //    GUILayout.Label(new GUIContent("Enable Minimum Science Threshold"), GUILayout.ExpandWidth(true));
+                            //    Settings.Instance.EnableScienceThreshold = AudibleToggle(Settings.Instance.EnableScienceThreshold, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
+                            //}
+                            //GUILayout.EndHorizontal();
 
 
-                            GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                            {
-                                GUILayout.Space(24f);
-                                GUILayout.Label("Ignore reports worth less than:");
-                                string newValue = GUILayout.TextField(sciMinValue, 5, GUILayout.MinWidth(24f));
-                                newValue = newValue.Replace(',', '.');
+                            //GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                            //{
+                            //    GUILayout.Space(24f);
+                            //    GUILayout.Label("Ignore reports worth less than:");
+                            //    string newValue = GUILayout.TextField(sciMinValue, 5, GUILayout.MinWidth(24f));
+                            //    newValue = newValue.Replace(',', '.');
 
-                                float converted = 0f;
+                            //    float converted = 0f;
 
-                                if (!string.Equals(sciMinValue, newValue))
-                                    if (string.IsNullOrEmpty(newValue))
-                                    {
-                                        Settings.Instance.ScienceThreshold = 0f;
-                                        sciMinValue = newValue;
-                                    }
-                                    else
-                                    {
-                                        if (float.TryParse(newValue, out converted))
-                                        {
-                                            Settings.Instance.ScienceThreshold = Mathf.Max(0f, converted);
-                                            sciMinValue = newValue;
+                            //    if (!string.Equals(sciMinValue, newValue))
+                            //        if (string.IsNullOrEmpty(newValue))
+                            //        {
+                            //            Settings.Instance.ScienceThreshold = 0f;
+                            //            sciMinValue = newValue;
+                            //        }
+                            //        else
+                            //        {
+                            //            if (float.TryParse(newValue, out converted))
+                            //            {
+                            //                Settings.Instance.ScienceThreshold = Mathf.Max(0f, converted);
+                            //                sciMinValue = newValue;
 
-                                            Log.Debug("ScienceThreshold is now {0}", Settings.Instance.ScienceThreshold);
-                                        }
-                                        else
-                                        {
-                                            AudioUtil.Play("error");
+                            //                Log.Debug("ScienceThreshold is now {0}", Settings.Instance.ScienceThreshold);
+                            //            }
+                            //            else
+                            //            {
+                            //                AudioUtil.Play("error");
 
-                                            Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
-                                            Log.Debug("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
-                                        }
-                                    }
-                            }
-                            GUILayout.EndHorizontal();
+                            //                Log.Debug("Failed to convert '{0}' into a numeric value", newValue);
+                            //                Log.Debug("newValue = {0}, sciMinValue = {1}", newValue, sciMinValue);
+                            //            }
+                            //        }
+                            //}
+                            //GUILayout.EndHorizontal();
                         }
 
 

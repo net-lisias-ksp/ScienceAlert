@@ -30,13 +30,32 @@ namespace ScienceAlert.ProfileData
     /// </summary>
     class Profile
     {
+        //------------------------------------------------------
+        // Profile identifier
+        //------------------------------------------------------
         [Persistent (isPersistant = true)]
         public string name = string.Empty;
 
         [Persistent]
         public bool modified = false;
 
+
+        //------------------------------------------------------
+        // Science threshold
+        //------------------------------------------------------
+        [Persistent]
+        public bool thresholdEnabled = false;
+
+        [Persistent]
+        public float scienceThreshold = 0f;
+
+
+        //------------------------------------------------------
+        // Per-experiment settings
+        //------------------------------------------------------
+        [NonSerialized]
         public Dictionary<string /* expid */, ProfileData.ExperimentSettings> settings;
+
 
 /******************************************************************************
  *                    Implementation Details
@@ -90,6 +109,8 @@ namespace ScienceAlert.ProfileData
 
             name = String.Copy(other.name);
             modified = other.modified;
+            thresholdEnabled = other.thresholdEnabled;
+            scienceThreshold = other.scienceThreshold;
 
             RegisterEvents();
         }
@@ -222,6 +243,7 @@ namespace ScienceAlert.ProfileData
         }
 
 
+
         public string DisplayName
         {
             get
@@ -231,6 +253,19 @@ namespace ScienceAlert.ProfileData
                 return name;
             }
         }
+
+
+
+        public float ScienceThreshold
+        {
+            get
+            {
+                if (thresholdEnabled)
+                    return scienceThreshold;
+                return 0f;
+            }
+        }
+
 
 
         void SettingChanged()

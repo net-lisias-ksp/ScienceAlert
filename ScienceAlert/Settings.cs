@@ -188,8 +188,8 @@ namespace ScienceAlert
                 DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
                 GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
                 SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
-                EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
-                ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
+                //EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
+                //ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
                 ShowReportValue = general.Parse<bool>("ShowReportValue", false);
                 DisplayCurrentBiome = general.Parse<bool>("DisplayCurrentBiome", false);
 
@@ -254,47 +254,6 @@ namespace ScienceAlert
             }
 #endregion
 
-#region experiment settings
-//            try
-//            {
-//                ConfigNode experimentSettings = node.GetNode("ExperimentSettings");
-
-//                foreach (var nodeName in experimentSettings.nodes.DistinctNames())
-//                {
-//                    Log.Debug("Settings: Parsing experiment node '{0}'", nodeName);
-
-//                    ConfigNode experimentNode = experimentSettings.GetNode(nodeName);
-//                    Log.Debug("Its contents: {0}", experimentNode.ToString());
-
-//                    if (!PerExperimentSettings.ContainsKey(nodeName))
-//                    {
-//                        Log.Error("No experiment named '{0}' located.", nodeName);
-//                    }
-//                    else
-//                    {
-//                        PerExperimentSettings[nodeName].OnLoad(experimentNode);
-//                        Log.Debug("OnLoad for {0}: enabled = {1}, sound = {2}, animation = {3}, assume onboard = {4}", nodeName, PerExperimentSettings[nodeName].Enabled, PerExperimentSettings[nodeName].SoundOnDiscovery, PerExperimentSettings[nodeName].AnimationOnDiscovery, PerExperimentSettings[nodeName].AssumeOnboard);
-//                    }
-//                }
-
-//                if (PerExperimentSettings.Keys.Count != experimentSettings.nodes.DistinctNames().GetLength(0))
-//                {
-//                    // we don't have a match for experiments in the config
-//                    // vs loaded experiments.  Save the default values to disk
-//                    // immediately so they can be hand-edited if necessary.
-//                    Log.Warning(@"
-//Experiment config count does not match number of available experiments.  
-//Re-saving config with default values for missing experiments.");
-
-//                    resave = true;
-//                }
-//            }
-//            catch (Exception e)
-//            {
-//                Log.Error("Exception occurred while loading ExperimentSettings section: {0}", e);
-//            }
-#endregion
-
 #region sound settings
             //try
             //{
@@ -350,8 +309,8 @@ namespace ScienceAlert
                 general.AddValue("DebugMode", DebugMode);
                 general.AddValue("GlobalWarp", GlobalWarp);
                 general.AddValue("SoundNotification", SoundNotification);
-                general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
-                general.AddValue("ScienceThreshold", ScienceThreshold);
+                //general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
+                //general.AddValue("ScienceThreshold", ScienceThreshold);
                 general.AddValue("ShowReportValue", ShowReportValue);
                 general.AddValue("DisplayCurrentBiome", DisplayCurrentBiome);
 
@@ -431,8 +390,8 @@ namespace ScienceAlert
         public bool DebugMode { get; private set; }
         public WarpSetting GlobalWarp { get; set; }
         public SoundNotifySetting SoundNotification { get; set; }
-        public bool EnableScienceThreshold { get; set; }
-        public float ScienceThreshold { get; set; }
+        //public bool EnableScienceThreshold { get; set; }
+        //public float ScienceThreshold { get; set; }
         public bool ShowReportValue { get; set; }
         public bool DisplayCurrentBiome { get; set; }
         

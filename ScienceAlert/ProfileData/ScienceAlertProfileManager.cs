@@ -23,7 +23,6 @@ using System.Text;
 using UnityEngine;
 using ReeperCommon;
 using ScienceAlert.ProfileData;
-using ImprovedAddonLoader;
 
 namespace ScienceAlert
 {

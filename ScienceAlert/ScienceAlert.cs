@@ -140,19 +140,20 @@
  *      First public release
  *****************************************************************************/
 
+//#error next task: add min science threshold into per-profile ui option
+
 //#define PROFILE
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using ReeperCommon;
-using ImprovedAddonLoader;
 
 
 namespace ScienceAlert
 {
 
-    [KSPAddonImproved(KSPAddonImproved.Startup.Flight, false)]
+    [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ScienceAlert : MonoBehaviour
     {
         // --------------------------------------------------------------------
@@ -173,7 +174,7 @@ namespace ScienceAlert
  ******************************************************************************/
         System.Collections.IEnumerator Start()
         {
-
+           
             Log.Write("Waiting on R&D...");
             while (ResearchAndDevelopment.Instance == null) yield return 0;
             while (FlightGlobals.ActiveVessel == null) yield return 0;
@@ -247,6 +248,11 @@ namespace ScienceAlert
                 Log.Write("UImanager: {0}", UIManager.instance.transform.position);
                 Log.Write("ScreenSafeUI: {0}", ScreenSafeUI.fetch.transform.position);
             }
+        }
+
+        private void Awake()
+        {
+            Log.Debug("ScienceAlert.Awake");
         }
 #endif
 

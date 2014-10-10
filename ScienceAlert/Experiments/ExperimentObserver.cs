@@ -575,20 +575,25 @@ namespace ScienceAlert
                         Available = Available && nextReportValue > 0.01f;
 
                         // check the science threshold
-                        if (Available && Settings.Instance.EnableScienceThreshold)
-                        {
-                            // make sure any experiment we alert on will produce at
-                            // least X science, or we should ignore it even if it
-                            // would otherwise match the filter
-                            Log.Debug("next report value of {0}: {1}", experiment.id, CalculateNextReportValue(subject, experimentSituation, data));
+                        Available = Available && nextReportValue > ScienceAlertProfileManager.ActiveProfile.ScienceThreshold;
+
+                        //if (Available && Settings.Instance.EnableScienceThreshold)
+                        //{
+                        //    // make sure any experiment we alert on will produce at
+                        //    // least X science, or we should ignore it even if it
+                        //    // would otherwise match the filter
+                        //    Log.Debug("next report value of {0}: {1}", experiment.id, CalculateNextReportValue(subject, experimentSituation, data));
 
 
-                            Available = Available && nextReportValue >= Settings.Instance.ScienceThreshold;
+                        //    Available = Available && nextReportValue >= Settings.Instance.ScienceThreshold;
 
-                            // was using for debugging
-                            //if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
-                            //    Log.Verbose("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
-                        }
+                        //    // was using for debugging
+                        //    //if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
+                        //    //    Log.Verbose("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
+                        //}
+          
+
+
 
                         if (Available)
                         {

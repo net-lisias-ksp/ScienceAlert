@@ -33,9 +33,6 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -58,9 +55,6 @@
     </Compile>
     <Compile Include="..\..\DebugTools\GuiUtil.cs">
       <Link>Tools\GuiUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\ImprovedAddonLoader.cs">
-      <Link>Tools\ImprovedAddonLoader.cs</Link>
     </Compile>
     <Compile Include="..\..\DebugTools\Log.cs">
       <Link>Tools\Log.cs</Link>
