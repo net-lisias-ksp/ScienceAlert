@@ -224,6 +224,10 @@ namespace ScienceAlert
             Log.Normal("Toolbar button ready");
 
             Log.Normal("ScienceAlert initialization finished.");
+
+#if DEBUG
+            gameObject.AddComponent<Windows.Implementations.TestDrag>();
+#endif
         }
 
 
