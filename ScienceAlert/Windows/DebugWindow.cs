@@ -40,7 +40,7 @@ namespace ScienceAlert
         private ScienceAlert scienceAlert;
         private BiomeFilter biomeFilter;
         private StorageCache storage;
-
+        private new AudioPlayer audio;
 
 
 /******************************************************************************
@@ -51,6 +51,7 @@ namespace ScienceAlert
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
             biomeFilter = gameObject.GetComponent<BiomeFilter>();
             storage = gameObject.GetComponent<StorageCache>();
+            audio = GetComponent<AudioPlayer>();
         }
 
 
@@ -58,11 +59,12 @@ namespace ScienceAlert
         {
             if (scienceAlert.Button.Drawable is DebugWindow)
             {
-                AudioUtil.Play("click2", 0.05f);
+                audio.Play("click2", 1f, 0.05f);
                 scienceAlert.Button.Drawable = null;
             } else if (scienceAlert.Button.Drawable == null && ci.button == 2)
             {
-                AudioUtil.Play("click2", 0.05f);
+                audio.Play("click2", 1f, 0.05f);
+
                 scienceAlert.Button.Drawable = this;
             }
         }

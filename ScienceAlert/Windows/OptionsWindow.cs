@@ -75,6 +75,9 @@ namespace ScienceAlert.Windows
         // locale
         NumberFormatInfo formatter;
 
+        // audio
+        new AudioPlayer audio;
+
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
@@ -92,6 +95,8 @@ namespace ScienceAlert.Windows
 
 
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
+            audio = GetComponent<AudioPlayer>();
+
 
             windowRect = new Rect(0, 0, 324, Screen.height / 5 * 3);
 
@@ -215,7 +220,7 @@ namespace ScienceAlert.Windows
                     else
                     {
                         scienceAlert.Button.Drawable = this;
-                        AudioUtil.Play("click1");
+                        audio.Play("click1");
                     }
                 }
             }
@@ -237,7 +242,7 @@ namespace ScienceAlert.Windows
 
             Log.Debug("Closing options window");
             scienceAlert.Button.Drawable = null;
-            AudioUtil.Play("click1", 0.05f);
+            audio.Play("click1", 1f, 0.05f);
         }
 
 
@@ -277,7 +282,7 @@ namespace ScienceAlert.Windows
             bool result = GUILayout.Toggle(value, content, style == null ? Settings.Skin.toggle : style, options);
             if (result != value)
             {
-                AudioUtil.Play("click1");
+                audio.Play("click1");
 
 #if DEBUG
                 Log.Debug("Toggle '{0}' is now {1}", content.text, result);
@@ -299,7 +304,7 @@ namespace ScienceAlert.Windows
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
             if (newValue != currentValue)
             {
-                AudioUtil.Play("click1");
+                audio.Play("click1");
                 settings.Filter = (ProfileData.ExperimentSettings.FilterMethod)newValue;
             }
 
@@ -319,7 +324,7 @@ namespace ScienceAlert.Windows
             bool pressed = GUILayout.Button(content, options);
 
             if (pressed)
-                AudioUtil.Play("click1");
+                audio.Play("click1");
 
             return pressed;
         }

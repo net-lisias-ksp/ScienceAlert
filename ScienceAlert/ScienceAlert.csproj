@@ -65,7 +65,6 @@
     <Compile Include="..\..\DebugTools\ResourceUtil.cs">
       <Link>Tools\ResourceUtil.cs</Link>
     </Compile>
-    <Compile Include="AudioController.cs" />
     <Compile Include="BiomeFilter.cs" />
     <Compile Include="ProfileData\ExperimentSettings.cs" />
     <Compile Include="ProfileData\Mothballed\ModuleSAProfile.cs" />

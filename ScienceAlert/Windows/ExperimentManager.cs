@@ -61,6 +61,12 @@ namespace ScienceAlert
 
         string lastGoodBiome = string.Empty;
 
+
+        // --------------------------------------------------------------------
+        //    Audio
+        // --------------------------------------------------------------------
+        new AudioPlayer audio;
+
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
@@ -70,6 +76,7 @@ namespace ScienceAlert
             vesselStorage = gameObject.AddComponent<StorageCache>();
             biomeFilter = gameObject.AddComponent<BiomeFilter>();
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
+            audio = GetComponent<AudioPlayer>();
 
             // event setup
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
@@ -160,7 +167,7 @@ namespace ScienceAlert
                 else
                 {
                     ci.Consume();
-                    AudioUtil.Play("click1");
+                    audio.Play("click1");
 
                     if (scienceAlert.Button.Drawable is ExperimentManager)
                     {
@@ -176,7 +183,7 @@ namespace ScienceAlert
                 ci.Consume();
 
                 // close menu
-                AudioUtil.Play("click1", 0.05f); // set min delay in case other drawables open their window
+                audio.Play("click1", 1f, 0.05f); // set min delay in case other drawables open their window
                                                  // and play a sound on this event as well
                 scienceAlert.Button.Drawable = null;
                 Log.Debug("Closing ExperimentManager");
@@ -296,7 +303,7 @@ namespace ScienceAlert
                         if (GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
                         {
                             Log.Debug("Deploying {0}", observer.ExperimentTitle);
-                            AudioUtil.Play("click2");
+                            audio.Play("click2");
                             observer.Deploy();
                         }
                     }
@@ -480,12 +487,12 @@ namespace ScienceAlert
                             {
                                 case Settings.SoundNotifySetting.ByExperiment:
                                     if (observer.settings.SoundOnDiscovery)
-                                        AudioUtil.Play("bubbles", 2f);
+                                        audio.Play("bubbles", 1f, 2f);
 
                                     break;
 
                                 case Settings.SoundNotifySetting.Always:
-                                    AudioUtil.Play("bubbles", 2f);
+                                    audio.Play("bubbles", 1f, 2f);
                                     break;
                             }
                         }

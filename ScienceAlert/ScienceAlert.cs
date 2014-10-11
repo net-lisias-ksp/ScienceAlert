@@ -140,8 +140,6 @@
  *      First public release
  *****************************************************************************/
 
-//#error next task: add min science threshold into per-profile ui option
-
 //#define PROFILE
 using System;
 using System.Collections.Generic;
@@ -175,12 +173,12 @@ namespace ScienceAlert
         System.Collections.IEnumerator Start()
         {
            
-            Log.Write("Waiting on R&D...");
+            Log.Normal("Waiting on R&D...");
             while (ResearchAndDevelopment.Instance == null) yield return 0;
             while (FlightGlobals.ActiveVessel == null) yield return 0;
             while (!FlightGlobals.ready) yield return 0;
 
-            Log.Write("Waiting on ProfileManager...");
+            Log.Normal("Waiting on ProfileManager...");
             while (ScienceAlertProfileManager.Instance == null) yield return 0;
 
             Log.Normal("Initializing ScienceAlert");
@@ -195,7 +193,9 @@ namespace ScienceAlert
             
 
             Log.Debug("Loading sounds...");
-            AudioUtil.LoadSoundsFrom("/ScienceAlert/sounds", AudioType.WAV);
+            gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
+
+
             Log.Debug("Sounds ready.");
 
             Log.Normal("Creating options window");
