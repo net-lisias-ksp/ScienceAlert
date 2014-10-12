@@ -61,9 +61,11 @@ namespace ScienceAlert
         /// Load all saved profiles, register for events and other
         /// initialization tasks
         /// </summary>
-        private void Awake()
+        public override void OnAwake()
         {
-            Log.Debug("ProfileManager.Start");
+            base.OnAwake();
+
+            Log.Debug("ProfileManager.OnAwake");
 
             if (HighLogic.CurrentGame.config == null)
             {
@@ -162,7 +164,7 @@ namespace ScienceAlert
                         }
                     }
                 }
-               
+
                 // make sure there's a "default" config in there. Ideally the
                 // user has created and saved over one but if not, we need
                 // at least a default to give to vessels that are missing their
@@ -287,6 +289,7 @@ namespace ScienceAlert
             {
                 Log.Warning("Persistent save has no saved profiles");
                 vesselProfiles = new VesselTable();
+                Ready = true;
                 return;
             }
             else node = node.GetNode(PERSISTENT_NODE_NAME);

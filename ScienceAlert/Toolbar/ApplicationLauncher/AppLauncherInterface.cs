@@ -366,8 +366,8 @@ namespace ScienceAlert.Toolbar
 
             Log.Verbose("Creating mod button...");
             button = ApplicationLauncher.Instance.AddModApplication(
-                                                        OnToggleOn,
-                                                        OnToggleOff,
+                                                        OnToggle,
+                                                        OnToggle,
                                                         () => { },
                                                         () => { },
                                                         () => { },
@@ -446,9 +446,9 @@ namespace ScienceAlert.Toolbar
         /// close open stock widgets and let our listeners know about
         /// the click
         /// </summary>
-        public void OnToggleOn()
+        public void OnToggle()
         {
-            Log.Debug("OnToggleOn");
+            Log.Debug("OnToggle");
 
             int button = 0;
 
@@ -473,12 +473,6 @@ namespace ScienceAlert.Toolbar
         }
 
 
-
-        public void OnToggleOff()
-        {
-            Log.Debug("AppLauncherInterface.OnToggleOff");
-            Drawable = null;
-        }
 
         #endregion
 

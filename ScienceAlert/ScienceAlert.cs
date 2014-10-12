@@ -223,7 +223,7 @@ namespace ScienceAlert
             Log.Normal("ScienceAlert initialization finished.");
 
 #if DEBUG
-            gameObject.AddComponent<Windows.Implementations.TestDrag>();
+            //gameObject.AddComponent<Windows.Implementations.TestDrag>();
 #endif
         }
 

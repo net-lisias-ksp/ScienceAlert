@@ -38,11 +38,15 @@ namespace ScienceAlert.Windows
             DraggableWindow.ButtonHoverBackground = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnBackground.png");
             DraggableWindow.ButtonSound = "click1";
 
+            // note to self: these are on separate gameobjects because they use a UIButton to catch
+            // clickthrough, parented to the window's GO. It's simpler to simply disable the window rather than
+            // also disable the UIButton every time
+
             Log.Normal("Creating options window");
-            optionsWindow = gameObject.AddComponent<Implementations.DraggableOptionsWindow>();
+            optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
 
             Log.Normal("Creating experiment window");
-            experimentList = gameObject.AddComponent<Implementations.DraggableExperimentList>();
+            experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
 
             // initially hide windows
             optionsWindow.Visible = experimentList.Visible = false;
@@ -83,6 +87,11 @@ namespace ScienceAlert.Windows
             //
             //   If left-click, show experiment list
             //   If right-click, show options window
+
+#if DEBUG
+            Log.Debug("OptionsWindow: {0}", optionsWindow.Visible);
+            Log.Debug("ExperimentList: {0}", experimentList.Visible);
+#endif
 
             if (optionsWindow.Visible || experimentList.Visible)
             {
