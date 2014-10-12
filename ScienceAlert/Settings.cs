@@ -93,6 +93,48 @@ namespace ScienceAlert
                     //skin.label.fontSize = skin.label.fontSize - 2;
                     skin.horizontalSlider.margin = new RectOffset();
 
+
+                    // make the window background opaque
+                    Texture2D tex = skin.window.normal.background.CreateReadable();
+
+#if DEBUG
+                    tex.SaveToDisk("unmodified_window_bkg.png");
+#endif
+
+                    var pixels = tex.GetPixels32();
+
+                    for (int i = 0; i < pixels.Length; ++i)
+                        pixels[i].a = 255;
+
+                    tex.SetPixels32(pixels); tex.Apply();
+#if DEBUG
+                    tex.SaveToDisk("opaque_window_bkg.png");
+#endif
+
+                    // one of these apparently fixes the right thing
+                    skin.window.onActive.background = 
+                    skin.window.onFocused.background = 
+                    skin.window.onNormal.background = 
+                    skin.window.onHover.background = 
+                    skin.window.active.background = 
+                    skin.window.focused.background = 
+                    skin.window.hover.background = 
+                    skin.window.normal.background = tex;
+
+                    skin.window.onNormal.textColor =
+                        skin.window.normal.textColor = XKCDColors.Green_Yellow;
+
+                    skin.window.onHover.textColor =
+                        skin.window.hover.textColor = XKCDColors.YellowishOrange;
+
+                    skin.window.onFocused.textColor =
+                        skin.window.focused.textColor = Color.red;
+
+                    skin.window.onActive.textColor =
+                        skin.window.active.textColor = Color.blue;
+
+                    skin.window.fontSize = 12;
+
                 // default sane values, just in case the config doesn't exist
                     EvaAtmospherePressureWarnThreshold = 0.00035;
                     EvaAtmosphereVelocityWarnThreshold = 30;
@@ -104,8 +146,12 @@ namespace ScienceAlert
                     CheckSurfaceSampleNotEva = false;
                     DisplayCurrentBiome = false;
 
+            ReeperCommon.Window.DraggableWindow.Skin = skin;
+
             Load();
         }
+
+
 
 
         public static Settings Instance
@@ -118,15 +164,14 @@ namespace ScienceAlert
                 return instance;
             }
         }
-        
-        
+
+
         
 
 
         private string GetConfigPath()
         {
-            string path = KSPUtil.ApplicationRootPath + "/GameData/ScienceAlert/settings.cfg";
-            return path;
+            return ConfigUtil.GetDllDirectoryPath() + "/settings.cfg";
         }
 
 
@@ -188,8 +233,6 @@ namespace ScienceAlert
                 DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
                 GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
                 SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
-                //EnableScienceThreshold = ConfigUtil.Parse<bool>(general, "EnableScienceThreshold", false);
-                //ScienceThreshold = ConfigUtil.Parse<float>(general, "ScienceThreshold", 0f);
                 ShowReportValue = general.Parse<bool>("ShowReportValue", false);
                 DisplayCurrentBiome = general.Parse<bool>("DisplayCurrentBiome", false);
 

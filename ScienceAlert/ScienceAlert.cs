@@ -150,6 +150,7 @@ using ReeperCommon;
 
 namespace ScienceAlert
 {
+    using Window = ReeperCommon.Window;
 
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ScienceAlert : MonoBehaviour
@@ -172,7 +173,6 @@ namespace ScienceAlert
  ******************************************************************************/
         System.Collections.IEnumerator Start()
         {
-           
             Log.Normal("Waiting on R&D...");
             while (ResearchAndDevelopment.Instance == null) yield return 0;
             while (FlightGlobals.ActiveVessel == null) yield return 0;
@@ -192,11 +192,17 @@ namespace ScienceAlert
             if (exp != null) exp.experimentTitle = "Sample (Asteroid)";
             
 
-            Log.Debug("Loading sounds...");
+            Log.Verbose("Loading sounds...");
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
+            Log.Verbose("Sounds ready.");
 
-
-            Log.Debug("Sounds ready.");
+            Log.Verbose("Customizing DraggableWindow");
+            
+            Window.DraggableWindow.CloseTexture = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnClose.png");
+            Window.DraggableWindow.LockTexture = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnLock.png");
+            Window.DraggableWindow.UnlockTexture = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnUnlock.png");
+            Window.DraggableWindow.ButtonHoverBackground = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnBackground.png");
+            Window.DraggableWindow.ButtonSound = "click1";
 
             Log.Normal("Creating options window");
             gameObject.AddComponent<Windows.OptionsWindow>();

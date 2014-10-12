@@ -72,7 +72,6 @@
     <Compile Include="ProfileData\Mothballed\ProfileStorage.cs" />
     <Compile Include="ProfileData\ScienceAlertProfileManager.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
-    <Compile Include="Windows\Base\DraggableWindow.cs" />
     <Compile Include="Windows\ExperimentManager.cs" />
     <Compile Include="Windows\DebugWindow.cs" />
     <Compile Include="ScienceAlert.cs" />
@@ -114,6 +113,16 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\btnRename.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\btnUnlock.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\btnClose.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\btnBackground.png" />
+    <EmbeddedResource Include="Resources\btnLock.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
