@@ -380,7 +380,20 @@ namespace ScienceAlert.Toolbar
 
  
             Log.Verbose("AppLauncherInterface ready");
+#if DEBUG
+            //Log.Debug("Button GO: " + button.gameObject.name);
             //ApplicationLauncher.Instance.gameObject.PrintComponents();
+
+            //button.gameObject.GetComponentsInChildren<BTButton>().ToList().ForEach(btn =>
+            //    {
+            //        btn.AddInputDelegate(delegate(ref POINTER_INFO ptr)
+            //        {
+            //            if (ptr.evt == POINTER_INFO.INPUT_EVENT.TAP)
+            //                if (Input.GetMouseButton(2))
+            //                    Log.Warning("Input delegate: middle mouse on " + ptr.targetObj.name);
+            //        });
+            //    });
+#endif
         }
 
 

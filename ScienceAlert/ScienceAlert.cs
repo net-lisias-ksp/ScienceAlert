@@ -179,7 +179,7 @@ namespace ScienceAlert
             while (!FlightGlobals.ready) yield return 0;
 
             Log.Normal("Waiting on ProfileManager...");
-            while (!ScienceAlertProfileManager.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
+            while (ScienceAlertProfileManager.Instance == null || !ScienceAlertProfileManager.Instance.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
 
             Log.Normal("Initializing ScienceAlert");
 
@@ -196,17 +196,7 @@ namespace ScienceAlert
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
-            Log.Verbose("Customizing DraggableWindow");
-            
-            Window.DraggableWindow.CloseTexture = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnClose.png");
-            Window.DraggableWindow.LockTexture = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnLock.png");
-            Window.DraggableWindow.UnlockTexture = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnUnlock.png");
-            Window.DraggableWindow.ButtonHoverBackground = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnBackground.png");
-            Window.DraggableWindow.ButtonSound = "click1";
-
-            Log.Normal("Creating options window");
-            //gameObject.AddComponent<Windows.OptionsWindow>();
-            gameObject.AddComponent<Windows.Implementations.DraggableOptionsWindow>();
+            gameObject.AddComponent<Windows.WindowEventLogic>();
 
             Log.Normal("Creating experiment manager");
             gameObject.AddComponent<ExperimentManager>();

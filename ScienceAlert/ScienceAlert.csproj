@@ -66,6 +66,7 @@
       <Link>Tools\ResourceUtil.cs</Link>
     </Compile>
     <Compile Include="BiomeFilter.cs" />
+    <Compile Include="Experiments\ExperimentManagerMockup.cs" />
     <Compile Include="ProfileData\ExperimentSettings.cs" />
     <Compile Include="ProfileData\Mothballed\ModuleSAProfile.cs" />
     <Compile Include="ProfileData\Profile.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Scan Interfaces\ScanInterface.cs" />
     <Compile Include="Scan Interfaces\SCANsatInterface.cs" />
     <Compile Include="MagicDataTransmitter.cs" />
+    <Compile Include="Windows\Implementations\DraggableExperimentList.cs" />
     <Compile Include="Windows\Implementations\DraggableOptionsWindow.cs" />
     <Compile Include="Windows\Implementations\TestDrag.cs" />
     <Compile Include="Windows\OptionsWindow.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="Toolbar\IToolbar.cs" />
     <Compile Include="Toolbar\Wrapper\ToolbarWrapper.cs" />
     <Compile Include="Windows\OptionsWindow_Popups.cs" />
+    <Compile Include="Windows\WindowEventLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\flask.png" />

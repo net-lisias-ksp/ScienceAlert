@@ -61,7 +61,7 @@ namespace ScienceAlert
         /// Load all saved profiles, register for events and other
         /// initialization tasks
         /// </summary>
-        void Start()
+        private void Awake()
         {
             Log.Debug("ProfileManager.Start");
 
@@ -83,10 +83,10 @@ namespace ScienceAlert
             //GameEvents.onGameStateLoad.Add(OnGameLoad);
 
 
-            LoadStoredProfiles();
-            //OnGameLoad(HighLogic.CurrentGame.config);
+            Ready = false; // won't be ready until OnLoad
+            Instance = this;
 
-            // intentionally not set Instance yet; waiting for OnLoad to come from KSP
+            LoadStoredProfiles();
         }
 
 
@@ -95,7 +95,7 @@ namespace ScienceAlert
         /// Unregister for any events from the constructor; save 
         /// stored profiles
         /// </summary>
-        void OnDestroy()
+        private void OnDestroy()
         {
             Instance = null;
 
@@ -282,9 +282,6 @@ namespace ScienceAlert
         public override void OnLoad(ConfigNode node)
         {
             base.OnLoad(node);
-            Instance = this;
-
-            //Log.Verbose("ProfileManager.OnLoad = {0}", node.ToString());
 
             if (!node.HasNode(PERSISTENT_NODE_NAME))
             {
@@ -387,6 +384,8 @@ namespace ScienceAlert
 
                 PopupDialog.SpawnPopupDialog("ScienceAlert: Profile Manager", message, "Okay", false, HighLogic.Skin);
             }
+
+            Ready = true;
         }
 
 
@@ -451,13 +450,7 @@ namespace ScienceAlert
 
 #region Interaction methods
         public static ScienceAlertProfileManager Instance { private set; get; }
-        public static bool Ready
-        {
-            get
-            {
-                return Instance != null && Instance.storedProfiles != null && Instance.vesselProfiles != null;
-            }
-        }
+        public bool Ready { private set; get; }
 
         public static Profile DefaultProfile
         {
