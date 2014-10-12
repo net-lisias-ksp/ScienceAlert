@@ -79,6 +79,7 @@
     <Compile Include="Scan Interfaces\ScanInterface.cs" />
     <Compile Include="Scan Interfaces\SCANsatInterface.cs" />
     <Compile Include="MagicDataTransmitter.cs" />
+    <Compile Include="Windows\Implementations\DraggableOptionsWindow.cs" />
     <Compile Include="Windows\Implementations\TestDrag.cs" />
     <Compile Include="Windows\OptionsWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

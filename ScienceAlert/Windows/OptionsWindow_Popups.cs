@@ -5,11 +5,13 @@ using System.Text;
 using UnityEngine;
 using ReeperCommon;
 
-namespace ScienceAlert.Windows
+//namespace ScienceAlert.Windows
+namespace ScienceAlert.Windows.Implementations
 {
     using ProfileManager = ScienceAlertProfileManager;
 
-    internal partial class OptionsWindow : MonoBehaviour, IDrawable
+    //internal partial class OptionsWindow : MonoBehaviour, IDrawable
+    internal partial class DraggableOptionsWindow : ReeperCommon.Window.DraggableWindow
     {
         internal string editText = string.Empty;
         internal string lockName = string.Empty;

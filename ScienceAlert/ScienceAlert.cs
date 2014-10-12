@@ -179,7 +179,7 @@ namespace ScienceAlert
             while (!FlightGlobals.ready) yield return 0;
 
             Log.Normal("Waiting on ProfileManager...");
-            while (ScienceAlertProfileManager.Instance == null) yield return 0;
+            while (!ScienceAlertProfileManager.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
 
             Log.Normal("Initializing ScienceAlert");
 
@@ -205,7 +205,8 @@ namespace ScienceAlert
             Window.DraggableWindow.ButtonSound = "click1";
 
             Log.Normal("Creating options window");
-            gameObject.AddComponent<Windows.OptionsWindow>();
+            //gameObject.AddComponent<Windows.OptionsWindow>();
+            gameObject.AddComponent<Windows.Implementations.DraggableOptionsWindow>();
 
             Log.Normal("Creating experiment manager");
             gameObject.AddComponent<ExperimentManager>();

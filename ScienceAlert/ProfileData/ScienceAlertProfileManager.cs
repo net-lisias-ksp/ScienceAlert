@@ -451,7 +451,13 @@ namespace ScienceAlert
 
 #region Interaction methods
         public static ScienceAlertProfileManager Instance { private set; get; }
-
+        public static bool Ready
+        {
+            get
+            {
+                return Instance != null && Instance.storedProfiles != null && Instance.vesselProfiles != null;
+            }
+        }
 
         public static Profile DefaultProfile
         {
