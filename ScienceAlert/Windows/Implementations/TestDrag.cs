@@ -7,7 +7,7 @@ using ReeperCommon;
 
 namespace ScienceAlert.Windows.Implementations
 {
-    class TestDrag : Base.DraggableWindow
+    class TestDrag : ReeperCommon.Window.DraggableWindow
     {
 
         protected override Rect Setup()
@@ -21,10 +21,15 @@ namespace ScienceAlert.Windows.Implementations
 
         protected override void DrawUI()
         {
-            Log.Write("TestDrag.DrawUI");
+            //Log.Write("TestDrag.DrawUI");
             GUILayout.BeginVertical();
             GUILayout.Label("TestDrag.DrawUI");
             GUILayout.EndVertical();
+        }
+
+        protected override void OnCloseClick()
+        {
+            Log.Warning("Window close attempt");
         }
     }
 }
