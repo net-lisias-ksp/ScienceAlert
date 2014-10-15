@@ -47,6 +47,9 @@ namespace ScienceAlert.Windows
 
             Log.Normal("Creating experiment window");
             experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
+            experimentList.biomeFilter = GetComponent<BiomeFilter>();
+            experimentList.manager = GetComponent<ExperimentManager>();
+
 
             // initially hide windows
             optionsWindow.Visible = experimentList.Visible = false;
@@ -68,7 +71,7 @@ namespace ScienceAlert.Windows
 
         private void OnDestroy()
         {
-            // no cleanup; we're attached to ScienceAlert so it dies when we do
+            // no cleanup; we're attached to ScienceAlert so it'll clean us up
         }
 
 

@@ -196,14 +196,17 @@ namespace ScienceAlert
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
-            gameObject.AddComponent<Windows.WindowEventLogic>();
+            
 
             Log.Normal("Creating experiment manager");
             gameObject.AddComponent<ExperimentManager>();
 
+            
+
+            gameObject.AddComponent<Windows.WindowEventLogic>();
+
             Log.Normal("Creating debug window");
             gameObject.AddComponent<DebugWindow>();
-
             Log.Normal("Finished creating windows");
 
 

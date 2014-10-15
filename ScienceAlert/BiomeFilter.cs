@@ -43,7 +43,7 @@ namespace ScienceAlert
     /// a certain radius for its result. If we don't get any matches, the
     /// GetAttr value is probably invalid and should be discarded.
     /// </summary>
-    internal class BiomeFilter : MonoBehaviour
+    public class BiomeFilter : MonoBehaviour
     {
         private const int HALF_SEARCH_DIMENSIONS = 2;    // box around the point on the biome map to
                                                          // use to verify biome map results
@@ -79,6 +79,29 @@ namespace ScienceAlert
         {
             if (projector != null)
                 projector.MoveNext();
+        }
+
+
+        public bool GetCurrentBiome(out string biome)
+        {
+            biome = "N/A";
+
+            if (FlightGlobals.ActiveVessel == null)
+                return false;
+
+            string possibleBiome = string.Empty;
+
+            if (GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out possibleBiome))
+            {
+                // the biome we got is most likely good
+                return true;
+            }
+            else
+            {
+                // the biome we got is not very accurate (e.g. polar ice caps in middle of kerbin grasslands and
+                // such, due to the way the biome map is filtered).
+                return false;
+            }
         }
 
 

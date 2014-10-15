@@ -18,6 +18,7 @@
  *****************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -35,7 +36,7 @@ namespace ScienceAlert
     /// will deal with updating experiments and reporting status changes to
     /// ScienceAlert.
     /// </summary>
-    class ExperimentManager : MonoBehaviour, IDrawable
+    class ExperimentManager : MonoBehaviour/*, IDrawable*/
     {
         private readonly int experimentMenuID = UnityEngine.Random.Range(0, int.MaxValue);
         private const float TIMEWARP_CHECK_THRESHOLD = 10f; // when the game exceeds this threshold, experiment observers
@@ -97,6 +98,7 @@ namespace ScienceAlert
 
 
 
+        
         /// <summary>
         /// Either continue building list of experiment observers or begin
         /// run status updates on them
@@ -128,22 +130,22 @@ namespace ScienceAlert
         /// experiment window. I know it's ugly, but CalcSize is only
         /// available in a GUI function
         /// </summary>
-        public void OnGUI()
-        {
-            if (float.IsNaN(maximumTextLength) && observers.Count > 0 && rebuilder == null)
-            {
-                // construct the experiment observer list ...
-                maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle + " (123)")).x);
-                experimentButtonRect.width = maximumTextLength + 10f/* a little extra for report value */;
+        //public void OnGUI()
+        //{
+        //    if (float.IsNaN(maximumTextLength) && observers.Count > 0 && rebuilder == null)
+        //    {
+        //        // construct the experiment observer list ...
+        //        maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle + " (123)")).x);
+        //        experimentButtonRect.width = maximumTextLength + 10f/* a little extra for report value */;
 
-                Log.Debug("MaximumTextLength = {0}", maximumTextLength);
+        //        Log.Debug("MaximumTextLength = {0}", maximumTextLength);
 
-                // note: we can't use CalcSize anywhere but inside OnGUI.  I know
-                // it's ugly, but it's the least ugly of the available alternatives
-            }
+        //        // note: we can't use CalcSize anywhere but inside OnGUI.  I know
+        //        // it's ugly, but it's the least ugly of the available alternatives
+        //    }
 
-            experimentButtonRect.height = 32f * observers.Count(obs => obs.Available);
-        }
+        //    experimentButtonRect.height = 32f * observers.Count(obs => obs.Available);
+        //}
 
 
         /// <summary>
@@ -152,43 +154,43 @@ namespace ScienceAlert
         /// get called, so only worry about our own affairs
         /// </summary>
         /// <param name="ci"></param>
-        public void OnToolbarClicked(ClickInfo ci)
-        {
-            if (ci.used)
-                return;
+        //public void OnToolbarClicked(ClickInfo ci)
+        //{
+        //    if (ci.used)
+        //        return;
 
-            // if left-click and we're not already displayed...
-            if (ci.button == 0)
-            {
-                if (scienceAlert.Button.Drawable != null && !(scienceAlert.Button.Drawable is ExperimentManager))
-                {
-                    return; // somebody else is open; let them handle this click
-                }
-                else
-                {
-                    ci.Consume();
-                    audio.Play("click1");
+        //    // if left-click and we're not already displayed...
+        //    if (ci.button == 0)
+        //    {
+        //        if (scienceAlert.Button.Drawable != null && !(scienceAlert.Button.Drawable is ExperimentManager))
+        //        {
+        //            return; // somebody else is open; let them handle this click
+        //        }
+        //        else
+        //        {
+        //            ci.Consume();
+        //            audio.Play("click1");
 
-                    if (scienceAlert.Button.Drawable is ExperimentManager)
-                    {
-                        // close menu
-                        scienceAlert.Button.Drawable = null;
-                        Log.Debug("Closing ExperimentManager");
-                    }
-                    else scienceAlert.Button.Drawable = this;
-                }
-            }
-            else if (scienceAlert.Button.Drawable is ExperimentManager)
-            {
-                ci.Consume();
+        //            if (scienceAlert.Button.Drawable is ExperimentManager)
+        //            {
+        //                // close menu
+        //                scienceAlert.Button.Drawable = null;
+        //                Log.Debug("Closing ExperimentManager");
+        //            }
+        //            else scienceAlert.Button.Drawable = this;
+        //        }
+        //    }
+        //    else if (scienceAlert.Button.Drawable is ExperimentManager)
+        //    {
+        //        ci.Consume();
 
-                // close menu
-                audio.Play("click1", 1f, 0.05f); // set min delay in case other drawables open their window
-                                                 // and play a sound on this event as well
-                scienceAlert.Button.Drawable = null;
-                Log.Debug("Closing ExperimentManager");
-            }
-        }
+        //        // close menu
+        //        audio.Play("click1", 1f, 0.05f); // set min delay in case other drawables open their window
+        //                                         // and play a sound on this event as well
+        //        scienceAlert.Button.Drawable = null;
+        //        Log.Debug("Closing ExperimentManager");
+        //    }
+        //}
 
 
 
@@ -198,46 +200,46 @@ namespace ScienceAlert
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        public Vector2 Draw(Vector2 position)
-        {
-            if (experimentButtonRect.height > 0)
-            {
-                var old = GUI.skin;
+        //public Vector2 Draw(Vector2 position)
+        //{
+        //    if (experimentButtonRect.height > 0)
+        //    {
+        //        var old = GUI.skin;
 
-                GUI.skin = Settings.Skin;
+        //        GUI.skin = Settings.Skin;
 
-                experimentButtonRect.x = position.x;
-                experimentButtonRect.y = position.y;
+        //        experimentButtonRect.x = position.x;
+        //        experimentButtonRect.y = position.y;
                 
-                if (!Settings.Instance.DisplayCurrentBiome)
-                {
-                    experimentButtonRect = KSPUtil.ClampRectToScreen(GUILayout.Window(experimentMenuID, experimentButtonRect, DrawWindow, "Available Experiments"));
-                }
-                else
-                {
-                    experimentButtonRect.height += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
+        //        if (!Settings.Instance.DisplayCurrentBiome)
+        //        {
+        //            experimentButtonRect = KSPUtil.ClampRectToScreen(GUILayout.Window(experimentMenuID, experimentButtonRect, DrawWindow, "Available Experiments"));
+        //        }
+        //        else
+        //        {
+        //            experimentButtonRect.height += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
 
-                    DrawArea();
-                }
-                GUI.skin = old;
-            }
-            else
-            {
-                // no experiments
-                scienceAlert.Button.Drawable = null;
-            }
-            return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
-        }
+        //            DrawArea();
+        //        }
+        //        GUI.skin = old;
+        //    }
+        //    else
+        //    {
+        //        // no experiments
+        //        scienceAlert.Button.Drawable = null;
+        //    }
+        //    return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
+        //}
 
 
         /// <summary>
         /// Window (does not display biome info)
         /// </summary>
         /// <param name="winid"></param>
-        private void DrawWindow(int winid)
-        {
-            DrawButtons();
-        }
+        //private void DrawWindow(int winid)
+        //{
+        //    DrawButtons();
+        //}
 
 
 
@@ -245,71 +247,71 @@ namespace ScienceAlert
         /// Instead of a window title, we'll put that space to use
         /// to display current biome
         /// </summary
-        private void DrawArea()
-        {
-            GUILayout.BeginArea(experimentButtonRect, Settings.Skin.box);
-            {
-                if (FlightGlobals.ActiveVessel == null)
-                {
-                    scienceAlert.Button.Drawable = null;
-                    return;
-                }
+        //private void DrawArea()
+        //{
+        //    GUILayout.BeginArea(experimentButtonRect, Settings.Skin.box);
+        //    {
+        //        if (FlightGlobals.ActiveVessel == null)
+        //        {
+        //            scienceAlert.Button.Drawable = null;
+        //            return;
+        //        }
 
-                // Biome data
-                {
-                    if (biomeFilter.IsBusy || !scanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
-                    {
-                        GUILayout.Box("Biome: <working>");
-                    }
-                    else
-                    {
-                        string biome;
+        //        // Biome data
+        //        {
+        //            if (biomeFilter.IsBusy || !scanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
+        //            {
+        //                GUILayout.Box("Biome: <working>");
+        //            }
+        //            else
+        //            {
+        //                string biome;
 
-                        if (!biomeFilter.GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out biome))
-                        {
-                            biome = lastGoodBiome;
-                        }
-                        else
-                        {
-                            lastGoodBiome = biome;
-                        }
-                        GUILayout.Box(string.Format(biome));
-                    }
-                }
-                DrawButtons();
-            }
-            GUILayout.EndArea();
-        }
+        //                if (!biomeFilter.GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out biome))
+        //                {
+        //                    biome = lastGoodBiome;
+        //                }
+        //                else
+        //                {
+        //                    lastGoodBiome = biome;
+        //                }
+        //                GUILayout.Box(string.Format(biome));
+        //            }
+        //        }
+        //        DrawButtons();
+        //    }
+        //    GUILayout.EndArea();
+        //}
 
 
 
         /// <summary>
         /// Draw experiment buttons in whichever style was requested
         /// </summary>
-        private void DrawButtons()
-        {
-            GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-            {
-                //-----------------------------------------------------
-                // Experiment list
-                //-----------------------------------------------------
-                foreach (var observer in observers)
-                    if (observer.Available)
-                    {
-                        var content = new GUIContent(observer.ExperimentTitle);
+        //private void DrawButtons()
+        //{
+        //    GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+        //    {
+        //        //-----------------------------------------------------
+        //        // Experiment list
+        //        //-----------------------------------------------------
+        //        foreach (var observer in observers)
+        //            if (observer.Available)
+        //            {
+        //                var content = new GUIContent(observer.ExperimentTitle);
 
-                        if (Settings.Instance.ShowReportValue) content.text += string.Format(" ({0:0.#})", observer.NextReportValue);
+        //                if (Settings.Instance.ShowReportValue) content.text += string.Format(" ({0:0.#})", observer.NextReportValue);
 
-                        if (GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
-                        {
-                            Log.Debug("Deploying {0}", observer.ExperimentTitle);
-                            audio.Play("click2");
-                            observer.Deploy();
-                        }
-                    }
-            }
-            GUILayout.EndVertical();
-        }
+        //                if (GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
+        //                {
+        //                    Log.Debug("Deploying {0}", observer.ExperimentTitle);
+        //                    audio.Play("click2");
+        //                    observer.Deploy();
+        //                }
+        //            }
+        //    }
+        //    GUILayout.EndVertical();
+        //}
 
 
 
@@ -353,7 +355,7 @@ namespace ScienceAlert
             if (Settings.Instance.ReopenOnEva && scienceAlert.Button.Drawable is ExperimentManager)
             {
                 Log.Debug("ExperimentManager.OnCrewGoingEva: from {0} to {1}", relevant.from.partName, relevant.to.partName);
-                StartCoroutine(WaitAndReopenList(relevant.to.vessel));
+                //StartCoroutine(WaitAndReopenList(relevant.to.vessel));
             }
         }
 
@@ -366,21 +368,21 @@ namespace ScienceAlert
         /// </summary>
         /// <param name="timeOut"></param>
         /// <returns></returns>
-        private System.Collections.IEnumerator WaitAndReopenList(Vessel target)
-        {
-            float start = Time.realtimeSinceStartup;
-            Log.Verbose("ExperimentManager: Waiting to reopen window");
+        //private System.Collections.IEnumerator WaitAndReopenList(Vessel target)
+        //{
+        //    float start = Time.realtimeSinceStartup;
+        //    Log.Verbose("ExperimentManager: Waiting to reopen window");
 
-            while ((FlightGlobals.ActiveVessel != target || !observers.Any(o => o.Available)) && Time.realtimeSinceStartup - start < 2f /* 2 second timeout */)
-                yield return 0;
+        //    while ((FlightGlobals.ActiveVessel != target || !observers.Any(o => o.Available)) && Time.realtimeSinceStartup - start < 2f /* 2 second timeout */)
+        //        yield return 0;
 
-            if (!observers.Any(o => o.Available))
-            {
-                Log.Warning("ExperimentManager: Waited to open list, but timed out after {0:0.#} seconds", Time.realtimeSinceStartup - start);
-                yield break;
-            }
-            else scienceAlert.Button.Drawable = this;
-        }
+        //    if (!observers.Any(o => o.Available))
+        //    {
+        //        Log.Warning("ExperimentManager: Waited to open list, but timed out after {0:0.#} seconds", Time.realtimeSinceStartup - start);
+        //        yield break;
+        //    }
+        //    else scienceAlert.Button.Drawable = this;
+        //}
 
 
 
@@ -564,7 +566,7 @@ namespace ScienceAlert
                         if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
                         {   // we can't monitor this experiment, so no need to clutter the
                             // ui with it
-                            Log.Warning("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
+                            Log.Verbose("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
 
                         }
                         else observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], biomeFilter, scanInterface, expid));
@@ -671,10 +673,26 @@ namespace ScienceAlert
         {
             Log.Debug("ExperimentManager.Notify_ToolbarInterfaceChanged");
 
-            scienceAlert.Button.OnClick += OnToolbarClicked;
+            //scienceAlert.Button.OnClick += OnToolbarClicked;
             ScheduleRebuildObserverList(); // why? to update toolbar button state
         }
 
 #endregion
+
+
+        #region properties
+
+        public ReadOnlyCollection<ExperimentObserver> Observers
+        {
+            get
+            {
+                return new ReadOnlyCollection<ExperimentObserver>(observers);
+            }
+        }
+
+
+
+
+        #endregion
     }
 }
