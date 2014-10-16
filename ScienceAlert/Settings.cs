@@ -66,6 +66,8 @@ namespace ScienceAlert
         private GUISkin skin;
         public event SaveCallback OnSave = delegate(ConfigNode node) { };
 
+
+
 /******************************************************************************
  *                      Implementation details
  *****************************************************************************/
@@ -95,31 +97,33 @@ namespace ScienceAlert
 
 
                     // make the window background opaque
-                    Texture2D tex = skin.window.normal.background.CreateReadable();
+                    WindowOpacity = 255;
 
-#if DEBUG
-                    tex.SaveToDisk("unmodified_window_bkg.png");
-#endif
+//                    Texture2D tex = skin.window.normal.background.CreateReadable();
 
-                    var pixels = tex.GetPixels32();
+//#if DEBUG
+//                    tex.SaveToDisk("unmodified_window_bkg.png");
+//#endif
 
-                    for (int i = 0; i < pixels.Length; ++i)
-                        pixels[i].a = 255;
+//                    var pixels = tex.GetPixels32();
 
-                    tex.SetPixels32(pixels); tex.Apply();
-#if DEBUG
-                    tex.SaveToDisk("opaque_window_bkg.png");
-#endif
+//                    for (int i = 0; i < pixels.Length; ++i)
+//                        pixels[i].a = 255;
 
-                    // one of these apparently fixes the right thing
-                    skin.window.onActive.background = 
-                    skin.window.onFocused.background = 
-                    skin.window.onNormal.background = 
-                    skin.window.onHover.background = 
-                    skin.window.active.background = 
-                    skin.window.focused.background = 
-                    skin.window.hover.background = 
-                    skin.window.normal.background = tex;
+//                    tex.SetPixels32(pixels); tex.Apply();
+//#if DEBUG
+//                    tex.SaveToDisk("opaque_window_bkg.png");
+//#endif
+
+                    //// one of these apparently fixes the right thing
+                    //skin.window.onActive.background = 
+                    //skin.window.onFocused.background = 
+                    //skin.window.onNormal.background = 
+                    //skin.window.onHover.background = 
+                    //skin.window.active.background = 
+                    //skin.window.focused.background = 
+                    //skin.window.hover.background = 
+                    //skin.window.normal.background = tex;
 
                     skin.window.onNormal.textColor =
                         skin.window.normal.textColor = XKCDColors.Green_Yellow;
@@ -146,7 +150,7 @@ namespace ScienceAlert
                     CheckSurfaceSampleNotEva = false;
                     DisplayCurrentBiome = false;
 
-            ReeperCommon.Window.DraggableWindow.Skin = skin;
+            ReeperCommon.Window.DraggableWindow.DefaultSkin = skin;
 
             Load();
         }
@@ -219,6 +223,7 @@ namespace ScienceAlert
             Log.Debug("Settings.load");
             bool resave = false;
 
+            
 #region general settings
             try
             {
@@ -227,14 +232,14 @@ namespace ScienceAlert
 
                 Log.Debug("General node = {0}", general.ToString());
 
-                FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
-                StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
+                //FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
+                //StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
                 
                 DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
                 GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
                 SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
-                ShowReportValue = general.Parse<bool>("ShowReportValue", false);
-                DisplayCurrentBiome = general.Parse<bool>("DisplayCurrentBiome", false);
+                //ShowReportValue = general.Parse<bool>("ShowReportValue", false);
+                //DisplayCurrentBiome = general.Parse<bool>("DisplayCurrentBiome", false);
 
             }
             catch (Exception e)
@@ -242,6 +247,29 @@ namespace ScienceAlert
                 Log.Error("Exception occurred while loading GeneralSettings section: {0}", e);
             }
 #endregion
+
+#region user interface settings
+
+            // note to self: move into own config section
+            try
+            {
+                ConfigNode general = node.GetNode("GeneralSettings");
+                if (general == null) general = node.AddNode(new ConfigNode("GeneralSettings"));
+
+                FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
+                StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
+
+                ShowReportValue = general.Parse<bool>("ShowReportValue", false);
+                DisplayCurrentBiome = general.Parse<bool>("DisplayCurrentBiome", false);
+
+                WindowOpacity = general.Parse<int>("WindowOpacity", 255);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception occurred while loading user interface GeneralSettings section: {0}", e);
+            }
+
+            #endregion
 
 #region crewed vessel settings
 
@@ -346,16 +374,23 @@ namespace ScienceAlert
                 #region general settings
                 ConfigNode general = node.AddNode(new ConfigNode("GeneralSettings"));
 
-                general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
-                general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
+
                 
                 general.AddValue("DebugMode", DebugMode);
                 general.AddValue("GlobalWarp", GlobalWarp);
                 general.AddValue("SoundNotification", SoundNotification);
-                //general.AddValue("EnableScienceThreshold", EnableScienceThreshold);
-                //general.AddValue("ScienceThreshold", ScienceThreshold);
+
+
+                #endregion
+
+                #region user interface settings
+
+                // note to self: move to own user interface section
                 general.AddValue("ShowReportValue", ShowReportValue);
                 general.AddValue("DisplayCurrentBiome", DisplayCurrentBiome);
+                general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
+                general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
+                general.AddValue("WindowOpacity", WindowOpacity);
 
                 #endregion
 
@@ -428,18 +463,65 @@ namespace ScienceAlert
 *****************************************************************************/
         #region General settings
 
-        public bool FlaskAnimationEnabled { get; set; }
-        public float StarFlaskFrameRate { get; private set; }
+
         public bool DebugMode { get; private set; }
         public WarpSetting GlobalWarp { get; set; }
         public SoundNotifySetting SoundNotification { get; set; }
-        //public bool EnableScienceThreshold { get; set; }
-        //public float ScienceThreshold { get; set; }
+
+
+#endregion
+
+        #region user interface settings
+
         public bool ShowReportValue { get; set; }
         public bool DisplayCurrentBiome { get; set; }
-        
+        public bool FlaskAnimationEnabled { get; set; }
+        public float StarFlaskFrameRate { get; private set; }
+
+        private int windowOpacity = 255;
+        public int WindowOpacity
+        {
+            get
+            {
+                return windowOpacity;
+            }
+
+            set
+            {
+                if (value != windowOpacity)
+                {
+                    Texture2D tex = skin.window.normal.background.CreateReadable();
+
+#if DEBUG
+                    tex.SaveToDisk("unmodified_window_bkg.png");
+#endif
+
+                    var pixels = tex.GetPixels32();
+
+                    for (int i = 0; i < pixels.Length; ++i)
+                        pixels[i].a = (byte)(Mathf.Clamp(windowOpacity, 0, 255));
+
+                    tex.SetPixels32(pixels); tex.Apply();
+#if DEBUG
+                    tex.SaveToDisk("usermodified_window_bkg.png");
+#endif
+                    // one of these apparently fixes the right thing
+                    skin.window.onActive.background =
+                    skin.window.onFocused.background =
+                    skin.window.onNormal.background =
+                    skin.window.onHover.background =
+                    skin.window.active.background =
+                    skin.window.focused.background =
+                    skin.window.hover.background =
+                    skin.window.normal.background = tex;
+                }
+
+                windowOpacity = value;
+            }
+        }
 
         #endregion
+
 
         #region Crewed vessel settings
 
@@ -451,7 +533,7 @@ namespace ScienceAlert
 
         #endregion
 
-        #region interface settings
+        #region scan interface settings
 
 
         protected ScanInterface Interface;

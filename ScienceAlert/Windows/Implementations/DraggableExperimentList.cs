@@ -69,20 +69,20 @@ namespace ScienceAlert.Windows.Implementations
         {
             if (!adjustedSkin)
             {
-                Skin.window.stretchHeight = true;
-                List<string> experimentTitles = new List<string>();
+                //Skin.window.stretchHeight = true;
+                //List<string> experimentTitles = new List<string>();
 
-                ResearchAndDevelopment.GetExperimentIDs().ForEach(id => experimentTitles.Add(ResearchAndDevelopment.GetExperiment(id).experimentTitle));
+                //ResearchAndDevelopment.GetExperimentIDs().ForEach(id => experimentTitles.Add(ResearchAndDevelopment.GetExperiment(id).experimentTitle));
 
-                Skin.button.fixedWidth = Mathf.Max(64f, experimentTitles.Max(title =>
-                    {
-                        float minWidth = 0f;
-                        float maxWidth = 0f;
+                //Skin.button.fixedWidth = Mathf.Max(64f, experimentTitles.Max(title =>
+                //    {
+                //        float minWidth = 0f;
+                //        float maxWidth = 0f;
 
-                        Skin.button.CalcMinMaxWidth(new GUIContent(title + " (123.4)"), out minWidth, out maxWidth);
+                //        Skin.button.CalcMinMaxWidth(new GUIContent(title + " (123.4)"), out minWidth, out maxWidth);
 
-                        return maxWidth;
-                    }));
+                //        return maxWidth;
+                //    }));
 
                 adjustedSkin = true;
             }

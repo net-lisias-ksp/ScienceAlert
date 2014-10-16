@@ -36,7 +36,8 @@ namespace ScienceAlert.Windows.Implementations
         private OpenPane submenu = OpenPane.None;
 
 
-        private ScienceAlert scienceAlert;
+        public ScienceAlert scienceAlert;
+        public ExperimentManager manager;
 
         // Materials and textures
         Texture2D collapseButton = new Texture2D(24, 24);
@@ -51,6 +52,12 @@ namespace ScienceAlert.Windows.Implementations
 
         // locale
         NumberFormatInfo formatter;
+
+
+        // gui styles and skins
+        GUIStyle miniLabelLeft; // left justified
+        GUIStyle miniLabelRight; // right justified
+
 
         // audio
         new AudioPlayer audio;
@@ -70,9 +77,9 @@ namespace ScienceAlert.Windows.Implementations
             formatter.PercentDecimalDigits = 2;
 
 
+            audio = AudioPlayer.Audio;
 
-            scienceAlert = gameObject.GetComponent<ScienceAlert>();
-            audio = GetComponent<AudioPlayer>();
+            if (audio == null) Log.Error("DraggableOptionsWindow: Failed to find AudioPlayer instance");
 
 
             var rawIds = ResearchAndDevelopment.GetExperimentIDs();
@@ -133,8 +140,18 @@ namespace ScienceAlert.Windows.Implementations
             submenu = OpenPane.None;
             Title = "ScienceAlert Options";
 
+            // smaller label for less important text hints
+            miniLabelLeft = new GUIStyle(Skin.label);
+            miniLabelLeft.fontSize = 10;
+            miniLabelLeft.normal.textColor = miniLabelLeft.onNormal.textColor = Color.white;
+
+            miniLabelRight = new GUIStyle(miniLabelLeft);
+            miniLabelRight.alignment = TextAnchor.MiddleRight;
+
             return new Rect(0, 0, 324, Screen.height / 5 * 3);
         }
+
+
 
         protected override void DrawUI()
         {
@@ -188,9 +205,10 @@ namespace ScienceAlert.Windows.Implementations
         /// </summary>
         private void DrawAdditionalOptions()
         {
-            GUI.skin = whiteLabel;
+            //GUI.skin = whiteLabel;
 
-            additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.ExpandHeight(true));
+            //additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.ExpandHeight(true));
+            additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, GUILayout.ExpandHeight(true));
             {
                 GUILayout.Space(4f);
 
@@ -199,7 +217,7 @@ namespace ScienceAlert.Windows.Implementations
 
                     #region Alert settings
                     {
-                        GUILayout.Box("Miscellaneous Alert Settings", GUILayout.ExpandWidth(true));
+                        GUILayout.Box("User Interface Settings", GUILayout.ExpandWidth(true));
 
                         //-----------------------------------------------------
                         // global flask animation
@@ -220,12 +238,26 @@ namespace ScienceAlert.Windows.Implementations
                             Settings.Instance.ShowReportValue = AudibleToggle(Settings.Instance.ShowReportValue, "Display Report Value");
                         }
 
+
                         //-----------------------------------------------------
                         // Display current biome in experiment list
                         //-----------------------------------------------------
                         {
                             Settings.Instance.DisplayCurrentBiome = AudibleToggle(Settings.Instance.DisplayCurrentBiome, "Display Biome in Experiment List");
                         }
+
+
+                        //-----------------------------------------------------
+                        // Interface window opacity
+                        //-----------------------------------------------------
+                        GUILayout.Label("Window Opacity");
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label("Less", miniLabelLeft);
+                        GUILayout.FlexibleSpace();
+                        GUILayout.Label("More", miniLabelRight);
+                        GUILayout.EndHorizontal();
+                        Settings.Instance.WindowOpacity = (int)GUILayout.HorizontalSlider(Settings.Instance.WindowOpacity, 0f, 255f, GUILayout.ExpandWidth(true), GUILayout.MaxHeight(16f));
+                        GUILayout.Space(8f);
                     } // end alert settings
                     #endregion
 
@@ -301,7 +333,7 @@ namespace ScienceAlert.Windows.Implementations
                             Settings.Instance.EvaReportOnTop = AudibleToggle(Settings.Instance.EvaReportOnTop, "List EVA report first");
 
                             if (Settings.Instance.EvaReportOnTop != prev)
-                                GetComponent<ExperimentManager>().ScheduleRebuildObserverList();
+                                manager.ScheduleRebuildObserverList();
                         }
 
                         // Surface sample on vessel
@@ -311,7 +343,7 @@ namespace ScienceAlert.Windows.Implementations
                             Settings.Instance.CheckSurfaceSampleNotEva = AudibleToggle(prev, "Track surface sample in vessel");
 
                             if (prev != Settings.Instance.CheckSurfaceSampleNotEva)
-                                GetComponent<ExperimentManager>().ScheduleRebuildObserverList();
+                                manager.ScheduleRebuildObserverList();
                         }
 
                     } // end crewed vessel settings

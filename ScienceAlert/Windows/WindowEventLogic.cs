@@ -44,6 +44,8 @@ namespace ScienceAlert.Windows
 
             Log.Normal("Creating options window");
             optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
+            optionsWindow.scienceAlert = GetComponent<ScienceAlert>();
+            optionsWindow.manager = GetComponent<ExperimentManager>();
 
             Log.Normal("Creating experiment window");
             experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
