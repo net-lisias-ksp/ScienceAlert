@@ -24,15 +24,19 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using ReeperCommon;
+using ReeperCommon.ConfigNodeSerialization;
 
 namespace ScienceAlert
 {
     public delegate void SaveCallback(ConfigNode node);
 
-    public class Settings
+    public class Settings : IReeperSerializable
     {
         // Singleton pattern
         private static Settings instance;
+
+        [DoNotSerialize]
+        private readonly string ConfigPath = ConfigUtil.GetDllDirectoryPath() + "/settings.cfg";
 
         public enum WarpSetting : int
         {
@@ -62,18 +66,29 @@ namespace ScienceAlert
         }
 
 
-        
+        [DoNotSerialize]
         private GUISkin skin;
+
+        [field: DoNotSerialize] // note: specifier required, else it won't apply to compiler-generated field portion
         public event SaveCallback OnSave = delegate(ConfigNode node) { };
+
+        [field: DoNotSerialize]
+        public event SaveCallback OnLoad = delegate(ConfigNode node) { };
 
 
 
 /******************************************************************************
  *                      Implementation details
  *****************************************************************************/
+        /// <summary>
+        /// Set up ScienceAlert skin and set default values; then load settings from cfg if 
+        /// it exists
+        /// </summary>
         private Settings()
         {
+            
             // set default values
+                // create custom skin (based on KSP skin)
                 skin = GameObject.Instantiate(HighLogic.Skin) as GUISkin;
 
                 // adjust the skin a little bit.  It wastes a lot of space in its
@@ -92,38 +107,10 @@ namespace ScienceAlert
                     skin.box.padding = new RectOffset(2, 2, 8, 5);
                     skin.box.contentOffset = new Vector2(0, 0f);
 
-                    //skin.label.fontSize = skin.label.fontSize - 2;
                     skin.horizontalSlider.margin = new RectOffset();
 
-
-                    // make the window background opaque
+                    // make the window background opaque by default
                     WindowOpacity = 255;
-
-//                    Texture2D tex = skin.window.normal.background.CreateReadable();
-
-//#if DEBUG
-//                    tex.SaveToDisk("unmodified_window_bkg.png");
-//#endif
-
-//                    var pixels = tex.GetPixels32();
-
-//                    for (int i = 0; i < pixels.Length; ++i)
-//                        pixels[i].a = 255;
-
-//                    tex.SetPixels32(pixels); tex.Apply();
-//#if DEBUG
-//                    tex.SaveToDisk("opaque_window_bkg.png");
-//#endif
-
-                    //// one of these apparently fixes the right thing
-                    //skin.window.onActive.background = 
-                    //skin.window.onFocused.background = 
-                    //skin.window.onNormal.background = 
-                    //skin.window.onHover.background = 
-                    //skin.window.active.background = 
-                    //skin.window.focused.background = 
-                    //skin.window.hover.background = 
-                    //skin.window.normal.background = tex;
 
                     skin.window.onNormal.textColor =
                         skin.window.normal.textColor = XKCDColors.Green_Yellow;
@@ -139,16 +126,17 @@ namespace ScienceAlert
 
                     skin.window.fontSize = 12;
 
-                // default sane values, just in case the config doesn't exist
-                    EvaAtmospherePressureWarnThreshold = 0.00035;
-                    EvaAtmosphereVelocityWarnThreshold = 30;
+            // default sane values, just in case the config doesn't exist
+                EvaAtmospherePressureWarnThreshold = 0.00035;
+                EvaAtmosphereVelocityWarnThreshold = 30;
 
-                    ScanInterfaceType = ScanInterface.None;
-                    ShowReportValue = false;
-                    EvaReportOnTop = false;
-                    ReopenOnEva = false;
-                    CheckSurfaceSampleNotEva = false;
-                    DisplayCurrentBiome = false;
+                ScanInterfaceType = ScanInterface.None;
+                ShowReportValue = false;
+                EvaReportOnTop = false;
+                CheckSurfaceSampleNotEva = false;
+                DisplayCurrentBiome = false;
+                StarFlaskFrameRate = 24f;
+                FlaskAnimationEnabled = true;
 
             ReeperCommon.Window.DraggableWindow.DefaultSkin = skin;
 
@@ -158,9 +146,12 @@ namespace ScienceAlert
 
 
 
+        /// <summary>
+        /// Singleton Instance
+        /// </summary>
         public static Settings Instance
         {
-            get 
+            get
             {
                 if (instance == null)
                     instance = new Settings();
@@ -170,285 +161,107 @@ namespace ScienceAlert
         }
 
 
-        
 
-
-        private string GetConfigPath()
+        /// <summary>
+        /// Currently unused; mainly to confirm that serialization is working as expected
+        /// </summary>
+        /// <param name="node"></param>
+        public void OnSerialize(ConfigNode node)
         {
-            return ConfigUtil.GetDllDirectoryPath() + "/settings.cfg";
+            Log.Verbose("Settings.OnSerialize");
         }
 
 
 
+        /// <summary>
+        /// Currently unused; mainly to confirm that serialization is working as expected
+        /// </summary>
+        /// <param name="node"></param>
+        public void OnDeserialize(ConfigNode node)
+        {
+            Log.Verbose("Settings.OnDeserialize");
+        }
+
+
+
+
+        /// <summary>
+        /// Loads settings from cfg
+        /// </summary>
         public void Load()
         {
-            var path = GetConfigPath();
-
-            Log.Normal("Loading settings from {0}", path);
-            if (File.Exists(path))
+ 
+            Log.Normal("Loading settings from {0}", ConfigPath);
+            if (File.Exists(ConfigPath))
             {
-                ConfigNode node = ConfigNode.Load(path);
+                ConfigNode node = ConfigNode.Load(ConfigPath);
 
                 if (node == null)
                 {
-                    Log.Error("Failed to load {0}", path);
+                    Log.Error("Failed to load {0}", ConfigPath);
                 }
-                else DoLoad(node);
+                else 
+                {
+                    node.CreateObjectFromConfigEx(this);
+                    Log.LoadFrom(node);
+
+                    OnLoad(node.GetNode("Extra") ?? new ConfigNode("Extra"));
+                }
             }
             else
             {
-                Log.Error("Failed to find settings file {0}", path);
+                Log.Error("Failed to find settings file {0}", ConfigPath);
 
                 // save default values, then
                 Save();
             }
         }
 
+
+
+        /// <summary>
+        /// Saves settings to cfg
+        /// </summary>
         public void Save()
         {
-            var path = GetConfigPath();
-
-            Log.Normal("Saving settings to {0}", path);
             ConfigNode saved = new ConfigNode();
-            DoSave(saved);
+
+            try
+            {
+                ConfigNode.Merge(saved, this.CreateConfigFromObjectEx() ?? new ConfigNode()); // otherwise we'd have to add result as a subnode
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception while creating ConfigNode from settings: {0}", e);
+            }
+
+            Log.SaveInto(saved);
 
             Log.Debug("About to save: {0}", saved.ToString());
-            saved.Save(path);
-            Log.Debug("Saved to {0}", path);
-        }
 
+            OnSave(saved.AddNode("Extra"));
 
-        public void DoLoad(ConfigNode node)
-        {
-            Log.Debug("Settings.load");
-            bool resave = false;
-
-            
-#region general settings
-            try
+            // note: it's really important we not save an empty ConfigNode to disk, else
+            // it'll stall KSP next time it loads
+            if (saved.CountNodes > 0 || saved.CountValues > 0)
             {
-                ConfigNode general = node.GetNode("GeneralSettings");
-                if (general == null) general = node.AddNode(new ConfigNode("GeneralSettings"));
 
-                Log.Debug("General node = {0}", general.ToString());
-
-                //FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
-                //StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
-                
-                DebugMode = ConfigUtil.Parse<bool>(general, "DebugMode", false);
-                GlobalWarp = ConfigUtil.ParseEnum<WarpSetting>(general, "GlobalWarp", WarpSetting.ByExperiment);
-                SoundNotification = ConfigUtil.ParseEnum<SoundNotifySetting>(general, "SoundNotification", SoundNotifySetting.ByExperiment);
-                //ShowReportValue = general.Parse<bool>("ShowReportValue", false);
-                //DisplayCurrentBiome = general.Parse<bool>("DisplayCurrentBiome", false);
-
+                Log.Normal("Saving settings to {0}", ConfigPath);
+                saved.Save(ConfigPath);
             }
-            catch (Exception e)
+            else
             {
-                Log.Error("Exception occurred while loading GeneralSettings section: {0}", e);
-            }
-#endregion
-
-#region user interface settings
-
-            // note to self: move into own config section
-            try
-            {
-                ConfigNode general = node.GetNode("GeneralSettings");
-                if (general == null) general = node.AddNode(new ConfigNode("GeneralSettings"));
-
-                FlaskAnimationEnabled = ConfigUtil.Parse<bool>(general, "FlaskAnimationEnabled", true);
-                StarFlaskFrameRate = ConfigUtil.Parse<float>(general, "StarFlaskFrameRate", 24f);
-
-                ShowReportValue = general.Parse<bool>("ShowReportValue", false);
-                DisplayCurrentBiome = general.Parse<bool>("DisplayCurrentBiome", false);
-
-                WindowOpacity = general.Parse<int>("WindowOpacity", 255);
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occurred while loading user interface GeneralSettings section: {0}", e);
-            }
-
-            #endregion
-
-#region crewed vessel settings
-
-            try
-            {
-                ConfigNode crewed = node.GetNode("CrewedVesselSettings");
-                if (crewed == null) crewed = node.AddNode(new ConfigNode("CrewedVesselSettings"));
-
-                ReopenOnEva = crewed.Parse<bool>("ReopenOnEva", false);
-                EvaAtmospherePressureWarnThreshold = crewed.Parse<double>("EvaAtmosPressureThreshold", 0.00035);
-                EvaAtmosphereVelocityWarnThreshold = crewed.Parse<float>("EvaAtmosVelocityThreshold", 30);
-                EvaReportOnTop = crewed.Parse<bool>("EvaReportOnTop", false);
-                CheckSurfaceSampleNotEva = crewed.Parse<bool>("CheckSurfaceSampleNotEva", false);
-
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occurred while loading CrewedVesselSettings section: {0}", e);
-            }
-
-            #endregion
-
-#region interface settings
-
-            // scan interface
-            try
-            {
-                ConfigNode si = node.GetNode("ScanInterface");
-                if (si == null) si = node.AddNode(new ConfigNode("ScanInterface"));
-
-                Log.Debug("ScanInterface node = {0}", si.ToString());
-
-                ScanInterfaceType = ConfigUtil.ParseEnum<ScanInterface>(si, "InterfaceType", ScanInterface.None);
-                Log.Debug("ScanInterface = {0}", ScanInterfaceType.ToString());
-            } catch (Exception e)
-            {
-                Log.Error("Exception occurred while loading ScanInterface section: {0}", e);
-            }
-
-
-            // toolbar interface
-            try
-            {
-                ConfigNode ti = node.GetNode("ToolbarInterface");
-                if (ti == null) ti = node.AddNode(new ConfigNode("ToolbarInterface"));
-
-                ToolbarInterfaceType = ti.ParseEnum<ToolbarInterface>("ToolbarType", ToolbarInterface.ApplicationLauncher);
-                Log.Debug("ToolbarInterface = {0}", ToolbarInterfaceType);
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception occurred while loading ToolbarInterface section: {0}", e);
-            }
-#endregion
-
-#region sound settings
-            //try
-            //{
-            //    var audioNode = node.GetNode("AudioSettings");
-
-            //    if (audioNode != null)
-            //    {
-            //        if (audioNode.nodes != null)
-            //        {
-            //            foreach (var audioSetting in audioNode.nodes.DistinctNames())
-            //            {
-            //                var settings = new SoundSettings();
-
-            //                Log.Debug("Loading sound settings for '{0}'", audioSetting);
-            //                settings.OnLoad(audioNode.GetNode(audioSetting));
-
-            //                PerSoundSettings[audioSetting] = settings;
-            //            }
-            //        }
-            //        else Log.Error("No individual audio nodes found in AudioSettings");
-            //    }
-            //    else Log.Error("No AudioSettings ConfigNode found in settings.cfg");
-            //}
-            //catch (Exception e)
-            //{
-            //    Log.Error("Exception occurred while loading AudioSettings section: {0}", e);
-            //}
-#endregion
-
-#region log settings
-            Log.LoadFrom(node);
-#endregion
-
-            if (resave)
-            {
-                Log.Debug("Resave flag set; re-saving settings");
-                Save();
+                Log.Warning("Settings.Save: ConfigNode looks empty. Saving this would lead to problems. All values will be reset to default");
+                Log.Warning("Problem ConfigNode: {0}", saved.ToString());
             }
         }
 
-        public void DoSave(ConfigNode node)
-        {
-            try
-            {
-                Log.Debug("Settings.save");
-
-                #region general settings
-                ConfigNode general = node.AddNode(new ConfigNode("GeneralSettings"));
 
 
-                
-                general.AddValue("DebugMode", DebugMode);
-                general.AddValue("GlobalWarp", GlobalWarp);
-                general.AddValue("SoundNotification", SoundNotification);
-
-
-                #endregion
-
-                #region user interface settings
-
-                // note to self: move to own user interface section
-                general.AddValue("ShowReportValue", ShowReportValue);
-                general.AddValue("DisplayCurrentBiome", DisplayCurrentBiome);
-                general.AddValue("FlaskAnimationEnabled", FlaskAnimationEnabled);
-                general.AddValue("StarFlaskFrameRate", StarFlaskFrameRate);
-                general.AddValue("WindowOpacity", WindowOpacity);
-
-                #endregion
-
-                #region crewed vessel settings
-                ConfigNode crewed = node.AddNode(new ConfigNode("CrewedVesselSettings"));
-
-                crewed.AddValue("EvaReportOnTop", EvaReportOnTop);
-                crewed.AddValue("ReopenOnEva", ReopenOnEva);
-                crewed.AddValue("EvaAtmosPressureThreshold", EvaAtmospherePressureWarnThreshold);
-                crewed.AddValue("EvaAtmosVelocityThreshold", EvaAtmosphereVelocityWarnThreshold);
-                crewed.AddValue("CheckSurfaceSampleNotEva", CheckSurfaceSampleNotEva);
-
-                #endregion
-
-                #region interface settings
-
-                ConfigNode si = node.AddNode(new ConfigNode("ScanInterface"));
-
-                si.AddValue("InterfaceType", ScanInterfaceType.ToString());
-
-                node.AddNode(new ConfigNode("ToolbarInterface")).AddValue("ToolbarType", ToolbarInterfaceType.ToString());
-
-                #endregion
-
-                #region experiment settings
-                //ConfigNode expSettings = node.AddNode(new ConfigNode("ExperimentSettings"));
-
-                //foreach (var kvp in PerExperimentSettings)
-                //    kvp.Value.OnSave(expSettings.AddNode(new ConfigNode(kvp.Key)));
-
-                #endregion
-
-                #region sound settings
-
-                //var audioSettings = node.AddNode(new ConfigNode("AudioSettings"));
-
-                //foreach (var kvp in PerSoundSettings)
-                //{
-                //    var n = audioSettings.AddNode(new ConfigNode(kvp.Key));
-                //    kvp.Value.OnSave(n);
-                //}
-
-                #endregion
-
-                #region log settings
-                Log.SaveInto(node);
-                #endregion
-
-                Log.Debug("Finished saving settings");
-            } catch (Exception e)
-            {
-                Log.Error("There was an exception while saving settings: {0}", e);
-            }
-
-            OnSave(node);
-        }
-
-
+        /// <summary>
+        /// Customized GUISkin for ScienceAlert (mainly some adjustments to make space usage
+        /// a bit more efficient)
+        /// </summary>
         public static GUISkin Skin
         {
             get
@@ -458,27 +271,98 @@ namespace ScienceAlert
         }
 
 
-/******************************************************************************
-* Settings
-*****************************************************************************/
-        #region General settings
+#region Debug settings
 
 
+        /// <summary>
+        /// Returns true if the debug window should be available
+        /// </summary>
+        [HelpDoc("Enables middle-click debug window")]
+        [Subsection("Debug")]
         public bool DebugMode { get; private set; }
-        public WarpSetting GlobalWarp { get; set; }
-        public SoundNotifySetting SoundNotification { get; set; }
+
+
 
 
 #endregion
 
-        #region user interface settings
 
+#region general settings
+
+        /// <summary>
+        /// Global warp setting; if not "ByExperiment" then individual experiment settings
+        /// will be ignored and this setting will be used instead
+        /// </summary>
+        [Subsection("General")]
+        public WarpSetting GlobalWarp { get; set; }
+
+
+
+        /// <summary>
+        /// Global sound setting; if not "ByExperiment" then individual experiment settings
+        /// will be ignored and this setting used instead
+        /// </summary>
+        [Subsection("General")]
+        public SoundNotifySetting SoundNotification { get; set; }
+
+
+        [Subsection("General")]
+        public double EvaAtmospherePressureWarnThreshold { get; private set; }
+
+
+        [Subsection("General")]
+        public float EvaAtmosphereVelocityWarnThreshold { get; private set; }
+
+#endregion
+
+
+#region User interface settings
+
+        /// <summary>
+        /// Display next science report value in deploy button?
+        /// </summary>
+        [Subsection("UserInterface")]
         public bool ShowReportValue { get; set; }
+
+
+
+        /// <summary>
+        /// Display current biome instead of experiment list's window title?
+        /// </summary>
+        [Subsection("UserInterface")]
         public bool DisplayCurrentBiome { get; set; }
+
+
+
+        /// <summary>
+        /// Should we animate the flask? The star flask will still appear, it just won't rotate
+        /// if set false
+        /// </summary>
+        [Subsection("UserInterface")]
         public bool FlaskAnimationEnabled { get; set; }
+
+
+
+        /// <summary>
+        /// Frame rate (per second) of the star flask animation
+        /// </summary>
+        [Subsection("UserInterface")]
         public float StarFlaskFrameRate { get; private set; }
 
+
+        /// <summary>
+        /// Backing field for WindowOpacity property; not serialized because we want
+        /// the serialization method to trigger logic inside the property instead
+        /// </summary>
+        [DoNotSerialize]
         private int windowOpacity = 255;
+
+
+        /// <summary>
+        /// Window opacity, 0 = transparent while 255 = opaque
+        /// </summary>
+        [HelpDoc("Window translucency; 0 = transparent, 255 = completely opaque")]
+        [Subsection("UserInterface")]
         public int WindowOpacity
         {
             get
@@ -488,57 +372,67 @@ namespace ScienceAlert
 
             set
             {
-                if (value != windowOpacity)
-                {
-                    Texture2D tex = skin.window.normal.background.CreateReadable();
 
-#if DEBUG
-                    tex.SaveToDisk("unmodified_window_bkg.png");
-#endif
-
-                    var pixels = tex.GetPixels32();
-
-                    for (int i = 0; i < pixels.Length; ++i)
-                        pixels[i].a = (byte)(Mathf.Clamp(windowOpacity, 0, 255));
-
-                    tex.SetPixels32(pixels); tex.Apply();
-#if DEBUG
-                    tex.SaveToDisk("usermodified_window_bkg.png");
-#endif
-                    // one of these apparently fixes the right thing
-                    skin.window.onActive.background =
-                    skin.window.onFocused.background =
-                    skin.window.onNormal.background =
-                    skin.window.onHover.background =
-                    skin.window.active.background =
-                    skin.window.focused.background =
-                    skin.window.hover.background =
-                    skin.window.normal.background = tex;
-                }
-
+                Texture2D tex = skin.window.normal.background.CreateReadable();
                 windowOpacity = value;
+
+                //#if DEBUG
+                //                Log.Debug("WindowOpacity set to " + value);
+                //                tex.SaveToDisk("unmodified_window_bkg.png");
+                //#endif
+
+                var pixels = tex.GetPixels32();
+
+                for (int i = 0; i < pixels.Length; ++i)
+                    pixels[i].a = (byte)(Mathf.Clamp(windowOpacity, 0, 255));
+
+                tex.SetPixels32(pixels); tex.Apply();
+                //#if DEBUG
+                //                tex.SaveToDisk("usermodified_window_bkg.png");
+                //#endif
+                // one of these apparently fixes the right thing
+                skin.window.onActive.background =
+                skin.window.onFocused.background =
+                skin.window.onNormal.background =
+                skin.window.onHover.background =
+                skin.window.active.background =
+                skin.window.focused.background =
+                skin.window.hover.background =
+                skin.window.normal.background = tex;
             }
         }
 
-        #endregion
+#endregion
 
 
-        #region Crewed vessel settings
 
-        public bool ReopenOnEva { get; set; }
+
+
+#region Crewed vessel settings
+
+
+        /// <summary>
+        /// If true, EVA reports will always be listed first in the experiment list window
+        /// </summary>
+        [HelpDoc("Should EVA reports always be on top of experiment list?")]
+        [Subsection("CrewedVesselSettings")]
         public bool EvaReportOnTop { get; set; }
-        public double EvaAtmospherePressureWarnThreshold { get; private set; }
-        public float EvaAtmosphereVelocityWarnThreshold { get; private set; }
+
+
+        [Subsection("CrewedVesselSettings")]
         public bool CheckSurfaceSampleNotEva { get; set; }
 
-        #endregion
+#endregion
 
-        #region scan interface settings
+#region scan interface settings
 
-
+        [DoNotSerialize] // use property logic
         protected ScanInterface Interface;
+
+        [DoNotSerialize] // use property logic
         protected ToolbarInterface ToolbarType;
 
+        [HelpDoc("Valid options: ScanSat, None")]
         public ScanInterface ScanInterfaceType
         {
             get
@@ -568,6 +462,7 @@ namespace ScienceAlert
             }
         }
 
+        [HelpDoc("Valid options: BlizzyToolbar, ApplicationLauncher")]
         public ToolbarInterface ToolbarInterfaceType
         {
             get
@@ -587,32 +482,10 @@ namespace ScienceAlert
             set
             {
                 ToolbarType = value;
-                //Log.Debug("Settings.ToolbarType is now {0}", value.ToString());
             }
         }
 
-        #endregion
-
-        #region sound settings
-
-        //public SoundSettings GetSoundSettings(string soundName)
-        //{
-        //    if (PerSoundSettings.ContainsKey(soundName))
-        //    {
-        //        return PerSoundSettings[soundName];
-        //    } else {
-        //        // return default settings
-        //        Log.Debug("No loaded settings found for '{0}' -- creating default settings", soundName);
-
-        //        var newSound = new SoundSettings();
-
-        //        PerSoundSettings.Add(soundName, newSound);
-
-        //        return newSound;
-        //    }
-        //}
-
-        #endregion
+#endregion
     }
 
 

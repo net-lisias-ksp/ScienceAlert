@@ -352,11 +352,11 @@ namespace ScienceAlert
 
         private void OnCrewGoingEva(GameEvents.FromToAction<Part, Part> relevant)
         {
-            if (Settings.Instance.ReopenOnEva && scienceAlert.Button.Drawable is ExperimentManager)
-            {
-                Log.Debug("ExperimentManager.OnCrewGoingEva: from {0} to {1}", relevant.from.partName, relevant.to.partName);
-                //StartCoroutine(WaitAndReopenList(relevant.to.vessel));
-            }
+            //if (Settings.Instance.ReopenOnEva && scienceAlert.Button.Drawable is ExperimentManager)
+            //{
+            //    Log.Debug("ExperimentManager.OnCrewGoingEva: from {0} to {1}", relevant.from.partName, relevant.to.partName);
+            //    //StartCoroutine(WaitAndReopenList(relevant.to.vessel));
+            //}
         }
 
 

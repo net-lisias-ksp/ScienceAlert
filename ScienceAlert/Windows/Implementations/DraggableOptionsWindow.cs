@@ -326,15 +326,15 @@ namespace ScienceAlert.Windows.Implementations
                     {
                         GUILayout.Box("Crewed Vessel Settings", GUILayout.ExpandWidth(true));
 
-                        Settings.Instance.ReopenOnEva = AudibleToggle(Settings.Instance.ReopenOnEva, "Re-open list on EVA");
-                        { // eva report on top
-                            var prev = Settings.Instance.EvaReportOnTop;
+                        //Settings.Instance.ReopenOnEva = AudibleToggle(Settings.Instance.ReopenOnEva, "Re-open list on EVA");
+                        //{ // eva report on top
+                        //    var prev = Settings.Instance.EvaReportOnTop;
 
-                            Settings.Instance.EvaReportOnTop = AudibleToggle(Settings.Instance.EvaReportOnTop, "List EVA report first");
+                        //    Settings.Instance.EvaReportOnTop = AudibleToggle(Settings.Instance.EvaReportOnTop, "List EVA report first");
 
-                            if (Settings.Instance.EvaReportOnTop != prev)
-                                manager.ScheduleRebuildObserverList();
-                        }
+                        //    if (Settings.Instance.EvaReportOnTop != prev)
+                        //        manager.ScheduleRebuildObserverList();
+                        //}
 
                         // Surface sample on vessel
                         {
