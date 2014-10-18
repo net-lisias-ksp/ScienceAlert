@@ -234,9 +234,12 @@ namespace ScienceAlert
 
         public void OnDestroy()
         {
+            Button.Drawable = null;
             Settings.Instance.Save();
             Log.Debug("ScienceAlert destroyed");
         }
+
+
 
 #if DEBUG
         void Update()
@@ -253,6 +256,8 @@ namespace ScienceAlert
                 Log.Write("ScreenSafeUI: {0}", ScreenSafeUI.fetch.transform.position);
             }
         }
+
+
 
         private void Awake()
         {

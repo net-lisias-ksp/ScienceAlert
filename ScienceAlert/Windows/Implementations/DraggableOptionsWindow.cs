@@ -148,7 +148,12 @@ namespace ScienceAlert.Windows.Implementations
             miniLabelRight = new GUIStyle(miniLabelLeft);
             miniLabelRight.alignment = TextAnchor.MiddleRight;
 
-            return new Rect(0, 0, 324, Screen.height / 5 * 3);
+            Settings.Instance.OnAboutToSave += OnAboutToSave;
+            OnClosed += OnCloseClick;
+
+            LoadFrom(Settings.Instance.additional.GetNode("OptionsWindow") ?? new ConfigNode());
+
+            return new Rect(windowRect.x, windowRect.y, 324, Screen.height / 5 * 3);
         }
 
 
@@ -194,10 +199,33 @@ namespace ScienceAlert.Windows.Implementations
             GUILayout.EndVertical();
         }
 
+
+
         protected override void OnCloseClick()
         {
-            throw new NotImplementedException();
+            if (Visible)
+            {
+                Log.Verbose("OptionsWindow closing");
+                Visible = false; // will trigger OnClose => OnCloseClick again
+            }
+            else
+            {
+                Log.Verbose("OptionsWindow closed; saving");
+                Settings.Instance.Save();
+            }
         }
+
+
+
+        /// <summary>
+        /// Update window position in settings
+        /// </summary>
+        private void OnAboutToSave()
+        {
+            Log.Verbose("DraggableOptionsWindow.OnAboutToSave");
+            SaveInto(Settings.Instance.additional.GetNode("OptionsWindow") ?? Settings.Instance.additional.AddNode("OptionsWindow"));
+        }
+
 
 
         /// <summary>

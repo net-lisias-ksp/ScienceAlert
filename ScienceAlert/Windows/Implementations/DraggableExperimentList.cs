@@ -37,9 +37,23 @@ namespace ScienceAlert.Windows.Implementations
             ShrinkHeightToFit = true;
 
             Skin = Instantiate(Settings.Skin) as GUISkin; // we'll be altering it a little bit to make sure the buttons are the right size
+            Settings.Instance.OnAboutToSave += AboutToSave;
 
-            return new Rect(0, 0, 256f, 128f);
+            LoadFrom(Settings.Instance.additional.GetNode("ExperimentWindow") ?? new ConfigNode());
+            return new Rect(windowRect.x, windowRect.y, 256f, 128f);
         }
+
+
+
+        /// <summary>
+        /// Instead of updating window position every frame, we'll use an event to let us know
+        /// when we should update Settings' window position
+        /// </summary>
+        private void AboutToSave()
+        {
+            SaveInto(Settings.Instance.additional.GetNode("ExperimentWindow") ?? Settings.Instance.additional.AddNode("ExperimentWindow"));
+        }
+
 
 
 
@@ -65,30 +79,30 @@ namespace ScienceAlert.Windows.Implementations
         /// Main purpose is to tweak our button skin so they're guaranteed not to clip any experiment
         /// title text
         /// </summary>
-        new protected void OnGUI() 
-        {
-            if (!adjustedSkin)
-            {
-                //Skin.window.stretchHeight = true;
-                //List<string> experimentTitles = new List<string>();
+        //new protected void OnGUI() 
+        //{
+        //    if (!adjustedSkin)
+        //    {
+        //        //Skin.window.stretchHeight = true;
+        //        //List<string> experimentTitles = new List<string>();
 
-                //ResearchAndDevelopment.GetExperimentIDs().ForEach(id => experimentTitles.Add(ResearchAndDevelopment.GetExperiment(id).experimentTitle));
+        //        //ResearchAndDevelopment.GetExperimentIDs().ForEach(id => experimentTitles.Add(ResearchAndDevelopment.GetExperiment(id).experimentTitle));
 
-                //Skin.button.fixedWidth = Mathf.Max(64f, experimentTitles.Max(title =>
-                //    {
-                //        float minWidth = 0f;
-                //        float maxWidth = 0f;
+        //        //Skin.button.fixedWidth = Mathf.Max(64f, experimentTitles.Max(title =>
+        //        //    {
+        //        //        float minWidth = 0f;
+        //        //        float maxWidth = 0f;
 
-                //        Skin.button.CalcMinMaxWidth(new GUIContent(title + " (123.4)"), out minWidth, out maxWidth);
+        //        //        Skin.button.CalcMinMaxWidth(new GUIContent(title + " (123.4)"), out minWidth, out maxWidth);
 
-                //        return maxWidth;
-                //    }));
+        //        //        return maxWidth;
+        //        //    }));
 
-                adjustedSkin = true;
-            }
+        //        adjustedSkin = true;
+        //    }
 
-            base.OnGUI();
-        }
+        //    base.OnGUI();
+        //}
 
 
 

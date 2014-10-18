@@ -26,12 +26,17 @@ using UnityEngine;
 using ReeperCommon;
 using ReeperCommon.ConfigNodeSerialization;
 
+//#error figure out a way to let DraggableWindows listen to events from Settings
+
 namespace ScienceAlert
 {
-    public delegate void SaveCallback(ConfigNode node);
+    
 
     public class Settings : IReeperSerializable
     {
+        public delegate void SaveCallback(ConfigNode node);
+        public delegate void Callback();
+
         // Singleton pattern
         private static Settings instance;
 
@@ -73,9 +78,16 @@ namespace ScienceAlert
         public event SaveCallback OnSave = delegate(ConfigNode node) { };
 
         [field: DoNotSerialize]
+        public event Callback OnAboutToSave = delegate() { };
+        
+        [field: DoNotSerialize]
         public event SaveCallback OnLoad = delegate(ConfigNode node) { };
 
+        [field: DoNotSerialize]
+        public event Callback OnAboutToLoad = delegate() { };
 
+        [Subsection("WindowPositions")]
+        public ConfigNode additional = new ConfigNode("additional");
 
 /******************************************************************************
  *                      Implementation details
@@ -202,10 +214,13 @@ namespace ScienceAlert
                 }
                 else 
                 {
+                    OnAboutToLoad();
                     node.CreateObjectFromConfigEx(this);
                     Log.LoadFrom(node);
 
-                    OnLoad(node.GetNode("Extra") ?? new ConfigNode("Extra"));
+                    Log.Debug("Settings.additional = {0}", additional.ToString());
+
+                    OnLoad(additional);
                 }
             }
             else
@@ -224,11 +239,13 @@ namespace ScienceAlert
         /// </summary>
         public void Save()
         {
-            ConfigNode saved = new ConfigNode();
+            ConfigNode saved = null;
 
             try
             {
-                ConfigNode.Merge(saved, this.CreateConfigFromObjectEx() ?? new ConfigNode()); // otherwise we'd have to add result as a subnode
+                OnAboutToSave();
+
+                saved = this.CreateConfigFromObjectEx() ?? new ConfigNode();
             }
             catch (Exception e)
             {
@@ -239,7 +256,7 @@ namespace ScienceAlert
 
             Log.Debug("About to save: {0}", saved.ToString());
 
-            OnSave(saved.AddNode("Extra"));
+            OnSave(additional);
 
             // note: it's really important we not save an empty ConfigNode to disk, else
             // it'll stall KSP next time it loads
@@ -401,6 +418,8 @@ namespace ScienceAlert
                 skin.window.normal.background = tex;
             }
         }
+
+
 
 #endregion
 

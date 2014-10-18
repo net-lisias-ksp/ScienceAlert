@@ -88,6 +88,7 @@
     <Compile Include="Scan Interfaces\ScanInterface.cs" />
     <Compile Include="Scan Interfaces\SCANsatInterface.cs" />
     <Compile Include="MagicDataTransmitter.cs" />
+    <Compile Include="Windows\Implementations\DraggableDebugWindow.cs" />
     <Compile Include="Windows\Implementations\DraggableExperimentList.cs" />
     <Compile Include="Windows\Implementations\DraggableOptionsWindow.cs" />
     <Compile Include="Windows\Implementations\TestDrag.cs" />
