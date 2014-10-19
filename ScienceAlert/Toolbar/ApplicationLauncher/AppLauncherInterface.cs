@@ -119,6 +119,7 @@ namespace ScienceAlert.Toolbar
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                                                         sprite);
 
+            Log.Debug("AppLauncherInterface: Button transform = {0}", button.transform.position.ToString());
  
             Log.Verbose("AppLauncherInterface ready");
         }

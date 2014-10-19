@@ -137,32 +137,15 @@ namespace ScienceAlert.Windows
 
 
 
+        /// <summary>
+        /// Prevent clickthrough to ScreenSafe GUI controls
+        /// </summary>
         private void Update()
         {
-            //Func<ReeperCommon.Window.DraggableWindow, Vector2, bool> SuppressMouse = delegate(ReeperCommon.Window.DraggableWindow window, Vector2 mouse)
-            //{
-            //    return window.Visible && window.WindowRect.Contains(mouse);
-            //};
-
             var mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
             ReeperCommon.Window.DraggableWindow[] windows = new DraggableWindow[] { optionsWindow, experimentList, debugWindow };
 
             uiCamera.enabled = !windows.Any(win => win.Visible && win.WindowRect.Contains(mouse));
-            Log.Normal("Enabled: {0}", uiCamera.enabled);
-
-            //if (SuppressMouse(optionsWindow.WindowRect, mouse) || SuppressMouse(debugWindow.
-            //if (optionsWindow.Visible && optionsWindow.WindowRect.Contains(
-            //{
-            //    Log.Warning("mouseover options window");
-            //    //uiCamera.ProcessMouseEvents = false;
-            //    uiCamera.enabled = false;
-            //}
-            //else
-            //{
-            //    Log.Normal("normal");
-            //    //uiCamera.ProcessMouseEvents = true;
-            //    uiCamera.enabled = true;
-            //}
         }
     }
 }

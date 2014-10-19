@@ -33,6 +33,10 @@ namespace ScienceAlert.Windows.Implementations
         /// <returns></returns>
         protected override Rect Setup()
         {
+            // position blocker in front of ApplicationLauncher buttons. The window is going to be drawn on
+            // top of them regardless; this will just prevent us from accidentally interacting with them
+            backstop.SetZ(ApplicationLauncher.Instance.anchor.transform.position.z - 50f);
+
             Title = "Available Experiments";
             ShrinkHeightToFit = true;
 
