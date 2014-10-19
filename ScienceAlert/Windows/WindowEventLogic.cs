@@ -21,6 +21,7 @@ namespace ScienceAlert.Windows
 
         // other components
         ScienceAlert scienceAlert;
+        SSUICamera uiCamera;
 
 /******************************************************************************
  *                    Implementation Details
@@ -38,6 +39,9 @@ namespace ScienceAlert.Windows
             DraggableWindow.UnlockTexture = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnUnlock.png");
             DraggableWindow.ButtonHoverBackground = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnBackground.png");
             DraggableWindow.ButtonSound = "click1";
+
+            uiCamera = ScreenSafeUI.referenceCam.GetComponent<SSUICamera>();
+            if (uiCamera == null) Log.Error("WindowEventLogic: SSUICamera not found");
 
             // note to self: these are on separate gameobjects because they use a UIButton to catch
             // clickthrough, parented to the window's GO. It's simpler to simply disable the window rather than
@@ -129,6 +133,36 @@ namespace ScienceAlert.Windows
 
                 AudioPlayer.Audio.Play("click1", 0.5f);
             }
+        }
+
+
+
+        private void Update()
+        {
+            //Func<ReeperCommon.Window.DraggableWindow, Vector2, bool> SuppressMouse = delegate(ReeperCommon.Window.DraggableWindow window, Vector2 mouse)
+            //{
+            //    return window.Visible && window.WindowRect.Contains(mouse);
+            //};
+
+            var mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+            ReeperCommon.Window.DraggableWindow[] windows = new DraggableWindow[] { optionsWindow, experimentList, debugWindow };
+
+            uiCamera.enabled = !windows.Any(win => win.Visible && win.WindowRect.Contains(mouse));
+            Log.Normal("Enabled: {0}", uiCamera.enabled);
+
+            //if (SuppressMouse(optionsWindow.WindowRect, mouse) || SuppressMouse(debugWindow.
+            //if (optionsWindow.Visible && optionsWindow.WindowRect.Contains(
+            //{
+            //    Log.Warning("mouseover options window");
+            //    //uiCamera.ProcessMouseEvents = false;
+            //    uiCamera.enabled = false;
+            //}
+            //else
+            //{
+            //    Log.Normal("normal");
+            //    //uiCamera.ProcessMouseEvents = true;
+            //    uiCamera.enabled = true;
+            //}
         }
     }
 }

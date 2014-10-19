@@ -68,6 +68,30 @@ namespace ScienceAlert.Windows.Implementations
 
         protected override Rect Setup()
         {
+            Log.Normal("Z before change: " + backstop.transform.position.z);
+            //float newz = UIManager.instance.transform.position.z; still behind stuff
+            float newz = FlightUIController.fetch.brakes.transform.position.z - 1f;
+
+            Log.Normal("New Z: {0}", newz);
+            backstop.SetZ(newz);
+            //backstop.SetZ(GuiUtil.GetGuiCamera().transform.position.z + GuiUtil.GetGuiCamera().nearClipPlane - 1f);
+            Log.Normal("ScreenSafeUI.centerAnchor.bottom = {0}", ScreenSafeUI.fetch.centerAnchor.bottom.position);
+            Log.Normal("FlightUIController: {0}", FlightUIController.fetch.brakes.transform.position.z);
+
+            Log.Normal("FlightUIController.th pos: {0}", FlightUIController.fetch.thr.transform.position.ToString());
+            Log.Normal("FlightUIController.th layer: {0}", FlightUIController.fetch.thr.gameObject.layer); // layer 12!
+
+            var found = Camera.allCameras.SingleOrDefault(c => (c.cullingMask & (1 << 12)) != 0);
+            if (found == null) Log.Error("didn't find right camera");
+            
+            else {
+                Log.Normal("RenderCamera is {0}", found.name); 
+                found.gameObject.PrintComponents(); 
+            }
+
+            FlightUIController.fetch.thr.gameObject.PrintComponents();
+            FlightUIController.fetch.thr.transform.GetTopParent().gameObject.PrintComponents();
+
             // culture setting
             Log.Normal("Configuring NumberFormatInfo for current locale");
             formatter = (NumberFormatInfo)NumberFormatInfo.CurrentInfo.Clone();
