@@ -75,19 +75,22 @@ namespace ScienceAlert
         private GUISkin skin;
 
         [field: DoNotSerialize] // note: specifier required, else it won't apply to compiler-generated field portion
-        public event SaveCallback OnSave = delegate(ConfigNode node) { };
+        public event Callback OnSave = delegate() { };
 
-        [field: DoNotSerialize]
-        public event Callback OnAboutToSave = delegate() { };
+        //[field: DoNotSerialize]
+        //public event Callback OnAboutToSave = delegate() { };
         
         [field: DoNotSerialize]
         public event SaveCallback OnLoad = delegate(ConfigNode node) { };
 
-        [field: DoNotSerialize]
-        public event Callback OnAboutToLoad = delegate() { };
+        //[field: DoNotSerialize]
+        //public event Callback OnAboutToLoad = delegate() { };
 
-        [Subsection("WindowPositions")]
-        public ConfigNode additional = new ConfigNode("additional");
+        /// <summary>
+        /// Extra storage for objects that don't register for listeners in time
+        /// </summary>
+        public ConfigNode additional = new ConfigNode("config");
+
 
 /******************************************************************************
  *                      Implementation details
@@ -214,7 +217,6 @@ namespace ScienceAlert
                 }
                 else 
                 {
-                    OnAboutToLoad();
                     node.CreateObjectFromConfigEx(this);
                     Log.LoadFrom(node);
 
@@ -243,7 +245,7 @@ namespace ScienceAlert
 
             try
             {
-                OnAboutToSave();
+                OnSave();
 
                 saved = this.CreateConfigFromObjectEx() ?? new ConfigNode();
             }
@@ -256,7 +258,6 @@ namespace ScienceAlert
 
             Log.Debug("About to save: {0}", saved.ToString());
 
-            OnSave(additional);
 
             // note: it's really important we not save an empty ConfigNode to disk, else
             // it'll stall KSP next time it loads

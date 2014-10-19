@@ -24,262 +24,6 @@ using System;
 
 namespace ScienceAlert.Toolbar
 {
-    /// <summary>
-    /// Unfortunately there's some peculiar, potentially annoying behaviour
-    /// with the ApplicationLauncher. Specifically, there are cases where
-    /// mousing over a stock button would cause it to overlap with the
-    /// Drawable. The goal of this object is to make the drawable behave
-    /// nicely by:
-    /// 
-    /// - temporarily hiding the drawable if a stock button is hovered
-    /// - temporarily hiding the drawable if the currency widget is visible
-    /// - closing the drawable if a stock button is clicked
-    /// 
-    /// Note: this whole thing is essentially a bugfix for the issue 
-    /// described at http://forum.kerbalspaceprogram.com/threads/86682-Appilcation-Launcher-and-Mods?p=1280014#post1280014
-    /// </summary>
-    class DrawableManners : MonoBehaviour
-    {
-
-        // --------------------------------------------------------------------
-        //    Members
-        // --------------------------------------------------------------------
-        List<ApplicationLauncherButton> stockButtons = new List<ApplicationLauncherButton>();
-        List<GameObject> widgets = new List<GameObject>();
-
-        CurrencyWidgetsApp currency;
-        MessageSystem messager;
-        ResourceDisplay resources;
-        ContractsApp contracts;
-
-        AppLauncherInterface button;
-        System.Collections.IEnumerator waitRoutine;
-
-
-/******************************************************************************
- *                    Implementation Details
- ******************************************************************************/
-
-        void Start()
-        {
-            Log.Debug("DrawableManners start");
-
-            button = GetComponent<AppLauncherInterface>();
-
-            var appl = ApplicationLauncher.Instance.gameObject.transform;
-            var holder = appl.Find("anchor/List");
-
-            if (holder == null)
-            {
-                Log.Error("AppLauncherInterface.DrawableManners: stock buttons not found!");
-            }
-            else
-            {
-                stockButtons = holder.GetComponentsInChildren<ApplicationLauncherButton>().ToList();
-
-                // nope foreach (var b in appl.GetComponentsInChildren<RUIToggleButton>())
-                // nope foreach (var b in appl.GetComponentsInChildren<UIButton>())
-                // nope foreach (var b in appl.GetComponentsInChildren<UIListItemContainer>())
-                // nope foreach (var b in appl.GetComponentsInChildren<BTButton>())
-
-                // Looking for ApplicationLauncherButtons would be the obvious route but for
-                // some reason the currency widget doesn't seem to be one. We can get click
-                // events this way instead
-                foreach (var b in holder.GetComponentsInChildren<UIScrollList>()) // AH HA!!
-                    b.AddValueChangedDelegate(StockButtonClick);
-                
-            }
-
-            // the currency button is a little different
-            currency = GameObject.FindObjectOfType<CurrencyWidgetsApp>();
-            //currency.gameObject.PrintComponents();
-            
-            StartCoroutine(WaitForCurrencyWidget());
-            StartCoroutine(WaitForMessageWidget());
-            StartCoroutine(WaitForResourceWidget());
-            StartCoroutine(WaitForContractsWidget());
-        }
-
-
-
-        void OnDestroy()
-        {
-            // remove hooks from stock buttons
-            var holder = ApplicationLauncher.Instance.gameObject.transform.Find("anchor/List");
-
-            foreach (var b in holder.GetComponentsInChildren<UIScrollList>())
-            {
-                try
-                {
-                    b.RemoveValueChangedDelegate(StockButtonClick);
-                }
-                catch (Exception e)
-                {
-                    Log.Error("AppLauncherInterface: Exception while remove stock app button delegates: {0}", e);
-                }
-            }
-        }
-
-
-
-        /// <summary>
-        /// Close the drawable if the player clicks on a stock button
-        /// </summary>
-        /// <param name="o"></param>
-        public void StockButtonClick(IUIObject o)
-        {
-            Log.Debug("stock button click");
-            button.Drawable = null;
-        }
-
-
-
-        /// <summary>
-        /// The usual: find some important-looking bits of the widget that
-        /// will be displayed on mouseover and track them
-        /// </summary>
-        /// <returns></returns>
-        System.Collections.IEnumerator WaitForContractsWidget()
-        {
-            Log.Debug("Waiting for contracts widget...");
-
-            while (ContractsApp.Instance == null)
-            {
-                yield return 0;
-            }
-
-            Log.Debug("Found contracts widget!");
-            contracts = ContractsApp.Instance;
-            widgets.Add(contracts.transform.Find("anchor/header").gameObject);
-
-#if DEBUG
-            contracts.gameObject.PrintComponents();
-#endif
-        }
-
-
-
-        /// <summary>
-        /// The usual: find some important-looking bits of the widget that
-        /// will be displayed on mouseover and track them
-        /// </summary>
-        /// <returns></returns>
-        System.Collections.IEnumerator WaitForCurrencyWidget()
-        {
-            Log.Debug("Waiting for currency widget ...");
-
-            while (!currency.widgetSpawner.Spawned)
-                yield return 0;
-
-            Log.Debug("Found currency widget");
-
-#if DEBUG
-            currency.gameObject.PrintComponents();
-#endif
-
-            var t = currency.gameObject.transform;
-
-            // we also need to know if the widget is actually being displayed
-            widgets.Add(t.Find("anchor/FundsWidget/Frame").gameObject);
-            widgets.Add(t.Find("anchor/RepWidget/Frame").gameObject);
-            widgets.Add(t.Find("anchor/SciWidget/Frame").gameObject);
-        }
-
-
-
-        /// <summary>
-        /// Wait for the messager to exist and then locate a child object
-        /// we can poll to see if the panel is being displayed
-        /// </summary>
-        /// <returns></returns>
-        System.Collections.IEnumerator WaitForMessageWidget()
-        {
-            Log.Debug("Waiting for message widget...");
-
-            while (MessageSystem.Instance == null)
-                yield return 0;
-
-            Log.Debug("Found messager widget");
-
-            messager = MessageSystem.Instance;
-            
-            widgets.Add(messager.gameObject.transform.Find("listArea/bg").gameObject);
-            Log.Debug("AppLauncherInterface: Found message widget background");
-        }
-
-
-
-        /// <summary>
-        /// Same idea as the messager widget
-        /// </summary>
-        /// <returns></returns>
-        System.Collections.IEnumerator WaitForResourceWidget()
-        {
-            Log.Debug("Waiting for resource widget...");
-
-            while (ResourceDisplay.Instance == null)
-                yield return 0;
-
-            Log.Debug("Found resource widget");
-
-            resources = ResourceDisplay.Instance;
-            widgets.Add(resources.transform.Find("header").gameObject);
-
-#if DEBUG
-            resources.gameObject.PrintComponents();
-#endif
-        }
-
-
-
-        /// <summary>
-        /// Why update the coroutine manually? I like this way better than
-        /// using a flag to avoid duplicate coroutines from being created
-        /// </summary>
-        void Update()
-        {
-            if (waitRoutine != null)
-                if (!waitRoutine.MoveNext())
-                    waitRoutine = null;
-        }
-
-
-
-        /// <summary>
-        /// If the ScienceAlert button is pressed, it should supercede any
-        /// open widgets
-        /// </summary>
-        public void CloseOpenWidgets()
-        {
-            if (resources != null) resources.HideResourceList();
-            if (messager != null) messager.Hide();
-            if (currency != null) { currency.widgetSpawner.gameObject.SetActive(false); currency.gameObject.SendMessage("Hide"); }
-            if (contracts != null) { contracts.gameObject.SendMessage("Hide"); }
-
-
-            // note: doesn't get currency widget button state =\
-            foreach (var b in stockButtons)
-                if (b.toggleButton.State == RUIToggleButton.ButtonState.TRUE)
-                    b.toggleButton.SetFalse();    
-        }
-
-
-
-        /// <summary>
-        /// ExperimentManager will query this to decide whether the drawable
-        /// should be visible or not. 
-        /// </summary>
-        public bool ShouldHide
-        {
-            get
-            {
-                return waitRoutine != null ||
-                        stockButtons.Any(b => b.toggleButton.IsHovering || b.toggleButton.State == RUIToggleButton.ButtonState.TRUE)
-                        || widgets.Any(go => go.activeInHierarchy);
-            }
-        }
-    }
-
 
     /// <summary>
     /// A concrete object hidden behind IToolbar which handles (almost) all
@@ -297,11 +41,10 @@ namespace ScienceAlert.Toolbar
         private IDrawable drawable;
         private Vector2 drawablePosition = new Vector2(Screen.width, 0);
 
-        private DrawableManners manners;
-
         public ApplicationLauncherButton button;
         private PackedSprite sprite; // animations: Spin, Unlit
 
+        
 
 /******************************************************************************
  *                    Implementation Details
@@ -349,12 +92,12 @@ namespace ScienceAlert.Toolbar
 
             // normal state
             Log.Verbose("Setting up normal animation");
-            UVAnimation normal = new UVAnimation() { name = "Unlit", loopCycles = 0, framerate = 24f };
+            UVAnimation normal = new UVAnimation() { name = "Unlit", loopCycles = 0, framerate = Settings.Instance.StarFlaskFrameRate };
             normal.BuildUVAnim(sprite.PixelCoordToUVCoord(9 * 38, 8 * 38), sprite.PixelSpaceToUVSpace(38, 38), 1, 1, 1);
 
             // animated state
             Log.Verbose("Setting up star flask animation");
-            UVAnimation anim = new UVAnimation() { name = "Spin", loopCycles = -1, framerate = 24f };
+            UVAnimation anim = new UVAnimation() { name = "Spin", loopCycles = -1, framerate = Settings.Instance.StarFlaskFrameRate };
             anim.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, 38).y), sprite.PixelSpaceToUVSpace(38, 38), 100);
 
 
@@ -368,6 +111,7 @@ namespace ScienceAlert.Toolbar
             button = ApplicationLauncher.Instance.AddModApplication(
                                                         OnToggle,
                                                         OnToggle,
+   
                                                         () => { },
                                                         () => { },
                                                         () => { },
@@ -375,25 +119,8 @@ namespace ScienceAlert.Toolbar
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                                                         sprite);
 
-            Log.Verbose("Creating DrawableManners...");
-            manners = gameObject.AddComponent<DrawableManners>();
-
  
             Log.Verbose("AppLauncherInterface ready");
-#if DEBUG
-            //Log.Debug("Button GO: " + button.gameObject.name);
-            //ApplicationLauncher.Instance.gameObject.PrintComponents();
-
-            //button.gameObject.GetComponentsInChildren<BTButton>().ToList().ForEach(btn =>
-            //    {
-            //        btn.AddInputDelegate(delegate(ref POINTER_INFO ptr)
-            //        {
-            //            if (ptr.evt == POINTER_INFO.INPUT_EVENT.TAP)
-            //                if (Input.GetMouseButton(2))
-            //                    Log.Warning("Input delegate: middle mouse on " + ptr.targetObj.name);
-            //        });
-            //    });
-#endif
         }
 
 
@@ -405,8 +132,6 @@ namespace ScienceAlert.Toolbar
                 Log.Verbose("Removing ApplicationLauncherButton");
                 ApplicationLauncher.Instance.RemoveModApplication(button);
             }
-
-            if (manners != null) Component.Destroy(manners);
         }
 
 
@@ -435,11 +160,26 @@ namespace ScienceAlert.Toolbar
         {
             if (drawable == null) return;
             if (!button.gameObject.activeSelf) return;
-            if (manners.ShouldHide) return;
 
             var dimensions = drawable.Draw(drawablePosition);
             drawablePosition = CalculateDrawablePosition(dimensions);
         }
+
+
+        // This is the basis of getting middle-mouse click to work on a UIButton. As you can see it's not very pretty
+        //public void Update()
+        //{
+        //    // if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity, layerMask))
+        //    var camSettings = UIManager.instance.uiCameras[0];
+
+        //    RaycastHit hitInfo;
+
+        //    if (Physics.Raycast(camSettings.camera.ScreenPointToRay(Input.mousePosition), out hitInfo, camSettings.rayDepth, camSettings.mask))
+        //    {
+        //        Log.Warning("Raycasthit: {0}", hitInfo.collider.gameObject.name);
+        //    }
+        //}
+
 
 
         /// <summary>
@@ -458,17 +198,25 @@ namespace ScienceAlert.Toolbar
             }
             else if (Input.GetMouseButtonUp(1))
             {
-                Log.Debug("AppLauncher: right click");
-                button = 1;
+                if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+                {
+                    Log.Debug("AppLauncher: right click + alt");
+                    button = 2;
+                }
+                else
+                {
+                    Log.Debug("AppLauncher: right click");
+                    button = 1;
+                }
             }
-            else if (Input.GetMouseButtonUp(2))
+            else if (Input.GetMouseButtonUp(2)) // note: middle mouse isn't registered as a tap by ezgui so this will never be called
+                                                // solution is to do the raycast ourselves which does work but it's messy
             {
                 Log.Debug("AppLauncher: middle click");
                 button = 2;
             }
 
-            manners.CloseOpenWidgets();
-
+ 
             OnClick(new ClickInfo() { button = button, used = false });
         }
 

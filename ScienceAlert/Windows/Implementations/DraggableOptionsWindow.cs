@@ -148,8 +148,7 @@ namespace ScienceAlert.Windows.Implementations
             miniLabelRight = new GUIStyle(miniLabelLeft);
             miniLabelRight.alignment = TextAnchor.MiddleRight;
 
-            Settings.Instance.OnAboutToSave += OnAboutToSave;
-            OnClosed += OnCloseClick;
+            Settings.Instance.OnSave += OnAboutToSave;
 
             LoadFrom(Settings.Instance.additional.GetNode("OptionsWindow") ?? new ConfigNode());
 
@@ -203,16 +202,7 @@ namespace ScienceAlert.Windows.Implementations
 
         protected override void OnCloseClick()
         {
-            if (Visible)
-            {
-                Log.Verbose("OptionsWindow closing");
-                Visible = false; // will trigger OnClose => OnCloseClick again
-            }
-            else
-            {
-                Log.Verbose("OptionsWindow closed; saving");
-                Settings.Instance.Save();
-            }
+            Visible = false;
         }
 
 

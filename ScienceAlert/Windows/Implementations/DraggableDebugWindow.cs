@@ -18,15 +18,19 @@ namespace ScienceAlert.Windows.Implementations
         {
             Title = "Debug";
             Skin = Settings.Skin;
-            Settings.Instance.OnAboutToSave += AboutToSave;
+            Settings.Instance.OnSave += AboutToSave;
 
             LoadFrom(Settings.Instance.additional.GetNode("DebugWindow") ?? new ConfigNode());
+
+            Log.Debug("DraggableDebugWindow.Setup");
+
             return new Rect(windowRect.x, windowRect.y, 256f, 128f);
         }
 
 
         private void AboutToSave()
         {
+            Log.Debug("DraggableDebugWindow.AboutToSave");
             SaveInto(Settings.Instance.additional.GetNode("DebugWindow") ?? Settings.Instance.additional.AddNode("DebugWindow"));
         }
 
@@ -50,14 +54,5 @@ namespace ScienceAlert.Windows.Implementations
         }
 
 
-        private void OnSettingsSave(ConfigNode node)
-        {
-            SaveInto(node.AddNode("DebugWindow"));
-        }
-
-        private void OnSettingsLoad(ConfigNode node)
-        {
-            LoadFrom(node.GetNode("DebugWindow") ?? new ConfigNode());
-        }
     }
 }

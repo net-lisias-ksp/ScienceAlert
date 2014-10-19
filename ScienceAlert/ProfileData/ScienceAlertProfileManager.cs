@@ -442,7 +442,7 @@ namespace ScienceAlert
         /// Called when Settings.Save is called
         /// </summary>
         /// <param name="node"></param>
-        public void OnSettingsSave(ConfigNode node)
+        public void OnSettingsSave()
         {
             Log.Debug("ProfileManager.OnSettingsSave");
 

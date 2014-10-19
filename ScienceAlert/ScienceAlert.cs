@@ -205,8 +205,8 @@ namespace ScienceAlert
 
             gameObject.AddComponent<Windows.WindowEventLogic>();
 
-            Log.Normal("Creating debug window");
-            gameObject.AddComponent<DebugWindow>();
+
+
             Log.Normal("Finished creating windows");
 
 

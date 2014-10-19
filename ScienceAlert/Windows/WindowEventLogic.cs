@@ -17,6 +17,7 @@ namespace ScienceAlert.Windows
         // Windows
         Implementations.DraggableExperimentList experimentList;
         Implementations.DraggableOptionsWindow optionsWindow;
+        Implementations.DraggableDebugWindow debugWindow;
 
         // other components
         ScienceAlert scienceAlert;
@@ -53,8 +54,12 @@ namespace ScienceAlert.Windows
             experimentList.manager = GetComponent<ExperimentManager>();
 
 
+            Log.Normal("Creating debug window");
+            debugWindow = new GameObject("ScienceAlert.DebugWindow").AddComponent<Implementations.DraggableDebugWindow>();
+
+
             // initially hide windows
-            optionsWindow.Visible = experimentList.Visible = false;
+            optionsWindow.Visible = experimentList.Visible = debugWindow.Visible = false;
         }
 
 
@@ -98,10 +103,11 @@ namespace ScienceAlert.Windows
             Log.Debug("ExperimentList: {0}", experimentList.Visible);
 #endif
 
-            if (optionsWindow.Visible || experimentList.Visible)
+            if (optionsWindow.Visible || experimentList.Visible || debugWindow.Visible)
             {
                 Log.Debug("WindowEventLogic: Hiding window(s)");
-                optionsWindow.Visible = experimentList.Visible = false;
+                optionsWindow.Visible = experimentList.Visible = debugWindow.Visible = false;
+                AudioPlayer.Audio.Play("click1", 0.5f);
                 return;
             }
             else
@@ -116,10 +122,12 @@ namespace ScienceAlert.Windows
                         optionsWindow.Visible = true;
                         break;
 
-                    case 2: // middle click
-                        throw new NotImplementedException("Middle-click not handled by WindowEventLogic");
-                        
+                    case 2: // middle click, show debug window (for AppLauncher this is alt + right click)
+                        debugWindow.Visible = true;
+                        break;
                 }
+
+                AudioPlayer.Audio.Play("click1", 0.5f);
             }
         }
     }
