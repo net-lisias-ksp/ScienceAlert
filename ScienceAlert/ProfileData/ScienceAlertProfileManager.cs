@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using ReeperCommon;
 using ScienceAlert.ProfileData;
@@ -304,17 +303,32 @@ namespace ScienceAlert
         /// <param name="newVessel"></param>
         private void OnVesselCreate(Vessel newVessel)
         {
+            if (newVessel == null)
+            {
+                Log.Debug("ProfileManager.OnVesselCreate: new vessel is null");
+            }
             Log.Debug("ProfileManager.OnVesselCreate: {0}", newVessel.vesselName);
 
-            if (newVessel != null && FlightGlobals.ActiveVessel != newVessel)
+            if (vesselProfiles == null) return; // we haven't even init yet
+
+            if (FlightGlobals.ActiveVessel != newVessel && newVessel.vesselType != VesselType.Debris)
             {
                 Profile parentProfile = null;
 
-                // is the active vessel our parent?
-                if (newVessel.rootPart.missionID == FlightGlobals.ActiveVessel.rootPart.missionID &&
-                    vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id) &&
-                    vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
-                    parentProfile = ActiveProfile;
+                // it's possible the new vessel is in fact packed (almost certain to be a DiscoverableObject)
+                // so we need to be careful not to access any parts if it is
+                uint mid = newVessel.packed ? newVessel.protoVessel.protoPartSnapshots[newVessel.protoVessel.rootIndex].missionID : newVessel.rootPart.missionID;
+
+                Log.Debug("ProfileManager.OnVesselCreate: new vessel mission id = " + mid);
+
+                if (mid == FlightGlobals.ActiveVessel.rootPart.missionID)
+                    if (vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id))
+                        if (vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
+                            parentProfile = ActiveProfile;
+                        
+                    
+                
+                    
 
                 // if the active vessel isn't the parent then the player probably didn't
                 // cause this vessel to be created; nonetheless there may be edge cases 
@@ -324,14 +338,18 @@ namespace ScienceAlert
                 {
                     var parentVessel = FlightGlobals.Vessels.SingleOrDefault(v =>
                            {
-                               if (newVessel.rootPart.missionID == v.rootPart.missionID)
-                                   if (vesselProfiles.ContainsKey(v.id))
-                                       return true;
-                               return false;
+                               if (v == null) Log.Error("somehow vessel inside loop is null");
+
+                                if (v.rootPart != null)
+                                    if (mid == v.rootPart.missionID)
+                                        if (vesselProfiles.ContainsKey(v.id))
+                                            return true;
+                                return false;
                            });
 
                     if (parentVessel != null) parentProfile = vesselProfiles[parentVessel.id];
                 }
+
 
                 if (parentProfile != null)
                 {
@@ -343,7 +361,7 @@ namespace ScienceAlert
 
                     Log.Normal("New vessel created; assigning it a clone of parent's profile {0}", parentProfile.name);
                     vesselProfiles.Add(newVessel.id, parentProfile.Clone());
-                }
+                } // otherwise this is a vessel created out of the player's control, most likely an asteroid
 
                 //// did we undock from something?
                 //if (newVessel.rootPart.missionID == FlightGlobals.ActiveVessel.rootPart.missionID && vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id) && vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)

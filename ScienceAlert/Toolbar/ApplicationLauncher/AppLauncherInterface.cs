@@ -119,6 +119,8 @@ namespace ScienceAlert.Toolbar
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                                                         sprite);
 
+            GameEvents.onGUIApplicationLauncherUnreadifying.Add(AppLauncherUnreadifying);
+
             Log.Debug("AppLauncherInterface: Button transform = {0}", button.transform.position.ToString());
  
             Log.Verbose("AppLauncherInterface ready");
@@ -130,8 +132,9 @@ namespace ScienceAlert.Toolbar
         {
             if (button != null)
             {
-                Log.Verbose("Removing ApplicationLauncherButton");
-                ApplicationLauncher.Instance.RemoveModApplication(button);
+                //Log.Verbose("Removing ApplicationLauncherButton");
+                //ApplicationLauncher.Instance.RemoveModApplication(button);
+                GameEvents.onGUIApplicationLauncherUnreadifying.Remove(AppLauncherUnreadifying);
             }
         }
 
@@ -152,6 +155,20 @@ namespace ScienceAlert.Toolbar
             return new Vector2(rect.x, rect.y);
         }
 
+        #region GameEvents
+
+        private void AppLauncherUnreadifying(GameScenes scene)
+        {
+            Log.Debug("AppLauncherInterface: AppLauncherUnreadifying");
+
+            if (button != null && ApplicationLauncher.Instance != null)
+            {
+                Log.Verbose("Removing ApplicationLauncherButton");
+                ApplicationLauncher.Instance.RemoveModApplication(button);
+            }
+        }
+
+        #endregion
 
         #region GUI events
 

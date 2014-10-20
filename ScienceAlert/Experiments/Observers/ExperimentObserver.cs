@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using ReeperCommon;
 using ScienceAlert.API;
@@ -452,21 +451,21 @@ namespace ScienceAlert.Experiments.Observers
             }
             else
             {
-                if (settings.AssumeOnboard)
-                {
-                    if (modules.Count == 0)
-                    {
-                        PopupDialog.SpawnPopupDialog("Error", string.Format("Cannot deploy custom experiment {0} because it does not extend ModuleScienceExperiment; you will have to manually deploy it. Sorry!", ExperimentTitle), "Okay", false, HighLogic.Skin);
-                        Log.Error("Custom experiment {0} has no modules and AssumeOnBoard flag; informed user that we cannot automatically deploy it.", ExperimentTitle);
-                        return false;
-                    }
-                }
-                else
-                {
-                    PopupDialog.SpawnPopupDialog("Error", string.Format("There are no open {0} experiments available onboard.", ExperimentTitle), "Okay", false, Settings.Skin);
-                    Log.Error("Failed to deploy experiment {0}; no more available science modules.", ExperimentTitle);
-                    return false;
-                }
+                //if (settings.AssumeOnboard)
+                //{
+                //    if (modules.Count == 0)
+                //    {
+                //        PopupDialog.SpawnPopupDialog("Error", string.Format("Cannot deploy custom experiment {0} because it does not extend ModuleScienceExperiment; you will have to manually deploy it. Sorry!", ExperimentTitle), "Okay", false, HighLogic.Skin);
+                //        Log.Error("Custom experiment {0} has no modules and AssumeOnBoard flag; informed user that we cannot automatically deploy it.", ExperimentTitle);
+                //        return false;
+                //    }
+                //}
+                //else
+                //{
+                //    PopupDialog.SpawnPopupDialog("Error", string.Format("There are no open {0} experiments available onboard.", ExperimentTitle), "Okay", false, Settings.Skin);
+                //    Log.Error("Failed to deploy experiment {0}; no more available science modules.", ExperimentTitle);
+                //    return false;
+                //}
             }
 
             // we should never reach this point if IsExperimentAvailableOnboard did
@@ -498,7 +497,7 @@ namespace ScienceAlert.Experiments.Observers
         {
             get
             {
-                return settings.AssumeOnboard || GetNextOnboardExperimentModule() != null;
+                return /*settings.AssumeOnboard ||*/ GetNextOnboardExperimentModule() != null;
             }
         }
 
@@ -512,13 +511,13 @@ namespace ScienceAlert.Experiments.Observers
 
 
 
-        public virtual bool AssumeOnboard
-        {
-            get
-            {
-                return settings.AssumeOnboard;
-            }
-        }
+        //public virtual bool AssumeOnboard
+        //{
+        //    get
+        //    {
+        //        return settings.AssumeOnboard;
+        //    }
+        //}
 
 
         public string ExperimentTitle

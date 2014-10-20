@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 using ScienceAlert.Toolbar;
 using ScienceAlert.Experiments.Observers;
@@ -328,7 +327,11 @@ namespace ScienceAlert.Experiments
                         Log.Verbose("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
 
                     }
-                    else observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], biomeFilter, scanInterface, expid));
+                    else if (FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>().Any(mse => mse.experimentID == expid))
+                    {
+                        // only add this observer if at least one applicable experiment is onboard
+                        observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], biomeFilter, scanInterface, expid));
+                    }
 
             // surfaceSample is a special case: it's technically available on any
             // crewed vessel

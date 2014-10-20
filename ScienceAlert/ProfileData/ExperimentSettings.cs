@@ -17,9 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using ReeperCommon;
 using UnityEngine;
 
@@ -42,7 +40,7 @@ namespace ScienceAlert.ProfileData
 *                    Implementation Details
 ******************************************************************************/
 
-        //public bool Enabled = true;
+
         private bool _enabled = true;
         public bool Enabled
         {
@@ -62,7 +60,6 @@ namespace ScienceAlert.ProfileData
 
 
 
-        //public bool SoundOnDiscovery = true;
         private bool _soundOnDiscovery = true;
         public bool SoundOnDiscovery
         {
@@ -82,7 +79,6 @@ namespace ScienceAlert.ProfileData
 
 
 
-        //public bool AnimationOnDiscovery = true;
         private bool _animationOnDiscovery = true;
         public bool AnimationOnDiscovery
         {
@@ -102,7 +98,6 @@ namespace ScienceAlert.ProfileData
 
 
 
-        //public bool StopWarpOnDiscovery = false;
         private bool _stopWarpOnDiscovery = false;
         public bool StopWarpOnDiscovery
         {
@@ -122,7 +117,6 @@ namespace ScienceAlert.ProfileData
 
 
 
-        //public FilterMethod Filter = FilterMethod.Unresearched;
         private FilterMethod _filter = FilterMethod.Unresearched;
         public FilterMethod Filter
         {
@@ -142,31 +136,27 @@ namespace ScienceAlert.ProfileData
 
 
         
-        //public bool AssumeOnboard = false;      // part of a workaround I'm thinking of for
-        // modded "experiments" that don't actually
-        // inherit from ModuleScienceExperiment
-        //
         // Those I've looked at seem to define the biome and
         // situation masks in ScienceDefs correctly, so although
         // we won't be able to interact directly with the experiment,
         // we should at least be able to tell when it could run under
         // our desired filter
-        private bool _assumeOnboard = false;
-        public bool AssumeOnboard
-        {
-            get
-            {
-                return _assumeOnboard;
-            }
-            set
-            {
-                if (value != _assumeOnboard)
-                {
-                    _assumeOnboard = value;
-                    OnChanged();
-                }
-            }
-        }
+        //private bool _assumeOnboard = false;
+        //public bool AssumeOnboard
+        //{
+        //    get
+        //    {
+        //        return _assumeOnboard;
+        //    }
+        //    set
+        //    {
+        //        if (value != _assumeOnboard)
+        //        {
+        //            _assumeOnboard = value;
+        //            OnChanged();
+        //        }
+        //    }
+        //}
 
 
 
@@ -180,7 +170,7 @@ namespace ScienceAlert.ProfileData
             AnimationOnDiscovery = other.AnimationOnDiscovery;
             StopWarpOnDiscovery = other.StopWarpOnDiscovery;
             Filter = other.Filter;
-            AssumeOnboard = other.AssumeOnboard;
+            //AssumeOnboard = other.AssumeOnboard;
             IsDefault = other.IsDefault;
         }
 
@@ -191,7 +181,7 @@ namespace ScienceAlert.ProfileData
             Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
             SoundOnDiscovery = ConfigUtil.Parse<bool>(node, "SoundOnDiscovery", true);
             AnimationOnDiscovery = ConfigUtil.Parse<bool>(node, "AnimationOnDiscovery", true);
-            AssumeOnboard = ConfigUtil.Parse<bool>(node, "AssumeOnboard", false);
+            //AssumeOnboard = ConfigUtil.Parse<bool>(node, "AssumeOnboard", false);
             StopWarpOnDiscovery = ConfigUtil.Parse<bool>(node, "StopWarpOnDiscovery", false);
 
             var strFilterName = node.GetValue("Filter");
@@ -213,7 +203,7 @@ namespace ScienceAlert.ProfileData
             node.AddValue("SoundOnDiscovery", SoundOnDiscovery);
             node.AddValue("AnimationOnDiscovery", AnimationOnDiscovery);
             node.AddValue("StopWarpOnDiscovery", StopWarpOnDiscovery);
-            node.AddValue("AssumeOnboard", AssumeOnboard);
+            //node.AddValue("AssumeOnboard", AssumeOnboard);
             node.AddValue("Filter", Filter);
             node.AddValue("IsDefault", IsDefault);
         }
