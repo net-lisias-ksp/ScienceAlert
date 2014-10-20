@@ -82,9 +82,7 @@
     <Compile Include="Experiments\Observers\RequiresCrew.cs" />
     <Compile Include="Experiments\Observers\SurfaceSampleObserver.cs" />
     <Compile Include="ProfileData\ExperimentSettings.cs" />
-    <Compile Include="ProfileData\Mothballed\ModuleSAProfile.cs" />
     <Compile Include="ProfileData\Profile.cs" />
-    <Compile Include="ProfileData\Mothballed\ProfileStorage.cs" />
     <Compile Include="ProfileData\ScienceAlertProfileManager.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
     <Compile Include="Experiments\ExperimentManager.cs" />

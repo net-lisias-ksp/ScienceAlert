@@ -138,7 +138,7 @@ namespace ScienceAlert.Windows.Implementations
                             if (GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
                             {
                                 Log.Debug("Deploying {0}", observer.ExperimentTitle);
-                                AudioPlayer.Audio.Play("click2");
+                                AudioPlayer.Audio.PlayUI("click2");
                                 observer.Deploy();
                             }
                         }

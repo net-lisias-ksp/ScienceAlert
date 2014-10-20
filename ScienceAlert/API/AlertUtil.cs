@@ -24,7 +24,7 @@ namespace ScienceAlert.API
             xmitScalar += data.labBoost;
 
 #if DEBUG
-            Log.Debug("GetNextReportValue for {0}, calculated labBoost of {1}", experiment.experimentTitle, data.labBoost);
+            //Log.Debug("GetNextReportValue for {0}, calculated labBoost of {1}", experiment.experimentTitle, data.labBoost);
 #endif
             if (onboard.Count == 0)
                 return ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, subject, xmitScalar) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;

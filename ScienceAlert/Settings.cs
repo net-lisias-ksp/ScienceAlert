@@ -316,8 +316,7 @@ namespace ScienceAlert
         public WarpSetting GlobalWarp { get; set; }
 
 
-        [HelpDoc("When TimeWarp exceeds this multiplier, every experiment's availability")]
-        [HelpDoc(" will be checked every frame instead of one per frame")]
+        [HelpDoc("Check every experiment every frame instead of round-robin when time warp exceeds this value")]
         [Subsection("General")]
         public float TimeWarpCheckThreshold { get; private set; }
 
@@ -431,8 +430,6 @@ namespace ScienceAlert
 
 
 
-
-
 #region Crewed vessel settings
 
 
@@ -448,6 +445,7 @@ namespace ScienceAlert
         public bool CheckSurfaceSampleNotEva { get; set; }
 
 #endregion
+
 
 #region scan interface settings
 
@@ -510,6 +508,10 @@ namespace ScienceAlert
             }
         }
 
+#endregion
+
+#region audio settings
+        // volume multiplier? we'll see; uses Settings.UIVolume for now
 #endregion
     }
 

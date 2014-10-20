@@ -118,7 +118,7 @@ namespace ScienceAlert.Windows
             {
                 Log.Debug("WindowEventLogic: Hiding window(s)");
                 optionsWindow.Visible = experimentList.Visible = debugWindow.Visible = false;
-                AudioPlayer.Audio.Play("click1", 0.5f);
+                AudioPlayer.Audio.PlayUI("click1", 0.5f);
                 return;
             }
             else
@@ -138,7 +138,7 @@ namespace ScienceAlert.Windows
                         break;
                 }
 
-                AudioPlayer.Audio.Play("click1", 0.5f);
+                AudioPlayer.Audio.PlayUI("click1", 0.5f);
             }
         }
 

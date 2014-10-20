@@ -87,6 +87,7 @@ namespace ScienceAlert.Experiments
             audio = GetComponent<AudioPlayer>() ?? AudioPlayer.Audio;
 
             scienceAlert.OnScanInterfaceChanged += OnScanInterfaceChanged;
+            scienceAlert.OnToolbarButtonChanged += OnToolbarButtonChanged;
 
             // event setup
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
@@ -154,14 +155,13 @@ namespace ScienceAlert.Experiments
 
 
 
-
-
-
         public void OnVesselDestroyed(Vessel vessel)
         {
+
             try
             {
-                if (FlightGlobals.ActiveVessel == vessel)
+                // note: on shutdown, accessing FlightGlobals.ActiveVessel will result in a NRE
+                if (FlightGlobals.fetch != null && FlightGlobals.ActiveVessel == vessel)
                 {
                     Log.Debug("Active vessel was destroyed!");
                     observers.Clear();
@@ -254,12 +254,12 @@ namespace ScienceAlert.Experiments
                             {
                                 case Settings.SoundNotifySetting.ByExperiment:
                                     if (observer.settings.SoundOnDiscovery)
-                                        audio.Play("bubbles", 1f, 2f);
+                                        audio.PlayUI("bubbles", 2f);
 
                                     break;
 
                                 case Settings.SoundNotifySetting.Always:
-                                    audio.Play("bubbles", 1f, 2f);
+                                    audio.PlayUI("bubbles", 2f);
                                     break;
                             }
 
@@ -501,6 +501,14 @@ namespace ScienceAlert.Experiments
         }
 
 
+        /// <summary>
+        /// Event sent from ScienceAlert whenever the too--well you get it
+        /// </summary>
+        private void OnToolbarButtonChanged()
+        {
+            Log.Debug("ExperimentManager.OnToolbarButtonChanged");
+            RebuildObserverList();
+        }
 
 #endregion
 

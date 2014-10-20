@@ -662,7 +662,7 @@ namespace ScienceAlert.Windows.Implementations
             bool result = GUILayout.Toggle(value, content, style == null ? Settings.Skin.toggle : style, options);
             if (result != value)
             {
-                audio.Play("click1");
+                audio.PlayUI("click1");
 
 #if DEBUG
                 Log.Debug("Toggle '{0}' is now {1}", content.text, result);
@@ -684,7 +684,7 @@ namespace ScienceAlert.Windows.Implementations
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
             if (newValue != currentValue)
             {
-                audio.Play("click1");
+                audio.PlayUI("click1");
                 settings.Filter = (ProfileData.ExperimentSettings.FilterMethod)newValue;
             }
 
@@ -704,7 +704,7 @@ namespace ScienceAlert.Windows.Implementations
             bool pressed = GUILayout.Button(content, options);
 
             if (pressed)
-                audio.Play("click1");
+                audio.PlayUI("click1");
 
             return pressed;
         }

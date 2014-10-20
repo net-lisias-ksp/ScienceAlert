@@ -83,6 +83,7 @@ namespace ScienceAlert
             GameEvents.onVesselWillDestroy.Add(OnVesselWillDestroy);
             //GameEvents.onGameStateSave.Add(OnGameSave);
             //GameEvents.onGameStateLoad.Add(OnGameLoad);
+            GameEvents.onSameVesselUndock.Add(OnSameVesselUndock);
 
 
             Ready = false; // won't be ready until OnLoad
@@ -111,6 +112,7 @@ namespace ScienceAlert
             GameEvents.onVesselWillDestroy.Remove(OnVesselWillDestroy);
             //GameEvents.onGameStateSave.Remove(OnGameSave);
             //GameEvents.onGameStateLoad.Remove(OnGameLoad);
+            GameEvents.onSameVesselUndock.Add(OnSameVesselUndock);
 
             SaveStoredProfiles();
         }
@@ -276,6 +278,10 @@ namespace ScienceAlert
         }
 
 
+        private void OnSameVesselUndock(ModuleDockingNode node1, ModuleDockingNode node2)
+        {
+            Log.Debug("OnSameVesselUndock: {0}, {1}", node1.vessel.vesselName, node2.vessel.vesselName);
+        }
 
         /// <summary>
         /// Load vessel-specific ConfigNodes from the persistent file
