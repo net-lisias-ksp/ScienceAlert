@@ -22,6 +22,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using ReeperCommon;
+using ScienceAlert.API;
 
 namespace ScienceAlert.Experiments.Observers
 {
@@ -310,7 +311,7 @@ namespace ScienceAlert.Experiments.Observers
 
                             case ProfileData.ExperimentSettings.FilterMethod.NotMaxed:
                                 // <98% of science cap
-                                Available = scienceTotal < subject.scienceCap * 0.98 * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+                                Available = scienceTotal < subject.scienceCap * 0.98f * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
                                 break;
 
                             case ProfileData.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
@@ -321,7 +322,7 @@ namespace ScienceAlert.Experiments.Observers
                                 break;
 
                             case ProfileData.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
-                                Available = scienceTotal < subject.scienceCap * 0.9 * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+                                Available = scienceTotal < subject.scienceCap * 0.9f * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
                                 break;
 
                             default: // this should NEVER occur, but nice to have a safety measure
@@ -333,7 +334,8 @@ namespace ScienceAlert.Experiments.Observers
 
                         // bugfix: also ensure the experiment will generate >0 science, else
                         //         we could produce alerts for reports that won't generate any science
-                        nextReportValue = CalculateNextReportValue(subject, experimentSituation, data);
+                        //nextReportValue = CalculateNextReportValue(subject, experimentSituation, data);
+                        nextReportValue = subject.CalculateNextReport(experiment, data);
                         Available = Available && nextReportValue > 0.01f;
 
                         // check the science threshold
@@ -353,7 +355,7 @@ namespace ScienceAlert.Experiments.Observers
 
                             if (Available != lastStatus && Available)
                             {
-                                Log.Normal("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, nextReportValue);
+                                Log.Normal("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier, settings.Filter, subject.science, nextReportValue);
 
                                 //Log.Debug("Transmission value: {0}", CalculateTransmissionValue(subject));
 

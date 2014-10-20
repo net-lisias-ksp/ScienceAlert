@@ -94,12 +94,15 @@ namespace ScienceAlert
             if (GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out possibleBiome))
             {
                 // the biome we got is most likely good
+                biome = possibleBiome;
                 return true;
             }
             else
             {
                 // the biome we got is not very accurate (e.g. polar ice caps in middle of kerbin grasslands and
                 // such, due to the way the biome map is filtered).
+                // we'll return it anyway; let the caller figure out what to do about it
+                biome = possibleBiome;
                 return false;
             }
         }

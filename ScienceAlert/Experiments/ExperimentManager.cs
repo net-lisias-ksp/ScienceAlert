@@ -68,6 +68,12 @@ namespace ScienceAlert.Experiments
                                                                                        // this differs from ExperimentObserver.Available which just reports whether
                                                                                        // that experiment currently meets filter settings
 
+        public event Callback OnObserversRebuilt = delegate { }; // called whenever observers are totally recreated from scratch,
+                                                                 // such as when the player changes ships
+
+        public event Callback OnExperimentsScanned = delegate { };   // called whenever the observers rescan the ship, typically
+                                                                     // as a result of the current vessel being modified but not
+                                                                     // switched (pieces breaking off or staged, etc)
 
 /******************************************************************************
  *                    Implementation Details
@@ -131,6 +137,8 @@ namespace ScienceAlert.Experiments
                 Log.Normal("ExperimentManager.OnVesselWasModified: rescanning vessel for experiment modules");
                 foreach (var obs in observers)
                     obs.Rescan();
+
+                OnExperimentsScanned();
                 Log.Normal("Done");
             }
         }
@@ -304,7 +312,12 @@ namespace ScienceAlert.Experiments
             Log.Normal("Rebuilding observer list");
 
             observers.Clear();
-            ScanInterface scanInterface = GetComponent<ScanInterface>(); // can be null
+            ScanInterface scanInterface = GetComponent<ScanInterface>();
+
+            if (scanInterface == null)
+                Log.Error("ExperimentManager.RebuildObserverList: No ScanInterface component found"); // this is bad; things won't break if the scan interface
+                                                                                                      // is the default but there should always be a ScanInterface-type
+                                                                                                      // script attached to this GO
 
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
@@ -330,21 +343,32 @@ namespace ScienceAlert.Experiments
             // so on) I think it's best we separate it out into its own
             // Observer type that will account for these changes and any others
             // that might not necessarily trigger a VesselModified event
-            if (ProfileManager.ActiveProfile["evaReport"].Enabled)
+            try
             {
-                if (Settings.Instance.EvaReportOnTop)
+                if (ProfileManager.ActiveProfile["evaReport"].Enabled)
                 {
-                    observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-                    observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+                    if (Settings.Instance.EvaReportOnTop)
+                    {
+                        observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+                        observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+                    }
+                    else
+                    {
+                        observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+                        observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+                    }
                 }
-                else
-                {
-                    observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
-                    observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-                }
-            } else observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+                else observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+            }
+            catch (NullReferenceException e)
+            {
+                // this is another one of those things that should never happen but if they did
+                // it'd be in a quiet "why isn't this list sorted?" way
+                Log.Error("ExperimentManager.RebuildObserverList: Active profile does not seem to have an \"evaReport\" entry; {0}", e);
+            }
 
             watcher = UpdateObservers(); // to prevent any problems by rebuilding in the middle of enumeration
+            OnObserversRebuilt();
 
             return observers.Count;
         }
