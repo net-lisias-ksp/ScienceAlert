@@ -46,8 +46,9 @@ namespace ScienceAlert
         ProfileTable storedProfiles;
         VesselTable vesselProfiles;
 
-        public const string PERSISTENT_NODE_NAME = "ScienceAlert_Profiles";
-        public const string STORED_NODE_NAME = "Stored_Profiles";
+        private const string PERSISTENT_NODE_NAME = "ScienceAlert_Profiles";
+        private const string STORED_NODE_NAME = "Stored_Profiles";
+        public const int MAX_PROFILE_NAME_LENGTH = 28;
 
 /******************************************************************************
  *                    Implementation Details
@@ -604,11 +605,6 @@ namespace ScienceAlert
                 {
                     Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", Instance.VesselIdentifier(vessel.id));
                     Instance.vesselProfiles.Add(vessel.id, DefaultProfile.Clone());
-
-                    //Log.Normal("ProfileManager: Vessel {0} does not have a profile entry.", FlightGlobals.ActiveVessel.vesselName);
-
-#warning check out GameEvents first
-                    // first let's see if any existing ships
                 }
 
                 return Instance.vesselProfiles[vessel.id];

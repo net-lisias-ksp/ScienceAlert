@@ -152,6 +152,9 @@ namespace ScienceAlert
 {
     using Window = ReeperCommon.Window;
 
+
+    
+
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ScienceAlert : MonoBehaviour
     {

@@ -57,7 +57,7 @@ namespace ScienceAlert.Windows.Implementations
         // gui styles and skins
         GUIStyle miniLabelLeft; // left justified
         GUIStyle miniLabelRight; // right justified
-
+        GUIStyle miniLabelCenter; 
 
         // audio
         new AudioPlayer audio;
@@ -152,8 +152,12 @@ namespace ScienceAlert.Windows.Implementations
             miniLabelRight = new GUIStyle(miniLabelLeft);
             miniLabelRight.alignment = TextAnchor.MiddleRight;
 
+            miniLabelCenter = new GUIStyle(miniLabelLeft);
+            miniLabelCenter.alignment = TextAnchor.MiddleCenter;
+
             Settings.Instance.OnSave += OnAboutToSave;
-            GameEvents.onVesselChange.Add(OnVesselChange);
+            base.OnVisibilityChange += OnVisibilityChanged;
+            GameEvents.onVesselChange.Add(OnVesselChanged);
 
             LoadFrom(Settings.Instance.additional.GetNode("OptionsWindow") ?? new ConfigNode());
 
@@ -161,11 +165,11 @@ namespace ScienceAlert.Windows.Implementations
         }
 
     
-        protected virtual void OnDestroy()
+        new protected void OnDestroy()
         {
-            //base.OnDestroy();
+            base.OnDestroy();
             Log.Debug("DraggableOptionsWindow.OnDestroy");
-            GameEvents.onVesselChange.Remove(OnVesselChange);
+            base.OnVisibilityChange -= OnVisibilityChanged;
         }
 
 
@@ -177,12 +181,26 @@ namespace ScienceAlert.Windows.Implementations
         /// it'll show the old one (although the slider is correct)
         /// </summary>
         /// <param name="newVessel"></param>
-        private void OnVesselChange(Vessel newVessel)
+        //private void OnVesselChange(Vessel newVessel)
+        //{
+        //    Log.Debug("DraggableOptionsWindow.OnVesselChange to {0}", newVessel != null ? newVessel.vesselName : "<null>");
+        //    thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+        //}
+
+        private void OnVisibilityChanged(bool tf)
         {
-            Log.Debug("DraggableOptionsWindow.OnVesselChange to {0}", newVessel != null ? newVessel.vesselName : "<null>");
-            thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+            if (tf)
+            {
+                // just became visible; update threshold var
+                thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+            }
         }
 
+
+        private void OnVesselChanged(Vessel vessel)
+        {
+            OnVisibilityChanged(Visible);
+        }
 
         protected override void OnCloseClick()
         {
@@ -462,6 +480,7 @@ namespace ScienceAlert.Windows.Implementations
                     // min threshold slider ui
                     //-----------------------------------------------------
                     #region min threshold slider
+                    GUI.SetNextControlName("ThresholdHeader");
                     GUILayout.Box("Alert Threshold");
 
                     GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true), GUILayout.MinHeight(14f));
@@ -486,6 +505,13 @@ namespace ScienceAlert.Windows.Implementations
                         GUI.SetNextControlName("ThresholdText");
                         string result = GUILayout.TextField(thresholdValue, GUILayout.MinWidth(60f));
 
+                        // let the player use escape to cancel focus. Otherwise I'm likely to get a slew of
+                        // bug reports about having locked up their GUI since all actions are locked while
+                        // the text field has focus
+                        if (Event.current.keyCode == KeyCode.Escape)
+                            GUI.FocusControl("ThresholdHeader"); // kinda hacky but it works
+
+                        
                         if (GUI.GetNameOfFocusedControl() == "ThresholdText") // only use text field value if it's focused; if we don't
                         // do this, then it'll continuously overwrite the slider value
                         {
@@ -525,16 +551,13 @@ namespace ScienceAlert.Windows.Implementations
                     // slider min/max value display. Put under slider because I couldn't get it centered on the sides
                     // properly and it just looked strange
                     GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true), GUILayout.MaxHeight(10f));
-                    var prevColor = GUI.color;
-                    GUI.color = XKCDColors.Dark;
-                    GUILayout.Label("0");
-                    GUILayout.FlexibleSpace();
-                    GUILayout.Label("Science Amount");
-                    GUILayout.FlexibleSpace();
-                    GUILayout.Label("100");
-                    GUILayout.EndHorizontal();
 
-                    GUI.color = prevColor;
+                    GUILayout.Label("0", miniLabelLeft);
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("Science Amount", miniLabelCenter);
+                    GUILayout.FlexibleSpace();
+                    GUILayout.Label("100", miniLabelRight);
+                    GUILayout.EndHorizontal();
 
                     #endregion
 
@@ -602,7 +625,7 @@ namespace ScienceAlert.Windows.Implementations
                     //DrawProfileList_HorizontalDivider();
                     GUILayout.Label("Select a profile to load");
                     GUILayout.Box(blackPixel, GUILayout.ExpandWidth(true), GUILayout.MinHeight(1f), GUILayout.MaxHeight(3f));
-                    GUILayout.Space(2f); // just a bit of space to make the bar we drew stand out more
+                    GUILayout.Space(4f); // just a bit of space to make the bar we drew stand out more
 
                     var profileList = ProfileManager.Profiles;
 

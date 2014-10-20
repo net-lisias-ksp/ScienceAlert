@@ -19,7 +19,7 @@ namespace ScienceAlert.Windows.Implementations
         internal ProfileData.Profile editProfile;
 
         internal PopupDialog popup;
-        internal Rect popupRect = new Rect(Screen.width / 2f - 380f / 2f, Screen.height / 2 - 200f / 2f, 380f, 200f);
+        internal Rect popupRect = new Rect(Screen.width / 2f - 380f / 2f, Screen.height / 2 - 200f / 2f, 380f, 600f);
         internal string badChars = "()[]?'\":#$%^&*~;\n\t\r!@,.{}/<>";
 
 #region save popup
@@ -107,7 +107,7 @@ namespace ScienceAlert.Windows.Implementations
             editText = target.name;
             LockControls("ScienceAlertRenamePopup");
             //popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", ProfileManager.ActiveProfile.name), HighLogic.Skin, new DialogOption[] { new DialogOption("Rename", new Callback(RenameTargetProfile)), new DialogOption("Cancel", new Callback(DismissPopup)) }), false, HighLogic.Skin);
-            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", ProfileManager.ActiveProfile.name), HighLogic.Skin), false, HighLogic.Skin);
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", target.name), HighLogic.Skin), false, HighLogic.Skin);
         }
 
 
@@ -127,7 +127,7 @@ namespace ScienceAlert.Windows.Implementations
                         Event.current.character = '_';
                 }
 
-                editText = GUILayout.TextField(editText, GUILayout.ExpandWidth(true));
+                editText = GUILayout.TextField(editText, ProfileManager.MAX_PROFILE_NAME_LENGTH, GUILayout.ExpandWidth(true));
 
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
@@ -220,7 +220,7 @@ namespace ScienceAlert.Windows.Implementations
             editProfile = target;
             LockControls("ScienceAlertDeletePopup");
 
-            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Are you sure you want to delete '{0}'?", target.name), HighLogic.Skin, new DialogOption("Confirm", DeleteTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Are you sure you want to\ndelete '{0}'?", target.name), HighLogic.Skin, new DialogOption("Confirm", DeleteTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
         }
 
 
@@ -241,7 +241,7 @@ namespace ScienceAlert.Windows.Implementations
         {
             editProfile = target;
             LockControls("ScienceAlertOpenPopup");
-            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Load '{0}'? Unsaved settings will be lost.", editProfile.name), HighLogic.Skin, new DialogOption("Confirm", LoadTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Load '{0}'?\nUnsaved settings will be lost.", editProfile.name), HighLogic.Skin, new DialogOption("Confirm", LoadTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
         }
 
 
@@ -252,8 +252,10 @@ namespace ScienceAlert.Windows.Implementations
 
             if (ProfileManager.AssignAsActiveProfile(editProfile.Clone()))
             {
-                Log.Normal("Assigned new active profile: {0]", editProfile.name);
+                Log.Normal("Assigned new active profile: {0}", editProfile.name);
                 submenu = OpenPane.None; // close panel
+
+                OnVisibilityChanged(Visible); // update any ui elements (only threshold text currently)
             }
             else Log.Error("Failed to load '{0}'", editProfile.name);
         }
