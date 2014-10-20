@@ -199,8 +199,14 @@ namespace ScienceAlert
             
 
             Log.Normal("Creating experiment manager");
-            gameObject.AddComponent<ExperimentManager>();
+            gameObject.AddComponent<Experiments.ExperimentManager>();
 
+#if DEBUG
+            gameObject.GetComponent<Experiments.ExperimentManager>().OnExperimentAvailable += delegate(ScienceExperiment experiment, float report)
+            {
+                Log.Debug("ExperimentManager.OnExperimentAvailable listener triggered: Experiment '{0}' available, next report = {1}", experiment.experimentTitle, report);
+            };
+#endif
             
 
             gameObject.AddComponent<Windows.WindowEventLogic>();

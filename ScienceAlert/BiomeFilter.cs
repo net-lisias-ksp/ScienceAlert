@@ -120,7 +120,7 @@ namespace ScienceAlert
             // as biomes even though they don't exist on the biome map.
             if (!string.IsNullOrEmpty(vessel.landedAt))
             {
-                biome = vessel.landedAt;
+                biome = Vessel.GetLandedAtString(vessel.landedAt);
                 return true;
             }
             else

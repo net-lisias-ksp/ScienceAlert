@@ -9,7 +9,7 @@ using UnityEngine;
 namespace ScienceAlert.Windows.Implementations
 {
     using ProfileManager = ScienceAlertProfileManager;
-
+    using ExperimentManager = Experiments.ExperimentManager;
 
     internal partial class DraggableOptionsWindow : ReeperCommon.Window.DraggableWindow
     {
@@ -365,7 +365,8 @@ namespace ScienceAlert.Windows.Implementations
                             Settings.Instance.CheckSurfaceSampleNotEva = AudibleToggle(prev, "Track surface sample in vessel");
 
                             if (prev != Settings.Instance.CheckSurfaceSampleNotEva)
-                                manager.ScheduleRebuildObserverList();
+                                manager.RebuildObserverList();
+                                //manager.ScheduleRebuildObserverList();
                         }
 
                     } // end crewed vessel settings

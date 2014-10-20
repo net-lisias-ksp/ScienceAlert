@@ -152,6 +152,7 @@ namespace ScienceAlert
                 DisplayCurrentBiome = false;
                 StarFlaskFrameRate = 24f;
                 FlaskAnimationEnabled = true;
+                TimeWarpCheckThreshold = 5f;
 
             ReeperCommon.Window.DraggableWindow.DefaultSkin = skin;
 
@@ -315,6 +316,10 @@ namespace ScienceAlert
         public WarpSetting GlobalWarp { get; set; }
 
 
+        [HelpDoc("When TimeWarp exceeds this multiplier, every experiment's availability")]
+        [HelpDoc(" will be checked every frame instead of one per frame")]
+        [Subsection("General")]
+        public float TimeWarpCheckThreshold { get; private set; }
 
         /// <summary>
         /// Global sound setting; if not "ByExperiment" then individual experiment settings

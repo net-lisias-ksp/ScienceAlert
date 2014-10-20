@@ -23,26 +23,22 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using ScienceAlert.Toolbar;
+using ScienceAlert.Experiments.Observers;
 using ReeperCommon;
 
-namespace ScienceAlert
+namespace ScienceAlert.Experiments
 {
     using ProfileManager = ScienceAlertProfileManager;
     using ExperimentObserverList = List<ExperimentObserver>;
-
+    
     /// <summary>
     /// ExperimentManager has been born to reduce the responsibilities of the
     /// ScienceAlert object, which has become far too unwieldy. ExperimentManager
     /// will deal with updating experiments and reporting status changes to
     /// ScienceAlert.
     /// </summary>
-    class ExperimentManager : MonoBehaviour/*, IDrawable*/
+    public class ExperimentManager : MonoBehaviour
     {
-        private readonly int experimentMenuID = UnityEngine.Random.Range(0, int.MaxValue);
-        private const float TIMEWARP_CHECK_THRESHOLD = 10f; // when the game exceeds this threshold, experiment observers
-                                                            // will check their status on every frame rather than sequentially,
-                                                            // one observer per frame
-
         // --------------------------------------------------------------------
         //    Members of ExperimentManager
         // --------------------------------------------------------------------
@@ -56,17 +52,24 @@ namespace ScienceAlert
         ExperimentObserverList observers = new ExperimentObserverList();
         public ScanInterface scanInterface;
 
-        // experiment text related
-        private float maximumTextLength = float.NaN;
-        private Rect experimentButtonRect = new Rect(0, 0, 0, 0);
-
-        string lastGoodBiome = string.Empty;
+        string lastGoodBiome = string.Empty; // if BiomeFilter tells us the biome it got is probably not real, then we can use
+                                             // this stored last known good biome instead
 
 
         // --------------------------------------------------------------------
         //    Audio
         // --------------------------------------------------------------------
         new AudioPlayer audio;
+
+
+        // --------------------------------------------------------------------
+        //    Events
+        // --------------------------------------------------------------------
+        public delegate void ExperimentAvailableDelegate(ScienceExperiment experiment, float reportValue); // todo
+        public event ExperimentAvailableDelegate OnExperimentAvailable = delegate { }; // called whenever an experiment just became available in a new subject
+                                                                                       // this differs from ExperimentObserver.Available which just reports whether
+                                                                                       // that experiment currently meets filter settings
+
 
 /******************************************************************************
  *                    Implementation Details
@@ -77,7 +80,7 @@ namespace ScienceAlert
             vesselStorage = gameObject.AddComponent<StorageCache>();
             biomeFilter = gameObject.AddComponent<BiomeFilter>();
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
-            audio = GetComponent<AudioPlayer>();
+            audio = GetComponent<AudioPlayer>() ?? AudioPlayer.Audio;
 
             // event setup
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
@@ -105,217 +108,23 @@ namespace ScienceAlert
         /// </summary>
         public void Update()
         {
-            if (rebuilder != null)
-            {   // still working on refreshing observer list
-                if (!rebuilder.MoveNext())
-                    rebuilder = null;
-            }
-            else
-            {
+            //if (rebuilder != null)
+            //{   // still working on refreshing observer list
+            //    if (!rebuilder.MoveNext())
+            //        rebuilder = null;
+            //}
+            //else
+            //{
                 if (FlightGlobals.ActiveVessel != null)
                     if (!vesselStorage.IsBusy && watcher != null)
                     {
                         if (!PauseMenu.isOpen)
                             if (watcher != null) watcher.MoveNext();
                     }
-            }
+            //}
         }
 
 
-
-#region GUI functions
-
-        /// <summary>
-        /// It's necessary to figure out how wide to make the available 
-        /// experiment window. I know it's ugly, but CalcSize is only
-        /// available in a GUI function
-        /// </summary>
-        //public void OnGUI()
-        //{
-        //    if (float.IsNaN(maximumTextLength) && observers.Count > 0 && rebuilder == null)
-        //    {
-        //        // construct the experiment observer list ...
-        //        maximumTextLength = observers.Max(observer => Settings.Skin.button.CalcSize(new GUIContent(observer.ExperimentTitle + " (123)")).x);
-        //        experimentButtonRect.width = maximumTextLength + 10f/* a little extra for report value */;
-
-        //        Log.Debug("MaximumTextLength = {0}", maximumTextLength);
-
-        //        // note: we can't use CalcSize anywhere but inside OnGUI.  I know
-        //        // it's ugly, but it's the least ugly of the available alternatives
-        //    }
-
-        //    experimentButtonRect.height = 32f * observers.Count(obs => obs.Available);
-        //}
-
-
-        /// <summary>
-        /// Whichever toolbar button (stock or blizzy) is in use will call
-        /// this method. Keep in mind the other Drawables are also going to
-        /// get called, so only worry about our own affairs
-        /// </summary>
-        /// <param name="ci"></param>
-        //public void OnToolbarClicked(ClickInfo ci)
-        //{
-        //    if (ci.used)
-        //        return;
-
-        //    // if left-click and we're not already displayed...
-        //    if (ci.button == 0)
-        //    {
-        //        if (scienceAlert.Button.Drawable != null && !(scienceAlert.Button.Drawable is ExperimentManager))
-        //        {
-        //            return; // somebody else is open; let them handle this click
-        //        }
-        //        else
-        //        {
-        //            ci.Consume();
-        //            audio.Play("click1");
-
-        //            if (scienceAlert.Button.Drawable is ExperimentManager)
-        //            {
-        //                // close menu
-        //                scienceAlert.Button.Drawable = null;
-        //                Log.Debug("Closing ExperimentManager");
-        //            }
-        //            else scienceAlert.Button.Drawable = this;
-        //        }
-        //    }
-        //    else if (scienceAlert.Button.Drawable is ExperimentManager)
-        //    {
-        //        ci.Consume();
-
-        //        // close menu
-        //        audio.Play("click1", 1f, 0.05f); // set min delay in case other drawables open their window
-        //                                         // and play a sound on this event as well
-        //        scienceAlert.Button.Drawable = null;
-        //        Log.Debug("Closing ExperimentManager");
-        //    }
-        //}
-
-
-
-        /// <summary>
-        /// Blizzy toolbar popup menu, when the toolbar button is left-clicked.
-        /// The options window is separate.
-        /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        //public Vector2 Draw(Vector2 position)
-        //{
-        //    if (experimentButtonRect.height > 0)
-        //    {
-        //        var old = GUI.skin;
-
-        //        GUI.skin = Settings.Skin;
-
-        //        experimentButtonRect.x = position.x;
-        //        experimentButtonRect.y = position.y;
-                
-        //        if (!Settings.Instance.DisplayCurrentBiome)
-        //        {
-        //            experimentButtonRect = KSPUtil.ClampRectToScreen(GUILayout.Window(experimentMenuID, experimentButtonRect, DrawWindow, "Available Experiments"));
-        //        }
-        //        else
-        //        {
-        //            experimentButtonRect.height += Settings.Skin.box.CalcHeight(new GUIContent("Biome: Unknown"), experimentButtonRect.width);
-
-        //            DrawArea();
-        //        }
-        //        GUI.skin = old;
-        //    }
-        //    else
-        //    {
-        //        // no experiments
-        //        scienceAlert.Button.Drawable = null;
-        //    }
-        //    return new Vector2(experimentButtonRect.width, experimentButtonRect.height);
-        //}
-
-
-        /// <summary>
-        /// Window (does not display biome info)
-        /// </summary>
-        /// <param name="winid"></param>
-        //private void DrawWindow(int winid)
-        //{
-        //    DrawButtons();
-        //}
-
-
-
-        /// <summary>
-        /// Instead of a window title, we'll put that space to use
-        /// to display current biome
-        /// </summary
-        //private void DrawArea()
-        //{
-        //    GUILayout.BeginArea(experimentButtonRect, Settings.Skin.box);
-        //    {
-        //        if (FlightGlobals.ActiveVessel == null)
-        //        {
-        //            scienceAlert.Button.Drawable = null;
-        //            return;
-        //        }
-
-        //        // Biome data
-        //        {
-        //            if (biomeFilter.IsBusy || !scanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
-        //            {
-        //                GUILayout.Box("Biome: <working>");
-        //            }
-        //            else
-        //            {
-        //                string biome;
-
-        //                if (!biomeFilter.GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out biome))
-        //                {
-        //                    biome = lastGoodBiome;
-        //                }
-        //                else
-        //                {
-        //                    lastGoodBiome = biome;
-        //                }
-        //                GUILayout.Box(string.Format(biome));
-        //            }
-        //        }
-        //        DrawButtons();
-        //    }
-        //    GUILayout.EndArea();
-        //}
-
-
-
-        /// <summary>
-        /// Draw experiment buttons in whichever style was requested
-        /// </summary>
-        //private void DrawButtons()
-        //{
-        //    GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-        //    {
-        //        //-----------------------------------------------------
-        //        // Experiment list
-        //        //-----------------------------------------------------
-        //        foreach (var observer in observers)
-        //            if (observer.Available)
-        //            {
-        //                var content = new GUIContent(observer.ExperimentTitle);
-
-        //                if (Settings.Instance.ShowReportValue) content.text += string.Format(" ({0:0.#})", observer.NextReportValue);
-
-        //                if (GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
-        //                {
-        //                    Log.Debug("Deploying {0}", observer.ExperimentTitle);
-        //                    audio.Play("click2");
-        //                    observer.Deploy();
-        //                }
-        //            }
-        //    }
-        //    GUILayout.EndVertical();
-        //}
-
-
-
-#endregion
 
 #region Event functions
 
@@ -331,7 +140,7 @@ namespace ScienceAlert
             {
                 Log.Normal("Vessel was modified; refreshing observer caches...");
                 foreach (var obs in observers)
-                    obs.Rebuild();
+                    obs.Rescan();
                 Log.Normal("Done");
             }
         }
@@ -342,10 +151,10 @@ namespace ScienceAlert
         {
             Log.Debug("OnVesselChange: {0}", newVessel.name);
 
-            
+            RebuildObserverList();
 
-            ScheduleRebuildObserverList();
-            watcher = null;
+            //ScheduleRebuildObserverList();
+            //watcher = null;
         }
 
 
@@ -386,11 +195,11 @@ namespace ScienceAlert
 
 
 
-        public void ScheduleRebuildObserverList()
-        {
-            observers.Clear();
-            rebuilder = RebuildObserverList();
-        }
+        //public void ScheduleRebuildObserverList()
+        //{
+        //    observers.Clear();
+        //    rebuilder = RebuildObserverList();
+        //}
 
 
 
@@ -406,8 +215,10 @@ namespace ScienceAlert
                     watcher = null;
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Log.Error("Something has gone really wrong in ExperimentManager.OnVesselDestroyed: {0}", e);
+
                 // rarely (usually when something has gone REALLY WRONG
                 // elswhere), accessing FlightGlobals.ActiveVessel will
                 // spew forth a storm of NREs
@@ -448,9 +259,10 @@ namespace ScienceAlert
 #if PROFILE
                     float start = Time.realtimeSinceStartup;
 #endif
+                        bool newReport = false;
 
                         // Is exciting new research available?
-                        if (observer.UpdateStatus(expSituation))
+                        if (observer.UpdateStatus(expSituation, out newReport))
                         {
                             // if we're timewarping, resume normal time if that setting
                             // was used
@@ -497,6 +309,8 @@ namespace ScienceAlert
                                     audio.Play("bubbles", 1f, 2f);
                                     break;
                             }
+
+                            OnExperimentAvailable(observer.Experiment, observer.NextReportValue);
                         }
                         else if (!observers.Any(ob => ob.Available))
                         {
@@ -522,7 +336,7 @@ namespace ScienceAlert
                     // experiments checked too late. If the user is time warping
                     // quickly enough, then we'll go ahead and check every 
                     // experiment on every loop
-                    if (TimeWarp.CurrentRate < TIMEWARP_CHECK_THRESHOLD)
+                    if (TimeWarp.CurrentRate < Settings.Instance.TimeWarpCheckThreshold)
                         yield return 0; // pause until next frame
 
 
@@ -535,116 +349,171 @@ namespace ScienceAlert
 
 
         /// <summary>
+        /// Recreates all ExperimentObservers. This is done so that we never have any ExperimentObservers
+        /// that watch for experiments that the current Vessel doesn't have, except in special cases like
+        /// EVA reports or surface samples.
+        /// </summary>
+        /// <returns>Number of observers created</returns>
+        public int RebuildObserverList()
+        {
+            Log.Normal("Rebuilding observer list");
+
+            observers.Clear();
+
+            // construct the experiment observer list ...
+            foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
+                if (expid != "evaReport" && expid != "surfaceSample") // special cases
+                    if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
+                    {   // we can't monitor this experiment, so no need to clutter the
+                        // ui with it
+                        Log.Verbose("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
+
+                    }
+                    else observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], biomeFilter, scanInterface, expid));
+
+            // surfaceSample is a special case: it's technically available on any
+            // crewed vessel
+            observers.Add(new SurfaceSampleObserver(vesselStorage, ProfileManager.ActiveProfile["surfaceSample"], biomeFilter, scanInterface));
+
+
+            // evaReport is a special case.  It technically exists on any crewed
+            // vessel.  That vessel won't report it normally though, unless
+            // the vessel is itself an eva'ing Kerbal.  Since there are conditions
+            // that would result in the experiment no longer being available 
+            // (kerbal dies, user goes out on eva and switches back to ship, and
+            // so on) I think it's best we separate it out into its own
+            // Observer type that will account for these changes and any others
+            // that might not necessarily trigger a VesselModified event
+            if (ProfileManager.ActiveProfile["evaReport"].Enabled)
+            {
+                if (Settings.Instance.EvaReportOnTop)
+                {
+                    observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+                    observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+                }
+                else
+                {
+                    observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+                    observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+                }
+            } else observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+
+            watcher = UpdateObservers(); // to prevent any problems by rebuilding in the middle of enumeration
+
+            return observers.Count;
+        }
+
+
+
+        /// <summary>
         /// Each experiment observer caches relevant modules to reduce cpu
         /// time.  Whenever the vessel changes, they'll need to be updated.
         /// That's what this function does.
         /// </summary>
         /// <returns></returns>
-        private System.Collections.IEnumerator RebuildObserverList()
-        {
-            Log.Normal("Rebuilding observer list...");
+        //private System.Collections.IEnumerator RebuildObserverList()
+        //{
+        //    Log.Normal("Rebuilding observer list...");
 
-            observers.Clear();
-            maximumTextLength = float.NaN;
+        //    observers.Clear();
 
-
-            while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed || scanInterface == null)
-                yield return 0;
+        //    while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed || scanInterface == null)
+        //        yield return 0;
 
 
-            // critical: there's a quiet issue where sometimes user get multiple
-            //           experimentIds loaded (the one I know of at the moment is
-            //           through a small bug in MM), but if that happens, GetExperimentIDs()
-            //           will throw an exception and the whole plugin goes down in flames.
+        //    // critical: there's a quiet issue where sometimes user get multiple
+        //    //           experimentIds loaded (the one I know of at the moment is
+        //    //           through a small bug in MM), but if that happens, GetExperimentIDs()
+        //    //           will throw an exception and the whole plugin goes down in flames.
 
 
-            try
-            {
-                // construct the experiment observer list ...
-                foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-                    if (expid != "evaReport" && expid != "surfaceSample") // special cases
-                        if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
-                        {   // we can't monitor this experiment, so no need to clutter the
-                            // ui with it
-                            Log.Verbose("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
+        //    try
+        //    {
+        //        // construct the experiment observer list ...
+        //        foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
+        //            if (expid != "evaReport" && expid != "surfaceSample") // special cases
+        //                if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
+        //                {   // we can't monitor this experiment, so no need to clutter the
+        //                    // ui with it
+        //                    Log.Verbose("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
 
-                        }
-                        else observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], biomeFilter, scanInterface, expid));
+        //                }
+        //                else observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], biomeFilter, scanInterface, expid));
 
-                // surfaceSample is a special case: it's technically available on any
-                // crewed vessel
-                observers.Add(new SurfaceSampleObserver(vesselStorage, ProfileManager.ActiveProfile["surfaceSample"], biomeFilter, scanInterface));
+        //        // surfaceSample is a special case: it's technically available on any
+        //        // crewed vessel
+        //        observers.Add(new SurfaceSampleObserver(vesselStorage, ProfileManager.ActiveProfile["surfaceSample"], biomeFilter, scanInterface));
 
 
-                // evaReport is a special case.  It technically exists on any crewed
-                // vessel.  That vessel won't report it normally though, unless
-                // the vessel is itself an eva'ing Kerbal.  Since there are conditions
-                // that would result in the experiment no longer being available 
-                // (kerbal dies, user goes out on eva and switches back to ship, and
-                // so on) I think it's best we separate it out into its own
-                // Observer type that will account for these changes and any others
-                // that might not necessarily trigger a VesselModified event
-                if (ProfileManager.ActiveProfile["evaReport"].Enabled)
-                {
-                    if (Settings.Instance.EvaReportOnTop)
-                    {
-                        observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-                        observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
-                    }
-                    else
-                    {
-                        observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
-                        observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-                    }
-                } else observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+        //        // evaReport is a special case.  It technically exists on any crewed
+        //        // vessel.  That vessel won't report it normally though, unless
+        //        // the vessel is itself an eva'ing Kerbal.  Since there are conditions
+        //        // that would result in the experiment no longer being available 
+        //        // (kerbal dies, user goes out on eva and switches back to ship, and
+        //        // so on) I think it's best we separate it out into its own
+        //        // Observer type that will account for these changes and any others
+        //        // that might not necessarily trigger a VesselModified event
+        //        if (ProfileManager.ActiveProfile["evaReport"].Enabled)
+        //        {
+        //            if (Settings.Instance.EvaReportOnTop)
+        //            {
+        //                observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+        //                observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+        //            }
+        //            else
+        //            {
+        //                observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+        //                observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
+        //            }
+        //        } else observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
 
-                watcher = UpdateObservers();
+        //        watcher = UpdateObservers();
 
-                Log.Normal("Observer list rebuilt");
-            }
-            catch (Exception e)
-            {
-                Log.Error("CRITICAL: Exception RebuildObserverList(): {0}", e);
+        //        Log.Normal("Observer list rebuilt");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Log.Error("CRITICAL: Exception RebuildObserverList(): {0}", e);
 
-                Log.Normal("Listing current experiment definitions:");
+        //        Log.Normal("Listing current experiment definitions:");
 
-                // It's usually something to do with duplicate crew reports
-                foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
-                {
-                    // note: avoid being too spammy by removing the results sections,
-                    // those aren't going to be causing problems anyway
-                    ConfigNode snipped = new ConfigNode();
-                    node.CopyTo(snipped);
+        //        // It's usually something to do with duplicate crew reports
+        //        foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
+        //        {
+        //            // note: avoid being too spammy by removing the results sections,
+        //            // those aren't going to be causing problems anyway
+        //            ConfigNode snipped = new ConfigNode();
+        //            node.CopyTo(snipped);
 
-                    snipped.RemoveNode("RESULTS");
+        //            snipped.RemoveNode("RESULTS");
 
-                    Log.Normal("{0}", snipped.ToString());
-                }
+        //            Log.Normal("{0}", snipped.ToString());
+        //        }
 
-                Log.Normal("Finished listing experiment definitions.");
+        //        Log.Normal("Finished listing experiment definitions.");
 
-                // find any duplicates
-                HashSet<string /* id */> alreadyKnown = new HashSet<string>();
+        //        // find any duplicates
+        //        HashSet<string /* id */> alreadyKnown = new HashSet<string>();
 
-                foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
-                {
-                    if (node.HasValue("id"))
-                    {
-                        string id = node.GetValue("id");
+        //        foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
+        //        {
+        //            if (node.HasValue("id"))
+        //            {
+        //                string id = node.GetValue("id");
 
-                        if (!alreadyKnown.Contains(id))
-                        {
-                            alreadyKnown.Add(id);
-                        }
-                        else
-                        {
-                            Log.Error("Duplicate science definition found for '{0}'", id);
-                        }
-                    }
-                    else Log.Normal("no value id found");
-                }
-            }
-        }
+        //                if (!alreadyKnown.Contains(id))
+        //                {
+        //                    alreadyKnown.Add(id);
+        //                }
+        //                else
+        //                {
+        //                    Log.Error("Duplicate science definition found for '{0}'", id);
+        //                }
+        //            }
+        //            else Log.Normal("no value id found");
+        //        }
+        //    }
+        //}
 #endregion
 
 
@@ -660,7 +529,8 @@ namespace ScienceAlert
             Log.Debug("ExperimentManager.Notify_ScanInterfaceChanged");
 
             scanInterface = gameObject.GetComponent<ScanInterface>();
-            ScheduleRebuildObserverList();
+            //ScheduleRebuildObserverList();
+            RebuildObserverList();
         }
 
 
@@ -674,7 +544,8 @@ namespace ScienceAlert
             Log.Debug("ExperimentManager.Notify_ToolbarInterfaceChanged");
 
             //scienceAlert.Button.OnClick += OnToolbarClicked;
-            ScheduleRebuildObserverList(); // why? to update toolbar button state
+            //ScheduleRebuildObserverList(); // why? to update toolbar button state
+            RebuildObserverList();
         }
 
 #endregion

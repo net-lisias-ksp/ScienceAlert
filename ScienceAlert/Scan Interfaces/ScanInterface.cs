@@ -25,7 +25,7 @@ namespace ScienceAlert
     /// away the exact mechanism that determines whether a location (lat/lon-wise)
     /// can be checked for an experiment. 
     /// </summary>
-    internal class ScanInterface : MonoBehaviour
+    public class ScanInterface : MonoBehaviour
     {
         /// <summary>
         /// Returns true if the projected location on the biome map has been 
@@ -37,7 +37,7 @@ namespace ScienceAlert
         public virtual bool HaveScanData(double lat, double lon, CelestialBody body) { return true; }
     }
 
-    internal class DefaultScanInterface : ScanInterface
+    public class DefaultScanInterface : ScanInterface
     {
     }
 }

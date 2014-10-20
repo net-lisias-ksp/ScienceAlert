@@ -74,7 +74,11 @@
     <Compile Include="..\..\DebugTools\ResourceUtil.cs">
       <Link>Tools\ResourceUtil.cs</Link>
     </Compile>
+    <Compile Include="API\AlertUtil.cs" />
     <Compile Include="BiomeFilter.cs" />
+    <Compile Include="Experiments\Observers\EvaReportObserver.cs" />
+    <Compile Include="Experiments\Observers\RequiresCrew.cs" />
+    <Compile Include="Experiments\Observers\SurfaceSampleObserver.cs" />
     <Compile Include="ProfileData\ExperimentSettings.cs" />
     <Compile Include="ProfileData\Mothballed\ModuleSAProfile.cs" />
     <Compile Include="ProfileData\Profile.cs" />
@@ -84,7 +88,7 @@
     <Compile Include="Experiments\ExperimentManager.cs" />
     <Compile Include="Windows\DebugWindow.cs" />
     <Compile Include="ScienceAlert.cs" />
-    <Compile Include="Experiments\ExperimentObserver.cs" />
+    <Compile Include="Experiments\Observers\ExperimentObserver.cs" />
     <Compile Include="Scan Interfaces\ScanInterface.cs" />
     <Compile Include="Scan Interfaces\SCANsatInterface.cs" />
     <Compile Include="MagicDataTransmitter.cs" />

@@ -23,253 +23,9 @@ using System.Text;
 using UnityEngine;
 using ReeperCommon;
 
-namespace ScienceAlert
+namespace ScienceAlert.Experiments.Observers
 {
     using ScienceModuleList = List<ModuleScienceExperiment>;
-
-    /// <summary>
-    /// A special observer that uses the existence of crew, not
-    /// an available ModuleScienceExperiment, to determine whether
-    /// the experiment is possible
-    /// </summary>
-    class RequiresCrew : ExperimentObserver
-    {
-        protected List<Part> crewableParts = new List<Part>();
-
-        public RequiresCrew(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid)
-            : base(cache, settings, filter, scanInterface, expid)
-        {
-            this.requireControllable = false; 
-        }
-
-        /// <summary>
-        /// Note: ScienceAlert will look out for vessel changes for
-        /// us and call Rebuild() as necessary
-        /// </summary>
-        public override void Rebuild()
-        {
-            base.Rebuild();
-
-            crewableParts.Clear();
-
-            if (FlightGlobals.ActiveVessel == null)
-            {
-                Log.Debug("EvaReportObserver: active vessel null; observer will not function");
-                return;
-            }
-
-            // cache any part that can hold crew, so we don't have to
-            // wastefully go through the entire vessel part tree
-            // when updating status
-            FlightGlobals.ActiveVessel.parts.ForEach(p =>
-            {
-                if (p.CrewCapacity > 0) crewableParts.Add(p);
-            });
-
-        }
-
-
-        public override bool IsReadyOnboard
-        {
-            get
-            {
-                foreach (var crewable in crewableParts)
-                    if (crewable.protoModuleCrew.Count > 0)
-                        return true;
-                return false;
-            }
-        }
-    }
-
-
-
-    internal class EvaReportObserver : RequiresCrew
-    {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public EvaReportObserver(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid = "evaReport")
-            : base(cache, settings, filter, scanInterface, expid)
-        {
-
-        }
-
-
-
-        /// <summary>
-        /// This function will do one of two things: if the active vessel
-        /// isn't an eva kerbal, it will choose a kerbal at random from
-        /// the crew and send them on eva (unless the conditions outside
-        /// would make it dangerous, in which case player will receive
-        /// a dialog instead).
-        /// 
-        /// On the other hand, if the active vessel is an eva kerbal, it
-        /// will deploy the experiment itself.
-        /// </summary>
-        /// <returns></returns>
-        public override bool Deploy()
-        {
-            if (!Available || !IsReadyOnboard)
-            {
-                Log.Error("Cannot deploy eva experiment {0}; Available = {1}, Onboard = {2}, experiment = {3}", Available, IsReadyOnboard, experiment.id);
-                return false;
-            }
-
-            if (FlightGlobals.ActiveVessel == null)
-            {
-                Log.Error("Deploy -- invalid active vessel");
-                return false;
-            }
-
-
-            // the current vessel IS NOT an eva'ing Kerbal, so
-            // find a kerbal and dump him into space
-            if (!FlightGlobals.ActiveVessel.isEVA)
-            {
-                // check conditions outside
-                Log.Warning("Current static pressure: {0}", FlightGlobals.getStaticPressure());
-
-                if (FlightGlobals.getStaticPressure() > Settings.Instance.EvaAtmospherePressureWarnThreshold)
-                    if (FlightGlobals.ActiveVessel.GetSrfVelocity().magnitude > Settings.Instance.EvaAtmosphereVelocityWarnThreshold)
-                    {
-                        Log.Debug("setting up dialog options to warn player about eva risk");
-
-                        var options = new DialogOption[2];
-
-                        options[0] = new DialogOption("Science is worth a little risk", new Callback(OnConfirmEva));
-                        options[1] = new DialogOption("No, it would be a PR nightmare", null);
-
-                        var dlg = new MultiOptionDialog("It looks dangerous out there. Are you sure you want to send someone out? They might lose their grip!", "Dangerous Condition Alert", Settings.Skin, options);
-
-
-                        PopupDialog.SpawnPopupDialog(dlg, false, Settings.Skin);
-                        return true;
-                    }
-
-
-
-                if (!ExpelCrewman())
-                {
-                    Log.Error("{0}.Deploy - Did not successfully send kerbal out the airlock.  Hatch might be blocked.", GetType().Name);
-                    return false;
-                }
-
-                return true;
-
-            }
-            else
-            {
-                // The vessel is indeed a kerbalEva, so we can expect to find the
-                // appropriate science module now
-                var evas = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
-                foreach (var exp in evas)
-                    if (!exp.Deployed && exp.experimentID == experiment.id)
-                    {
-                        exp.DeployExperiment();
-                        break;
-                    }
-
-                return true;
-            }
-        }
-
-
-
-        protected void OnConfirmEva()
-        {
-            Log.Normal("EvaObserver: User confirmed eva despite conditions");
-            Log.Normal("Expelling... {0}", ExpelCrewman() ? "success!" : "failed");
-        }
-
-
-
-        /// <summary>
-        /// Toss a random kerbal out the airlock
-        /// </summary>
-        /// <returns></returns>
-        protected virtual bool ExpelCrewman()
-        {
-            // You might think HighLogic.CurrentGame.CrewRoster.GetNextAvailableCrewMember
-            // is a logical function to use.  Actually it's possible for it to
-            // generate a crew member out of thin air and put it outside, so nope
-            // 
-            // luckily we can specify a particular onboard Kerbal.  We'll do so by
-            // finding the possibilities and then picking one totally at 
-            // pseudorandom
-
-            List<ProtoCrewMember> crewChoices = new List<ProtoCrewMember>();
-
-            foreach (var crewable in crewableParts)
-                crewChoices.AddRange(crewable.protoModuleCrew);
-
-            if (crewChoices.Count == 0)
-            {
-                Log.Error("{0}.Deploy - No crew choices available.  Check logic", GetType().Name);
-                return false;
-            }
-            else
-            {
-                // 1.4b bugfix for the 1.4a buxfix:
-                //  if the player is in map view, SetCameraFlight won't shut it
-                // down for us. Whoops
-                if (MapView.MapIsEnabled)
-                {
-                    MapView.ExitMapView();
-                }
-
-                // 1.4a bugfix:
-                //   if the player is in IVA view when we spawn eva, it looks
-                // like KSP doesn't switch cameras automatically
-                if ((CameraManager.Instance.currentCameraMode & (CameraManager.CameraMode.Internal | CameraManager.CameraMode.IVA)) != 0)
-                {
-                    Log.Normal("Detected IVA or internal cam; switching to flight cam");
-                    CameraManager.Instance.SetCameraFlight();
-                }
-
-
-                Log.Debug("Choices of kerbal:");
-                foreach (var crew in crewChoices)
-                    Log.Debug(" - {0}", crew.name);
-
-                // select a kerbal target...
-                var luckyKerbal = crewChoices[UnityEngine.Random.Range(0, crewChoices.Count - 1)];
-                Log.Debug("{0} is the lucky Kerbal.  Out the airlock with him!", luckyKerbal.name);
-
-                // out he goes!
-                return FlightEVA.SpawnEVA(luckyKerbal.KerbalRef);
-            }
-        }
-    }
-
-
-
-    internal class SurfaceSampleObserver : EvaReportObserver
-    {
-        public SurfaceSampleObserver(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
-            : base(cache, settings, filter, scanInterface, "surfaceSample")
-        {
-
-        }
-
-        public override bool IsReadyOnboard
-        {
-            get
-            {
-                if (FlightGlobals.ActiveVessel != null)
-                {
-                    if (FlightGlobals.ActiveVessel.isEVA)
-                    {
-                        return settings.AssumeOnboard || this.GetNextOnboardExperimentModule() != null;
-                    }
-                    else return Settings.Instance.CheckSurfaceSampleNotEva && base.IsReadyOnboard;
-                    
-                }
-                else return false;
-            }
-        }
-    }
-
-
 
     /// <summary>
     /// Given an experiment, monitor conditions for the experiment.  If
@@ -277,7 +33,7 @@ namespace ScienceAlert
     /// for the given filter, the experiment observer will indicate that
     /// the experiment is Available.
     /// </summary>
-    internal class ExperimentObserver
+    public class ExperimentObserver
     {
         private ScienceModuleList modules;                  // all ModuleScienceExperiments onboard that represent our experiment
         protected ScienceExperiment experiment;             // The actual experiment that will be performed
@@ -289,6 +45,9 @@ namespace ScienceAlert
         protected ScanInterface scanInterface;              // Determines whether we're allowed to know if an experiment is available
         protected float nextReportValue;                    // take a guess
         protected bool requireControllable;                 // Vessel needs to be controllable for the experiment to be available
+
+        // events
+        public ExperimentManager.ExperimentAvailableDelegate OnAvailable = delegate { };
 
 /******************************************************************************
  *                    Implementation Details
@@ -315,7 +74,7 @@ namespace ScienceAlert
                 Log.Error("Failed to get experiment '{0}'", expid);
 
             storage = cache;
-            Rebuild();
+            Rescan();
         }
 
 
@@ -333,15 +92,14 @@ namespace ScienceAlert
         /// lost a part like mystery goo can, etc), this function should be 
         /// called to keep the modules up to date.
         /// </summary>
-        public virtual void Rebuild()
+        public virtual void Rescan()
         {
-            Log.Debug("ExperimentObserver.Rebuild - {0}", experiment.id);
+            Log.Debug("ExperimentObserver.Rescan - {0}", experiment.id);
 
             modules = new ScienceModuleList();
             
             if (FlightGlobals.ActiveVessel == null)
                 return;
-
 
             // locate all ModuleScienceExperiments that implement this
             // experiment.  By keeping track of them ourselves, we don't
@@ -385,11 +143,11 @@ namespace ScienceAlert
             else
             {
                 // we've got at least one report we need to consider
-                float potentialScience = subject.science + ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject);
+                float potentialScience = subject.science + ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
 
                 if (found.Count() > 1)
                 {
-                    float secondReport = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject);
+                    float secondReport = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
 
                     potentialScience += secondReport;
 
@@ -452,9 +210,9 @@ namespace ScienceAlert
         protected float CalculateNextReportValue(ScienceSubject subject, ExperimentSituations situation, List<ScienceData> stored)
         {
             if (stored.Count == 0)
-                return ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, subject);
+                return ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, subject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
 
-            float experimentValue = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject);
+            float experimentValue = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
 
             if (stored.Count == 1)
                 return experimentValue;
@@ -469,14 +227,18 @@ namespace ScienceAlert
 
 
 
+
+
         /// <summary>
         /// Returns true if the status just changed to available (so that
         /// ScienceAlert can play a sound when the experiment
         /// status changes)
         /// </summary>
         /// <returns></returns>
-        public virtual bool UpdateStatus(ExperimentSituations experimentSituation)
+        public virtual bool UpdateStatus(ExperimentSituations experimentSituation, out bool newReport)
         {
+            newReport = false;
+
             if (FlightGlobals.ActiveVessel == null)
             {
                 Available = false;
@@ -548,18 +310,18 @@ namespace ScienceAlert
 
                             case ProfileData.ExperimentSettings.FilterMethod.NotMaxed:
                                 // <98% of science cap
-                                Available = scienceTotal < subject.scienceCap * 0.98;
+                                Available = scienceTotal < subject.scienceCap * 0.98 * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
                                 break;
 
                             case ProfileData.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
                                 // important note for these last two filters: we can only accurately
                                 // predict science for up to two of the same reports. After that,
                                 // it'll be highly overestimated
-                                Available = scienceTotal < subject.scienceCap * 0.5f;
+                                Available = scienceTotal < subject.scienceCap * 0.5f * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
                                 break;
 
                             case ProfileData.ExperimentSettings.FilterMethod.LessThanNinetyPercent:
-                                Available = scienceTotal < subject.scienceCap * 0.9f;
+                                Available = scienceTotal < subject.scienceCap * 0.9 * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
                                 break;
 
                             default: // this should NEVER occur, but nice to have a safety measure
@@ -577,38 +339,32 @@ namespace ScienceAlert
                         // check the science threshold
                         Available = Available && nextReportValue > ScienceAlertProfileManager.ActiveProfile.ScienceThreshold;
 
-                        //if (Available && Settings.Instance.EnableScienceThreshold)
-                        //{
-                        //    // make sure any experiment we alert on will produce at
-                        //    // least X science, or we should ignore it even if it
-                        //    // would otherwise match the filter
-                        //    Log.Debug("next report value of {0}: {1}", experiment.id, CalculateNextReportValue(subject, experimentSituation, data));
-
-
-                        //    Available = Available && nextReportValue >= Settings.Instance.ScienceThreshold;
-
-                        //    // was using for debugging
-                        //    //if (CalculateNextReportValue(subject, experimentSituation, data) < Settings.Instance.ScienceThreshold)
-                        //    //    Log.Verbose("Experiment {0} does not meet threshold of {1}; next report value is {2}", experiment.id, Settings.Instance.ScienceThreshold, CalculateNextReportValue(subject, experimentSituation, data));
-                        //}
-          
-
 
 
                         if (Available)
                         {
                             if (lastAvailableId != subject.id)
+                            {
                                 lastStatus = false; // force a refresh, in case we're going from available -> available in different subject id
-
+                                newReport = true; // we've available on a brand new report
+                            }
+                            
                             lastAvailableId = subject.id;
 
                             if (Available != lastStatus && Available)
                             {
                                 Log.Normal("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap, settings.Filter, subject.science, nextReportValue);
 
+                                //Log.Debug("Transmission value: {0}", CalculateTransmissionValue(subject));
+
+#if DEBUG
+                                if (GetNextOnboardExperimentModule() != null)
+                                    Log.Debug("Transmission value: {0}", API.AlertUtil.GetNextReportValue(subject, experiment, data, GetNextOnboardExperimentModule().xmitDataScalar));
+#endif
+
                                 if (data.Count() > 0)
                                 {
-                                    Log.Debug("Raw dataAmount = {0}, nextScience = {1}", data.First().dataAmount, ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject));
+                                    Log.Debug("Raw dataAmount = {0}, nextScience = {1}", data.First().dataAmount, ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier);
                                     Log.Debug("Total science value = {0}", GetScienceTotal(subject, out data));
                                 }
                             }
@@ -812,6 +568,14 @@ namespace ScienceAlert
             private set
             {
                 nextReportValue = value;
+            }
+        }
+
+        public ScienceExperiment Experiment
+        {
+            get
+            {
+                return experiment;
             }
         }
 

@@ -16,7 +16,7 @@ namespace ScienceAlert.Windows.Implementations
         private const string WindowTitle = "Available Experiments";
 
         // members
-        public ExperimentManager manager;
+        public Experiments.ExperimentManager manager;
         public BiomeFilter biomeFilter;
 
         

@@ -37,7 +37,7 @@ namespace ScienceAlert
     /// StorageCache keeps track of events and will update itself as
     /// necessary.  It will also manage the magic transmitter as required.
     /// </summary>
-    internal class StorageCache : MonoBehaviour
+    public class StorageCache : MonoBehaviour
     {
         protected StorageList storage;                      // containers for science data
         protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
