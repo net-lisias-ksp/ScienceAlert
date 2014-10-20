@@ -153,12 +153,56 @@ namespace ScienceAlert.Windows.Implementations
             miniLabelRight.alignment = TextAnchor.MiddleRight;
 
             Settings.Instance.OnSave += OnAboutToSave;
+            GameEvents.onVesselChange.Add(OnVesselChange);
 
             LoadFrom(Settings.Instance.additional.GetNode("OptionsWindow") ?? new ConfigNode());
 
             return new Rect(windowRect.x, windowRect.y, 324, Screen.height / 5 * 3);
         }
 
+    
+        protected virtual void OnDestroy()
+        {
+            //base.OnDestroy();
+            Log.Debug("DraggableOptionsWindow.OnDestroy");
+            GameEvents.onVesselChange.Remove(OnVesselChange);
+        }
+
+
+        #region events (and GameEvents)
+
+
+        /// <summary>
+        /// The only reason we're interested in vessel switches is to update the value of threshold; else
+        /// it'll show the old one (although the slider is correct)
+        /// </summary>
+        /// <param name="newVessel"></param>
+        private void OnVesselChange(Vessel newVessel)
+        {
+            Log.Debug("DraggableOptionsWindow.OnVesselChange to {0}", newVessel != null ? newVessel.vesselName : "<null>");
+            thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+        }
+
+
+        protected override void OnCloseClick()
+        {
+            Visible = false;
+        }
+
+
+        /// <summary>
+        /// Update window position in settings
+        /// </summary>
+        private void OnAboutToSave()
+        {
+            Log.Verbose("DraggableOptionsWindow.OnAboutToSave");
+            SaveInto(Settings.Instance.additional.GetNode("OptionsWindow") ?? Settings.Instance.additional.AddNode("OptionsWindow"));
+        }
+
+
+        #endregion
+
+        #region user interface drawing
 
 
         protected override void DrawUI()
@@ -202,23 +246,6 @@ namespace ScienceAlert.Windows.Implementations
             GUILayout.EndVertical();
         }
 
-
-
-        protected override void OnCloseClick()
-        {
-            Visible = false;
-        }
-
-
-
-        /// <summary>
-        /// Update window position in settings
-        /// </summary>
-        private void OnAboutToSave()
-        {
-            Log.Verbose("DraggableOptionsWindow.OnAboutToSave");
-            SaveInto(Settings.Instance.additional.GetNode("OptionsWindow") ?? Settings.Instance.additional.AddNode("OptionsWindow"));
-        }
 
 
 
@@ -575,6 +602,7 @@ namespace ScienceAlert.Windows.Implementations
                     //DrawProfileList_HorizontalDivider();
                     GUILayout.Label("Select a profile to load");
                     GUILayout.Box(blackPixel, GUILayout.ExpandWidth(true), GUILayout.MinHeight(1f), GUILayout.MaxHeight(3f));
+                    GUILayout.Space(2f); // just a bit of space to make the bar we drew stand out more
 
                     var profileList = ProfileManager.Profiles;
 
@@ -630,6 +658,7 @@ namespace ScienceAlert.Windows.Implementations
             GUILayout.EndHorizontal();
         }
 
+        #endregion
 
         #region GUI helper methods
 

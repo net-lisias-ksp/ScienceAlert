@@ -84,7 +84,7 @@ namespace ScienceAlert
             //GameEvents.onGameStateSave.Add(OnGameSave);
             //GameEvents.onGameStateLoad.Add(OnGameLoad);
             GameEvents.onSameVesselUndock.Add(OnSameVesselUndock);
-
+            GameEvents.onUndock.Add(OnUndock);
 
             Ready = false; // won't be ready until OnLoad
             Instance = this;
@@ -112,7 +112,9 @@ namespace ScienceAlert
             GameEvents.onVesselWillDestroy.Remove(OnVesselWillDestroy);
             //GameEvents.onGameStateSave.Remove(OnGameSave);
             //GameEvents.onGameStateLoad.Remove(OnGameLoad);
-            GameEvents.onSameVesselUndock.Add(OnSameVesselUndock);
+            GameEvents.onSameVesselUndock.Remove(OnSameVesselUndock);
+            GameEvents.onUndock.Remove(OnUndock);
+          
 
             SaveStoredProfiles();
         }
@@ -238,50 +240,157 @@ namespace ScienceAlert
 
 #region GameEvents
 
+        /// <summary>
+        /// If the ship we're changing to has an unmodified profile (meaning we should use the stored profile),
+        /// it might need to be updated. Just recreating it will do
+        /// </summary>
+        /// <param name="vessel"></param>
         private void OnVesselChange(Vessel vessel)
         {
-            Log.Debug("OnVesselChange: {0}", vessel.vesselName);
+            Log.Debug("ProfileManager.OnVesselChange: {0}", vessel.vesselName);
+
+            if (vessel != null)
+                if (vesselProfiles.ContainsKey(vessel.id))
+                    if (!vesselProfiles[vessel.id].modified)
+                    {
+                        // it's possible the stored profile this one is based off of was
+                        // modified in the meantime by the player, so bring ours up to date
+                        var stored = FindStoredProfile(vesselProfiles[vessel.id].name);
+
+                        // oops, looks like it was deleted! well we don't want to create
+                        // it again next save when the user wants it gone so convert this
+                        // profile from a stored to a modified vessel profile..
+                        if (stored == null)
+                        {
+                            Log.Warning("ProfileManager.OnVesselChange: Vessel {0} refers to a missing stored profile '{1}'; converting it to vessel profile", vessel.id, vesselProfiles[vessel.id].name);
+
+                            vesselProfiles[vessel.id].modified = true;
+                        }
+                        else
+                        {
+                            Log.Normal("ProfileManager.OnVesselChange: Bringing vessel {0} up to date on stored profile {1}", vessel.id, stored.name);
+                            vesselProfiles[vessel.id] = stored.Clone();
+                        }
+                    }
         }
 
 
 
+        /// <summary>
+        /// Destroy old vessel profiles, if the vessel being destroyed has one
+        /// </summary>
+        /// <param name="vessel"></param>
         private void OnVesselDestroy(Vessel vessel)
         {
-            Log.Debug("OnVesselDestroy: {0}", vessel.vesselName);
+            Log.Debug("ProfileManager.OnVesselDestroy: {0}", vessel.vesselName);
+
+            if (vesselProfiles.ContainsKey(vessel.id))
+            {
+                // note to self: it's not strictly necessary to delete it since unused
+                // profiles won't be saved, but I can't think of a reason to keep it around
+                // since we catch undock events already...
+                Log.Normal("Deleting profile '{0}' since its vessel {1} was destroyed", vesselProfiles[vessel.id].name, vessel.id.ToString());
+                vesselProfiles.Remove(vessel.id);
+            }
         }
 
 
 
+        /// <summary>
+        /// If the new vessel was created out of a vessel that has a profile, it inherits its parent's
+        /// profile
+        /// </summary>
+        /// <param name="newVessel"></param>
         private void OnVesselCreate(Vessel newVessel)
         {
-            Log.Debug("OnVesselCreate: {0}", newVessel.vesselName);  
+            Log.Debug("ProfileManager.OnVesselCreate: {0}", newVessel.vesselName);
+
+            if (newVessel != null && FlightGlobals.ActiveVessel != newVessel)
+            {
+                Profile parentProfile = null;
+
+                // is the active vessel our parent?
+                if (newVessel.rootPart.missionID == FlightGlobals.ActiveVessel.rootPart.missionID &&
+                    vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id) &&
+                    vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
+                    parentProfile = ActiveProfile;
+
+                // if the active vessel isn't the parent then the player probably didn't
+                // cause this vessel to be created; nonetheless there may be edge cases 
+                // (collision? mods that allow eva to undock nodes?) so let's
+                // see if any vessel is our parent
+                if (parentProfile == null)
+                {
+                    var parentVessel = FlightGlobals.Vessels.SingleOrDefault(v =>
+                           {
+                               if (newVessel.rootPart.missionID == v.rootPart.missionID)
+                                   if (vesselProfiles.ContainsKey(v.id))
+                                       return true;
+                               return false;
+                           });
+
+                    if (parentVessel != null) parentProfile = vesselProfiles[parentVessel.id];
+                }
+
+                if (parentProfile != null)
+                {
+                    if (vesselProfiles.ContainsKey(newVessel.id))
+                    {
+                        Log.Error("ProfileManager.OnVesselCreate: Somehow we already have an entry for {0} called {1}; Investigate logic error", newVessel.id.ToString(), vesselProfiles[newVessel.id] != null ? vesselProfiles[newVessel.id].name : "<null vessel profile entry>");
+                        return;
+                    }
+
+                    Log.Normal("New vessel created; assigning it a clone of parent's profile {0}", parentProfile.name);
+                    vesselProfiles.Add(newVessel.id, parentProfile.Clone());
+                }
+
+                //// did we undock from something?
+                //if (newVessel.rootPart.missionID == FlightGlobals.ActiveVessel.rootPart.missionID && vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id) && vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
+                //{
+                //    if (vesselProfiles.ContainsKey(newVessel.id))
+                //    {
+                //        Log.Error("ProfileManager.OnVesselCreate: Somehow we already have an entry for {0}? Investigate logic error", newVessel.id.ToString());
+                //        return; // proceeding will just result in a thrown exception
+                //    }
+                //    // the new vessel will get a copy of its parents profile
+                //    Log.Normal("New vessel created from {0}, assigning it a clone of parent's profile", FlightGlobals.ActiveVessel.vesselName);
+                //    vesselProfiles.Add(newVessel.id, ActiveProfile.Clone());
+                //}
+            }
         }
 
 
 
         private void OnVesselModified(Vessel vessel)
         {
-            Log.Debug("OnVesselModified: {0}", vessel.vesselName);   
+            Log.Debug("ProfileManager.OnVesselModified: {0}", vessel.vesselName);   
         }
 
 
 
         private void OnFlightReady()
         {
-            Log.Debug("OnFlightReady");
+            Log.Debug("ProfileManager.OnFlightReady");
         }
 
 
         private void OnVesselWillDestroy(Vessel vessel)
         {
-            Log.Debug("OnVesselWillDestroy: {0}", vessel.vesselName); 
+            Log.Debug("ProfileManager.OnVesselWillDestroy: {0}", vessel.vesselName); 
         }
 
 
         private void OnSameVesselUndock(GameEvents.FromToAction<ModuleDockingNode, ModuleDockingNode> nodes)
         {
-            Log.Debug("OnSameVesselUndock: from {0}, to {1}", nodes.from.vessel.vesselName, nodes.to.vessel.vesselName);
+            Log.Debug("ProfileManager.OnSameVesselUndock: from {0}, to {1}", nodes.from.vessel.vesselName, nodes.to.vessel.vesselName);
         }
+
+
+        private void OnUndock(EventReport report)
+        {
+            Log.Debug("ProfileManager.OnUndock: origin {0}, sender {1}", report.origin.name, report.sender);
+        }
+
 
         /// <summary>
         /// Load vessel-specific ConfigNodes from the persistent file
@@ -495,6 +604,11 @@ namespace ScienceAlert
                 {
                     Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", Instance.VesselIdentifier(vessel.id));
                     Instance.vesselProfiles.Add(vessel.id, DefaultProfile.Clone());
+
+                    //Log.Normal("ProfileManager: Vessel {0} does not have a profile entry.", FlightGlobals.ActiveVessel.vesselName);
+
+#warning check out GameEvents first
+                    // first let's see if any existing ships
                 }
 
                 return Instance.vesselProfiles[vessel.id];
