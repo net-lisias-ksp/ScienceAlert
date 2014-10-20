@@ -278,9 +278,9 @@ namespace ScienceAlert
         }
 
 
-        private void OnSameVesselUndock(ModuleDockingNode node1, ModuleDockingNode node2)
+        private void OnSameVesselUndock(GameEvents.FromToAction<ModuleDockingNode, ModuleDockingNode> nodes)
         {
-            Log.Debug("OnSameVesselUndock: {0}, {1}", node1.vessel.vesselName, node2.vessel.vesselName);
+            Log.Debug("OnSameVesselUndock: from {0}, to {1}", nodes.from.vessel.vesselName, nodes.to.vessel.vesselName);
         }
 
         /// <summary>
