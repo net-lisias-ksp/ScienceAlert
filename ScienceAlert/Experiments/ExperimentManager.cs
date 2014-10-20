@@ -47,10 +47,8 @@ namespace ScienceAlert.Experiments
         private BiomeFilter biomeFilter;
 
         private System.Collections.IEnumerator watcher;
-        private System.Collections.IEnumerator rebuilder;
 
         ExperimentObserverList observers = new ExperimentObserverList();
-        public ScanInterface scanInterface;
 
         string lastGoodBiome = string.Empty; // if BiomeFilter tells us the biome it got is probably not real, then we can use
                                              // this stored last known good biome instead
@@ -82,11 +80,12 @@ namespace ScienceAlert.Experiments
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
             audio = GetComponent<AudioPlayer>() ?? AudioPlayer.Audio;
 
+            scienceAlert.OnScanInterfaceChanged += OnScanInterfaceChanged;
+
             // event setup
             GameEvents.onVesselWasModified.Add(OnVesselWasModified);
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
-            GameEvents.onCrewOnEva.Add(OnCrewGoingEva);
         }
 
 
@@ -96,7 +95,6 @@ namespace ScienceAlert.Experiments
             GameEvents.onVesselWasModified.Remove(OnVesselWasModified);
             GameEvents.onVesselChange.Remove(OnVesselChanged);
             GameEvents.onVesselDestroy.Remove(OnVesselDestroyed);
-            GameEvents.onCrewOnEva.Remove(OnCrewGoingEva);
         }
 
 
@@ -108,20 +106,12 @@ namespace ScienceAlert.Experiments
         /// </summary>
         public void Update()
         {
-            //if (rebuilder != null)
-            //{   // still working on refreshing observer list
-            //    if (!rebuilder.MoveNext())
-            //        rebuilder = null;
-            //}
-            //else
-            //{
-                if (FlightGlobals.ActiveVessel != null)
-                    if (!vesselStorage.IsBusy && watcher != null)
-                    {
-                        if (!PauseMenu.isOpen)
-                            if (watcher != null) watcher.MoveNext();
-                    }
-            //}
+            if (FlightGlobals.ActiveVessel != null)
+                if (!vesselStorage.IsBusy && watcher != null)
+                {
+                    if (!PauseMenu.isOpen)
+                        if (watcher != null) watcher.MoveNext();
+                }
         }
 
 
@@ -138,7 +128,7 @@ namespace ScienceAlert.Experiments
         {
             if (vessel == FlightGlobals.ActiveVessel)
             {
-                Log.Normal("Vessel was modified; refreshing observer caches...");
+                Log.Normal("ExperimentManager.OnVesselWasModified: rescanning vessel for experiment modules");
                 foreach (var obs in observers)
                     obs.Rescan();
                 Log.Normal("Done");
@@ -149,57 +139,13 @@ namespace ScienceAlert.Experiments
 
         public void OnVesselChanged(Vessel newVessel)
         {
-            Log.Debug("OnVesselChange: {0}", newVessel.name);
-
+            Log.Debug("ExperimentManager.OnVesselChange: {0}", newVessel.name);
             RebuildObserverList();
-
-            //ScheduleRebuildObserverList();
-            //watcher = null;
         }
 
 
 
-        private void OnCrewGoingEva(GameEvents.FromToAction<Part, Part> relevant)
-        {
-            //if (Settings.Instance.ReopenOnEva && scienceAlert.Button.Drawable is ExperimentManager)
-            //{
-            //    Log.Debug("ExperimentManager.OnCrewGoingEva: from {0} to {1}", relevant.from.partName, relevant.to.partName);
-            //    //StartCoroutine(WaitAndReopenList(relevant.to.vessel));
-            //}
-        }
 
-
-
-        /// <summary>
-        /// Will wait for the specified vessel to become active and for
-        /// experiments to become available before reopening experiment
-        /// list
-        /// </summary>
-        /// <param name="timeOut"></param>
-        /// <returns></returns>
-        //private System.Collections.IEnumerator WaitAndReopenList(Vessel target)
-        //{
-        //    float start = Time.realtimeSinceStartup;
-        //    Log.Verbose("ExperimentManager: Waiting to reopen window");
-
-        //    while ((FlightGlobals.ActiveVessel != target || !observers.Any(o => o.Available)) && Time.realtimeSinceStartup - start < 2f /* 2 second timeout */)
-        //        yield return 0;
-
-        //    if (!observers.Any(o => o.Available))
-        //    {
-        //        Log.Warning("ExperimentManager: Waited to open list, but timed out after {0:0.#} seconds", Time.realtimeSinceStartup - start);
-        //        yield break;
-        //    }
-        //    else scienceAlert.Button.Drawable = this;
-        //}
-
-
-
-        //public void ScheduleRebuildObserverList()
-        //{
-        //    observers.Clear();
-        //    rebuilder = RebuildObserverList();
-        //}
 
 
 
@@ -211,7 +157,6 @@ namespace ScienceAlert.Experiments
                 {
                     Log.Debug("Active vessel was destroyed!");
                     observers.Clear();
-                    rebuilder = null;
                     watcher = null;
                 }
             }
@@ -223,7 +168,7 @@ namespace ScienceAlert.Experiments
                 // elswhere), accessing FlightGlobals.ActiveVessel will
                 // spew forth a storm of NREs
                 observers.Clear();
-                rebuilder = watcher = null;
+                watcher = null;
             }
         }
 
@@ -359,6 +304,7 @@ namespace ScienceAlert.Experiments
             Log.Normal("Rebuilding observer list");
 
             observers.Clear();
+            ScanInterface scanInterface = GetComponent<ScanInterface>(); // can be null
 
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
@@ -524,29 +470,13 @@ namespace ScienceAlert.Experiments
         /// This message will be sent by ScienceAlert when the user
         /// changes scan interface types
         /// </summary>
-        public void Notify_ScanInterfaceChanged()
+        private void OnScanInterfaceChanged()
         {
-            Log.Debug("ExperimentManager.Notify_ScanInterfaceChanged");
-
-            scanInterface = gameObject.GetComponent<ScanInterface>();
-            //ScheduleRebuildObserverList();
+            Log.Debug("ExperimentManager.OnScanInterfaceChanged");
             RebuildObserverList();
         }
 
 
-
-        /// <summary>
-        /// This message sent when toolbar has changed and re-registering
-        /// for events is necessary
-        /// </summary>
-        public void Notify_ToolbarInterfaceChanged()
-        {
-            Log.Debug("ExperimentManager.Notify_ToolbarInterfaceChanged");
-
-            //scienceAlert.Button.OnClick += OnToolbarClicked;
-            //ScheduleRebuildObserverList(); // why? to update toolbar button state
-            RebuildObserverList();
-        }
 
 #endregion
 

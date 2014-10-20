@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using ReeperCommon;
 
+/// WIP; cut this release because nothing is broken, redesign takes time and people have been waiting a long
+/// time for this update already
 namespace ScienceAlert.API
 {
     public class AlertUtil

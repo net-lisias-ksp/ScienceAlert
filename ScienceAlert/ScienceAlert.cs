@@ -167,6 +167,9 @@ namespace ScienceAlert
         private Settings.ToolbarInterface buttonInterfaceType = Settings.ToolbarInterface.ApplicationLauncher;
         private Settings.ScanInterface scanInterfaceType = Settings.ScanInterface.None;
 
+        // events
+        public event Callback OnScanInterfaceChanged = delegate { };
+        public event Callback OnToolbarButtonChanged = delegate { };
 
 /******************************************************************************
  *                    Implementation Details
@@ -333,7 +336,8 @@ namespace ScienceAlert
                     }
 
                     buttonInterfaceType = value;
-                    gameObject.SendMessage("Notify_ToolbarInterfaceChanged");
+                    //gameObject.SendMessage("Notify_ToolbarInterfaceChanged");
+                    OnToolbarButtonChanged();
                 }
             }
         }
@@ -394,8 +398,9 @@ namespace ScienceAlert
                         return;
                     }
 
-                    gameObject.SendMessage("Notify_ScanInterfaceChanged");
+                    //gameObject.SendMessage("Notify_ScanInterfaceChanged");
                     scanInterfaceType = value;
+                    OnScanInterfaceChanged();
                     Log.Normal("Scan interface type is now {0}", ScanInterfaceType.ToString());
                 }
             }

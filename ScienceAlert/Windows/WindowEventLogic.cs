@@ -74,7 +74,14 @@ namespace ScienceAlert.Windows
         private void Start()
         {
             scienceAlert = GetComponent<ScienceAlert>();
+            scienceAlert.OnToolbarButtonChanged += OnToolbarChanged;
 
+            OnToolbarChanged();
+        }
+
+
+        private void OnToolbarChanged()
+        {
             scienceAlert.Button.OnClick += OnToolbarClick;
         }
 
