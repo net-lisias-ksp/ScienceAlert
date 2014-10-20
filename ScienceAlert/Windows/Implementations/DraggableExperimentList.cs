@@ -18,7 +18,7 @@ namespace ScienceAlert.Windows.Implementations
         // members
         public Experiments.ExperimentManager manager;
         public BiomeFilter biomeFilter;
-
+        public ScanInterface scanInterface;
         
         private bool adjustedSkin = false;
 
@@ -42,7 +42,7 @@ namespace ScienceAlert.Windows.Implementations
 
             Skin = Instantiate(Settings.Skin) as GUISkin; // we'll be altering it a little bit to make sure the buttons are the right size
             Settings.Instance.OnSave += AboutToSave;
-
+ 
             LoadFrom(Settings.Instance.additional.GetNode("ExperimentWindow") ?? new ConfigNode());
             return new Rect(windowRect.x, windowRect.y, 256f, 128f);
         }
@@ -61,22 +61,44 @@ namespace ScienceAlert.Windows.Implementations
 
 
 
+
         /// <summary>
         /// Updates WindowRect size
         /// </summary>
         private void LateUpdate()
         {
-            if (Settings.Instance.DisplayCurrentBiome)
-            {
-                string biome = Title;
+            if (FlightGlobals.ActiveVessel != null)
+                if (Settings.Instance.DisplayCurrentBiome)
+                {
+                    // if SCANsat is enabled, don't show biome names for unscanned areas
+                    if (Settings.Instance.ScanInterfaceType == Settings.ScanInterface.ScanSat && scanInterface != null)
+                    {
+                        if (!scanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
+                        {
+                            Title = "Data not found";
+                            return;
+                        }
+                    }
 
-                if (biomeFilter.GetCurrentBiome(out biome))
-                    Title = biome;
-            }
-            else Title = WindowTitle;
-
+                    Title = GetBiomeString();
+                    return;
+                }  
+                    
+            Title = WindowTitle; // default experiment window title
         }
 
+
+
+        private string GetBiomeString()
+        {
+            string biome = Title;
+
+            if (biomeFilter.GetCurrentBiome(out biome))
+            {
+                return biome;
+            }
+            else return WindowTitle;
+        }
 
 
         /// <summary>

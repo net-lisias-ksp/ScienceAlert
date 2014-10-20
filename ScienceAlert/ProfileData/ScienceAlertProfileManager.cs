@@ -410,7 +410,7 @@ namespace ScienceAlert
             }
             else node = node.GetNode(PERSISTENT_NODE_NAME);
 
-            List<string> errors = new List<string>();
+            //List<string> errors = new List<string>();
             vesselProfiles = new VesselTable();
 
             var guidStrings = node.nodes.DistinctNames();
@@ -472,16 +472,21 @@ namespace ScienceAlert
                         }
                         else
                         {
-                            // add to missing profile list and clone default
-                            errors.Add(string.Format("Stored profile '{0}' not found for {1}", p.name, VesselIdentifier(guid)));
-                            Log.Error("Could not find profile '{0}' for vessel {1}. Will use default.", p.name, VesselIdentifier(guid));
+                            Log.Warning("Vessel {0} refers to a stored profile '{1}' which was not found. Existing data has been converted to a vessel profile.", VesselIdentifier(guid), p.name);
+                            p.modified = true;
 
-                            // note to self: this isn't the same as Profile.MakeDefault();
-                            // that is used for a truly default, totally unmodified profile.
-                            // DefaultProfile will locate a profile called "default" instead,
-                            // which may be custom-made by the user if they overwrite the 
-                            // standard one
-                            vesselProfiles.Add(guid, DefaultProfile.Clone());
+                            vesselProfiles.Add(guid, p);
+
+                            //// add to missing profile list and clone default
+                            //errors.Add(string.Format("Stored profile '{0}' not found for {1}", p.name, VesselIdentifier(guid)));
+                            //Log.Error("Could not find profile '{0}' for vessel {1}. Will use default.", p.name, VesselIdentifier(guid));
+
+                            //// note to self: this isn't the same as Profile.MakeDefault();
+                            //// that is used for a truly default, totally unmodified profile.
+                            //// DefaultProfile will locate a profile called "default" instead,
+                            //// which may be custom-made by the user if they overwrite the 
+                            //// standard one
+                            //vesselProfiles.Add(guid, DefaultProfile.Clone());
 
                         }
                     }
@@ -492,17 +497,17 @@ namespace ScienceAlert
                 }
             }
 
-            if (errors.Count > 0)
-            {
-                string message = "Errors while loading profiles:\n\n";
+            //if (errors.Count > 0)
+            //{
+            //    string message = "Errors while loading profiles:\n\n";
 
-                errors.ForEach(err => message += err + "\n");
-                message += "\nVessel(s) have been assigned the \"default\" profile.";
+            //    errors.ForEach(err => message += err + "\n");
+            //    message += "\nVessel(s) have been assigned the \"default\" profile.";
 
-                Log.Debug("Errors encountered during profile load: {0}", message);
+            //    Log.Debug("Errors encountered during profile load: {0}", message);
 
-                PopupDialog.SpawnPopupDialog("ScienceAlert: Profile Manager", message, "Okay", false, HighLogic.Skin);
-            }
+            //    PopupDialog.SpawnPopupDialog("ScienceAlert: Profile Manager", message, "Okay", false, HighLogic.Skin);
+            //}
 
             Ready = true;
         }

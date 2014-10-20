@@ -40,8 +40,9 @@ namespace ScienceAlert.Windows
             DraggableWindow.ButtonHoverBackground = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnBackground.png");
             DraggableWindow.ButtonSound = "click1";
 
-            uiCamera = ScreenSafeUI.referenceCam.GetComponent<SSUICamera>();
-            if (uiCamera == null) Log.Error("WindowEventLogic: SSUICamera not found");
+
+            scienceAlert = GetComponent<ScienceAlert>();
+            
 
             // note to self: these are on separate gameobjects because they use a UIButton to catch
             // clickthrough, parented to the window's GO. It's simpler to simply disable the window rather than
@@ -51,16 +52,17 @@ namespace ScienceAlert.Windows
             optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
             optionsWindow.scienceAlert = GetComponent<ScienceAlert>();
             optionsWindow.manager = GetComponent<Experiments.ExperimentManager>();
+            
 
             Log.Normal("Creating experiment window");
             experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
             experimentList.biomeFilter = GetComponent<BiomeFilter>();
             experimentList.manager = GetComponent<Experiments.ExperimentManager>();
-
+            
 
             Log.Normal("Creating debug window");
             debugWindow = new GameObject("ScienceAlert.DebugWindow").AddComponent<Implementations.DraggableDebugWindow>();
-
+            
 
             // initially hide windows
             optionsWindow.Visible = experimentList.Visible = debugWindow.Visible = false;
@@ -73,11 +75,22 @@ namespace ScienceAlert.Windows
         /// </summary>
         private void Start()
         {
-            scienceAlert = GetComponent<ScienceAlert>();
-            scienceAlert.OnToolbarButtonChanged += OnToolbarChanged;
+            uiCamera = ScreenSafeUI.referenceCam.GetComponent<SSUICamera>();
+            if (uiCamera == null) Log.Error("WindowEventLogic: SSUICamera not found");
 
+            
+            scienceAlert.OnToolbarButtonChanged += OnToolbarChanged;
+            scienceAlert.OnScanInterfaceChanged += OnInterfaceChanged;
+
+            optionsWindow.OnVisibilityChange += this.OnWindowVisibilityChanged;
+            experimentList.OnVisibilityChange += this.OnWindowVisibilityChanged;
+            debugWindow.OnVisibilityChange += this.OnWindowVisibilityChanged;
+
+            
             OnToolbarChanged();
+            OnInterfaceChanged();
         }
+
 
 
         private void OnToolbarChanged()
@@ -85,6 +98,15 @@ namespace ScienceAlert.Windows
             scienceAlert.Button.OnClick += OnToolbarClick;
         }
 
+
+
+        /// <summary>
+        /// We're only interested in this one so we can give the experiment list the new interface
+        /// </summary>
+        private void OnInterfaceChanged()
+        {
+            experimentList.scanInterface = GetComponent<ScanInterface>();
+        }
 
 
         private void OnDestroy()
@@ -119,6 +141,7 @@ namespace ScienceAlert.Windows
                 Log.Debug("WindowEventLogic: Hiding window(s)");
                 optionsWindow.Visible = experimentList.Visible = debugWindow.Visible = false;
                 AudioPlayer.Audio.PlayUI("click1", 0.5f);
+
                 return;
             }
             else
@@ -140,6 +163,26 @@ namespace ScienceAlert.Windows
 
                 AudioPlayer.Audio.PlayUI("click1", 0.5f);
             }
+        }
+
+
+
+        /// <summary>
+        /// Make sure the AppLauncher button state matches window state
+        /// </summary>
+        /// <param name="tf"></param>
+        private void OnWindowVisibilityChanged(bool tf)
+        {
+            if (scienceAlert.ToolbarType == Settings.ToolbarInterface.ApplicationLauncher)
+                if (tf)
+                {
+                    GetComponent<Toolbar.AppLauncherInterface>().button.SetTrue(false);
+                }
+                else
+                {
+                    if (!experimentList.Visible && !optionsWindow.Visible && !debugWindow.Visible)
+                        GetComponent<Toolbar.AppLauncherInterface>().button.SetFalse(false);
+                }
         }
 
 
