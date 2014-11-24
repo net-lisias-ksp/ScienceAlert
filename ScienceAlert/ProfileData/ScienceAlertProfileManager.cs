@@ -289,7 +289,7 @@ namespace ScienceAlert
                 // note to self: it's not strictly necessary to delete it since unused
                 // profiles won't be saved, but I can't think of a reason to keep it around
                 // since we catch undock events already...
-                Log.Normal("Deleting profile '{0}' since its vessel {1} was destroyed", vesselProfiles[vessel.id].name, vessel.id.ToString());
+                Log.Normal("Deleting vessel profile '{0}' since its vessel {1} was destroyed", vesselProfiles[vessel.id].name, vessel.id.ToString());
                 vesselProfiles.Remove(vessel.id);
             }
         }
@@ -317,7 +317,8 @@ namespace ScienceAlert
 
                 // it's possible the new vessel is in fact packed (almost certain to be a DiscoverableObject)
                 // so we need to be careful not to access any parts if it is
-                uint mid = newVessel.packed ? newVessel.protoVessel.protoPartSnapshots[newVessel.protoVessel.rootIndex].missionID : newVessel.rootPart.missionID;
+                // bugfix: newVessel.packed => newVessel.loaded. Thanks taniwha!
+                uint mid = !newVessel.loaded ? newVessel.protoVessel.protoPartSnapshots[newVessel.protoVessel.rootIndex].missionID : newVessel.rootPart.missionID;
 
                 Log.Debug("ProfileManager.OnVesselCreate: new vessel mission id = " + mid);
 
@@ -326,9 +327,6 @@ namespace ScienceAlert
                         if (vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
                             parentProfile = ActiveProfile;
                         
-                    
-                
-                    
 
                 // if the active vessel isn't the parent then the player probably didn't
                 // cause this vessel to be created; nonetheless there may be edge cases 
@@ -363,18 +361,6 @@ namespace ScienceAlert
                     vesselProfiles.Add(newVessel.id, parentProfile.Clone());
                 } // otherwise this is a vessel created out of the player's control, most likely an asteroid
 
-                //// did we undock from something?
-                //if (newVessel.rootPart.missionID == FlightGlobals.ActiveVessel.rootPart.missionID && vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id) && vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
-                //{
-                //    if (vesselProfiles.ContainsKey(newVessel.id))
-                //    {
-                //        Log.Error("ProfileManager.OnVesselCreate: Somehow we already have an entry for {0}? Investigate logic error", newVessel.id.ToString());
-                //        return; // proceeding will just result in a thrown exception
-                //    }
-                //    // the new vessel will get a copy of its parents profile
-                //    Log.Normal("New vessel created from {0}, assigning it a clone of parent's profile", FlightGlobals.ActiveVessel.vesselName);
-                //    vesselProfiles.Add(newVessel.id, ActiveProfile.Clone());
-                //}
             }
         }
 
