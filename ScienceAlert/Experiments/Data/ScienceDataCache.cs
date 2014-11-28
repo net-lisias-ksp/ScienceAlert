@@ -23,7 +23,7 @@ using System.Text;
 using UnityEngine;
 using ReeperCommon;
 
-namespace ScienceAlert
+namespace ScienceAlert.Experiments.Data
 {
     using StorageList = List<IScienceDataContainer>;
 
@@ -34,10 +34,10 @@ namespace ScienceAlert
     /// but rather by id, so it makes more sense to have one object track
     /// it than have every observer do so.
     /// 
-    /// StorageCache keeps track of events and will update itself as
+    /// ScienceDataCache keeps track of events and will update itself as
     /// necessary.  It will also manage the magic transmitter as required.
     /// </summary>
-    public class StorageCache : MonoBehaviour
+    public class ScienceDataCache : MonoBehaviour
     {
         protected StorageList storage;                      // containers for science data
         protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel

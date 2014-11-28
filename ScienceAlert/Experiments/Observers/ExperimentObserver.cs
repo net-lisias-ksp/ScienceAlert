@@ -22,6 +22,7 @@ using System.Linq;
 using UnityEngine;
 using ReeperCommon;
 using ScienceAlert;
+using ScienceAlert.Experiments.Data;
 
 namespace ScienceAlert.Experiments.Observers
 {
@@ -37,7 +38,7 @@ namespace ScienceAlert.Experiments.Observers
     {
         private ScienceModuleList modules;                  // all ModuleScienceExperiments onboard that represent our experiment
         protected ScienceExperiment experiment;             // The actual experiment that will be performed
-        protected StorageCache storage;                     // Represents possible storage locations on the vessel
+        protected ScienceDataCache storage;                     // Represents possible storage locations on the vessel
         public ProfileData.ExperimentSettings settings;     // settings for this experiment
         protected string lastAvailableId;                   // Id of the last time the experiment was available
         protected string lastBiomeQuery;                    // the last good biome result we had
@@ -53,7 +54,7 @@ namespace ScienceAlert.Experiments.Observers
  ******************************************************************************/
 
 
-        public ExperimentObserver(StorageCache cache, ProfileData.ExperimentSettings expSettings, BiomeFilter filter, ScanInterface scanMapInterface, string expid)
+        public ExperimentObserver(ScienceDataCache cache, ProfileData.ExperimentSettings expSettings, BiomeFilter filter, ScanInterface scanMapInterface, string expid)
         {
             settings = expSettings;
             biomeFilter = filter;

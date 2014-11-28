@@ -42,7 +42,7 @@ namespace ScienceAlert.Experiments
         //    Members of ExperimentManager
         // --------------------------------------------------------------------
         private ScienceAlert scienceAlert;
-        private StorageCache vesselStorage;
+        private Experiments.Data.ScienceDataCache vesselStorage;
         private BiomeFilter biomeFilter;
 
         private System.Collections.IEnumerator watcher;
@@ -66,7 +66,7 @@ namespace ScienceAlert.Experiments
 
         void Awake()
         {
-            vesselStorage = gameObject.AddComponent<StorageCache>();
+            vesselStorage = gameObject.AddComponent<Experiments.Data.ScienceDataCache>();
             biomeFilter = gameObject.AddComponent<BiomeFilter>();
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
             audio = GetComponent<AudioPlayer>() ?? AudioPlayer.Audio;
@@ -405,7 +405,7 @@ namespace ScienceAlert.Experiments
             }
         }
 
-        public StorageCache Storage
+        public Experiments.Data.ScienceDataCache Storage
         {
             get
             {

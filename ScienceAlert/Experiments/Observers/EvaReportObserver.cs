@@ -27,7 +27,7 @@ namespace ScienceAlert.Experiments.Observers
         /// <summary>
         /// Constructor
         /// </summary>
-        public EvaReportObserver(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid = "evaReport")
+        public EvaReportObserver(Experiments.Data.ScienceDataCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid = "evaReport")
             : base(cache, settings, filter, scanInterface, expid)
         {
 

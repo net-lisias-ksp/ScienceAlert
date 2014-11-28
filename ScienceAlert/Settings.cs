@@ -73,14 +73,9 @@ namespace ScienceAlert
         [field: DoNotSerialize] // note: specifier required, else it won't apply to compiler-generated field portion
         public event Callback OnSave = delegate() { };
 
-        //[field: DoNotSerialize]
-        //public event Callback OnAboutToSave = delegate() { };
-        
+
         [field: DoNotSerialize]
         public event SaveCallback OnLoad = delegate(ConfigNode node) { };
-
-        //[field: DoNotSerialize]
-        //public event Callback OnAboutToLoad = delegate() { };
 
         /// <summary>
         /// Extra storage for objects that don't register for listeners in time

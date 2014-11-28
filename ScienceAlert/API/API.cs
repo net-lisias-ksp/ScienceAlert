@@ -44,7 +44,7 @@ namespace ScienceAlert
         //---------------------------------------------------------------------
         // Delegate prototypes
         //---------------------------------------------------------------------
-        public delegate void ExperimentStatusChanged(ExperimentStatus newStatus, ScienceExperiment experiment, ExperimentMonitor monitor);
+        public delegate void ExperimentStatusChanged(ExperimentStatus newStatus, ExperimentStatus oldStatus, ScienceExperiment experiment, ExperimentMonitor monitor);
         
         // Simpler events if subscriber doesn't need to know all the details, only that an alert has popped
         public delegate void ExperimentRecoveryAlert(ScienceExperiment experiment, float recoveryValue);
@@ -58,6 +58,11 @@ namespace ScienceAlert
         public static event ExperimentRecoveryAlert OnExperimentRecoveryAlert = delegate { };
         public static event ExperimentTransmittableAlert OnExperimentTransmittableAlert = delegate { };
 
+
+        //---------------------------------------------------------------------
+        // Globals
+        //---------------------------------------------------------------------
+        public static bool Ready = false;
 
 
 

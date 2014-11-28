@@ -25,7 +25,7 @@ namespace ScienceAlert.Experiments.Observers
     /// </summary>
     internal class SurfaceSampleObserver : EvaReportObserver
     {
-        public SurfaceSampleObserver(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
+        public SurfaceSampleObserver(Experiments.Data.ScienceDataCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
             : base(cache, settings, filter, scanInterface, "surfaceSample")
         {
 

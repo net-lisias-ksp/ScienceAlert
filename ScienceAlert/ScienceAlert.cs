@@ -169,6 +169,7 @@ namespace ScienceAlert
         private ScanInterface scanInterface;
         private Experiments.ExperimentManager experimentManager;
 
+
         // interfaces
         private Settings.ToolbarInterface buttonInterfaceType = Settings.ToolbarInterface.ApplicationLauncher;
         private Settings.ScanInterface scanInterfaceType = Settings.ScanInterface.None;
@@ -208,7 +209,6 @@ namespace ScienceAlert
             Log.Verbose("Sounds ready.");
 
 
-
             Log.Verbose("Creating experiment manager");
             experimentManager = gameObject.AddComponent<Experiments.ExperimentManager>();
 
@@ -232,6 +232,8 @@ namespace ScienceAlert
             Log.Verbose("Toolbar button ready");
 
             Log.Normal("ScienceAlert initialization finished.");
+            API.Ready = true;
+
 #if DEBUG
             //gameObject.AddComponent<Windows.Implementations.TestDrag>();
 #endif
@@ -241,6 +243,7 @@ namespace ScienceAlert
 
         public void OnDestroy()
         {
+            API.Ready = false;
             Instance = null;
             Button.Drawable = null;
             Settings.Instance.Save();
@@ -294,6 +297,7 @@ namespace ScienceAlert
                 return experimentManager;
             }
         }
+
 
 
         /// <summary>

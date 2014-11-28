@@ -111,6 +111,20 @@ namespace ScienceAlert.Windows.Implementations
             {
                 subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, GetCurrentBiome());
 
+                // we need to look at the eva kerbal part
+                PartLoader.LoadedPartsList.ForEach(ap =>
+                {
+                    if (ap.name.StartsWith("k") || ap.name.StartsWith("K"))
+                        Log.Normal("Loaded part: {0}", ap.name);
+                });
+
+                //PartLoader.getPartInfoByName("kerbalEVA").partPrefab.gameObject.PrintComponents();
+                List<ModuleScienceExperiment> modules = PartLoader.getPartInfoByName("kerbalEVA").partPrefab.gameObject.GetComponentsInChildren<ModuleScienceExperiment>(true).ToList();
+
+                modules.ForEach(mse => Log.Normal("MSE: " + mse.experimentID));
+
+                float xmitScalar = modules.Single(mse => mse.experimentID == "surfaceSample").xmitDataScalar;
+
                 // note: hoping to find a correlation between module xmit scalar and something in subject
 
                 Log.Debug("Checking current surface sample transmit value for {0}", subject.id);
@@ -121,6 +135,8 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Debug("scientific value: " + subject.scientificValue);
                 Log.Debug("subject value: " + subject.subjectValue);
                 Log.Debug("body multiplier: " + API.GetBodyScienceValueMultipler(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)));
+                Log.Debug("xmitScalar: " + xmitScalar);
+                Log.Debug("sample count: " + ScienceAlert.Instance.ExperimentManager.Storage.FindStoredData(subject.id).Count);
 
                 FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>().Where(mse => mse.experimentID == exp.id).ToList().ForEach(mse => Log.Debug("xmitScalar: {0}", mse.xmitDataScalar));
 
@@ -131,10 +147,10 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, ScienceAlert.Instance.ExperimentManager.Storage.FindStoredData(subject.id)));
 
                 // value to be checked, absolute
-                Log.Normal("next absolute transmission: {0}", subject.CalculateNextReport(exp, ScienceAlert.Instance.ExperimentManager.Storage.FindStoredData(subject.id)));
+                Log.Normal("next absolute transmission: {0}", subject.CalculateNextReport(exp, new List<ScienceData>(), xmitScalar));
 
                 // value to be checked, next transmitted sample
-                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, ScienceAlert.Instance.ExperimentManager.Storage.FindStoredData(subject.id), subject.subjectValue));
+                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, ScienceAlert.Instance.ExperimentManager.Storage.FindStoredData(subject.id), xmitScalar));
             }
         }
 

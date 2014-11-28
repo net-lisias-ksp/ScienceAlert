@@ -23,7 +23,7 @@ using System.Text;
 using UnityEngine;
 using ReeperCommon;
 
-namespace ScienceAlert
+namespace ScienceAlert.Experiments.Data
 {
 
     /// <summary>
@@ -68,7 +68,7 @@ namespace ScienceAlert
         // will result in it getting stalled, remaining open but
         // not sending data
         private Dictionary<IScienceDataTransmitter, ScienceDataList> toBeTransmitted = new Dictionary<IScienceDataTransmitter, ScienceDataList>();
-        internal StorageCache cacheOwner;
+        internal Experiments.Data.ScienceDataCache cacheOwner;
 
 
 /******************************************************************************
