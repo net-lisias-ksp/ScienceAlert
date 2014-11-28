@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using ReeperCommon;
-using ScienceAlert.API;
+using ScienceAlert;
 
 namespace ScienceAlert.Experiments.Observers
 {
@@ -43,11 +43,10 @@ namespace ScienceAlert.Experiments.Observers
         protected string lastBiomeQuery;                    // the last good biome result we had
         protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
         protected ScanInterface scanInterface;              // Determines whether we're allowed to know if an experiment is available
-        protected float nextReportValue;                    // take a guess
+        protected float recoveryValue;                      // take a guess
+        protected float transmissionValue;
         protected bool requireControllable;                 // Vessel needs to be controllable for the experiment to be available
 
-        // events
-        public ExperimentManager.ExperimentAvailableDelegate OnAvailable = delegate { };
 
 /******************************************************************************
  *                    Implementation Details
@@ -334,11 +333,11 @@ namespace ScienceAlert.Experiments.Observers
                         // bugfix: also ensure the experiment will generate >0 science, else
                         //         we could produce alerts for reports that won't generate any science
                         //nextReportValue = CalculateNextReportValue(subject, experimentSituation, data);
-                        nextReportValue = subject.CalculateNextReport(experiment, data);
-                        Available = Available && nextReportValue > 0.01f;
+                        RecoveryValue = subject.CalculateNextReport(experiment, data);
+                        Available = Available && RecoveryValue > 0.01f;
 
                         // check the science threshold
-                        Available = Available && nextReportValue > ScienceAlertProfileManager.ActiveProfile.ScienceThreshold;
+                        Available = Available && RecoveryValue > ScienceAlertProfileManager.ActiveProfile.ScienceThreshold;
 
 
 
@@ -354,13 +353,11 @@ namespace ScienceAlert.Experiments.Observers
 
                             if (Available != lastStatus && Available)
                             {
-                                Log.Normal("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier, settings.Filter, subject.science, nextReportValue);
-
-                                //Log.Debug("Transmission value: {0}", CalculateTransmissionValue(subject));
+                                Log.Normal("Experiment {0} just became available! Total potential science onboard currently: {1} (Cap is {2}, threshold is {3}, current sci is {4}, expected next report value: {5})", lastAvailableId, scienceTotal, subject.scienceCap * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier, settings.Filter, subject.science, RecoveryValue);
 
 #if DEBUG
                                 if (GetNextOnboardExperimentModule() != null)
-                                    Log.Debug("Transmission value: {0}", API.AlertUtil.GetNextReportValue(subject, experiment, data, GetNextOnboardExperimentModule().xmitDataScalar));
+                                    Log.Debug("Transmission value: {0}", API.GetNextReportValue(subject, experiment, data, GetNextOnboardExperimentModule().xmitDataScalar));
 #endif
 
                                 if (data.Count() > 0)
@@ -493,6 +490,7 @@ namespace ScienceAlert.Experiments.Observers
             return null;
         }
 
+
         public virtual bool IsReadyOnboard
         {
             get
@@ -509,15 +507,6 @@ namespace ScienceAlert.Experiments.Observers
             protected set;
         }
 
-
-
-        //public virtual bool AssumeOnboard
-        //{
-        //    get
-        //    {
-        //        return settings.AssumeOnboard;
-        //    }
-        //}
 
 
         public string ExperimentTitle
@@ -560,15 +549,28 @@ namespace ScienceAlert.Experiments.Observers
             }
         }
 
-        public float NextReportValue
+        public float RecoveryValue
         {
             get
             {
-                return nextReportValue;
+                return recoveryValue;
             }
             private set
             {
-                nextReportValue = value;
+                recoveryValue = value;
+            }
+        }
+
+        public float TransmissionValue
+        {
+            get
+            {
+                return transmissionValue;
+            }
+
+            private set
+            {
+                transmissionValue = value;
             }
         }
 

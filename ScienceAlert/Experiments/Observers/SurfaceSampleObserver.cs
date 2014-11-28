@@ -20,9 +20,8 @@ namespace ScienceAlert.Experiments.Observers
 {
     /// <summary>
     /// This object works a bit like the EVA report observer: it checks if a particular experiment is available
-    /// even though a ModuleScienceExperiment for that experiment doesn't exist. This way we can alert to experiments
-    /// that are technically available since the player can EVA a kerbal at any time that does have the right
-    /// experiment module
+    /// even though a ModuleScienceExperiment for that experiment doesn't exist. It's useful because the player
+    /// technically has the capability to do this experiment at their fingertips already, just by going on EVA
     /// </summary>
     internal class SurfaceSampleObserver : EvaReportObserver
     {
@@ -40,7 +39,7 @@ namespace ScienceAlert.Experiments.Observers
                 {
                     if (FlightGlobals.ActiveVessel.isEVA)
                     {
-                        return /*settings.AssumeOnboard ||*/ this.GetNextOnboardExperimentModule() != null;
+                        return this.GetNextOnboardExperimentModule() != null;
                     }
                     else return Settings.Instance.CheckSurfaceSampleNotEva && base.IsReadyOnboard;
 

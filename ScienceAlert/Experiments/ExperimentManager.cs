@@ -59,20 +59,6 @@ namespace ScienceAlert.Experiments
         new AudioPlayer audio;
 
 
-        // --------------------------------------------------------------------
-        //    Events
-        // --------------------------------------------------------------------
-        public delegate void ExperimentAvailableDelegate(ScienceExperiment experiment, float reportValue); // todo
-        public event ExperimentAvailableDelegate OnExperimentAvailable = delegate { }; // called whenever an experiment just became available in a new subject
-                                                                                       // this differs from ExperimentObserver.Available which just reports whether
-                                                                                       // that experiment currently meets filter settings
-
-        public event Callback OnObserversRebuilt = delegate { }; // called whenever observers are totally recreated from scratch,
-                                                                 // such as when the player changes ships
-
-        public event Callback OnExperimentsScanned = delegate { };   // called whenever the observers rescan the ship, typically
-                                                                     // as a result of the current vessel being modified but not
-                                                                     // switched (pieces breaking off or staged, etc)
 
 /******************************************************************************
  *                    Implementation Details
@@ -138,7 +124,6 @@ namespace ScienceAlert.Experiments
                 foreach (var obs in observers)
                     obs.Rescan();
 
-                OnExperimentsScanned();
                 Log.Normal("Done");
             }
         }
@@ -261,8 +246,6 @@ namespace ScienceAlert.Experiments
                                     audio.PlayUI("bubbles", 2f);
                                     break;
                             }
-
-                            OnExperimentAvailable(observer.Experiment, observer.NextReportValue);
                         }
                         else if (!observers.Any(ob => ob.Available))
                         {
@@ -371,122 +354,10 @@ namespace ScienceAlert.Experiments
             }
 
             watcher = UpdateObservers(); // to prevent any problems by rebuilding in the middle of enumeration
-            OnObserversRebuilt();
 
             return observers.Count;
         }
 
-
-
-        /// <summary>
-        /// Each experiment observer caches relevant modules to reduce cpu
-        /// time.  Whenever the vessel changes, they'll need to be updated.
-        /// That's what this function does.
-        /// </summary>
-        /// <returns></returns>
-        //private System.Collections.IEnumerator RebuildObserverList()
-        //{
-        //    Log.Normal("Rebuilding observer list...");
-
-        //    observers.Clear();
-
-        //    while (ResearchAndDevelopment.Instance == null || !FlightGlobals.ready || FlightGlobals.ActiveVessel.packed || scanInterface == null)
-        //        yield return 0;
-
-
-        //    // critical: there's a quiet issue where sometimes user get multiple
-        //    //           experimentIds loaded (the one I know of at the moment is
-        //    //           through a small bug in MM), but if that happens, GetExperimentIDs()
-        //    //           will throw an exception and the whole plugin goes down in flames.
-
-
-        //    try
-        //    {
-        //        // construct the experiment observer list ...
-        //        foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
-        //            if (expid != "evaReport" && expid != "surfaceSample") // special cases
-        //                if (ResearchAndDevelopment.GetExperiment(expid).situationMask == 0 && ResearchAndDevelopment.GetExperiment(expid).biomeMask == 0)
-        //                {   // we can't monitor this experiment, so no need to clutter the
-        //                    // ui with it
-        //                    Log.Verbose("Experiment '{0}' cannot be monitored due to zero'd situation and biome flag masks.", ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
-
-        //                }
-        //                else observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], biomeFilter, scanInterface, expid));
-
-        //        // surfaceSample is a special case: it's technically available on any
-        //        // crewed vessel
-        //        observers.Add(new SurfaceSampleObserver(vesselStorage, ProfileManager.ActiveProfile["surfaceSample"], biomeFilter, scanInterface));
-
-
-        //        // evaReport is a special case.  It technically exists on any crewed
-        //        // vessel.  That vessel won't report it normally though, unless
-        //        // the vessel is itself an eva'ing Kerbal.  Since there are conditions
-        //        // that would result in the experiment no longer being available 
-        //        // (kerbal dies, user goes out on eva and switches back to ship, and
-        //        // so on) I think it's best we separate it out into its own
-        //        // Observer type that will account for these changes and any others
-        //        // that might not necessarily trigger a VesselModified event
-        //        if (ProfileManager.ActiveProfile["evaReport"].Enabled)
-        //        {
-        //            if (Settings.Instance.EvaReportOnTop)
-        //            {
-        //                observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-        //                observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
-        //            }
-        //            else
-        //            {
-        //                observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
-        //                observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-        //            }
-        //        } else observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-
-        //        watcher = UpdateObservers();
-
-        //        Log.Normal("Observer list rebuilt");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Log.Error("CRITICAL: Exception RebuildObserverList(): {0}", e);
-
-        //        Log.Normal("Listing current experiment definitions:");
-
-        //        // It's usually something to do with duplicate crew reports
-        //        foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
-        //        {
-        //            // note: avoid being too spammy by removing the results sections,
-        //            // those aren't going to be causing problems anyway
-        //            ConfigNode snipped = new ConfigNode();
-        //            node.CopyTo(snipped);
-
-        //            snipped.RemoveNode("RESULTS");
-
-        //            Log.Normal("{0}", snipped.ToString());
-        //        }
-
-        //        Log.Normal("Finished listing experiment definitions.");
-
-        //        // find any duplicates
-        //        HashSet<string /* id */> alreadyKnown = new HashSet<string>();
-
-        //        foreach (var node in GameDatabase.Instance.GetConfigNodes("EXPERIMENT_DEFINITION"))
-        //        {
-        //            if (node.HasValue("id"))
-        //            {
-        //                string id = node.GetValue("id");
-
-        //                if (!alreadyKnown.Contains(id))
-        //                {
-        //                    alreadyKnown.Add(id);
-        //                }
-        //                else
-        //                {
-        //                    Log.Error("Duplicate science definition found for '{0}'", id);
-        //                }
-        //            }
-        //            else Log.Normal("no value id found");
-        //        }
-        //    }
-        //}
 #endregion
 
 
@@ -526,7 +397,21 @@ namespace ScienceAlert.Experiments
             }
         }
 
+        public BiomeFilter BiomeFilter
+        {
+            get
+            {
+                return biomeFilter;
+            }
+        }
 
+        public StorageCache Storage
+        {
+            get
+            {
+                return vesselStorage;
+            }
+        }
 
 
         #endregion

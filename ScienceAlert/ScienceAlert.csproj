@@ -73,8 +73,10 @@
     <Compile Include="..\..\DebugTools\ResourceUtil.cs">
       <Link>Tools\ResourceUtil.cs</Link>
     </Compile>
-    <Compile Include="API\AlertUtil.cs" />
+    <Compile Include="API\API.cs" />
     <Compile Include="BiomeFilter.cs" />
+    <Compile Include="Experiments\MonitorManager.cs" />
+    <Compile Include="Experiments\Monitors\ExperimentMonitor.cs" />
     <Compile Include="Experiments\Observers\EvaReportObserver.cs" />
     <Compile Include="Experiments\Observers\RequiresCrew.cs" />
     <Compile Include="Experiments\Observers\SurfaceSampleObserver.cs" />
@@ -83,7 +85,6 @@
     <Compile Include="ProfileData\ScienceAlertProfileManager.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
     <Compile Include="Experiments\ExperimentManager.cs" />
-    <Compile Include="Windows\DebugWindow.cs" />
     <Compile Include="ScienceAlert.cs" />
     <Compile Include="Experiments\Observers\ExperimentObserver.cs" />
     <Compile Include="Scan Interfaces\ScanInterface.cs" />
@@ -93,7 +94,6 @@
     <Compile Include="Windows\Implementations\DraggableExperimentList.cs" />
     <Compile Include="Windows\Implementations\DraggableOptionsWindow.cs" />
     <Compile Include="Windows\Implementations\TestDrag.cs" />
-    <Compile Include="Windows\OptionsWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StorageCache.cs" />

@@ -23,6 +23,8 @@ using UnityEngine;
 
 namespace ScienceAlert.Windows.Implementations
 {
+    using Observer = Experiments.Observers.ExperimentObserver;
+
     /// <summary>
     /// This window replaces the old ExperimentManager Drawable. It lists all available
     /// experiments
@@ -37,7 +39,9 @@ namespace ScienceAlert.Windows.Implementations
         public ScanInterface scanInterface;
         
         private bool adjustedSkin = false;
-
+        List<Observer> eligibleExperiments = new List<Observer>();          // list of experiments that match user's profile settings
+                                                                            // ExperimentManager will send events to notify us when 
+                                                                            // they change
 
 /******************************************************************************
  *                    Implementation Details
@@ -58,6 +62,7 @@ namespace ScienceAlert.Windows.Implementations
 
             Skin = Instantiate(Settings.Skin) as GUISkin; // we'll be altering it a little bit to make sure the buttons are the right size
             Settings.Instance.OnSave += AboutToSave;
+
  
             LoadFrom(Settings.Instance.additional.GetNode("ExperimentWindow") ?? new ConfigNode());
             return new Rect(windowRect.x, windowRect.y, 256f, 128f);
@@ -166,12 +171,14 @@ namespace ScienceAlert.Windows.Implementations
                     //-----------------------------------------------------
                     // Experiment list
                     //-----------------------------------------------------
+
+                    // this is old version, check-manager-directly
                     foreach (var observer in observers)
                         if (observer.Available)
                         {
                             var content = new GUIContent(observer.ExperimentTitle);
 
-                            if (Settings.Instance.ShowReportValue) content.text += string.Format(" ({0:0.#})", observer.NextReportValue);
+                            if (Settings.Instance.ShowReportValue) content.text += string.Format(" ({0:0.#})", observer.RecoveryValue);
 
                             if (GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
                             {
@@ -200,7 +207,6 @@ namespace ScienceAlert.Windows.Implementations
 
 
         #region events
-
 
 
 

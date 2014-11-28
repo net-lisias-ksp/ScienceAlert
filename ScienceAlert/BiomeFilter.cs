@@ -131,7 +131,6 @@ namespace ScienceAlert
                 // use the stock function to get an initial possibility
                 var possibleBiome = vessel.mainBody.BiomeMap.GetAtt(latRad, lonRad);
 
-
                 // if the cleaned map is finished, let's test the validity
                 // of the result by checking some surrounding areas
                 if (!IsBusy)

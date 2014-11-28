@@ -162,9 +162,12 @@ namespace ScienceAlert
         //    Members of ScienceAlert
         // --------------------------------------------------------------------
 
+        public static ScienceAlert Instance = null;
+
         // owned objects
         private Toolbar.IToolbar button;
         private ScanInterface scanInterface;
+        private Experiments.ExperimentManager experimentManager;
 
         // interfaces
         private Settings.ToolbarInterface buttonInterfaceType = Settings.ToolbarInterface.ApplicationLauncher;
@@ -173,6 +176,7 @@ namespace ScienceAlert
         // events
         public event Callback OnScanInterfaceChanged = delegate { };
         public event Callback OnToolbarButtonChanged = delegate { };
+
 
 /******************************************************************************
  *                    Implementation Details
@@ -188,6 +192,7 @@ namespace ScienceAlert
             while (ScienceAlertProfileManager.Instance == null || !ScienceAlertProfileManager.Instance.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
 
             Log.Normal("Initializing ScienceAlert");
+            Instance = this;
 
 // just in case this has unforseen consequences later...
 // it should be okay since asteroidSample isn't actually defined
@@ -202,38 +207,29 @@ namespace ScienceAlert
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
-            
 
-            Log.Normal("Creating experiment manager");
-            gameObject.AddComponent<Experiments.ExperimentManager>();
 
-#if DEBUG
-            gameObject.GetComponent<Experiments.ExperimentManager>().OnExperimentAvailable += delegate(ScienceExperiment experiment, float report)
-            {
-                Log.Debug("ExperimentManager.OnExperimentAvailable listener triggered: Experiment '{0}' available, next report = {1}", experiment.experimentTitle, report);
-            };
-#endif
+            Log.Verbose("Creating experiment manager");
+            experimentManager = gameObject.AddComponent<Experiments.ExperimentManager>();
+
             
 
             gameObject.AddComponent<Windows.WindowEventLogic>();
 
 
 
-            Log.Normal("Finished creating windows");
+            Log.Verbose("Finished creating windows");
 
 
             // set up whichever interface we're using to determine when it's
             // permissable to check for science reports
-            // 
-            // it's delayed to make sure whichever interface (if not the
-            // default) has initialized
             ScanInterfaceType = Settings.Instance.ScanInterfaceType;
-            
 
 
-            Log.Debug("ScienceAlert.Start: initializing toolbar");
+
+            Log.Verbose("ScienceAlert.Start: initializing toolbar");
             ToolbarType = Settings.Instance.ToolbarInterfaceType;
-            Log.Normal("Toolbar button ready");
+            Log.Verbose("Toolbar button ready");
 
             Log.Normal("ScienceAlert initialization finished.");
 #if DEBUG
@@ -245,9 +241,10 @@ namespace ScienceAlert
 
         public void OnDestroy()
         {
+            Instance = null;
             Button.Drawable = null;
             Settings.Instance.Save();
-            Log.Debug("ScienceAlert destroyed");
+            Log.Verbose("ScienceAlert destroyed");
         }
 
 
@@ -289,6 +286,14 @@ namespace ScienceAlert
             }
         }
 
+
+        public Experiments.ExperimentManager ExperimentManager
+        {
+            get
+            {
+                return experimentManager;
+            }
+        }
 
 
         /// <summary>
@@ -409,4 +414,8 @@ namespace ScienceAlert
 
 #endregion 
     }
+
+
+
+
 }
