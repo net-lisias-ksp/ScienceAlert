@@ -64,7 +64,7 @@ namespace ScienceAlert.Windows.Implementations
             GUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.MinHeight(128f));
 
             // current biome
-            GUILayout.Label(string.Format("Biome: {0}", GetCurrentBiome()), GUILayout.MinWidth(256f));
+            GUILayout.Label(string.Format("Biome: {0}", ScienceAlert.Instance.ExperimentManager.BiomeFilter.CurrentBiome), GUILayout.MinWidth(256f));
 
 #region debug-only
 #if DEBUG
@@ -88,15 +88,7 @@ namespace ScienceAlert.Windows.Implementations
 
 
 
-        private string GetCurrentBiome()
-        {
-            string biome = string.Empty;
 
-            if (FlightGlobals.ActiveVessel != null)
-                ScienceAlert.Instance.ExperimentManager.BiomeFilter.GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out biome);
-
-            return biome;
-        }
 
 #if DEBUG
         // Check our ability to calculate correct transmit value for an experiment without a ModuleScienceExperiment
@@ -109,7 +101,7 @@ namespace ScienceAlert.Windows.Implementations
 
             if (exp.BiomeIsRelevantWhile(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)))
             {
-                subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, GetCurrentBiome());
+                subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, ScienceAlert.Instance.ExperimentManager.BiomeFilter.CurrentBiome);
 
                 // we need to look at the eva kerbal part
                 PartLoader.LoadedPartsList.ForEach(ap =>

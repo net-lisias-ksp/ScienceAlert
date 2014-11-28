@@ -277,14 +277,16 @@ namespace ScienceAlert.Experiments.Observers
                         // biome matters; check to make sure we have biome data available
                         if (scanInterface.HaveScanData(vessel.latitude, vessel.longitude, vessel.mainBody))
                         {
-                            if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
-                            {
-                                lastBiomeQuery = biome;
-                            }
-                            else
-                            {
-                                biome = lastBiomeQuery; // use last good known value
-                            }
+                            //if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
+                            //{
+                            //    lastBiomeQuery = biome;
+                            //}
+                            //else
+                            //{
+                            //    biome = lastBiomeQuery; // use last good known value
+                            //}
+                            biome = biomeFilter.CurrentBiome;
+
                         }
                         else
                         { // no biome data available

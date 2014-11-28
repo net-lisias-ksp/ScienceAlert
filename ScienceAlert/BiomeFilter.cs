@@ -27,21 +27,14 @@ namespace ScienceAlert
     /// <summary>
     /// Filtering at the edges of the original biome maps can cause some
     /// inaccurate biome reporting. That's not good, because it'll trick
-    /// experiment observers into believing they entered a new situation
+    /// experiment observers into believing they entered a new subjectid
     /// but only for a split second if the filtered color just happens
     /// to match any of the biomes.
     /// 
-    /// This class will generate a "clean" version with no aliasing. The
-    /// previous version simply queried the cleaned up version whenever
-    /// it was available. However, while this avoids "bogus" results
-    /// (where the alias color between shores and grasslands matches something
-    /// that's incorrect, tundra for instance) it isn't very good at low
-    /// altitudes.
-    /// 
-    /// In 1.1, I'm switching back to the stock GetAttr default function
-    /// but we'll add a filter by checking against the clean map within
-    /// a certain radius for its result. If we don't get any matches, the
-    /// GetAttr value is probably invalid and should be discarded.
+    /// This class will generate a "clean" version with no aliasing. If
+    /// the stock method result doesn't match any on the "clean" version
+    /// within a particular search radius, it's suspicious and the last 
+    /// good result should be used instead.
     /// </summary>
     public class BiomeFilter : MonoBehaviour
     {
@@ -53,14 +46,19 @@ namespace ScienceAlert
         //    Members
         // --------------------------------------------------------------------
 
-        private CelestialBody current;      // which CelestialBody we've got a cached biome map texture for
-        private Texture2D projectedMap;     // this is the cleaned biome map of the current CelestialBody
+        private CelestialBody current;                      // which CelestialBody we've got a cached biome map texture for
+        private Texture2D projectedMap;                     // this is the cleaned biome map of the current CelestialBody
         private System.Collections.IEnumerator projector;   // this coroutine constructs the projectedMap from current CelestialBody
         private const float COLOR_THRESHOLD = 0.005f;       // Maximum color difference for two colors to be considered the same
+        private string currentBiome = "";                   // current biome, updated every frame
 
-/******************************************************************************
- *                    Implementation Details
- ******************************************************************************/
+
+
+        /******************************************************************************
+         *                    Implementation Details
+         ******************************************************************************/
+        #region init/deinit
+
         void Start()
         {
             GameEvents.onDominantBodyChange.Add(OnDominantBodyChanged);
@@ -74,45 +72,38 @@ namespace ScienceAlert
             GameEvents.onDominantBodyChange.Remove(OnDominantBodyChanged);
         }
 
+        #endregion
+
+
 
         public void Update()
         {
             if (projector != null)
                 projector.MoveNext();
+
+            if (FlightGlobals.ActiveVessel == null) return;
+
+            string possibleBiome = "";
+
+            if (GetCurrentBiome(out possibleBiome))
+                CurrentBiome = possibleBiome;
+            // else use existing, last-known-good value by not overwriting it with the garbage we just received
         }
 
 
+
+        /// <summary>
+        /// Returns the biome of the body the active vessel is orbiting, located under its current
+        /// latitude and longitude. If the result may be incorrect, the method will return false
+        /// </summary>
+        /// <param name="biome"></param>
+        /// <returns></returns>
         public bool GetCurrentBiome(out string biome)
         {
-            biome = "N/A";
-
-            if (FlightGlobals.ActiveVessel == null)
-                return false;
-
-            string possibleBiome = string.Empty;
-
-            if (GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out possibleBiome))
-            {
-                // the biome we got is most likely good
-                biome = possibleBiome;
-                return true;
-            }
-            else
-            {
-                // the biome we got is not very accurate (e.g. polar ice caps in middle of kerbin grasslands and
-                // such, due to the way the biome map is filtered).
-                // we'll return it anyway; let the caller figure out what to do about it
-                biome = possibleBiome;
-                return false;
-            }
-        }
-
-
-
-        public bool GetBiome(double latRad, double lonRad, out string biome)
-        {
             biome = string.Empty;
-            var vessel = FlightGlobals.ActiveVessel;
+            Vessel vessel = FlightGlobals.ActiveVessel;
+            double lat = vessel.latitude * Mathf.Deg2Rad;
+            double lon = vessel.longitude * Mathf.Deg2Rad;
 
             if (vessel == null || vessel.mainBody.BiomeMap == null || vessel.mainBody.BiomeMap.Map == null)
                 return true;
@@ -128,14 +119,14 @@ namespace ScienceAlert
             }
             else
             {
-                // use the stock function to get an initial possibility
-                var possibleBiome = vessel.mainBody.BiomeMap.GetAtt(latRad, lonRad);
+                // we don't use ScienceUtil version here because we want to know the biome's attribute map color
+                var possibleBiome = vessel.mainBody.BiomeMap.GetAtt(lat, lon);
 
                 // if the cleaned map is finished, let's test the validity
                 // of the result by checking some surrounding areas
                 if (!IsBusy)
                 {
-                    if (VerifyBiomeResult(latRad, lonRad, possibleBiome))
+                    if (VerifyBiomeResult(lat, lon, possibleBiome))
                     {
                         // looks good!
                         biome = possibleBiome.name;
@@ -160,10 +151,30 @@ namespace ScienceAlert
             }
         }
 
+
+
+        /// <summary>
+        /// It basically does what it says
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <returns></returns>
         private bool Similar(Color first, Color second)
         {
             return Mathf.Abs(first.r - second.r) < COLOR_THRESHOLD && Mathf.Abs(first.g - second.g) < COLOR_THRESHOLD && Mathf.Abs(first.b - second.b) < COLOR_THRESHOLD;
         }
+
+
+
+        /// <summary>
+        /// Takes the result of the stock biome method and compares it against the cleaned version.
+        /// If the cleaned version has the same biome on the same point or within a small search
+        /// area, returns true indicating that the stock result is most likely correct.
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
         private bool VerifyBiomeResult(double lat, double lon, CBAttributeMap.MapAttribute target)
         {
             if (projectedMap == null)
@@ -174,11 +185,13 @@ namespace ScienceAlert
 
             if (target == null || target.mapColor == null)
                 return true; // this shouldn't happen 
-
+            
+            // longitude to correct domain
             lon -= Mathf.PI * 0.5f;
             if (lon < 0d) lon += Mathf.PI * 2d;
             lon %= Mathf.PI * 2d;
 
+            // simple math to convert lat/lon coordinates into rectangular xy
             int x_center = (int)Math.Round(projectedMap.width * (float)(lon / (Mathf.PI * 2)), 0);
             int y_center = (int)Math.Round(projectedMap.height * ((float)(lat / Mathf.PI) + 0.5f), 0);
 
@@ -323,8 +336,14 @@ namespace ScienceAlert
         {
             ReprojectBiomeMap(v.mainBody);
         }
-        
 
+
+        #region properties
+
+        /// <summary>
+        /// Returns true if the biome filter is currently projecting a clean version of the dominant
+        /// body's attribute map
+        /// </summary>
         public bool IsBusy
         {
             get
@@ -332,5 +351,21 @@ namespace ScienceAlert
                 return projector != null;
             }
         }
+
+
+        
+        /// <summary>
+        /// Current vessel biome. Correctly accounts for landedAt string (LaunchPad, KSC, etc)
+        /// </summary>
+        public string CurrentBiome
+        {
+            get { return currentBiome; }
+            private set
+            {
+                currentBiome = value;
+            }
+        }
+
+        #endregion
     }
 }
