@@ -13,7 +13,6 @@ namespace ScienceAlert.Experiments.Monitors
     {
 
         // members
-        MonitorManager manager;
         ScienceExperiment experiment;                               // which experiment this monitor watches
         ProfileData.ExperimentSettings settings;                    // This monitor's settings
         Experiments.Data.ScienceDataCache cache;                    // vessel ScienceData cache
@@ -26,11 +25,10 @@ namespace ScienceAlert.Experiments.Monitors
         /// </summary>
         /// <param name="experiment"></param>
         /// <param name="settings"></param>
-        public ExperimentMonitor(MonitorManager manager, string expid, ProfileData.ExperimentSettings settings, Experiments.Data.ScienceDataCache cache, ModuleList modules)
+        public ExperimentMonitor(string expid, ProfileData.ExperimentSettings settings, Experiments.Data.ScienceDataCache cache, ModuleList modules)
         {
             this.settings = settings;
             this.cache = cache;
-            this.manager = manager;
 
             experiment = ResearchAndDevelopment.GetExperiment(expid);
             experimentModules = modules;

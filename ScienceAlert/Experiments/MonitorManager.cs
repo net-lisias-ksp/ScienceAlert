@@ -94,11 +94,7 @@ namespace ScienceAlert.Experiments
             // the basic pool
             ResearchAndDevelopment.GetExperimentIDs().Where(expid => expid != "evaReport" && expid != "surfaceSample").ToList().ForEach(expid =>
                     monitors.Add(
-                        new Monitors.ExperimentMonitor( this, 
-                                                        expid, 
-                                                        ProfileManager.ActiveProfile[expid], 
-                                                        storage, 
-                                                        modules.Where(mse => mse.experimentID == expid).ToList())
+                        new Monitors.ExperimentMonitor(expid, ProfileManager.ActiveProfile[expid], storage, modules.Where(mse => mse.experimentID == expid).ToList())
                                                        )
             );
 
