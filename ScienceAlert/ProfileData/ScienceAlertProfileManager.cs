@@ -156,10 +156,10 @@ namespace ScienceAlert
                             try
                             {
                                 Profile p = new Profile(profileNode);
-                                p.modified = false; // by definition, stored profiles haven't been modified
+                                p.Modified = false; // by definition, stored profiles haven't been modified
 
-                                storedProfiles.Add(p.name, p);
-                                Log.Verbose("Loaded profile '{0}' successfully!", p.name);
+                                storedProfiles.Add(p.Name, p);
+                                Log.Verbose("Loaded profile '{0}' successfully!", p.Name);
                             } 
                             catch (Exception e) 
                             {
@@ -207,12 +207,12 @@ namespace ScienceAlert
                 {
                     // if this happened, something broke when we were creating
                     // a profile (or potentially loading an unsanitized one)
-                    if (!kvp.Key.ToLower().Equals(kvp.Value.name.ToLower()))
-                        Log.Warning("ProfileManager.SavedStoredProfiles: stored key '{0}' does not match profile name '{1}'!", kvp.Key, kvp.Value.name);
+                    if (!kvp.Key.ToLower().Equals(kvp.Value.Name.ToLower()))
+                        Log.Warning("ProfileManager.SavedStoredProfiles: stored key '{0}' does not match profile name '{1}'!", kvp.Key, kvp.Value.Name);
 
                     Log.Verbose("Saving stored profile '{0}'", kvp.Key);
                     kvp.Value.OnSave(profiles.AddNode(new ConfigNode("PROFILE")));
-                    Log.Verbose("Saved '{0}'", kvp.Value.name);
+                    Log.Verbose("Saved '{0}'", kvp.Value.Name);
                 } catch (Exception e)
                 {
                     Log.Error("ProfileManager: Exception while saving '{0}': {1}", kvp.Key, e);
@@ -251,24 +251,24 @@ namespace ScienceAlert
 
             if (vessel != null)
                 if (vesselProfiles.ContainsKey(vessel.id))
-                    if (!vesselProfiles[vessel.id].modified)
+                    if (!vesselProfiles[vessel.id].Modified)
                     {
                         // it's possible the stored profile this one is based off of was
                         // modified in the meantime by the player, so bring ours up to date
-                        var stored = FindStoredProfile(vesselProfiles[vessel.id].name);
+                        var stored = FindStoredProfile(vesselProfiles[vessel.id].Name);
 
                         // oops, looks like it was deleted! well we don't want to create
                         // it again next save when the user wants it gone so convert this
                         // profile from a stored to a modified vessel profile..
                         if (stored == null)
                         {
-                            Log.Warning("ProfileManager.OnVesselChange: Vessel {0} refers to a missing stored profile '{1}'; converting it to vessel profile", vessel.id, vesselProfiles[vessel.id].name);
+                            Log.Warning("ProfileManager.OnVesselChange: Vessel {0} refers to a missing stored profile '{1}'; converting it to vessel profile", vessel.id, vesselProfiles[vessel.id].Name);
 
-                            vesselProfiles[vessel.id].modified = true;
+                            vesselProfiles[vessel.id].Modified = true;
                         }
                         else
                         {
-                            Log.Normal("ProfileManager.OnVesselChange: Bringing vessel {0} up to date on stored profile {1}", vessel.id, stored.name);
+                            Log.Normal("ProfileManager.OnVesselChange: Bringing vessel {0} up to date on stored profile {1}", vessel.id, stored.Name);
                             vesselProfiles[vessel.id] = stored.Clone();
                         }
                     }
@@ -289,7 +289,7 @@ namespace ScienceAlert
                 // note to self: it's not strictly necessary to delete it since unused
                 // profiles won't be saved, but I can't think of a reason to keep it around
                 // since we catch undock events already...
-                Log.Normal("Deleting vessel profile '{0}' since its vessel {1} was destroyed", vesselProfiles[vessel.id].name, vessel.id.ToString());
+                Log.Normal("Deleting vessel profile '{0}' since its vessel {1} was destroyed", vesselProfiles[vessel.id].Name, vessel.id.ToString());
                 vesselProfiles.Remove(vessel.id);
             }
         }
@@ -303,64 +303,79 @@ namespace ScienceAlert
         /// <param name="newVessel"></param>
         private void OnVesselCreate(Vessel newVessel)
         {
-            if (newVessel == null)
-            {
-                Log.Debug("ProfileManager.OnVesselCreate: new vessel is null");
-            }
             Log.Debug("ProfileManager.OnVesselCreate: {0}", newVessel.vesselName);
 
             if (vesselProfiles == null) return; // we haven't even init yet
 
             if (FlightGlobals.ActiveVessel != newVessel && newVessel.vesselType != VesselType.Debris)
             {
-                Profile parentProfile = null;
-
-                // it's possible the new vessel is in fact packed (almost certain to be a DiscoverableObject)
-                // so we need to be careful not to access any parts if it is
-                // bugfix: newVessel.packed => newVessel.loaded. Thanks taniwha!
-                uint mid = !newVessel.loaded ? newVessel.protoVessel.protoPartSnapshots[newVessel.protoVessel.rootIndex].missionID : newVessel.rootPart.missionID;
-
-                Log.Debug("ProfileManager.OnVesselCreate: new vessel mission id = " + mid);
-
-                if (mid == FlightGlobals.ActiveVessel.rootPart.missionID)
-                    if (vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id))
-                        if (vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
-                            parentProfile = ActiveProfile;
-                        
-
-                // if the active vessel isn't the parent then the player probably didn't
-                // cause this vessel to be created; nonetheless there may be edge cases 
-                // (collision? mods that allow eva to undock nodes?) so let's
-                // see if any vessel is our parent
-                if (parentProfile == null)
+                try
                 {
-                    var parentVessel = FlightGlobals.Vessels.SingleOrDefault(v =>
-                           {
-                               if (v == null) Log.Error("somehow vessel inside loop is null");
+                    Profile parentProfile = null;
 
-                                if (v.rootPart != null)
-                                    if (mid == v.rootPart.missionID)
-                                        if (vesselProfiles.ContainsKey(v.id))
-                                            return true;
-                                return false;
-                           });
+                    // it's possible the new vessel is in fact packed (almost certain to be a DiscoverableObject)
+                    // so we need to be careful not to access any parts if it is
+                    // bugfix: newVessel.packed => newVessel.loaded. Thanks taniwha!
+                    uint mid = !newVessel.loaded
+                        ? newVessel.protoVessel.protoPartSnapshots[newVessel.protoVessel.rootIndex].missionID
+                        : newVessel.rootPart.missionID;
 
-                    if (parentVessel != null) parentProfile = vesselProfiles[parentVessel.id];
-                }
+                    Log.Debug("ProfileManager.OnVesselCreate: new vessel mission id = " + mid);
+
+                    if (mid == FlightGlobals.ActiveVessel.rootPart.missionID)
+                        if (vesselProfiles.ContainsKey(FlightGlobals.ActiveVessel.id))
+                            if (vesselProfiles[FlightGlobals.ActiveVessel.id] == ActiveProfile)
+                                parentProfile = ActiveProfile;
 
 
-                if (parentProfile != null)
-                {
-                    if (vesselProfiles.ContainsKey(newVessel.id))
+                    // if the active vessel isn't the parent then the player probably didn't
+                    // cause this vessel to be created; nonetheless there may be edge cases 
+                    // (collision? mods that allow eva to undock nodes?) so let's
+                    // see if any vessel is our parent
+                    if (parentProfile == null)
                     {
-                        Log.Error("ProfileManager.OnVesselCreate: Somehow we already have an entry for {0} called {1}; Investigate logic error", newVessel.id.ToString(), vesselProfiles[newVessel.id] != null ? vesselProfiles[newVessel.id].name : "<null vessel profile entry>");
-                        return;
+                        var parentVessel = FlightGlobals.Vessels.SingleOrDefault(v =>
+                        {
+                            if (v == null) Log.Error("somehow vessel inside loop is null");
+
+                            if (v.rootPart != null)
+                                if (mid == v.rootPart.missionID)
+                                    if (vesselProfiles.ContainsKey(v.id))
+                                        return true;
+                            return false;
+                        });
+
+                        if (parentVessel != null) parentProfile = vesselProfiles[parentVessel.id];
                     }
 
-                    Log.Normal("New vessel created; assigning it a clone of parent's profile {0}", parentProfile.name);
-                    vesselProfiles.Add(newVessel.id, parentProfile.Clone());
-                } // otherwise this is a vessel created out of the player's control, most likely an asteroid
 
+                    if (parentProfile != null)
+                    {
+                        if (vesselProfiles.ContainsKey(newVessel.id))
+                        {
+                            Log.Error(
+                                "ProfileManager.OnVesselCreate: Somehow we already have an entry for {0} called {1}; Investigate logic error",
+                                newVessel.id.ToString(),
+                                vesselProfiles[newVessel.id] != null
+                                    ? vesselProfiles[newVessel.id].Name
+                                    : "<null vessel profile entry>");
+                            return;
+                        }
+
+                        Log.Normal("New vessel created; assigning it a clone of parent's profile {0}",
+                            parentProfile.Name);
+                        vesselProfiles.Add(newVessel.id, parentProfile.Clone());
+                    } // otherwise this is a vessel created out of the player's control, most likely an asteroid
+                }
+                catch (Exception e)
+                {
+                    Log.Error("There was a problem while handling creation of vessel '{0}': {1}",newVessel.vesselName, e);
+                    Log.Warning("This vessel will use the default profile.");
+
+                    if (vesselProfiles.ContainsKey(newVessel.id))
+                        vesselProfiles[newVessel.id] = DefaultProfile.Clone();
+                    else vesselProfiles.Add(newVessel.id, DefaultProfile.Clone());
+                }
             }
         }
 
@@ -414,8 +429,9 @@ namespace ScienceAlert
             }
             else node = node.GetNode(PERSISTENT_NODE_NAME);
 
-            //List<string> errors = new List<string>();
+
             vesselProfiles = new VesselTable();
+
 
             var guidStrings = node.nodes.DistinctNames();
             Log.Verbose("ProfileManager: {0} vessel profile nodes found", guidStrings.Length);
@@ -430,7 +446,7 @@ namespace ScienceAlert
                     Log.Debug("Guid created: {0}", guid.ToString());
 
                     // confirm a vessel with this Guid exists
-                    if (!FlightGlobals.Vessels.Any(v => v.id == guid))
+                    if (FlightGlobals.Vessels.All(v => v.id != guid))
                     {
                         Log.Warning("Did not find a vessel that matches {0}; check destruction event code", guid.ToString());
                         continue;
@@ -458,40 +474,28 @@ namespace ScienceAlert
                     //          clone default profile
                     //      end
                     // end
-                    if (p.modified)
+                    if (p.Modified)
                     {
-                        Log.Verbose("Vessel {0} has a modified profile '{1}' stored.", VesselIdentifier(guid), p.name);
+                        Log.Verbose("Vessel {0} has a modified profile '{1}' stored.", VesselIdentifier(guid), p.Name);
 
                         vesselProfiles.Add(guid, p);
                     }
                     else
                     {
-                        if (HaveStoredProfile(p.name))
+                        if (HaveStoredProfile(p.Name))
                         {
-                            Log.Verbose("Vessel {0} has stored profile '{1}'", VesselIdentifier(guid), p.name);
+                            Log.Verbose("Vessel {0} has stored profile '{1}'", VesselIdentifier(guid), p.Name);
 
                             // use the stored profile
-                            vesselProfiles.Add(guid, FindStoredProfile(p.name).Clone());
+                            vesselProfiles.Add(guid, FindStoredProfile(p.Name).Clone());
 
                         }
                         else
                         {
-                            Log.Warning("Vessel {0} refers to a stored profile '{1}' which was not found. Existing data has been converted to a vessel profile.", VesselIdentifier(guid), p.name);
-                            p.modified = true;
+                            Log.Warning("Vessel {0} refers to a stored profile '{1}' which was not found. Existing data has been converted to a vessel profile.", VesselIdentifier(guid), p.Name);
+                            p.Modified = true;
 
                             vesselProfiles.Add(guid, p);
-
-                            //// add to missing profile list and clone default
-                            //errors.Add(string.Format("Stored profile '{0}' not found for {1}", p.name, VesselIdentifier(guid)));
-                            //Log.Error("Could not find profile '{0}' for vessel {1}. Will use default.", p.name, VesselIdentifier(guid));
-
-                            //// note to self: this isn't the same as Profile.MakeDefault();
-                            //// that is used for a truly default, totally unmodified profile.
-                            //// DefaultProfile will locate a profile called "default" instead,
-                            //// which may be custom-made by the user if they overwrite the 
-                            //// standard one
-                            //vesselProfiles.Add(guid, DefaultProfile.Clone());
-
                         }
                     }
                 }
@@ -500,18 +504,6 @@ namespace ScienceAlert
                     Log.Error("ProfileManager: Exception while loading '{0}': {1}", strGuid, e);
                 }
             }
-
-            //if (errors.Count > 0)
-            //{
-            //    string message = "Errors while loading profiles:\n\n";
-
-            //    errors.ForEach(err => message += err + "\n");
-            //    message += "\nVessel(s) have been assigned the \"default\" profile.";
-
-            //    Log.Debug("Errors encountered during profile load: {0}", message);
-
-            //    PopupDialog.SpawnPopupDialog("ScienceAlert: Profile Manager", message, "Okay", false, HighLogic.Skin);
-            //}
 
             Ready = true;
         }
@@ -538,20 +530,20 @@ namespace ScienceAlert
             {
                 try
                 {
-                    if (!FlightGlobals.Vessels.Any(v => v.id == kvp.Key))
+                    if (FlightGlobals.Vessels.All(v => v.id != kvp.Key))
                     {
-                        Log.Normal("ProfileManager.OnSave: Not saving profile '{0}' because vessel {1} does not exist.", kvp.Value.name, kvp.Key.ToString());
+                        Log.Normal("ProfileManager.OnSave: Not saving profile '{0}' because vessel {1} does not exist.", kvp.Value.Name, kvp.Key.ToString());
                         continue;
                     }
                     else
                     {
-                        Log.Verbose("ProfileManager.OnSave: saving vessel profile '{0}'", kvp.Value.name);
+                        Log.Verbose("ProfileManager.OnSave: saving vessel profile '{0}'", kvp.Value.Name);
                         kvp.Value.OnSave(node.AddNode(new ConfigNode(kvp.Key.ToString())));
                     }
                 }
                 catch (Exception e)
                 {
-                    Log.Error("ProfileManager.OnSave: Exception while saving profile '{0}': {1}", string.Format("{0}:{1}", kvp.Key.ToString(), kvp.Value.name), e);
+                    Log.Error("ProfileManager.OnSave: Exception while saving profile '{0}': {1}", string.Format("{0}:{1}", kvp.Key.ToString(), kvp.Value.Name), e);
                     continue;
                 }
             }
@@ -586,14 +578,14 @@ namespace ScienceAlert
             {
                 var key = Instance.storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals("default"));
 
-                if (string.IsNullOrEmpty(key))
-                {
-                    Log.Error("ProfileManager.DefaultProfile: failed to find a default profile! Creating one.");
-                    key = "default";
-                    Instance.storedProfiles.Add(key, Profile.MakeDefault());
-                }
+                if (!string.IsNullOrEmpty(key))
+                    return Instance.storedProfiles[key];
 
-                return Instance.storedProfiles[key];
+                Log.Error("ProfileManager.DefaultProfile: failed to find a default profile! Creating one.");
+                key = "default";
+                Instance.storedProfiles.Add(key, Profile.MakeDefault());
+
+                return DefaultProfile;
             }
         }
 
@@ -610,6 +602,7 @@ namespace ScienceAlert
                     Log.Debug("WARN: ProfileManager.ActiveProfile: vessel is null");
                     return null;
                 }
+
                 if (!Instance.vesselProfiles.ContainsKey(vessel.id))
                 {
                     Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", Instance.VesselIdentifier(vessel.id));
@@ -684,15 +677,15 @@ namespace ScienceAlert
         {
             Profile p = ActiveProfile;
 
-            p.name = name;
-            p.modified = false;
+            p.Name = name;
+            p.Modified = false;
 
             Profile newProfile = p.Clone();
 
-            Log.Verbose("Adding new profile '{0}'..", p.name);
+            Log.Verbose("Adding new profile '{0}'..", p.Name);
 
-            var existing = FindStoredProfile(newProfile.name);
-            if (existing != null) { Log.Warning("Overwriting existing profile"); Instance.storedProfiles.Remove(existing.name); }
+            var existing = FindStoredProfile(newProfile.Name);
+            if (existing != null) { Log.Warning("Overwriting existing profile"); Instance.storedProfiles.Remove(existing.Name); }
 
             Instance.storedProfiles.Add(name, newProfile);
             Log.Verbose("Successfully added or updated profile");
@@ -731,21 +724,21 @@ namespace ScienceAlert
                     Log.Warning("User attempting to rename default profile. Renaming a clone instead.");
                     var cloned = p.Clone();
 
-                    cloned.name = newName;
+                    cloned.Name = newName;
                     AssignAsActiveProfile(cloned);
 
-                    cloned.modified = p.modified;
+                    cloned.Modified = p.Modified;
 
                     // if we're dealing with a stored profile here, we need to actually save the new clone
                     // else it won't appear for other craft
-                    if (!cloned.modified)
+                    if (!cloned.Modified)
                         StoreActiveProfile(newName);
                     
                 }
                 else
                 {
                     Log.Normal("Renaming stored profile '{0}' to '{1}'", oldName, newName);
-                    p.name = newName;
+                    p.Name = newName;
                 }
             }
             else Log.Warning("ProfileManager: Cannot rename profile '{0}' because it was not found.");
@@ -776,7 +769,7 @@ namespace ScienceAlert
                 }
 
                 Profile newProfile = p.Clone();
-                newProfile.modified = false; // should already be false, just making sure
+                newProfile.Modified = false; // should already be false, just making sure
 
                 Instance.vesselProfiles[vessel.id] = newProfile;
                 return true;

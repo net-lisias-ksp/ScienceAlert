@@ -85,7 +85,7 @@
     <Compile Include="ProfileData\ScienceAlertProfileManager.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
     <Compile Include="Experiments\ExperimentManager.cs" />
-    <Compile Include="ScienceAlert.cs" />
+    <Compile Include="ScienceAlertCore.cs" />
     <Compile Include="Experiments\Observers\ExperimentObserver.cs" />
     <Compile Include="Scan Interfaces\ScanInterface.cs" />
     <Compile Include="Scan Interfaces\SCANsatInterface.cs" />

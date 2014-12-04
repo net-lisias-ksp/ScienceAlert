@@ -35,7 +35,7 @@ namespace ScienceAlert.Windows
         Implementations.DraggableDebugWindow debugWindow;
 
         // other components
-        ScienceAlert scienceAlert;
+        ScienceAlertCore scienceAlert;
         SSUICamera uiCamera;
 
 /******************************************************************************
@@ -56,7 +56,7 @@ namespace ScienceAlert.Windows
             DraggableWindow.ButtonSound = "click1";
 
 
-            scienceAlert = GetComponent<ScienceAlert>();
+            scienceAlert = GetComponent<ScienceAlertCore>();
             
 
             // note to self: these are on separate gameobjects because they use a UIButton to catch
@@ -65,7 +65,7 @@ namespace ScienceAlert.Windows
 
             Log.Normal("Creating options window");
             optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
-            optionsWindow.scienceAlert = GetComponent<ScienceAlert>();
+            optionsWindow.scienceAlert = GetComponent<ScienceAlertCore>();
             optionsWindow.manager = GetComponent<Experiments.ExperimentManager>();
             
 

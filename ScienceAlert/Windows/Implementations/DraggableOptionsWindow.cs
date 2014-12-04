@@ -53,7 +53,7 @@ namespace ScienceAlert.Windows.Implementations
         private OpenPane submenu = OpenPane.None;
 
 
-        public ScienceAlert scienceAlert;
+        public ScienceAlertCore scienceAlert;
         public ExperimentManager manager;
 
         // Materials and textures
@@ -466,7 +466,7 @@ namespace ScienceAlert.Windows.Implementations
                         SpawnRenamePopup(ProfileManager.ActiveProfile);
 
                     // Save profile (only enabled if profile was actually modified)
-                    GUI.enabled = ProfileManager.ActiveProfile.modified;
+                    GUI.enabled = ProfileManager.ActiveProfile.Modified;
                     if (AudibleButton(new GUIContent(saveButton), GUILayout.MaxWidth(24)))
                     {
                         SaveCurrentProfile();
@@ -517,7 +517,7 @@ namespace ScienceAlert.Windows.Implementations
                         GUILayout.FlexibleSpace();
 
 
-                        if (string.IsNullOrEmpty(thresholdValue)) thresholdValue = ProfileManager.ActiveProfile.scienceThreshold.ToString("F2", formatter);
+                        if (string.IsNullOrEmpty(thresholdValue)) thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
 
                         GUI.SetNextControlName("ThresholdText");
                         string result = GUILayout.TextField(thresholdValue, GUILayout.MinWidth(60f));
@@ -541,6 +541,7 @@ namespace ScienceAlert.Windows.Implementations
                             }
                             catch (Exception) // just in case
                             {
+                                Log.Debug("Failed to parse float from '{0}'", result);
                             }
 
                             if (!InputLockManager.IsLocked(ControlTypes.ACTIONS_ALL))
@@ -558,7 +559,7 @@ namespace ScienceAlert.Windows.Implementations
 
                     // threshold slider
                     float newThreshold = GUILayout.HorizontalSlider(ProfileManager.ActiveProfile.ScienceThreshold, 0f, 100f, GUILayout.ExpandWidth(true), GUILayout.Height(14f));
-                    if (newThreshold != ProfileManager.ActiveProfile.scienceThreshold)
+                    if (Math.Abs(newThreshold - ProfileManager.ActiveProfile.ScienceThreshold) > 0.001f)
                     {
                         ProfileManager.ActiveProfile.ScienceThreshold = newThreshold;
                         thresholdValue = newThreshold.ToString("F2", formatter);
@@ -676,7 +677,7 @@ namespace ScienceAlert.Windows.Implementations
         {
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Box(profile.name, GUILayout.ExpandWidth(true));
+                GUILayout.Box(profile.Name, GUILayout.ExpandWidth(true));
 
                 // rename button
                 GUI.enabled = profile != ProfileManager.DefaultProfile;

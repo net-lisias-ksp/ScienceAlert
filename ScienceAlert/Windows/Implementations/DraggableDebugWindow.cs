@@ -64,7 +64,7 @@ namespace ScienceAlert.Windows.Implementations
             GUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.MinHeight(128f));
 
             // current biome
-            GUILayout.Label(string.Format("Biome: {0}", ScienceAlert.Instance.ExperimentManager.BiomeFilter.CurrentBiome), GUILayout.MinWidth(256f));
+            GUILayout.Label(string.Format("Biome: {0}", API.ScienceAlert.ExperimentManager.BiomeFilter.CurrentBiome), GUILayout.MinWidth(256f));
 
 #region debug-only
 #if DEBUG
@@ -101,7 +101,7 @@ namespace ScienceAlert.Windows.Implementations
 
             if (exp.BiomeIsRelevantWhile(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)))
             {
-                subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, ScienceAlert.Instance.ExperimentManager.BiomeFilter.CurrentBiome);
+                subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, API.ScienceAlert.ExperimentManager.BiomeFilter.CurrentBiome);
 
                 // we need to look at the eva kerbal part
                 PartLoader.LoadedPartsList.ForEach(ap =>
@@ -128,7 +128,7 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Debug("subject value: " + subject.subjectValue);
                 Log.Debug("body multiplier: " + API.GetBodyScienceValueMultipler(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)));
                 Log.Debug("xmitScalar: " + xmitScalar);
-                Log.Debug("sample count: " + ScienceAlert.Instance.ExperimentManager.Storage.FindStoredData(subject.id).Count);
+                Log.Debug("sample count: " + API.ScienceAlert.ExperimentManager.Storage.FindStoredData(subject.id).Count);
 
                 FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>().Where(mse => mse.experimentID == exp.id).ToList().ForEach(mse => Log.Debug("xmitScalar: {0}", mse.xmitDataScalar));
 
@@ -136,13 +136,13 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Normal("Next absolute recovery: {0}", subject.CalculateNextReport(exp, new List<ScienceData>()));
 
                 // this should also be correct (considers stored experiments)
-                Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, ScienceAlert.Instance.ExperimentManager.Storage.FindStoredData(subject.id)));
+                Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, API.ScienceAlert.ExperimentManager.Storage.FindStoredData(subject.id)));
 
                 // value to be checked, absolute
                 Log.Normal("next absolute transmission: {0}", subject.CalculateNextReport(exp, new List<ScienceData>(), xmitScalar));
 
                 // value to be checked, next transmitted sample
-                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, ScienceAlert.Instance.ExperimentManager.Storage.FindStoredData(subject.id), xmitScalar));
+                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, API.ScienceAlert.ExperimentManager.Storage.FindStoredData(subject.id), xmitScalar));
             }
         }
 

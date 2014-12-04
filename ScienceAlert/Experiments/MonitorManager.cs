@@ -58,8 +58,8 @@ namespace ScienceAlert.Experiments
             GameEvents.onVesselChange.Remove(OnVesselEvent);
             GameEvents.onVesselDestroy.Remove(OnVesselEvent);
 
-            if (filter != null) Component.Destroy(filter);
-            if (storage != null) Component.Destroy(storage);
+            if (filter != null) Destroy(filter);
+            if (storage != null) Destroy(storage);
         }
 
 
@@ -88,18 +88,31 @@ namespace ScienceAlert.Experiments
                 return;
             }
 
-            var modules = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
-            
-            // note: surfaceSample and evaReport are handled in a special way, so we exclude them from
-            // the basic pool
-            ResearchAndDevelopment.GetExperimentIDs().Where(expid => expid != "evaReport" && expid != "surfaceSample").ToList().ForEach(expid =>
-                    monitors.Add(
-                        new Monitors.ExperimentMonitor(expid, ProfileManager.ActiveProfile[expid], storage, modules.Where(mse => mse.experimentID == expid).ToList())
-                                                       )
-            );
+            try
+            {
+                var modules = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
 
-            // todo: eva monitor, surface sample monitor
+                // note: surfaceSample and evaReport are handled in a special way, so we exclude them from
+                // the basic pool
+                ResearchAndDevelopment.GetExperimentIDs()
+                    .Where(expid => expid != "evaReport" && expid != "surfaceSample")
+                    .ToList()
+                    .ForEach(expid =>
+                        monitors.Add(
+                            new Monitors.ExperimentMonitor(expid, ProfileManager.ActiveProfile[expid], storage,
+                                modules.Where(mse => mse.experimentID == expid).ToList())
+                            )
+                    );
 
+                // todo: eva monitor, surface sample monitor
+
+
+                Log.Normal("Scanned vessel and found {0} experiment modules", modules.Count);
+            }
+            catch (Exception e)
+            {
+                Log.Error("An exception occurred while scanning the vessel for experiment modules: {0}", e);
+            }
 
             // start update loop over
             watcher = UpdateMonitors();

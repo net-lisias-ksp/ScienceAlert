@@ -39,7 +39,7 @@ namespace ScienceAlert.Windows.Implementations
 #region save popup
         void SpawnSavePopup()
         {
-            editText = ProfileManager.ActiveProfile.name;
+            editText = ProfileManager.ActiveProfile.Name;
             LockControls("ScienceAlertSavePopup");
             popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawSaveWindow, "Choose a name for this profile"), false, HighLogic.Skin);
         }
@@ -83,7 +83,7 @@ namespace ScienceAlert.Windows.Implementations
             {
                 popup.Dismiss();
             }
-            else editText = ProfileManager.ActiveProfile.name; // if there was no popup, SaveCurrentProfile was called directly
+            else editText = ProfileManager.ActiveProfile.Name; // if there was no popup, SaveCurrentProfile was called directly
 
             if (ProfileManager.HaveStoredProfile(editText))
             {
@@ -118,10 +118,10 @@ namespace ScienceAlert.Windows.Implementations
         private void SpawnRenamePopup(ProfileData.Profile target)
         {
             editProfile = target;
-            editText = target.name;
+            editText = target.Name;
             LockControls("ScienceAlertRenamePopup");
             //popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", ProfileManager.ActiveProfile.name), HighLogic.Skin, new DialogOption[] { new DialogOption("Rename", new Callback(RenameTargetProfile)), new DialogOption("Cancel", new Callback(DismissPopup)) }), false, HighLogic.Skin);
-            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", target.name), HighLogic.Skin), false, HighLogic.Skin);
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawRenameWindow, string.Format("Rename '{0}' to:", target.Name), HighLogic.Skin), false, HighLogic.Skin);
         }
 
 
@@ -176,7 +176,7 @@ namespace ScienceAlert.Windows.Implementations
         private void RenameTargetProfile()
         {
 
-            if (editProfile.modified || !ProfileManager.HaveStoredProfile(editProfile.name))
+            if (editProfile.Modified || !ProfileManager.HaveStoredProfile(editProfile.Name))
             {
                 // vessel profile: no need to check stored data
                 RenameTargetProfileOverwrite();
@@ -207,19 +207,19 @@ namespace ScienceAlert.Windows.Implementations
         /// </summary>
         private void RenameTargetProfileOverwrite()
         {
-            if (editProfile.modified == false && ProfileManager.HaveStoredProfile(editProfile.name))
+            if (editProfile.Modified == false && ProfileManager.HaveStoredProfile(editProfile.Name))
             {
-                ProfileManager.RenameProfile(editProfile.name, editText);
+                ProfileManager.RenameProfile(editProfile.Name, editText);
 
                 // if the active profile is unmodified and links to the renamed stored 
                 // profile, then rename it as well
-                if (!ProfileManager.ActiveProfile.modified)
-                    ProfileManager.ActiveProfile.name = editText;
+                if (!ProfileManager.ActiveProfile.Modified)
+                    ProfileManager.ActiveProfile.Name = editText;
             }
             else
             {
-                editProfile.name = editText;
-                editProfile.modified = true;
+                editProfile.Name = editText;
+                editProfile.Modified = true;
             }
 
             DismissPopup();
@@ -234,7 +234,7 @@ namespace ScienceAlert.Windows.Implementations
             editProfile = target;
             LockControls("ScienceAlertDeletePopup");
 
-            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Are you sure you want to\ndelete '{0}'?", target.name), HighLogic.Skin, new DialogOption("Confirm", DeleteTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Are you sure you want to\ndelete '{0}'?", target.Name), HighLogic.Skin, new DialogOption("Confirm", DeleteTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
         }
 
 
@@ -242,7 +242,7 @@ namespace ScienceAlert.Windows.Implementations
         private void DeleteTargetProfile()
         {
             DismissPopup();
-            ProfileManager.DeleteProfile(editProfile.name);
+            ProfileManager.DeleteProfile(editProfile.Name);
         }
 
 
@@ -255,7 +255,7 @@ namespace ScienceAlert.Windows.Implementations
         {
             editProfile = target;
             LockControls("ScienceAlertOpenPopup");
-            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Load '{0}'?\nUnsaved settings will be lost.", editProfile.name), HighLogic.Skin, new DialogOption("Confirm", LoadTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
+            popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("Load '{0}'?\nUnsaved settings will be lost.", editProfile.Name), HighLogic.Skin, new DialogOption("Confirm", LoadTargetProfile), new DialogOption("Cancel", DismissPopup)), false, HighLogic.Skin);
         }
 
 
@@ -266,12 +266,12 @@ namespace ScienceAlert.Windows.Implementations
 
             if (ProfileManager.AssignAsActiveProfile(editProfile.Clone()))
             {
-                Log.Normal("Assigned new active profile: {0}", editProfile.name);
+                Log.Normal("Assigned new active profile: {0}", editProfile.Name);
                 submenu = OpenPane.None; // close panel
 
                 OnVisibilityChanged(Visible); // update any ui elements (only threshold text currently)
             }
-            else Log.Error("Failed to load '{0}'", editProfile.name);
+            else Log.Error("Failed to load '{0}'", editProfile.Name);
         }
 
         #endregion

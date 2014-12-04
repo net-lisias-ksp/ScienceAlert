@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using ReeperCommon;
 using System;
 using ScienceAlert.Experiments.Monitors;
-
+using UnityEngine;
 
 namespace ScienceAlert
 {
@@ -34,7 +34,7 @@ namespace ScienceAlert
         [Flags]
         public enum ExperimentStatus
         {
-            NoAlert         = 0,                                      // This monitor's settings + current situation = don't alert user
+            NoAlert         = 0,                                      // Either the experiment doesn't match the user settings for both transmittable and recoverable science or the experiment is unavailable = don't alert user
             Recoverable     = 1 << 0,                                 // Alert user; this experiment matches their recovery filter
             Transmittable   = 1 << 1,                                 // Alert user; matches transmission filter
             
@@ -63,7 +63,7 @@ namespace ScienceAlert
         // Globals
         //---------------------------------------------------------------------
         public static bool Ready = false;
-
+        public static ScienceAlertCore ScienceAlert = null;
 
 
         /// <summary>

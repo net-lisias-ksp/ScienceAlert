@@ -41,7 +41,7 @@ namespace ScienceAlert.Experiments
         // --------------------------------------------------------------------
         //    Members of ExperimentManager
         // --------------------------------------------------------------------
-        private ScienceAlert scienceAlert;
+        private ScienceAlertCore scienceAlert;
         private Experiments.Data.ScienceDataCache vesselStorage;
         private BiomeFilter biomeFilter;
 
@@ -68,7 +68,7 @@ namespace ScienceAlert.Experiments
         {
             vesselStorage = gameObject.AddComponent<Experiments.Data.ScienceDataCache>();
             biomeFilter = gameObject.AddComponent<BiomeFilter>();
-            scienceAlert = gameObject.GetComponent<ScienceAlert>();
+            scienceAlert = gameObject.GetComponent<ScienceAlertCore>();
             audio = GetComponent<AudioPlayer>() ?? AudioPlayer.Audio;
 
             scienceAlert.OnScanInterfaceChanged += OnScanInterfaceChanged;

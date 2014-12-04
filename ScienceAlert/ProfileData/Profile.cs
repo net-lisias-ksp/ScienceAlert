@@ -31,26 +31,21 @@ namespace ScienceAlert.ProfileData
         //------------------------------------------------------
         // Profile identifier
         //------------------------------------------------------
-        [Persistent (isPersistant = true)]
-        public string name = string.Empty;
-
-        [Persistent]
-        public bool modified = false;
+        public string Name = string.Empty;
 
 
         //------------------------------------------------------
         // Science threshold
         //------------------------------------------------------
 
-        [Persistent]
-        public float scienceThreshold = 0f;
+        private float _scienceThreshold = 0f;
 
 
         //------------------------------------------------------
         // Per-experiment settings
         //------------------------------------------------------
         [NonSerialized]
-        public Dictionary<string /* expid */, ProfileData.ExperimentSettings> settings;
+        private Dictionary<string /* expid */, ProfileData.ExperimentSettings> _settings;
 
 
 /******************************************************************************
@@ -83,7 +78,7 @@ namespace ScienceAlert.ProfileData
         {
             // default values
             Log.Verbose("Creating profile '{0}' with default values", name);
-            this.name = name;
+            this.Name = name;
             Setup();
             RegisterEvents();
         }
@@ -96,16 +91,16 @@ namespace ScienceAlert.ProfileData
         /// <param name="other"></param>
         public Profile(Profile other)
         {
-            var otherKeys = other.settings.Keys;
+            var otherKeys = other._settings.Keys;
 
-            settings = new Dictionary<string, ProfileData.ExperimentSettings>();
+            _settings = new Dictionary<string, ProfileData.ExperimentSettings>();
 
             foreach (var otherKey in otherKeys)
-                settings.Add(otherKey, new ProfileData.ExperimentSettings(other.settings[otherKey]));
+                _settings.Add(otherKey, new ProfileData.ExperimentSettings(other._settings[otherKey]));
 
-            name = String.Copy(other.name);
-            modified = other.modified;
-            scienceThreshold = other.scienceThreshold;
+            Name = String.Copy(other.Name);
+            Modified = other.Modified;
+            _scienceThreshold = other._scienceThreshold;
 
             RegisterEvents();
         }
@@ -117,21 +112,21 @@ namespace ScienceAlert.ProfileData
         /// </summary>
         private void Setup()
         {
-            settings = new Dictionary<string, ProfileData.ExperimentSettings>();
+            _settings = new Dictionary<string, ProfileData.ExperimentSettings>();
 
             try
             {
                 var expids = ResearchAndDevelopment.GetExperimentIDs();
 
                 foreach (var id in expids)
-                    settings.Add(id, new ProfileData.ExperimentSettings());
+                    _settings.Add(id, new ProfileData.ExperimentSettings());
             }
             catch (Exception e)
             {
                 // this is most likely to happen on GetExperimentIDs, which
                 // will throw an exception if there are duplicate experiment
                 // id entries
-                Log.Error("Profile '{1}' constructor exception: {0}", e, string.IsNullOrEmpty(name) ? "(unnamed)" : name);
+                Log.Error("Profile '{1}' constructor exception: {0}", e, string.IsNullOrEmpty(Name) ? "(unnamed)" : Name);
             }
         }
 
@@ -147,7 +142,7 @@ namespace ScienceAlert.ProfileData
 
             ConfigNode.CreateConfigFromObject(this, 0, node);
 
-            foreach (var kvp in settings)
+            foreach (var kvp in _settings)
                 kvp.Value.OnSave(node.AddNode(new ConfigNode(kvp.Key)));
 
             Log.Debug("Profile: OnSave config: {0}", node.ToString());
@@ -163,14 +158,14 @@ namespace ScienceAlert.ProfileData
         {
             Log.Debug("Loading profile...");
             ConfigNode.LoadObjectFromConfig(this, node);
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(Name))
             {
                 // the saved profile somehow doesn't have a name. Since we
                 // distinguish them this way, that's a pretty bad thing
-                name = "nameless." + Guid.NewGuid().ToString();
-                Log.Warning("Profile.OnLoad: Loaded a profile without a name specified! It has been renamed to '{0}'", name);
+                Name = "nameless." + Guid.NewGuid().ToString();
+                Log.Warning("Profile.OnLoad: Loaded a profile without a name specified! It has been renamed to '{0}'", Name);
                 
-            } else Log.Debug("Profile name is '{0}'", name);
+            } else Log.Debug("Profile name is '{0}'", Name);
 
             // it's possible that the ConfigNode we're loading from has
             // extra experiment ids in it. Try to preserve those, if possible
@@ -178,13 +173,13 @@ namespace ScienceAlert.ProfileData
             {
                 var expNode = node.GetNode(expid);
 
-                if (!settings.ContainsKey(expid))
+                if (!_settings.ContainsKey(expid))
                 {
                     Log.Verbose("Profile.OnLoad: Expid '{0}' not found in default set. Adding it.", expid);
-                    settings.Add(expid, new ProfileData.ExperimentSettings());
+                    _settings.Add(expid, new ProfileData.ExperimentSettings());
                 }
 
-                settings[expid].OnLoad(expNode);
+                _settings[expid].OnLoad(expNode);
             }
         }
 
@@ -192,8 +187,7 @@ namespace ScienceAlert.ProfileData
 
         public Profile Clone()
         {
-            Profile p = new Profile(this);
-            return p;
+            return new Profile(this);
         }
 
 
@@ -219,21 +213,21 @@ namespace ScienceAlert.ProfileData
         {
             get
             {
-                if (settings.ContainsKey(expid))
-                    return settings[expid];
+                if (_settings.ContainsKey(expid))
+                    return _settings[expid];
 
                 // I never expect to see this. If it shows up, something in
                 // loading or initialization has broken
-                Log.Warning("Profile '{0}' has no settings for expid {1}; creating a default", name, expid);
+                Log.Warning("Profile '{0}' has no settings for expid {1}; creating a default", Name, expid);
 
-                settings[expid] = new ProfileData.ExperimentSettings();
+                _settings[expid] = new ProfileData.ExperimentSettings();
 
-                return settings[expid];
+                return _settings[expid];
             }
 
             private set
             {
-                settings.Add(expid.ToLower(), value);
+                _settings.Add(expid.ToLower(), value);
             }
         }
 
@@ -243,9 +237,9 @@ namespace ScienceAlert.ProfileData
         {
             get
             {
-                if (modified)
-                    return "*" + name + "*";
-                return name;
+                if (Modified)
+                    return "*" + Name + "*";
+                return Name;
             }
         }
 
@@ -255,22 +249,24 @@ namespace ScienceAlert.ProfileData
         {
             get
             {
-                return scienceThreshold;
+                return _scienceThreshold;
             }
             set
             {
-                if (value != scienceThreshold)
-                    modified = true;
-                scienceThreshold = value;
+                if (Math.Abs(value - _scienceThreshold) > 0.001f)
+                    Modified = true;
+                _scienceThreshold = value;
             }
         }
 
 
+        public bool Modified { get; set; }
+
 
         void SettingChanged()
         {
-            Log.Debug("Profile '{0}' was modified!", name);
-            modified = true;
+            Log.Debug("Profile '{0}' was modified!", Name);
+            Modified = true;
         }
 
 
@@ -279,7 +275,7 @@ namespace ScienceAlert.ProfileData
         /// </summary>
         private void RegisterEvents()
         {
-            foreach (var kvp in settings)
+            foreach (var kvp in _settings)
                 kvp.Value.OnChanged += SettingChanged;
         }
     }

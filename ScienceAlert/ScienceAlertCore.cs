@@ -156,13 +156,11 @@ namespace ScienceAlert
     
 
     [KSPAddon(KSPAddon.Startup.Flight, false)]
-    public class ScienceAlert : MonoBehaviour
+    public class ScienceAlertCore : MonoBehaviour
     {
         // --------------------------------------------------------------------
         //    Members of ScienceAlert
         // --------------------------------------------------------------------
-
-        public static ScienceAlert Instance = null;
 
         // owned objects
         private Toolbar.IToolbar button;
@@ -184,6 +182,9 @@ namespace ScienceAlert
  ******************************************************************************/
         System.Collections.IEnumerator Start()
         {
+            API.ScienceAlert = null;
+            API.Ready = false;
+
             Log.Normal("Waiting on R&D...");
             while (ResearchAndDevelopment.Instance == null) yield return 0;
             while (FlightGlobals.ActiveVessel == null) yield return 0;
@@ -193,7 +194,6 @@ namespace ScienceAlert
             while (ScienceAlertProfileManager.Instance == null || !ScienceAlertProfileManager.Instance.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
 
             Log.Normal("Initializing ScienceAlert");
-            Instance = this;
 
 // just in case this has unforseen consequences later...
 // it should be okay since asteroidSample isn't actually defined
@@ -233,6 +233,7 @@ namespace ScienceAlert
 
             Log.Normal("ScienceAlert initialization finished.");
             API.Ready = true;
+            API.ScienceAlert = this;
 
 #if DEBUG
             //gameObject.AddComponent<Windows.Implementations.TestDrag>();
@@ -244,7 +245,7 @@ namespace ScienceAlert
         public void OnDestroy()
         {
             API.Ready = false;
-            Instance = null;
+            API.ScienceAlert = null;
             Button.Drawable = null;
             Settings.Instance.Save();
             Log.Verbose("ScienceAlert destroyed");
@@ -299,6 +300,11 @@ namespace ScienceAlert
         }
 
 
+        public ScanInterface ScanInterface
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Switch between toolbar at runtime as desired by the user
@@ -369,7 +375,7 @@ namespace ScienceAlert
             {
                 if (value != scanInterfaceType || scanInterface == null)
                 {
-                    if (scanInterface != null) Component.DestroyImmediate(GetComponent<ScanInterface>());
+                    if (scanInterface != null) DestroyImmediate(GetComponent<ScanInterface>());
 
                     Log.Normal("Setting scan interface type to {0}", value.ToString());
 
