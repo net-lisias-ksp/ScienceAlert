@@ -44,19 +44,18 @@ namespace ScienceAlert
         //---------------------------------------------------------------------
         // Delegate prototypes
         //---------------------------------------------------------------------
-        public delegate void ExperimentStatusChanged(ExperimentStatus newStatus, ExperimentStatus oldStatus, ScienceExperiment experiment, ExperimentMonitor monitor);
+        public delegate void ExperimentStatusChanged(ExperimentStatus newStatus, ExperimentStatus oldStatus, ExperimentMonitor monitor);
         
         // Simpler events if subscriber doesn't need to know all the details, only that an alert has popped
         public delegate void ExperimentRecoveryAlert(ScienceExperiment experiment, float recoveryValue);
         public delegate void ExperimentTransmittableAlert(ScienceExperiment experiment, float transmissionValue);
 
+        // This one's a bit different: the above event delegates are only for actual status changes
+        // This one triggers when the subject id of an experiment changes, which won't necessarily trigger
+        // an alert but nonetheless may be of interest to subscribers
+        public delegate void ExperimentSubjectChanged(ExperimentStatus status, ExperimentMonitor monitor);
 
-        //---------------------------------------------------------------------
-        // Events
-        //---------------------------------------------------------------------
-        public static event ExperimentStatusChanged OnExperimentStatusChanged = delegate { };
-        public static event ExperimentRecoveryAlert OnExperimentRecoveryAlert = delegate { };
-        public static event ExperimentTransmittableAlert OnExperimentTransmittableAlert = delegate { };
+
 
 
         //---------------------------------------------------------------------
@@ -114,6 +113,49 @@ namespace ScienceAlert
 
             // we'll have to estimate
             return experimentValue / UnityEngine.Mathf.Pow(4f, onboard.Count - 1);
+        }
+
+
+
+        /// <summary>
+        /// Calculates the total science the player has for a given experiment's subject. This considers 
+        /// recovered (or transmitted) experiments, plus ScienceData already onboard. The theoretical value
+        /// of the next report isn't included.
+        /// </summary>
+        /// <param name="experiment"></param>
+        /// <param name="subject"></param>
+        /// <param name="onboard"></param>
+        /// <param name="xmitScalar"></param>
+        /// <returns></returns>
+        public static float CalculateScienceTotal(ScienceExperiment experiment, ScienceSubject subject, List<ScienceData> onboard, float xmitScalar = 1f)
+        {
+            if (onboard.Count == 0)
+            {
+                // straight stored data
+                return subject.science;
+            }
+            else
+            {
+                // we've got at least one report we need to consider
+                float potentialScience = subject.science + ResearchAndDevelopment.GetScienceValue(onboard[0].dataAmount, subject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+
+                if (onboard.Count > 1)
+                {
+                    float secondReport = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+
+                    potentialScience += secondReport;
+
+                    // there's some kind of interpolation that the game does for
+                    // subsequent experiments. Dividing by four seems to give fairly
+                    // decent estimate. It's very unlikely that the exact science value
+                    // after the second report is going to matter one way or the other
+                    // though, so this is a decent enough solution for now
+                    if (onboard.Count > 2)
+                        for (int i = 3; i < onboard.Count; ++i)
+                            potentialScience += secondReport / Mathf.Pow(4f, i - 2);
+                }
+                return potentialScience;
+            }
         }
 
 

@@ -164,9 +164,6 @@ namespace ScienceAlert
 
         // owned objects
         private Toolbar.IToolbar button;
-        private ScanInterface scanInterface;
-        private Experiments.ExperimentManager experimentManager;
-
 
         // interfaces
         private Settings.ToolbarInterface buttonInterfaceType = Settings.ToolbarInterface.ApplicationLauncher;
@@ -208,9 +205,11 @@ namespace ScienceAlert
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
+            VesselDataCache = gameObject.AddComponent<Experiments.Data.ScienceDataCache>();
+            BiomeFilter = gameObject.AddComponent<BiomeFilter>();
 
             Log.Verbose("Creating experiment manager");
-            experimentManager = gameObject.AddComponent<Experiments.ExperimentManager>();
+            MonitorManager = gameObject.AddComponent<Experiments.MonitorManager>();
 
             
 
@@ -291,20 +290,31 @@ namespace ScienceAlert
         }
 
 
-        public Experiments.ExperimentManager ExperimentManager
+        public Experiments.MonitorManager MonitorManager
         {
-            get
-            {
-                return experimentManager;
-            }
+            get;
+            private set;
         }
 
+        public Experiments.Data.ScienceDataCache VesselDataCache
+        {
+            get;
+            private set;
+        }
+
+        public BiomeFilter BiomeFilter
+        {
+            get;
+            private set;
+        }
 
         public ScanInterface ScanInterface
         {
             get;
             private set;
         }
+
+
 
         /// <summary>
         /// Switch between toolbar at runtime as desired by the user
@@ -373,9 +383,9 @@ namespace ScienceAlert
             }
             set
             {
-                if (value != scanInterfaceType || scanInterface == null)
+                if (value != scanInterfaceType || ScanInterface == null)
                 {
-                    if (scanInterface != null) DestroyImmediate(GetComponent<ScanInterface>());
+                    if (ScanInterface != null) DestroyImmediate(GetComponent<ScanInterface>());
 
                     Log.Normal("Setting scan interface type to {0}", value.ToString());
 
@@ -384,13 +394,13 @@ namespace ScienceAlert
                         switch (value)
                         {
                             case Settings.ScanInterface.None:
-                                scanInterface = gameObject.AddComponent<DefaultScanInterface>();
+                                ScanInterface = gameObject.AddComponent<DefaultScanInterface>();
                                 break;
 
                             case Settings.ScanInterface.ScanSat:
                                 if (SCANsatInterface.IsAvailable())
                                 {
-                                    scanInterface = gameObject.AddComponent<SCANsatInterface>();
+                                    ScanInterface = gameObject.AddComponent<SCANsatInterface>();
                                     break;
                                 }
                                 else

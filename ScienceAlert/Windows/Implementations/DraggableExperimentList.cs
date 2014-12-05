@@ -34,14 +34,7 @@ namespace ScienceAlert.Windows.Implementations
         private const string WindowTitle = "Available Experiments";
 
         // members
-        public Experiments.ExperimentManager manager;
-        public BiomeFilter biomeFilter;
-        public ScanInterface scanInterface;
-        
         private bool adjustedSkin = false;
-        List<Observer> eligibleExperiments = new List<Observer>();          // list of experiments that match user's profile settings
-                                                                            // ExperimentManager will send events to notify us when 
-                                                                            // they change
 
 /******************************************************************************
  *                    Implementation Details
@@ -92,34 +85,28 @@ namespace ScienceAlert.Windows.Implementations
                 if (Settings.Instance.DisplayCurrentBiome)
                 {
                     // if SCANsat is enabled, don't show biome names for unscanned areas
-                    if (Settings.Instance.ScanInterfaceType == Settings.ScanInterface.ScanSat && scanInterface != null)
+                    //if (API.scien.Instance.ScanInterfaceType == Settings.ScanInterface.ScanSat && scanInterface != null)
+                    //{
+                    //    if (!scanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
+                    //    {
+                    //        Title = "Data not found";
+                    //        return;
+                    //    }
+                    //}
+                    if (API.ScienceAlert.ScanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude,
+                        FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
                     {
-                        if (!scanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
-                        {
-                            Title = "Data not found";
-                            return;
-                        }
+                        Title = "Not scanned";
+                        return;
                     }
 
-                    Title = GetBiomeString();
+                    Title = API.ScienceAlert.BiomeFilter.CurrentBiome;
                     return;
                 }  
                     
             Title = WindowTitle; // default experiment window title
         }
 
-
-
-        private string GetBiomeString()
-        {
-            string biome = Title;
-
-            if (biomeFilter.GetCurrentBiome(out biome))
-            {
-                return biome;
-            }
-            else return WindowTitle;
-        }
 
 
         /// <summary>
@@ -131,7 +118,7 @@ namespace ScienceAlert.Windows.Implementations
             if (!adjustedSkin)
             {
                 Skin.window.stretchHeight = true;
-                List<string> experimentTitles = new List<string>();
+                var experimentTitles = new List<string>();
 
                 ResearchAndDevelopment.GetExperimentIDs().ForEach(id => experimentTitles.Add(ResearchAndDevelopment.GetExperiment(id).experimentTitle));
 
@@ -160,34 +147,37 @@ namespace ScienceAlert.Windows.Implementations
         {
             GUILayout.BeginVertical();
             {
-                var observers = manager.Observers;
+                GUILayout.Label("(no experiments available)");
 
-                if (observers.All(eo => !eo.Available))
-                {
-                    GUILayout.Label("(no experiments available)");
-                }
-                else
-                {
+                //var observers = manager.Observers;
+                //var observers = new List<Experiments.Monitors.ExperimentMonitor>();
+
+                //if (observers.All(eo => !eo.Available))
+                //{
+                //    GUILayout.Label("(no experiments available)");
+                //}
+                //else
+                //{
                     //-----------------------------------------------------
                     // Experiment list
                     //-----------------------------------------------------
 
                     // this is old version, check-manager-directly
-                    foreach (var observer in observers)
-                        if (observer.Available)
-                        {
-                            var content = new GUIContent(observer.ExperimentTitle);
+                    //foreach (var observer in observers)
+                    //    if (observer.Available)
+                    //    {
+                    //        var content = new GUIContent(observer.ExperimentTitle);
 
-                            if (Settings.Instance.ShowReportValue) content.text += string.Format(" ({0:0.#})", observer.RecoveryValue);
+                    //        if (Settings.Instance.ShowReportValue) content.text += string.Format(" ({0:0.#})", observer.RecoveryValue);
 
-                            if (GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
-                            {
-                                Log.Debug("Deploying {0}", observer.ExperimentTitle);
-                                AudioPlayer.Audio.PlayUI("click2");
-                                observer.Deploy();
-                            }
-                        }
-                }
+                    //        if (GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
+                    //        {
+                    //            Log.Debug("Deploying {0}", observer.ExperimentTitle);
+                    //            AudioPlayer.Audio.PlayUI("click2");
+                    //            observer.Deploy();
+                    //        }
+                    //    }
+                //}
 
 
                 

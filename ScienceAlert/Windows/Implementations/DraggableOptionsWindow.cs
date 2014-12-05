@@ -26,7 +26,7 @@ using UnityEngine;
 namespace ScienceAlert.Windows.Implementations
 {
     using ProfileManager = ScienceAlertProfileManager;
-    using ExperimentManager = Experiments.ExperimentManager;
+    //using ExperimentManager = Experiments.ExperimentManager;
 
     internal partial class DraggableOptionsWindow : ReeperCommon.Window.DraggableWindow
     {
@@ -53,8 +53,6 @@ namespace ScienceAlert.Windows.Implementations
         private OpenPane submenu = OpenPane.None;
 
 
-        public ScienceAlertCore scienceAlert;
-        public ExperimentManager manager;
 
         // Materials and textures
         Texture2D collapseButton = new Texture2D(24, 24);
@@ -310,7 +308,7 @@ namespace ScienceAlert.Windows.Implementations
                         {
                             GUILayout.Label("Globally Enable Animation", GUILayout.ExpandWidth(true));
                             Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                            if (!Settings.Instance.FlaskAnimationEnabled && scienceAlert.Button.IsAnimating) scienceAlert.Button.SetLit();
+                            if (!Settings.Instance.FlaskAnimationEnabled && API.ScienceAlert.Button.IsAnimating) API.ScienceAlert.Button.SetLit();
                         }
                         GUILayout.EndHorizontal();
 
@@ -371,7 +369,7 @@ namespace ScienceAlert.Windows.Implementations
 
                             Settings.Instance.ScanInterfaceType = enableSCANinterface ? Settings.ScanInterface.ScanSat : Settings.ScanInterface.None;
 
-                            scienceAlert.ScanInterfaceType = Settings.Instance.ScanInterfaceType;
+                            API.ScienceAlert.ScanInterfaceType = Settings.Instance.ScanInterfaceType;
                         }
                         GUILayout.EndHorizontal();
                     } // end scan interface options
@@ -398,8 +396,8 @@ namespace ScienceAlert.Windows.Implementations
 
                             Settings.Instance.ToolbarInterfaceType = enableBlizzyToolbar ? Settings.ToolbarInterface.BlizzyToolbar : Settings.ToolbarInterface.ApplicationLauncher;
 
-                            if (scienceAlert.ToolbarType != Settings.Instance.ToolbarInterfaceType)
-                                scienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
+                            if (API.ScienceAlert.ToolbarType != Settings.Instance.ToolbarInterfaceType)
+                                API.ScienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
                         }
                         GUILayout.EndHorizontal();
                     } // end toolbar interface options
@@ -427,8 +425,8 @@ namespace ScienceAlert.Windows.Implementations
                             Settings.Instance.CheckSurfaceSampleNotEva = AudibleToggle(prev, "Track surface sample in vessel");
 
                             if (prev != Settings.Instance.CheckSurfaceSampleNotEva)
-                                manager.RebuildObserverList();
-                                //manager.ScheduleRebuildObserverList();
+                                API.ScienceAlert.MonitorManager.RescanVessel();
+
                         }
 
                     } // end crewed vessel settings

@@ -65,14 +65,10 @@ namespace ScienceAlert.Windows
 
             Log.Normal("Creating options window");
             optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
-            optionsWindow.scienceAlert = GetComponent<ScienceAlertCore>();
-            optionsWindow.manager = GetComponent<Experiments.ExperimentManager>();
             
 
             Log.Normal("Creating experiment window");
             experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
-            experimentList.biomeFilter = GetComponent<BiomeFilter>();
-            experimentList.manager = GetComponent<Experiments.ExperimentManager>();
             
 
             Log.Normal("Creating debug window");
@@ -120,7 +116,7 @@ namespace ScienceAlert.Windows
         /// </summary>
         private void OnInterfaceChanged()
         {
-            experimentList.scanInterface = GetComponent<ScanInterface>();
+            //experimentList.scanInterface = GetComponent<ScanInterface>();
         }
 
 

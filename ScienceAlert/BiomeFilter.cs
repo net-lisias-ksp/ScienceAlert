@@ -94,7 +94,8 @@ namespace ScienceAlert
 
         /// <summary>
         /// Returns the biome of the body the active vessel is orbiting, located under its current
-        /// latitude and longitude. If the result may be incorrect, the method will return false
+        /// latitude and longitude. If the result may be incorrect (based on filter), the method will 
+        /// return false
         /// </summary>
         /// <param name="biome"></param>
         /// <returns></returns>

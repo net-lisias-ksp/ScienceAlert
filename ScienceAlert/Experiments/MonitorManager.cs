@@ -11,6 +11,10 @@ namespace ScienceAlert.Experiments
     using ProfileManager = ScienceAlertProfileManager;
     using MonitorList = List<Experiments.Monitors.ExperimentMonitor>;
 
+    using ExperimentStatusChanged = ScienceAlert.API.ExperimentStatusChanged;
+    using ExperimentRecoveryAlert = ScienceAlert.API.ExperimentRecoveryAlert;
+    using ExperimentTransmittableAlert = ScienceAlert.API.ExperimentTransmittableAlert;
+    using ExperimentSubjectChanged = ScienceAlert.API.ExperimentSubjectChanged;
 
     /// <summary>
     /// Responsible for updating experiment monitor status
@@ -20,17 +24,17 @@ namespace ScienceAlert.Experiments
         //---------------------------------------------------------------------
         // Members
         //---------------------------------------------------------------------
-        BiomeFilter filter;                                         // this is used to judge how accurate biomes are. In some cases, the way colors are interpolated
-                                                                    // on the CelestialBody's attribute map causes incorrect results. Users only see this in very rare cases
-                                                                    // but for us it's a problem
-
-        Data.ScienceDataCache storage;                              // can be queried for stored ScienceData
-
         System.Collections.IEnumerator watcher;                     // infinite-looping method used to update experiment monitors
         MonitorList monitors = new MonitorList();                   // monitors which will be checked sequentially
-        string lastKnownGoodBiome = "";                             // If the biome filter tells us we've got a dodgy biome, we can
-                                                                    // fall back to this previously-good one
 
+        //---------------------------------------------------------------------
+        // Events
+        //---------------------------------------------------------------------
+        public event ExperimentStatusChanged OnExperimentStatusChanged = delegate { };
+        public event ExperimentRecoveryAlert OnExperimentRecoveryAlert = delegate { };
+        public event ExperimentTransmittableAlert OnExperimentTransmittableAlert = delegate { };
+        public event ExperimentSubjectChanged OnExperimentSubjectChanged = delegate { };
+ 
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
@@ -38,9 +42,6 @@ namespace ScienceAlert.Experiments
         #region init/deinit/MonoBehaviour
         private void Start()
         {
-            filter = gameObject.AddComponent<BiomeFilter>();
-            storage = gameObject.AddComponent<ScienceDataCache>();
-
             // event setup
             GameEvents.onVesselWasModified.Add(OnVesselEvent);
             GameEvents.onVesselChange.Add(OnVesselEvent);
@@ -57,9 +58,6 @@ namespace ScienceAlert.Experiments
             GameEvents.onVesselWasModified.Remove(OnVesselEvent);
             GameEvents.onVesselChange.Remove(OnVesselEvent);
             GameEvents.onVesselDestroy.Remove(OnVesselEvent);
-
-            if (filter != null) Destroy(filter);
-            if (storage != null) Destroy(storage);
         }
 
 
@@ -76,7 +74,7 @@ namespace ScienceAlert.Experiments
         /// <summary>
         /// Refreshes monitor list and their assigned ModuleScienceExperiments
         /// </summary>
-        private void RescanVessel()
+        public void RescanVessel()
         {
             monitors.Clear();
 
@@ -99,7 +97,7 @@ namespace ScienceAlert.Experiments
                     .ToList()
                     .ForEach(expid =>
                         monitors.Add(
-                            new Monitors.ExperimentMonitor(expid, ProfileManager.ActiveProfile[expid], storage,
+                            new Monitors.ExperimentMonitor(expid, ProfileManager.ActiveProfile[expid], API.ScienceAlert.VesselDataCache,
                                 modules.Where(mse => mse.experimentID == expid).ToList())
                             )
                     );
@@ -130,7 +128,32 @@ namespace ScienceAlert.Experiments
 
                 foreach (var monitor in monitors)
                 {
-                    // todo: check monitor status
+                    var oldStatus = monitor.Status;
+                    var oldSubject = monitor.Subject;
+
+                    if (oldStatus != monitor.UpdateStatus(situation))
+                    {
+                        // new status! trigger appropriate alerts
+                        OnExperimentStatusChanged(monitor.Status, oldStatus, monitor);
+
+                        // is the recovery alert new?
+                        // note: the logic here is "if the recovery flag is set AND the old
+                        // status did not have this flag set"
+                        if ((monitor.Status & API.ExperimentStatus.Recoverable) != 0 &&
+                            (oldStatus & API.ExperimentStatus.Recoverable) == 0)
+                            OnExperimentRecoveryAlert(monitor.Experiment, monitor.RecoveryValue);
+
+                        // is the transmittable alert new?
+                        if ((monitor.Status & API.ExperimentStatus.Transmittable) != 0 &&
+                            (oldStatus & API.ExperimentStatus.Transmittable) == 0)
+                            OnExperimentTransmittableAlert(monitor.Experiment, monitor.TransmissionValue);
+
+                    }
+
+                    // notify subscribers if the monitor's subject has changed
+                    if (oldSubject != monitor.Subject)
+                        OnExperimentSubjectChanged(monitor.Status, monitor);
+
 
                     // if the user accelerated time it's possible to have some
                     // experiments checked too late. If the user is time warping
@@ -178,21 +201,7 @@ namespace ScienceAlert.Experiments
 
 
         #region properties
-        public BiomeFilter BiomeFilter
-        {
-            get
-            {
-                return filter;
-            }
-        }
 
-        public Experiments.Data.ScienceDataCache Storage
-        {
-            get
-            {
-                return storage;
-            }
-        }
 #endregion
     }
 }
