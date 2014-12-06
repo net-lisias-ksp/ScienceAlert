@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using UnityEngine;
 using ReeperCommon;
+using UnityEngine;
 
-namespace ScienceAlert.Experiments.Data
+namespace ScienceAlert.Experiments.Science
 {
-    using StorageList = List<IScienceDataContainer>;
-
-
     /// <summary>
     /// The purpose of this object is to reduce redundancy between 
     /// ExperimentObservers.  ScienceData isn't sorted by ScienceExperiment
@@ -21,7 +17,7 @@ namespace ScienceAlert.Experiments.Data
     /// </summary>
     public class ScienceDataCache : MonoBehaviour
     {
-        protected StorageList storage;                      // containers for science data
+        protected List<IScienceDataContainer> storage;                      // containers for science data
         protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
         protected Vessel vessel;                            // which vessel this storage cache is for
 
@@ -95,7 +91,7 @@ namespace ScienceAlert.Experiments.Data
                         // vessel is being destroyed is causing:
                         //      Destroying object multiple times. Don't use DestroyImmediate on the same object in OnDisable or OnDestroy."
 
-                storage = new StorageList();
+                storage = new List<IScienceDataContainer>();
                 magicTransmitter = null;
                 vessel = null;
             }

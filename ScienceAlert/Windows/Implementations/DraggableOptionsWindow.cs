@@ -407,7 +407,7 @@ namespace ScienceAlert.Windows.Implementations
                             Settings.Instance.CheckSurfaceSampleNotEva = AudibleToggle(prev, "Track surface sample in vessel");
 
                             if (prev != Settings.Instance.CheckSurfaceSampleNotEva)
-                                API.ScienceAlert.MonitorManager.RescanVessel();
+                                API.ScienceAlert.SensorManager.RescanVessel();
 
                         }
 
@@ -729,13 +729,13 @@ namespace ScienceAlert.Windows.Implementations
         /// <param name="currentValue"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        private int AudibleSelectionGrid(int currentValue, ref ProfileData.ExperimentSettings settings)
+        private int AudibleSelectionGrid(int currentValue, ref ProfileData.SensorSettings settings)
         {
             int newValue = GUILayout.SelectionGrid(currentValue, filterList.ToArray(), 2, GUILayout.ExpandWidth(true));
             if (newValue != currentValue)
             {
                 audio.PlayUI("click1");
-                settings.Filter = (ProfileData.ExperimentSettings.FilterMethod)newValue;
+                settings.Filter = (ProfileData.SensorSettings.FilterMethod)newValue;
             }
 
             return newValue;

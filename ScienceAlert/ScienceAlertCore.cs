@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ScienceAlert.Experiments.Science;
 using UnityEngine;
 using ReeperCommon;
 
@@ -63,11 +64,11 @@ namespace ScienceAlert
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
-            VesselDataCache = gameObject.AddComponent<Experiments.Data.ScienceDataCache>();
+            ScienceDataCache = gameObject.AddComponent<ScienceDataCache>();
             BiomeFilter = gameObject.AddComponent<BiomeFilter>();
 
             Log.Verbose("Creating experiment manager");
-            MonitorManager = gameObject.AddComponent<Experiments.MonitorManager>();
+            SensorManager = gameObject.AddComponent<Experiments.SensorManager>();
 
             
 
@@ -145,31 +146,6 @@ namespace ScienceAlert
             {
                 return button;
             }
-        }
-
-
-        public Experiments.MonitorManager MonitorManager
-        {
-            get;
-            private set;
-        }
-
-        public Experiments.Data.ScienceDataCache VesselDataCache
-        {
-            get;
-            private set;
-        }
-
-        public BiomeFilter BiomeFilter
-        {
-            get;
-            private set;
-        }
-
-        public ScanInterface ScanInterface
-        {
-            get;
-            private set;
         }
 
 
@@ -291,6 +267,36 @@ namespace ScienceAlert
         }
 
 #endregion 
+
+        public BiomeFilter BiomeFilter
+        {
+            get;
+            private set;
+        }
+
+        public ScienceDataCache ScienceDataCache
+        {
+            get
+            {
+                throw new System.NotImplementedException();
+            }
+            set
+            {
+            }
+        }
+
+        public ScanInterface ScanInterface
+        {
+            get;
+            private set;
+        }
+
+        public ScienceAlert.Experiments.SensorManager SensorManager
+        {
+            get;
+            private set;
+        }
+
     }
 
 

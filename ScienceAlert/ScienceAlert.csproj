@@ -75,28 +75,25 @@
     </Compile>
     <Compile Include="API\API.cs" />
     <Compile Include="BiomeFilter.cs" />
-    <Compile Include="Experiments\MonitorManager.cs" />
-    <Compile Include="Experiments\Monitors\ExperimentMonitor.cs" />
-    <Compile Include="Experiments\Observers\EvaReportObserver.cs" />
-    <Compile Include="Experiments\Observers\RequiresCrew.cs" />
-    <Compile Include="Experiments\Observers\SurfaceSampleObserver.cs" />
-    <Compile Include="ProfileData\ExperimentSettings.cs" />
+    <Compile Include="Experiments\SensorFactory.cs" />
+    <Compile Include="Experiments\SensorManager.cs" />
+    <Compile Include="Experiments\Sensors\ExperimentSensor.cs" />
+    <Compile Include="Experiments\Sensors\IExperimentSensor.cs" />
+    <Compile Include="ProfileData\SensorSettings.cs" />
     <Compile Include="ProfileData\Profile.cs" />
     <Compile Include="ProfileData\ScienceAlertProfileManager.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
-    <Compile Include="Experiments\ExperimentManager.cs" />
     <Compile Include="ScienceAlertCore.cs" />
-    <Compile Include="Experiments\Observers\ExperimentObserver.cs" />
     <Compile Include="Scan Interfaces\ScanInterface.cs" />
     <Compile Include="Scan Interfaces\SCANsatInterface.cs" />
-    <Compile Include="Experiments\Data\MagicDataTransmitter.cs" />
+    <Compile Include="Experiments\Science\MagicDataTransmitter.cs" />
     <Compile Include="Windows\Implementations\DraggableDebugWindow.cs" />
     <Compile Include="Windows\Implementations\DraggableExperimentList.cs" />
     <Compile Include="Windows\Implementations\DraggableOptionsWindow.cs" />
     <Compile Include="Windows\Implementations\TestDrag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="Experiments\Data\ScienceDataCache.cs" />
+    <Compile Include="Experiments\Science\ScienceDataCache.cs" />
     <Compile Include="Toolbar\Blizzy\BlizzyInterface.cs" />
     <Compile Include="Toolbar\IToolbar.cs" />
     <Compile Include="Toolbar\Wrapper\ToolbarWrapper.cs" />
@@ -138,6 +135,10 @@
     <EmbeddedResource Include="Resources\btnBackground.png" />
     <EmbeddedResource Include="Resources\btnLock.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program\GameData

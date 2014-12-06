@@ -5,8 +5,7 @@ using UnityEngine;
 
 namespace ScienceAlert.ProfileData
 {
-    // per-experiment settings
-    public class ExperimentSettings
+    public class SensorSettings
     {
         public enum FilterMethod : int
         {
@@ -144,8 +143,8 @@ namespace ScienceAlert.ProfileData
 
         public bool IsDefault = false;
 
-        public ExperimentSettings() { }
-        public ExperimentSettings(ExperimentSettings other)
+        public SensorSettings() { }
+        public SensorSettings(SensorSettings other)
         {
             Enabled = other.Enabled;
             SoundOnDiscovery = other.SoundOnDiscovery;

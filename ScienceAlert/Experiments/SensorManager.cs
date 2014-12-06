@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ScienceAlert.Experiments.Sensors;
 using UnityEngine;
 using ReeperCommon;
 
 namespace ScienceAlert.Experiments
 {
-    using Data;
     using ProfileManager = ScienceAlertProfileManager;
-    using MonitorList = List<Experiments.Monitors.ExperimentMonitor>;
+    using MonitorList = List<ExperimentSensor>;
 
     using ExperimentStatusChanged = ScienceAlert.API.ExperimentStatusChanged;
     using ExperimentRecoveryAlert = ScienceAlert.API.ExperimentRecoveryAlert;
@@ -19,7 +19,7 @@ namespace ScienceAlert.Experiments
     /// <summary>
     /// Responsible for updating experiment monitor status
     /// </summary>
-    public class MonitorManager : MonoBehaviour
+    public class SensorManager : MonoBehaviour
     {
         //---------------------------------------------------------------------
         // Members
@@ -78,7 +78,7 @@ namespace ScienceAlert.Experiments
         {
             monitors.Clear();
 
-            Log.Verbose("MonitorManager: Scanning vessel for experiments");
+            Log.Verbose("SensorManager: Scanning vessel for experiments");
 
             if (FlightGlobals.ActiveVessel == null)
             {
@@ -97,7 +97,7 @@ namespace ScienceAlert.Experiments
                     .ToList()
                     .ForEach(expid =>
                         monitors.Add(
-                            new Monitors.ExperimentMonitor(expid, ProfileManager.ActiveProfile[expid], API.ScienceAlert.VesselDataCache,
+                            new ExperimentSensor(expid, ProfileManager.ActiveProfile[expid], API.ScienceAlert.ScienceDataCache,
                                 modules.Where(mse => mse.experimentID == expid).ToList())
                             )
                     );
@@ -190,7 +190,7 @@ namespace ScienceAlert.Experiments
             else
             {
                 // just to be sure
-                Log.Debug("MonitorManager.OnVesselEvent: ignoring event for vessel {0}", v.vesselName);
+                Log.Debug("SensorManager.OnVesselEvent: ignoring event for vessel {0}", v.vesselName);
             }
 #endif
         }

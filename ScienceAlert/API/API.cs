@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ReeperCommon;
 using System;
-using ScienceAlert.Experiments.Monitors;
+using ScienceAlert.Experiments.Sensors;
 using UnityEngine;
 
 namespace ScienceAlert
@@ -13,20 +13,12 @@ namespace ScienceAlert
     public static class API
     {
 
-        [Flags]
-        public enum ExperimentStatus
-        {
-            NoAlert         = 0,                                      // Either the experiment doesn't match the user settings for both transmittable and recoverable science or the experiment is unavailable = don't alert user
-            Recoverable     = 1 << 0,                                 // Alert user; this experiment matches their recovery filter
-            Transmittable   = 1 << 1,                                 // Alert user; matches transmission filter
-            
-            Both = Recoverable | Transmittable
-        }
+
 
         //---------------------------------------------------------------------
         // Delegate prototypes
         //---------------------------------------------------------------------
-        public delegate void ExperimentStatusChanged(ExperimentStatus newStatus, ExperimentStatus oldStatus, ExperimentMonitor monitor);
+        public delegate void ExperimentStatusChanged(ExperimentStatus newStatus, ExperimentStatus oldStatus, ExperimentSensor sensor);
         
         // Simpler events if subscriber doesn't need to know all the details, only that an alert has popped
         public delegate void ExperimentRecoveryAlert(ScienceExperiment experiment, float recoveryValue);
@@ -35,7 +27,7 @@ namespace ScienceAlert
         // This one's a bit different: the above event delegates are only for actual status changes
         // This one triggers when the subject id of an experiment changes, which won't necessarily trigger
         // an alert but nonetheless may be of interest to subscribers
-        public delegate void ExperimentSubjectChanged(ExperimentStatus status, ExperimentMonitor monitor);
+        public delegate void ExperimentSubjectChanged(ExperimentStatus status, ExperimentSensor sensor);
 
 
 

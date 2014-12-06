@@ -132,7 +132,7 @@ namespace ScienceAlert.Windows.Implementations
                 GUILayout.Label("(no experiments available)");
 
                 //var observers = manager.Observers;
-                //var observers = new List<Experiments.Monitors.ExperimentMonitor>();
+                //var observers = new List<Experiments.Monitors.ExperimentSensor>();
 
                 //if (observers.All(eo => !eo.Available))
                 //{

@@ -27,7 +27,7 @@ namespace ScienceAlert.ProfileData
         // Per-experiment settings
         //------------------------------------------------------
         [NonSerialized]
-        private Dictionary<string /* expid */, ProfileData.ExperimentSettings> _settings;
+        private Dictionary<string /* expid */, ProfileData.SensorSettings> _settings;
 
 
 /******************************************************************************
@@ -75,10 +75,10 @@ namespace ScienceAlert.ProfileData
         {
             var otherKeys = other._settings.Keys;
 
-            _settings = new Dictionary<string, ProfileData.ExperimentSettings>();
+            _settings = new Dictionary<string, ProfileData.SensorSettings>();
 
             foreach (var otherKey in otherKeys)
-                _settings.Add(otherKey, new ProfileData.ExperimentSettings(other._settings[otherKey]));
+                _settings.Add(otherKey, new ProfileData.SensorSettings(other._settings[otherKey]));
 
             Name = String.Copy(other.Name);
             Modified = other.Modified;
@@ -94,14 +94,14 @@ namespace ScienceAlert.ProfileData
         /// </summary>
         private void Setup()
         {
-            _settings = new Dictionary<string, ProfileData.ExperimentSettings>();
+            _settings = new Dictionary<string, ProfileData.SensorSettings>();
 
             try
             {
                 var expids = ResearchAndDevelopment.GetExperimentIDs();
 
                 foreach (var id in expids)
-                    _settings.Add(id, new ProfileData.ExperimentSettings());
+                    _settings.Add(id, new ProfileData.SensorSettings());
             }
             catch (Exception e)
             {
@@ -158,7 +158,7 @@ namespace ScienceAlert.ProfileData
                 if (!_settings.ContainsKey(expid))
                 {
                     Log.Verbose("Profile.OnLoad: Expid '{0}' not found in default set. Adding it.", expid);
-                    _settings.Add(expid, new ProfileData.ExperimentSettings());
+                    _settings.Add(expid, new ProfileData.SensorSettings());
                 }
 
                 _settings[expid].OnLoad(expNode);
@@ -191,7 +191,7 @@ namespace ScienceAlert.ProfileData
         /// </summary>
         /// <param name="expid"></param>
         /// <returns></returns>
-        public ProfileData.ExperimentSettings this[string expid]
+        public ProfileData.SensorSettings this[string expid]
         {
             get
             {
@@ -202,7 +202,7 @@ namespace ScienceAlert.ProfileData
                 // loading or initialization has broken
                 Log.Warning("Profile '{0}' has no settings for expid {1}; creating a default", Name, expid);
 
-                _settings[expid] = new ProfileData.ExperimentSettings();
+                _settings[expid] = new ProfileData.SensorSettings();
 
                 return _settings[expid];
             }
