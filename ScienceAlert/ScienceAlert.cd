@@ -1,0 +1,526 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="ScienceAlert.API" Collapsed="true">
+    <Position X="9.75" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAEAUAAAAAAAACAAAAAAAAQAAgAAAAAAA=</HashCode>
+      <FileName>API\API.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.BiomeFilter" Collapsed="true">
+    <Position X="19.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABQBABAAAGAAAAAABAAAAABAqCAAEQAACIAAAACAAAA=</HashCode>
+      <FileName>BiomeFilter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.ScienceAlertProfileManager">
+    <Position X="0.5" Y="1" Width="3" />
+    <TypeIdentifier>
+      <HashCode>EAABgNIAQGAAgoUIAAkICAQCIAEgQDAASkQgCgAIAQA=</HashCode>
+      <FileName>ProfileData\ScienceAlertProfileManager.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="DefaultProfile" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ScienceAlert.ScanInterface" Collapsed="true">
+    <Position X="5.25" Y="17.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Scan Interfaces\ScanInterface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.DefaultScanInterface" Collapsed="true">
+    <Position X="4" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Scan Interfaces\ScanInterface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.SCANsatInterface" Collapsed="true">
+    <Position X="6.25" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAIAAAAAAAIAAAABAAAAAAAAAAAAAAAAIAIACAAA=</HashCode>
+      <FileName>Scan Interfaces\SCANsatInterface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.ScienceAlertCore">
+    <Position X="12.25" Y="0.75" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AEQFAABAACAAAAAAAAEAAAAAAgAAAAACAAAAlAABEMA=</HashCode>
+      <FileName>ScienceAlertCore.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="BiomeFilter" />
+      <Property Name="SensorManager" />
+      <Property Name="OnboardScienceDataCache" />
+      <Property Name="Button" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ScienceAlert.Settings" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="15" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>MBEQwKBEAIAAAAAAAIBQABAKAAFAAAAARABAEAQAIYg=</HashCode>
+      <FileName>Settings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ScienceAlert.ToolbarManager" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="20.25" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEQAAAAAAAAAAAAIAAAAQAAAABAAAAAQBAAAAICAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ScienceAlert.ClickEvent" Collapsed="true">
+    <Position X="9.75" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.MouseMoveEvent" Collapsed="true">
+    <Position X="7.5" Y="14" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.MouseEnterEvent" Collapsed="true">
+    <Position X="7.5" Y="15.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.MouseLeaveEvent" Collapsed="true">
+    <Position X="8" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.GameScenesVisibility" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="20.25" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAIAAAAEAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ScienceAlert.PopupMenuDrawable" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="13.25" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAwgAAAAAAAAAgAAAQAAAAABAQBCAAIEAAAAAAAIAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ScienceAlert.Button" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="18.5" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BEAAAgAIAAEAIIAIAABAAAgCACRACAAIoAAgCIIEIwA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ScienceAlert.ToolbarTypes" Collapsed="true">
+    <Position X="9.75" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAJAJBAAAAAAAAAAAAAAAAAAQBAAAAAAAAIAAAAAIA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.ButtonTypes" Collapsed="true">
+    <Position X="20.25" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAIAABAAAAAAAAAAQAAIQQQAAIAgABiEAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.Experiments.Science.MagicDataTransmitter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="22.75" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAQABQACASAAAAAEAAAAAAACAAAGAQAAAAhAAAAEAAA=</HashCode>
+      <FileName>Experiments\Science\MagicDataTransmitter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ScienceAlert.Experiments.Science.OnboardScienceDataCache">
+    <Position X="19.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQABABAAACAAAAACAAAAAAFQIAAAAAAAACgCAAIQgAA=</HashCode>
+      <FileName>Experiments\Science\OnboardScienceDataCache.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="magicTransmitter" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="ScienceAlert.Experiments.SensorManager" Collapsed="true">
+    <Position X="12" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAoAAAABAAAAAQAAICAiAIAAAABIIAAAAAAIAAAE=</HashCode>
+      <FileName>Experiments\SensorManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.ProfileData.SensorSettings" Collapsed="true">
+    <Position X="15" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EGAAAQBAAQBAAIAEAAAAAEACQBAAAIAQAAAAAAAAAAA=</HashCode>
+      <FileName>ProfileData\SensorSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.ProfileData.Profile" Collapsed="true">
+    <Position X="5.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EABCEAAACAAAAAAAiBABAAQCAAAAAAAAAgAAAAAQABA=</HashCode>
+      <FileName>ProfileData\Profile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.Toolbar.AppLauncherInterface" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="11.5" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAABAABAACAAAAASABAAAAACABSgAAAAgATCCIACAAA=</HashCode>
+      <FileName>Toolbar\ApplicationLauncher\AppLauncherInterface.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ScienceAlert.Toolbar.BlizzyInterface" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="16.75" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AASBIAJAACAEAAACABAAAICDAASgAAAAgCBCAAAAAAA=</HashCode>
+      <FileName>Toolbar\Blizzy\BlizzyInterface.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="ScienceAlert.Toolbar.ClickInfo" Collapsed="true">
+    <Position X="11.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABIAAAAAgAAAAAAAAAAAAAAAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>Toolbar\IToolbar.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.PlayableSound" Collapsed="true">
+    <Position X="11.5" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAgAACAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\AudioUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.AudioPlayer" Collapsed="true">
+    <Position X="13.25" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAANAQAAAAAAAAMAAAEAAAQAAAAEAAAAgAABAAAAAEA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\AudioUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigUtil" Collapsed="true">
+    <Position X="15" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAkAAAAAAAAFAAAAAAAAACAAAAAAQAAAAEAAABAAAI=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.PositionSentinel" Collapsed="true">
+    <Position X="15" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.LineSentinel" Collapsed="true">
+    <Position X="13.25" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAIAAAAAAAAEAAAABAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.DebugVisualizer" Collapsed="true">
+    <Position X="20.25" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAABAAAAABAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.DebugExtensions" Collapsed="true">
+    <Position X="18.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAACAEgAAIQgAAgAAAAAACAAIAQEAAAAJAAAAgAIAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.DebugCollider" Collapsed="true">
+    <Position X="16.75" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAABAAAAAAAAABAAAADAAACAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.PerformanceTest" Collapsed="true">
+    <Position X="9.75" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIgAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.FontUtil" Collapsed="true">
+    <Position X="18.5" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAg=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\FontUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.UvAtlas" Collapsed="true">
+    <Position X="13.25" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAIAAAAEAAAggMAAAAAAAAAAAAAAAABAAAAAAAAgE=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.GuiUtil" Collapsed="true">
+    <Position X="9.75" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AJAAAAAAAoAQAAAAAAgAoAAAAAAAEQAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.UIButtonExtensions" Collapsed="true">
+    <Position X="11.5" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.Log" Collapsed="true">
+    <Position X="15" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAABCQAIAAAYAAAAAAABAAAAAIABABAAgAAIEAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\Log.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.StringDumper" Collapsed="true">
+    <Position X="16.75" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAACAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\Misc.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.FieldDumper" Collapsed="true">
+    <Position X="16.75" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\Misc.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ObjectCopier" Collapsed="true">
+    <Position X="20.25" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ObjectUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ResourceUtil" Collapsed="true">
+    <Position X="20.25" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAABAAAAAAAAACAAAAAAAAAJABAAQABABAAAIQACBI=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ResourceUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.DoNotSerialize" Collapsed="true">
+    <Position X="9.75" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.HelpDoc" Collapsed="true">
+    <Position X="11.5" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAIAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.Subsection" Collapsed="true">
+    <Position X="18.5" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.ConfigNodeTypeHandler" Collapsed="true">
+    <Position X="13.25" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAACAAAAAAACBAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.ReeperConfigNodeExtensions" Collapsed="true">
+    <Position X="18.5" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAJAAAAAAAAAAAAAAASAAAAAAQAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.Window.DraggableWindow" Collapsed="true">
+    <Position X="4.5" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAaJRAyADiQIAEUAAQQBAQgABAgEgCQpBBCACIQACEA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.Windows.Implementations.DraggableDebugWindow" Collapsed="true">
+    <Position X="5.75" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAgAAAAAQAAAAAAEIAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Windows\Implementations\DraggableDebugWindow.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.Windows.Implementations.DraggableExperimentList" Collapsed="true">
+    <Position X="0.5" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAACAAAAAAAAQAAIAAAAIAAAAAABACAAEAAAAA=</HashCode>
+      <FileName>Windows\Implementations\DraggableExperimentList.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.Windows.Implementations.DraggableOptionsWindow" Collapsed="true">
+    <Position X="2.25" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>wAABAAUACAgAgGJEi4IIAkQBIEEYAEKQBBCLIAigSGE=</HashCode>
+      <FileName>Windows\Implementations\DraggableOptionsWindow.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.Windows.Implementations.TestDrag" Collapsed="true">
+    <Position X="4" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAAQAAAAAAAAAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Windows\Implementations\TestDrag.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ScienceAlert.Windows.WindowEventLogic" Collapsed="true">
+    <Position X="15" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEQBAAAAQCAIAAAAAAAAAAEAgARAAAAAAIAAAQAAAEA=</HashCode>
+      <FileName>Windows\WindowEventLogic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UnityEngine.MonoBehaviour" Collapsed="true">
+    <Position X="6.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="ScienceAlert.Experiments.Sensors.ExperimentSensor" Collapsed="true">
+    <Position X="13.25" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AiCCAAAEAQAAgAAgAIQAEAAFAAAAQAAAgCAAFAAAAAA=</HashCode>
+      <FileName>Experiments\Sensors\ExperimentSensor.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="ScienceAlert.IToolbarManager" Collapsed="true">
+    <Position X="18.5" Y="18" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ScienceAlert.IButton" Collapsed="true">
+    <Position X="9.75" Y="18" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAIAAAAAIAIAABAAAgCAARAAAAIoAAACAAAIAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ScienceAlert.IDrawable" Collapsed="true">
+    <Position X="13.25" Y="18" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ScienceAlert.IVisibility" Collapsed="true">
+    <Position X="20.25" Y="18" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ScienceAlert.Toolbar.IToolbar" Collapsed="true">
+    <Position X="19.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAACABAAAAACAASgAAAAgABCAAAAAAA=</HashCode>
+      <FileName>Toolbar\IToolbar.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ReeperCommon.ConfigNodeSerialization.IReeperSerializable" Collapsed="true">
+    <Position X="15" Y="18" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="ReeperCommon.ConfigNodeSerialization.IConfigNodeTypeFormatter" Collapsed="true">
+    <Position X="11.5" Y="18" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACBAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Delegate Name="ScienceAlert.ClickHandler" Collapsed="true">
+    <Position X="9.75" Y="19" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="ScienceAlert.MouseEnterHandler" Collapsed="true">
+    <Position X="15" Y="19" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="ScienceAlert.MouseLeaveHandler" Collapsed="true">
+    <Position X="16.75" Y="19" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Toolbar\Wrapper\ToolbarWrapper.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="ScienceAlert.Toolbar.ToolbarClickHandler" Collapsed="true">
+    <Position X="18.5" Y="19" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>Toolbar\IToolbar.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="ReeperCommon.GameObjectVisitor" Collapsed="true">
+    <Position X="13.25" Y="19" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAACAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="ReeperCommon.FieldTraverseDelegate" Collapsed="true">
+    <Position X="11.5" Y="19" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAEAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\Misc.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="ReeperCommon.Window.WindowDelegate" Collapsed="true">
+    <Position X="9.75" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="ReeperCommon.Window.WindowClosedDelegate" Collapsed="true">
+    <Position X="20.25" Y="19" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

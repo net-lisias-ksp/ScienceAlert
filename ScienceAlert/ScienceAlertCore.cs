@@ -61,10 +61,12 @@ namespace ScienceAlert
             Log.Verbose("Sounds ready.");
 
             OnboardScienceDataCache = gameObject.AddComponent<OnboardScienceDataCache>();
-            BiomeFilter = gameObject.AddComponent<BiomeFilter>();
 
-            Log.Verbose("Creating experiment manager");
-            SensorManager = gameObject.AddComponent<Experiments.SensorManager>();
+
+            CreateBiomeFilter();
+
+
+            SensorManager = new Experiments.SensorManager(OnboardScienceDataCache);
 
             
 
@@ -98,6 +100,8 @@ namespace ScienceAlert
 
         public void OnDestroy()
         {
+            DestroyBiomeFilter();
+
             API.Ready = false;
             API.ScienceAlert = null;
             Button.Drawable = null;
@@ -106,30 +110,25 @@ namespace ScienceAlert
         }
 
 
-
-#if DEBUG
-        void Update()
+        private void CreateBiomeFilter()
         {
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                var btns = GameObject.FindObjectsOfType<UIButton>();
+            BiomeFilter = new BiomeFilter();
+            GameEvents.onVesselChange.Add(BiomeFilter.OnVesselChanged);
+            GameEvents.onDominantBodyChange.Add(BiomeFilter.OnDominantBodyChanged);
+        }
 
-                btns.ToList().ForEach(b => Log.Write("UIButton: {0} at {1}", b.name, b.transform.position));
-
-                if (ScreenSafeUI.fetch.centerAnchor.bottom == null) Log.Error("nope");
-                Log.Write("center transform: {0}", ScreenSafeUI.fetch.centerAnchor.bottom.transform.position);
-                Log.Write("UImanager: {0}", UIManager.instance.transform.position);
-                Log.Write("ScreenSafeUI: {0}", ScreenSafeUI.fetch.transform.position);
-            }
+        private void DestroyBiomeFilter()
+        {
+            GameEvents.onDominantBodyChange.Remove(BiomeFilter.OnDominantBodyChanged);
+            GameEvents.onVesselChange.Remove(BiomeFilter.OnVesselChanged);
+            BiomeFilter = null;
         }
 
 
-
-        private void Awake()
+        private void Update()
         {
-            Log.Debug("ScienceAlert.Awake");
+            BiomeFilter.UpdateBiomeData();
         }
-#endif
 
 
 

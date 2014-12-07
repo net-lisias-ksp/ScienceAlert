@@ -12,13 +12,13 @@ namespace ScienceAlert.Windows
     class WindowEventLogic : MonoBehaviour
     {
         // Windows
-        Implementations.DraggableExperimentList experimentList;
-        Implementations.DraggableOptionsWindow optionsWindow;
-        Implementations.DraggableDebugWindow debugWindow;
+        Implementations.DraggableExperimentList _experimentList;
+        Implementations.DraggableOptionsWindow _optionsWindow;
+        Implementations.DraggableDebugWindow _debugWindow;
 
         // other components
-        ScienceAlertCore scienceAlert;
-        SSUICamera uiCamera;
+        ScienceAlertCore _scienceAlert;
+        SSUICamera _uiCamera;
 
 /******************************************************************************
  *                    Implementation Details
@@ -38,7 +38,7 @@ namespace ScienceAlert.Windows
             DraggableWindow.ButtonSound = "click1";
 
 
-            scienceAlert = GetComponent<ScienceAlertCore>();
+            _scienceAlert = GetComponent<ScienceAlertCore>();
             
 
             // note to self: these are on separate gameobjects because they use a UIButton to catch
@@ -46,19 +46,19 @@ namespace ScienceAlert.Windows
             // also disable the UIButton every time
 
             Log.Normal("Creating options window");
-            optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
+            _optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
             
 
             Log.Normal("Creating experiment window");
-            experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
+            _experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
             
 
             Log.Normal("Creating debug window");
-            debugWindow = new GameObject("ScienceAlert.DebugWindow").AddComponent<Implementations.DraggableDebugWindow>();
+            _debugWindow = new GameObject("ScienceAlert.DebugWindow").AddComponent<Implementations.DraggableDebugWindow>();
             
 
             // initially hide windows
-            optionsWindow.Visible = experimentList.Visible = debugWindow.Visible = false;
+            _optionsWindow.Visible = _experimentList.Visible = _debugWindow.Visible = false;
         }
 
 
@@ -68,16 +68,16 @@ namespace ScienceAlert.Windows
         /// </summary>
         private void Start()
         {
-            uiCamera = ScreenSafeUI.referenceCam.GetComponent<SSUICamera>();
-            if (uiCamera == null) Log.Error("WindowEventLogic: SSUICamera not found");
+            _uiCamera = ScreenSafeUI.referenceCam.GetComponent<SSUICamera>();
+            if (_uiCamera == null) Log.Error("WindowEventLogic: SSUICamera not found");
 
             
-            scienceAlert.OnToolbarButtonChanged += OnToolbarChanged;
-            scienceAlert.OnScanInterfaceChanged += OnInterfaceChanged;
+            _scienceAlert.OnToolbarButtonChanged += OnToolbarChanged;
+            _scienceAlert.OnScanInterfaceChanged += OnInterfaceChanged;
 
-            optionsWindow.OnVisibilityChange += this.OnWindowVisibilityChanged;
-            experimentList.OnVisibilityChange += this.OnWindowVisibilityChanged;
-            debugWindow.OnVisibilityChange += this.OnWindowVisibilityChanged;
+            _optionsWindow.OnVisibilityChange += this.OnWindowVisibilityChanged;
+            _experimentList.OnVisibilityChange += this.OnWindowVisibilityChanged;
+            _debugWindow.OnVisibilityChange += this.OnWindowVisibilityChanged;
 
             
             OnToolbarChanged();
@@ -88,7 +88,7 @@ namespace ScienceAlert.Windows
 
         private void OnToolbarChanged()
         {
-            scienceAlert.Button.OnClick += OnToolbarClick;
+            _scienceAlert.Button.OnClick += OnToolbarClick;
         }
 
 
@@ -125,14 +125,14 @@ namespace ScienceAlert.Windows
             //   If right-click, show options window
 
 #if DEBUG
-            Log.Debug("OptionsWindow: {0}", optionsWindow.Visible);
-            Log.Debug("ExperimentList: {0}", experimentList.Visible);
+            Log.Debug("OptionsWindow: {0}", _optionsWindow.Visible);
+            Log.Debug("ExperimentList: {0}", _experimentList.Visible);
 #endif
 
-            if (optionsWindow.Visible || experimentList.Visible || debugWindow.Visible)
+            if (_optionsWindow.Visible || _experimentList.Visible || _debugWindow.Visible)
             {
                 Log.Debug("WindowEventLogic: Hiding window(s)");
-                optionsWindow.Visible = experimentList.Visible = debugWindow.Visible = false;
+                _optionsWindow.Visible = _experimentList.Visible = _debugWindow.Visible = false;
                 AudioPlayer.Audio.PlayUI("click1", 0.5f);
 
                 return;
@@ -142,15 +142,15 @@ namespace ScienceAlert.Windows
                 switch (clickInfo.button)
                 {
                     case 0: // left click, show experiment list
-                        experimentList.Visible = true;
+                        _experimentList.Visible = true;
                         break;
 
                     case 1: // right click, show options window
-                        optionsWindow.Visible = true;
+                        _optionsWindow.Visible = true;
                         break;
 
                     case 2: // middle click, show debug window (for AppLauncher this is alt + right click)
-                        debugWindow.Visible = true;
+                        _debugWindow.Visible = true;
                         break;
                 }
 
@@ -166,14 +166,14 @@ namespace ScienceAlert.Windows
         /// <param name="tf"></param>
         private void OnWindowVisibilityChanged(bool tf)
         {
-            if (scienceAlert.ToolbarType == Settings.ToolbarInterface.ApplicationLauncher)
+            if (_scienceAlert.ToolbarType == Settings.ToolbarInterface.ApplicationLauncher)
                 if (tf)
                 {
                     GetComponent<Toolbar.AppLauncherInterface>().button.SetTrue(false);
                 }
                 else
                 {
-                    if (!experimentList.Visible && !optionsWindow.Visible && !debugWindow.Visible)
+                    if (!_experimentList.Visible && !_optionsWindow.Visible && !_debugWindow.Visible)
                         GetComponent<Toolbar.AppLauncherInterface>().button.SetFalse(false);
                 }
         }
@@ -186,9 +186,9 @@ namespace ScienceAlert.Windows
         private void Update()
         {
             var mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-            ReeperCommon.Window.DraggableWindow[] windows = new DraggableWindow[] { optionsWindow, experimentList, debugWindow };
+            ReeperCommon.Window.DraggableWindow[] windows = new DraggableWindow[] { _optionsWindow, _experimentList, _debugWindow };
 
-            uiCamera.enabled = !windows.Any(win => win.Visible && win.WindowRect.Contains(mouse));
+            _uiCamera.enabled = !windows.Any(win => win.Visible && win.WindowRect.Contains(mouse));
         }
     }
 }

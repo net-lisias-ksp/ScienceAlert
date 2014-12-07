@@ -18,7 +18,7 @@ namespace ScienceAlert
     /// within a particular search radius, it's suspicious and the last 
     /// good result should be used instead.
     /// </summary>
-    public class BiomeFilter : MonoBehaviour
+    public class BiomeFilter
     {
         private const int HALF_SEARCH_DIMENSIONS = 2;    // box around the point on the biome map to
                                                          // use to verify biome map results
@@ -39,26 +39,16 @@ namespace ScienceAlert
         /******************************************************************************
          *                    Implementation Details
          ******************************************************************************/
-        #region init/deinit
 
-        void Start()
+
+        public BiomeFilter()
         {
-            GameEvents.onDominantBodyChange.Add(OnDominantBodyChanged);
-            GameEvents.onVesselChange.Add(OnVesselChanged);
             ReprojectBiomeMap(FlightGlobals.currentMainBody);
         }
 
-        void OnDestroy()
-        {
-            GameEvents.onVesselChange.Remove(OnVesselChanged);
-            GameEvents.onDominantBodyChange.Remove(OnDominantBodyChanged);
-        }
-
-        #endregion
 
 
-
-        public void Update()
+        public void UpdateBiomeData()
         {
             if (projector != null)
                 projector.MoveNext();
@@ -308,14 +298,14 @@ namespace ScienceAlert
         /// inaccurate results.
         /// </summary>
         /// <param name="bodies"></param>
-        private void OnDominantBodyChanged(GameEvents.FromToAction<CelestialBody, CelestialBody> bodies)
+        public void OnDominantBodyChanged(GameEvents.FromToAction<CelestialBody, CelestialBody> bodies)
         {
             Log.Normal("BiomeFilter.OnDominantBodyChanged from {0} to {1}", bodies.from, bodies.to);
             ReprojectBiomeMap(bodies.to);
         }
 
 
-        private void OnVesselChanged(Vessel v)
+        public void OnVesselChanged(Vessel v)
         {
             ReprojectBiomeMap(v.mainBody);
         }
