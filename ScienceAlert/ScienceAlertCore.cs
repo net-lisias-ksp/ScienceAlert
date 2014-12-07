@@ -9,10 +9,6 @@ using ReeperCommon;
 
 namespace ScienceAlert
 {
-    using Window = ReeperCommon.Window;
-
-
-    
 
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ScienceAlertCore : MonoBehaviour
@@ -64,7 +60,7 @@ namespace ScienceAlert
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
-            ScienceDataCache = gameObject.AddComponent<ScienceDataCache>();
+            OnboardScienceDataCache = gameObject.AddComponent<OnboardScienceDataCache>();
             BiomeFilter = gameObject.AddComponent<BiomeFilter>();
 
             Log.Verbose("Creating experiment manager");
@@ -274,7 +270,7 @@ namespace ScienceAlert
             private set;
         }
 
-        public ScienceDataCache ScienceDataCache
+        public OnboardScienceDataCache OnboardScienceDataCache
         {
             get
             {

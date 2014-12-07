@@ -9,51 +9,66 @@ using ReeperCommon;
 namespace ScienceAlert.Experiments
 {
     using ProfileManager = ScienceAlertProfileManager;
-    using MonitorList = List<ExperimentSensor>;
+    using SensorList = List<IExperimentSensor>;
 
-    using ExperimentStatusChanged = ScienceAlert.API.ExperimentStatusChanged;
-    using ExperimentRecoveryAlert = ScienceAlert.API.ExperimentRecoveryAlert;
-    using ExperimentTransmittableAlert = ScienceAlert.API.ExperimentTransmittableAlert;
-    using ExperimentSubjectChanged = ScienceAlert.API.ExperimentSubjectChanged;
 
-    /// <summary>
-    /// Responsible for updating experiment monitor status
-    /// </summary>
-    public class SensorManager : MonoBehaviour
+
+    public class SensorManager
     {
-        //---------------------------------------------------------------------
-        // Members
-        //---------------------------------------------------------------------
-        System.Collections.IEnumerator watcher;                     // infinite-looping method used to update experiment monitors
-        MonitorList monitors = new MonitorList();                   // monitors which will be checked sequentially
+        private System.Collections.IEnumerator _sensorLoop;                     // infinite-looping method used to update experiment monitors
+        private SensorList _sensors = new SensorList();                         // monitors which will be checked sequentially
+        private readonly SensorFactory sensorFactory;
 
-        //---------------------------------------------------------------------
-        // Events
-        //---------------------------------------------------------------------
+
+        public delegate void ExperimentStatusChanged(SensorState oldStatus, IExperimentSensor sensor); // all status changes, including alert->no alert
+        public delegate void ExperimentRecoveryAlert(IExperimentSensor sensor);
+        public delegate void ExperimentTransmittableAlert(IExperimentSensor sensor);
+        public delegate void ExperimentSubjectChanged(IExperimentSensor sensor);
+
+
         public event ExperimentStatusChanged OnExperimentStatusChanged = delegate { };
         public event ExperimentRecoveryAlert OnExperimentRecoveryAlert = delegate { };
         public event ExperimentTransmittableAlert OnExperimentTransmittableAlert = delegate { };
         public event ExperimentSubjectChanged OnExperimentSubjectChanged = delegate { };
  
+
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
 
-        #region init/deinit/MonoBehaviour
-        private void Start()
-        {
-            // event setup
-            GameEvents.onVesselWasModified.Add(OnVesselEvent);
-            GameEvents.onVesselChange.Add(OnVesselEvent);
-            GameEvents.onVesselDestroy.Add(OnVesselEvent);
 
-            // create monitor list
-            RescanVessel();
+        public SensorManager(Experiments.Science.OnboardScienceDataCache onboardCache)
+        {
+            sensorFactory = new SensorFactory(onboardCache);
+            SubscribeVesselEvents();
+            CreateSensorsForVessel();
         }
 
 
 
-        private void OnDestroy()
+        ~SensorManager()
+        {
+            UnsubscribeVesselEvents();
+        }
+
+
+        public void UpdateSensorStates()
+        {
+            if (FlightGlobals.ActiveVessel != null && _sensorLoop != null)
+                _sensorLoop.MoveNext(); // loop never ends so no need to check return value here
+        }
+
+
+
+        private void SubscribeVesselEvents()
+        {
+            GameEvents.onVesselWasModified.Add(OnVesselEvent);
+            GameEvents.onVesselChange.Add(OnVesselEvent);
+            GameEvents.onVesselDestroy.Add(OnVesselEvent);
+        }
+
+
+        private void UnsubscribeVesselEvents()
         {
             GameEvents.onVesselWasModified.Remove(OnVesselEvent);
             GameEvents.onVesselChange.Remove(OnVesselEvent);
@@ -61,64 +76,47 @@ namespace ScienceAlert.Experiments
         }
 
 
-        private void Update()
+
+        public void CreateSensorsForVessel()
         {
-            if (FlightGlobals.ActiveVessel != null && watcher != null)
-                watcher.MoveNext(); // watcher never ends so no need to check return value here
-        }
+            _sensors.Clear();
 
-        #endregion
-
-
-
-        /// <summary>
-        /// Refreshes monitor list and their assigned ModuleScienceExperiments
-        /// </summary>
-        public void RescanVessel()
-        {
-            monitors.Clear();
-
-            Log.Verbose("SensorManager: Scanning vessel for experiments");
+            Log.Verbose("SensorManager: Checking vessel for experiments");
 
             if (FlightGlobals.ActiveVessel == null)
             {
-                Log.Verbose("Scan aborted; no active vessel");
+                Log.Verbose("aborted; no active vessel");
                 return;
             }
 
             try
             {
                 var modules = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
-
-                // note: surfaceSample and evaReport are handled in a special way, so we exclude them from
-                // the basic pool
-                ResearchAndDevelopment.GetExperimentIDs()
-                    .Where(expid => expid != "evaReport" && expid != "surfaceSample")
-                    .ToList()
-                    .ForEach(expid =>
-                        monitors.Add(
-                            new ExperimentSensor(expid, ProfileManager.ActiveProfile[expid], API.ScienceAlert.ScienceDataCache,
-                                modules.Where(mse => mse.experimentID == expid).ToList())
-                            )
-                    );
-
-                // todo: eva monitor, surface sample monitor
-
-
                 Log.Normal("Scanned vessel and found {0} experiment modules", modules.Count);
+
+                var experimentids = ResearchAndDevelopment.GetExperimentIDs();
+
+                foreach (string expid in experimentids)
+                {
+                    IExperimentSensor sensor = sensorFactory.CreateSensor(expid, modules);
+                    if (sensor == null)
+                    {
+                        Log.Error("Failed to create {0} sensor", expid);
+                    }
+                    else _sensors.Add(sensor);
+                }
             }
             catch (Exception e)
             {
                 Log.Error("An exception occurred while scanning the vessel for experiment modules: {0}", e);
             }
 
-            // start update loop over
-            watcher = UpdateMonitors();
+            _sensorLoop = CheckSensorStates();
         }
 
 
 
-        private System.Collections.IEnumerator UpdateMonitors()
+        private System.Collections.IEnumerator CheckSensorStates()
         {
             ExperimentSituations situation;
 
@@ -126,51 +124,49 @@ namespace ScienceAlert.Experiments
             {
                 situation = ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel);
 
-                foreach (var monitor in monitors)
+                foreach (var sensor in _sensors)
                 {
-                    var oldStatus = monitor.Status;
-                    var oldSubject = monitor.Subject;
+                    CheckSensorForEvent(situation, sensor);
 
-                    if (oldStatus != monitor.UpdateStatus(situation))
-                    {
-                        // new status! trigger appropriate alerts
-                        OnExperimentStatusChanged(monitor.Status, oldStatus, monitor);
-
-                        // is the recovery alert new?
-                        // note: the logic here is "if the recovery flag is set AND the old
-                        // status did not have this flag set"
-                        if ((monitor.Status & API.ExperimentStatus.Recoverable) != 0 &&
-                            (oldStatus & API.ExperimentStatus.Recoverable) == 0)
-                            OnExperimentRecoveryAlert(monitor.Experiment, monitor.RecoveryValue);
-
-                        // is the transmittable alert new?
-                        if ((monitor.Status & API.ExperimentStatus.Transmittable) != 0 &&
-                            (oldStatus & API.ExperimentStatus.Transmittable) == 0)
-                            OnExperimentTransmittableAlert(monitor.Experiment, monitor.TransmissionValue);
-
-                    }
-
-                    // notify subscribers if the monitor's subject has changed
-                    if (oldSubject != monitor.Subject)
-                        OnExperimentSubjectChanged(monitor.Status, monitor);
-
-
-                    // if the user accelerated time it's possible to have some
-                    // experiments checked too late. If the user is time warping
-                    // quickly enough, then we'll go ahead and check every 
-                    // experiment on every loop
                     if (TimeWarp.CurrentRate < Settings.Instance.TimeWarpCheckThreshold)
                     {
                         yield return 0; // pause until next frame
-                        situation = ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel); // for correctness' sake, otherwise we could lag up to (1-expcount) frames behind
+                        situation = ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel); // otherwise situation will be increasingly out of date
                     }
-                } // end foreach monitors
-
+                }
 
                 yield return 0;
-            } // end infinite while loop
+            }
         }
 
+
+
+        private void CheckSensorForEvent(ExperimentSituations currentSituation, IExperimentSensor sensor)
+        {
+            var oldStatus = sensor.Status;
+            var oldSubject = sensor.Subject;
+
+            sensor.UpdateState(FlightGlobals.ActiveVessel.mainBody, currentSituation);
+
+            if (oldStatus != sensor.Status)
+                OnExperimentStatusChanged(oldStatus, sensor);
+
+            if (IsFlagStateNewlySet(sensor.Status, oldStatus, SensorState.RecoveryAlert))
+                OnExperimentRecoveryAlert(sensor);
+
+            if (IsFlagStateNewlySet(sensor.Status, oldStatus, SensorState.TransmitAlert))
+                OnExperimentTransmittableAlert(sensor);
+
+            if (oldSubject != sensor.Subject)
+                OnExperimentSubjectChanged(sensor);
+
+        }
+
+
+        private static bool IsFlagStateNewlySet(SensorState newState, SensorState oldState, SensorState flag)
+        {
+            return ((oldState & flag) == 0) && (newState & flag) != 0;
+        }
 
        
         #region GameEvents
@@ -182,9 +178,9 @@ namespace ScienceAlert.Experiments
             Log.Debug("OnVesselEvent for {0}", v.vesselName);
 #endif
 
-            if (FlightGlobals.ActiveVessel == v && v != null)
+            if (FlightGlobals.ActiveVessel == v)
             {
-                RescanVessel();
+                CreateSensorsForVessel();
             }
 #if DEBUG
             else

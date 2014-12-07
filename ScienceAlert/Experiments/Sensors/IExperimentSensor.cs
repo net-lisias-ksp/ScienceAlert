@@ -9,13 +9,15 @@ namespace ScienceAlert.Experiments.Sensors
     public enum SensorState
     {
         NoAlert = 0,                                            
-        Recoverable = 1 << 0,                                   
-        Transmittable = 1 << 1,                                 
+        RecoveryAlert = 1 << 0,                                   
+        TransmitAlert = 1 << 1,                                 
 
-        Both = Recoverable | Transmittable
+        Both = RecoveryAlert | TransmitAlert,
+        RecoveryAndTransmitAlert = Both
     }
 
-    interface IExperimentSensor
+
+    public interface IExperimentSensor
     {
         float RecoveryValue { get; }
         float TransmissionValue { get; }
@@ -26,5 +28,6 @@ namespace ScienceAlert.Experiments.Sensors
 
         void UpdateState(CelestialBody body, ExperimentSituations situation);
         bool DeployThisExperiment();
+        void SetScienceModules(ModuleScienceExperiment moduleList);
     }
 }

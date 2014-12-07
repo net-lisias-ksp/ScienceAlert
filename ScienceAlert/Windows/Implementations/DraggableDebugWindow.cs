@@ -110,7 +110,7 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Debug("subject value: " + subject.subjectValue);
                 Log.Debug("body multiplier: " + API.GetBodyScienceValueMultipler(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)));
                 Log.Debug("xmitScalar: " + xmitScalar);
-                Log.Debug("sample count: " + API.ScienceAlert.ScienceDataCache.FindStoredData(subject.id).Count);
+                Log.Debug("sample count: " + API.ScienceAlert.OnboardScienceDataCache.FindStoredData(subject.id).Count);
 
                 FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>().Where(mse => mse.experimentID == exp.id).ToList().ForEach(mse => Log.Debug("xmitScalar: {0}", mse.xmitDataScalar));
 
@@ -118,13 +118,13 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Normal("Next absolute recovery: {0}", subject.CalculateNextReport(exp, new List<ScienceData>()));
 
                 // this should also be correct (considers stored experiments)
-                Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, API.ScienceAlert.ScienceDataCache.FindStoredData(subject.id)));
+                Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, API.ScienceAlert.OnboardScienceDataCache.FindStoredData(subject.id)));
 
                 // value to be checked, absolute
                 Log.Normal("next absolute transmission: {0}", subject.CalculateNextReport(exp, new List<ScienceData>(), xmitScalar));
 
                 // value to be checked, next transmitted sample
-                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, API.ScienceAlert.ScienceDataCache.FindStoredData(subject.id), xmitScalar));
+                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, API.ScienceAlert.OnboardScienceDataCache.FindStoredData(subject.id), xmitScalar));
             }
         }
 

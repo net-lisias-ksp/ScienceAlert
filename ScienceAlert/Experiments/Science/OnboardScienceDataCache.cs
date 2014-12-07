@@ -12,10 +12,10 @@ namespace ScienceAlert.Experiments.Science
     /// but rather by id, so it makes more sense to have one object track
     /// it than have every observer do so.
     /// 
-    /// ScienceDataCache keeps track of events and will update itself as
+    /// OnboardScienceDataCache keeps track of events and will update itself as
     /// necessary.  It will also manage the magic transmitter as required.
     /// </summary>
-    public class ScienceDataCache : MonoBehaviour
+    public class OnboardScienceDataCache : MonoBehaviour
     {
         protected List<IScienceDataContainer> storage;                      // containers for science data
         protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel

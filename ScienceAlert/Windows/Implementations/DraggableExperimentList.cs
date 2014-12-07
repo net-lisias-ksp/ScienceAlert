@@ -5,8 +5,6 @@ using UnityEngine;
 
 namespace ScienceAlert.Windows.Implementations
 {
-    using Observer = Experiments.Observers.ExperimentObserver;
-
     /// <summary>
     /// This window replaces the old ExperimentManager Drawable. It lists all available
     /// experiments
@@ -16,7 +14,7 @@ namespace ScienceAlert.Windows.Implementations
         private const string WindowTitle = "Available Experiments";
 
         // members
-        private bool adjustedSkin = false;
+        private bool _adjustedSkin = false;
 
 /******************************************************************************
  *                    Implementation Details
@@ -97,7 +95,7 @@ namespace ScienceAlert.Windows.Implementations
         /// </summary>
         new protected void OnGUI()
         {
-            if (!adjustedSkin)
+            if (!_adjustedSkin)
             {
                 Skin.window.stretchHeight = true;
                 var experimentTitles = new List<string>();
@@ -114,7 +112,7 @@ namespace ScienceAlert.Windows.Implementations
                         return maxWidth;
                     }));
 
-                adjustedSkin = true;
+                _adjustedSkin = true;
             }
 
             base.OnGUI();

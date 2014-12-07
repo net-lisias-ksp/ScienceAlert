@@ -10,7 +10,7 @@ namespace ScienceAlert.Experiments.Sensors
 
         // members
         private BiomeFilter filter;
-        ScienceDataCache cache;                  
+        OnboardScienceDataCache cache;                  
 
         private List<ModuleScienceExperiment> recoveryModules;                         // cache of all ModuleScienceExperiments on the Vessel, sorted
                                                                     // least-to-greatest by xmitScalar
@@ -18,7 +18,7 @@ namespace ScienceAlert.Experiments.Sensors
 
 
 
-        public ExperimentSensor(ScienceExperiment experiment, ProfileData.SensorSettings settings, ScienceDataCache cache, IEnumerable<ModuleScienceExperiment> modules)
+        public ExperimentSensor(ScienceExperiment experiment, ProfileData.SensorSettings settings, OnboardScienceDataCache cache, IEnumerable<ModuleScienceExperiment> modules)
         {
             Settings = settings;
             Experiment = experiment;
@@ -94,24 +94,24 @@ namespace ScienceAlert.Experiments.Sensors
                 // "only alert me if I have no data whatsoever on this experiment"
                 case ProfileData.SensorSettings.FilterMethod.Unresearched:
                     if (recoveryTotal < 0.001f)
-                        Status |= SensorState.Recoverable;
+                        Status |= SensorState.RecoveryAlert;
                     break;
 
                 // "alert me if this subject has less than 50% of its science gathered"
                 case ProfileData.SensorSettings.FilterMethod.LessThanFiftyPercent:
                     if (recoveryTotal / subject.scienceCap < 0.5f)
-                        Status |= SensorState.Recoverable;
+                        Status |= SensorState.RecoveryAlert;
                     break;
 
                 // "alert me if this subject has less than 90% of its science gathered"
                 case ProfileData.SensorSettings.FilterMethod.LessThanNinetyPercent:
                     if (recoveryTotal / subject.science < 0.9f)
-                        Status |= SensorState.Recoverable;
+                        Status |= SensorState.RecoveryAlert;
                     break;
 
                 // "alert me if I can gain ANY science"
                 case ProfileData.SensorSettings.FilterMethod.NotMaxed:
-                    Status |= SensorState.Recoverable;
+                    Status |= SensorState.RecoveryAlert;
                     break;
             }
             
@@ -133,6 +133,10 @@ namespace ScienceAlert.Experiments.Sensors
             throw new System.NotImplementedException();
         }
 
+        public void SetScienceModules(ModuleScienceExperiment moduleList)
+        {
+            throw new System.NotImplementedException();
+        }
 
 
         /// <summary>

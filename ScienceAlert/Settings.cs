@@ -14,10 +14,10 @@ namespace ScienceAlert
         public delegate void Callback();
 
         // Singleton pattern
-        private static Settings instance;
+        private static Settings _instance;
 
         [DoNotSerialize]
-        private readonly string ConfigPath = ConfigUtil.GetDllDirectoryPath() + "/settings.cfg";
+        private readonly string _configPath = ConfigUtil.GetDllDirectoryPath() + "/settings.cfg";
 
         public enum WarpSetting : int
         {
@@ -140,10 +140,10 @@ namespace ScienceAlert
         {
             get
             {
-                if (instance == null)
-                    instance = new Settings();
+                if (_instance == null)
+                    _instance = new Settings();
 
-                return instance;
+                return _instance;
             }
         }
 
@@ -178,14 +178,14 @@ namespace ScienceAlert
         public void Load()
         {
  
-            Log.Normal("Loading settings from {0}", ConfigPath);
-            if (File.Exists(ConfigPath))
+            Log.Normal("Loading settings from {0}", _configPath);
+            if (File.Exists(_configPath))
             {
-                ConfigNode node = ConfigNode.Load(ConfigPath);
+                ConfigNode node = ConfigNode.Load(_configPath);
 
                 if (node == null)
                 {
-                    Log.Error("Failed to load {0}", ConfigPath);
+                    Log.Error("Failed to load {0}", _configPath);
                 }
                 else 
                 {
@@ -199,7 +199,7 @@ namespace ScienceAlert
             }
             else
             {
-                Log.Error("Failed to find settings file {0}", ConfigPath);
+                Log.Error("Failed to find settings file {0}", _configPath);
 
                 // save default values, then
                 Save();
@@ -236,8 +236,8 @@ namespace ScienceAlert
             if (saved.CountNodes > 0 || saved.CountValues > 0)
             {
 
-                Log.Normal("Saving settings to {0}", ConfigPath);
-                saved.Save(ConfigPath);
+                Log.Normal("Saving settings to {0}", _configPath);
+                saved.Save(_configPath);
             }
             else
             {

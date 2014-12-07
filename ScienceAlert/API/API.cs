@@ -12,26 +12,6 @@ namespace ScienceAlert
     /// </summary>
     public static class API
     {
-
-
-
-        //---------------------------------------------------------------------
-        // Delegate prototypes
-        //---------------------------------------------------------------------
-        public delegate void ExperimentStatusChanged(ExperimentStatus newStatus, ExperimentStatus oldStatus, ExperimentSensor sensor);
-        
-        // Simpler events if subscriber doesn't need to know all the details, only that an alert has popped
-        public delegate void ExperimentRecoveryAlert(ScienceExperiment experiment, float recoveryValue);
-        public delegate void ExperimentTransmittableAlert(ScienceExperiment experiment, float transmissionValue);
-
-        // This one's a bit different: the above event delegates are only for actual status changes
-        // This one triggers when the subject id of an experiment changes, which won't necessarily trigger
-        // an alert but nonetheless may be of interest to subscribers
-        public delegate void ExperimentSubjectChanged(ExperimentStatus status, ExperimentSensor sensor);
-
-
-
-
         //---------------------------------------------------------------------
         // Globals
         //---------------------------------------------------------------------
