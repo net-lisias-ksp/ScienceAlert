@@ -10,7 +10,7 @@
   <Class Name="ScienceAlert.BiomeFilter" Collapsed="true">
     <Position X="19.5" Y="2.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>ABQBABAAAGAAAAAABAAAAABAqCAAEQAACIAAAACAAAA=</HashCode>
+      <HashCode>ABAAABAAAEAAAAAABAAAAABAqDAAEQAACIAAAACAAAA=</HashCode>
       <FileName>BiomeFilter.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -48,20 +48,20 @@
   <Class Name="ScienceAlert.ScienceAlertCore">
     <Position X="12.25" Y="0.75" Width="3.75" />
     <TypeIdentifier>
-      <HashCode>AEQFAABAACAAAAAAAAEAAAAAAgAAAAACAAAAlAABEMA=</HashCode>
+      <HashCode>AEQBAABAAiAAAAACAAEAAAAAAgAAAAAGAAAAlAABEIA=</HashCode>
       <FileName>ScienceAlertCore.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="BiomeFilter" />
       <Property Name="SensorManager" />
-      <Property Name="OnboardScienceDataCache" />
+      <Property Name="StoredVesselScience" />
       <Property Name="Button" />
     </ShowAsAssociation>
   </Class>
   <Class Name="ScienceAlert.Settings" Collapsed="true" BaseTypeListCollapsed="true">
     <Position X="15" Y="15.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>MBEQwKBEAIAAAAAAAIBQABAKAAFAAAAARABAEAQAIYg=</HashCode>
+      <HashCode>MBEUgKBEAIAAAAAAAIBQABAKAIEAAAAARABAEAQAIYg=</HashCode>
       <FileName>Settings.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
@@ -148,20 +148,21 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="ScienceAlert.Experiments.Science.OnboardScienceDataCache">
+  <Class Name="ScienceAlert.Experiments.Science.StoredVesselScience">
     <Position X="19.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AQABABAAACAAAAACAAAAAAFQIAAAAAAAACgCAAIQgAA=</HashCode>
-      <FileName>Experiments\Science\OnboardScienceDataCache.cs</FileName>
+      <HashCode>AQAFAJAAAAAAAAAAAAAAAAFQIAAAAAAAACgCIAIQgAA=</HashCode>
+      <FileName>Experiments\Science\StoredVesselScience.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="magicTransmitter" />
     </ShowAsAssociation>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="ScienceAlert.Experiments.SensorManager" Collapsed="true">
     <Position X="12" Y="8.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAoAAAABAAAAAQAAICAiAIAAAABIIAAAAAAIAAAE=</HashCode>
+      <HashCode>AAAAAoAAAABAAAAASAAACAiAIAAABBIIAAAAAAIAAAE=</HashCode>
       <FileName>Experiments\SensorManager.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -380,7 +381,7 @@
   <Class Name="ScienceAlert.Windows.Implementations.DraggableExperimentList" Collapsed="true">
     <Position X="0.5" Y="12.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAgAACAAAAAAAAQAAIAAAAIAAAAAABACAAEAAAAA=</HashCode>
+      <HashCode>AAAAAgAACAAAEAAAAQAAIAAAAIAAAAAABACAAAAAAAA=</HashCode>
       <FileName>Windows\Implementations\DraggableExperimentList.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -401,7 +402,7 @@
   <Class Name="ScienceAlert.Windows.WindowEventLogic" Collapsed="true">
     <Position X="15" Y="16.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AEQBAAAAQCAIAAAAAAAAAAEAgARAAAAAAIAAAQAAAEA=</HashCode>
+      <HashCode>AEQBAAAACCAACAAAAAAACAEAAAQAgAACAIAAAAAAAEA=</HashCode>
       <FileName>Windows\WindowEventLogic.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -412,7 +413,7 @@
   <Class Name="ScienceAlert.Experiments.Sensors.ExperimentSensor" Collapsed="true">
     <Position X="13.25" Y="12.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AiCCAAAEAQAAgAAgAIQAEAAFAAAAQAAAgCAAFAAAAAA=</HashCode>
+      <HashCode>AiCCAAAEAQAAgAAgAIQAEAQFAAAAQAAAgCAAFAAAAAA=</HashCode>
       <FileName>Experiments\Sensors\ExperimentSensor.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />

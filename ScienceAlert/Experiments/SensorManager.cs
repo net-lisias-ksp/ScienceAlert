@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ScienceAlert.Experiments.Sensors;
+using ScienceAlert.Experiments.Factory;
+using ScienceAlert.KSPInterfaces.FlightGlobals;
 using UnityEngine;
 using ReeperCommon;
 
@@ -15,10 +17,13 @@ namespace ScienceAlert.Experiments
 
     public class SensorManager
     {
+        private readonly ISensorFactory _sensorFactory;
+        private readonly IActiveVesselProvider _activeVesselProvider;
+
+
         private System.Collections.IEnumerator _sensorLoop;                     // infinite-looping method used to update experiment monitors
         private SensorList _sensors = new SensorList();                         // monitors which will be checked sequentially
-        private readonly SensorFactory sensorFactory;
-
+        
 
         public delegate void ExperimentStatusChanged(SensorState oldStatus, IExperimentSensor sensor); // all status changes, including alert->no alert
         public delegate void ExperimentRecoveryAlert(IExperimentSensor sensor);
@@ -37,9 +42,19 @@ namespace ScienceAlert.Experiments
  ******************************************************************************/
 
 
-        public SensorManager(Experiments.Science.OnboardScienceDataCache onboardCache)
+        public SensorManager(
+            ISensorFactory sensorFactory, 
+            Experiments.Science.StoredVesselScience storedVesselCache, 
+            IActiveVesselProvider activeVesselProvider)
         {
-            sensorFactory = new SensorFactory(onboardCache);
+            if (sensorFactory.IsNull())
+                throw new ArgumentNullException("sensorFactory");
+            if (activeVesselProvider.IsNull())
+                throw new ArgumentNullException("activeVesselProvider");
+
+            _sensorFactory = sensorFactory;
+            _activeVesselProvider = activeVesselProvider;
+
             SubscribeVesselEvents();
             CreateSensorsForVessel();
         }
@@ -52,9 +67,10 @@ namespace ScienceAlert.Experiments
         }
 
 
+
         public void UpdateSensorStates()
         {
-            if (FlightGlobals.ActiveVessel != null && _sensorLoop != null)
+            if (_activeVesselProvider.GetActiveVessel().Any() && _sensorLoop != null)
                 _sensorLoop.MoveNext(); // loop never ends so no need to check return value here
         }
 
@@ -66,6 +82,7 @@ namespace ScienceAlert.Experiments
             GameEvents.onVesselChange.Add(OnVesselEvent);
             GameEvents.onVesselDestroy.Add(OnVesselEvent);
         }
+
 
 
         private void UnsubscribeVesselEvents()
@@ -83,7 +100,7 @@ namespace ScienceAlert.Experiments
 
             Log.Verbose("SensorManager: Checking vessel for experiments");
 
-            if (FlightGlobals.ActiveVessel == null)
+            if (_activeVesselProvider.GetActiveVessel().Any())
             {
                 Log.Verbose("aborted; no active vessel");
                 return;
@@ -91,14 +108,14 @@ namespace ScienceAlert.Experiments
 
             try
             {
-                var modules = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
-                Log.Normal("Scanned vessel and found {0} experiment modules", modules.Count);
+                var modules = _activeVesselProvider.GetActiveVessel().Single().GetScienceExperimentModules();
+                Log.Normal("Scanned vessel and found {0} experiment modules", modules.Count());
 
                 var experimentids = ResearchAndDevelopment.GetExperimentIDs();
 
                 foreach (string expid in experimentids)
                 {
-                    IExperimentSensor sensor = sensorFactory.CreateSensor(expid, modules);
+                    IExperimentSensor sensor = _sensorFactory.Create(expid, modules);
                     if (sensor == null)
                     {
                         Log.Error("Failed to create {0} sensor", expid);

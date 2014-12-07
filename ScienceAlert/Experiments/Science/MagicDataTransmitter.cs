@@ -47,7 +47,7 @@ namespace ScienceAlert.Experiments.Science
         // will result in it getting stalled, remaining open but
         // not sending data
         private Dictionary<IScienceDataTransmitter, List<ScienceData>> toBeTransmitted = new Dictionary<IScienceDataTransmitter, List<ScienceData>>();
-        internal OnboardScienceDataCache cacheOwner;
+        internal StoredVesselScience cacheOwner;
 
 
 /******************************************************************************

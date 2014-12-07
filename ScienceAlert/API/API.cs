@@ -12,12 +12,6 @@ namespace ScienceAlert
     /// </summary>
     public static class API
     {
-        //---------------------------------------------------------------------
-        // Globals
-        //---------------------------------------------------------------------
-        public static bool Ready = false;
-        public static ScienceAlertCore ScienceAlert = null;
-
 
         /// <summary>
         /// See GetNextReportValue

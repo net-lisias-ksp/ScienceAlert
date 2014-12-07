@@ -407,7 +407,7 @@ namespace ScienceAlert.Windows.Implementations
                             Settings.Instance.CheckSurfaceSampleNotEva = AudibleToggle(prev, "Track surface sample in vessel");
 
                             if (prev != Settings.Instance.CheckSurfaceSampleNotEva)
-                                API.ScienceAlert.SensorManager.RescanVessel();
+                                API.ScienceAlert.SensorManager.CreateSensorsForVessel();
 
                         }
 

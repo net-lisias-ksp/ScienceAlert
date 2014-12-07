@@ -12,16 +12,16 @@ namespace ScienceAlert.Experiments
 
     class SensorFactory
     {
-        private readonly OnboardScienceDataCache _onboardScienceCache;
+        private readonly StoredVesselScience _storedVesselScienceCache;
 
 
-        public SensorFactory(OnboardScienceDataCache onboardData)
+        public SensorFactory(StoredVesselScience storedVesselData)
         {
-            _onboardScienceCache = onboardData;
+            _storedVesselScienceCache = storedVesselData;
         }
 
 
-        public IExperimentSensor CreateSensor(string experimentid, IEnumerable<ModuleScienceExperiment> allOnboardScienceModules)
+        public IExperimentSensor Create(string experimentid, IEnumerable<ModuleScienceExperiment> allOnboardScienceModules)
         {
             if (allOnboardScienceModules == null) allOnboardScienceModules = new List<ModuleScienceExperiment>();
 
@@ -43,7 +43,7 @@ namespace ScienceAlert.Experiments
                     break;
 
                 default:
-                    return new ExperimentSensor(experiment, ProfileManager.ActiveProfile[experimentid], _onboardScienceCache, allOnboardScienceModules);
+                    return new ExperimentSensor(experiment, ProfileManager.ActiveProfile[experimentid], _storedVesselScienceCache, allOnboardScienceModules);
                     break;
             }
         }

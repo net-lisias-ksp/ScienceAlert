@@ -10,7 +10,7 @@ namespace ScienceAlert.Experiments.Sensors
 
         // members
         private BiomeFilter filter;
-        OnboardScienceDataCache cache;                  
+        StoredVesselScience cache;                  
 
         private List<ModuleScienceExperiment> recoveryModules;                         // cache of all ModuleScienceExperiments on the Vessel, sorted
                                                                     // least-to-greatest by xmitScalar
@@ -18,7 +18,7 @@ namespace ScienceAlert.Experiments.Sensors
 
 
 
-        public ExperimentSensor(ScienceExperiment experiment, ProfileData.SensorSettings settings, OnboardScienceDataCache cache, IEnumerable<ModuleScienceExperiment> modules)
+        public ExperimentSensor(ScienceExperiment experiment, ProfileData.SensorSettings settings, StoredVesselScience cache, IEnumerable<ModuleScienceExperiment> modules)
         {
             Settings = settings;
             Experiment = experiment;

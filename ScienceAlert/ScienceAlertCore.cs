@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ScienceAlert.Experiments.Science;
+using ScienceAlert.KSPInterfaces.ResearchAndDevelopment;
+using ScienceAlert.KSPInterfaces.ResearchAndDevelopment.Implementations;
+using ScienceAlert.ResearchAndDevelopment;
 using UnityEngine;
 using ReeperCommon;
 
@@ -29,18 +32,22 @@ namespace ScienceAlert
         public event Callback OnToolbarButtonChanged = delegate { };
 
 
+        private IResearchAndDevelopmentProvider _rndProvider;
+
+
+
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
         System.Collections.IEnumerator Start()
         {
-            API.ScienceAlert = null;
-            API.Ready = false;
+            _rndProvider = new KspResearchAndDevelopmentProvider();
+
+
 
             Log.Normal("Waiting on R&D...");
-            while (ResearchAndDevelopment.Instance == null) yield return 0;
-            while (FlightGlobals.ActiveVessel == null) yield return 0;
-            while (!FlightGlobals.ready) yield return 0;
+            while (!_rndProvider.Instance.Any()) yield return 0;
+
 
             Log.Normal("Waiting on ProfileManager...");
             while (ScienceAlertProfileManager.Instance == null || !ScienceAlertProfileManager.Instance.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
@@ -60,13 +67,13 @@ namespace ScienceAlert
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
-            OnboardScienceDataCache = gameObject.AddComponent<OnboardScienceDataCache>();
+            StoredVesselScience = gameObject.AddComponent<StoredVesselScience>();
 
 
             CreateBiomeFilter();
 
 
-            SensorManager = new Experiments.SensorManager(OnboardScienceDataCache);
+            SensorManager = new Experiments.SensorManager(StoredVesselScience);
 
             
 
@@ -88,8 +95,7 @@ namespace ScienceAlert
             Log.Verbose("Toolbar button ready");
 
             Log.Normal("ScienceAlert initialization finished.");
-            API.Ready = true;
-            API.ScienceAlert = this;
+
 
 #if DEBUG
             //gameObject.AddComponent<Windows.Implementations.TestDrag>();
@@ -102,13 +108,13 @@ namespace ScienceAlert
         {
             DestroyBiomeFilter();
 
-            API.Ready = false;
-            API.ScienceAlert = null;
             Button.Drawable = null;
             Settings.Instance.Save();
             Log.Verbose("ScienceAlert destroyed");
         }
 
+
+     
 
         private void CreateBiomeFilter()
         {
@@ -269,7 +275,7 @@ namespace ScienceAlert
             private set;
         }
 
-        public OnboardScienceDataCache OnboardScienceDataCache
+        public StoredVesselScience StoredVesselScience
         {
             get
             {

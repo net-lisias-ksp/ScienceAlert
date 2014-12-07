@@ -2,36 +2,47 @@
 using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon;
-using UnityEngine;
+using ScienceAlert.KSPInterfaces.FlightGlobals;
 
 namespace ScienceAlert.Experiments.Science
 {
+    public interface IStoredVesselScience
+    {
+        void OnVesselChange(IVessel vessel);
+        void OnVesselWasModified(IVessel vessel);
+        void OnVesselDestroy(IVessel vessel);
+
+        IEnumerable<ScienceData> StoredScience { get; }
+    }
+
+
     /// <summary>
     /// The purpose of this object is to reduce redundancy between 
     /// ExperimentObservers.  ScienceData isn't sorted by ScienceExperiment
     /// but rather by id, so it makes more sense to have one object track
     /// it than have every observer do so.
     /// 
-    /// OnboardScienceDataCache keeps track of events and will update itself as
+    /// StoredVesselScience keeps track of events and will update itself as
     /// necessary.  It will also manage the magic transmitter as required.
     /// </summary>
-    public class OnboardScienceDataCache : MonoBehaviour
+    public class StoredVesselScience : IStoredVesselScience
     {
-        protected List<IScienceDataContainer> storage;                      // containers for science data
-        protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
-        protected Vessel vessel;                            // which vessel this storage cache is for
+        private List<IScienceDataContainer> storage;                      // containers for science data
+        private MagicDataTransmitter magicTransmitter;                    // MagicDataTransmitter keeps an eye on any queued data for the vessel
+        private IActiveVesselProvider _vesselProvider;
+        private IVessel _monitoredVessel;
 
 
 /******************************************************************************
  *                          Begin Implementation
  *****************************************************************************/
-        public void Start()
+        public StoredVesselScience(IActiveVesselProvider vesselProvider)
         {
-            GameEvents.onVesselChange.Add(OnVesselChange);
-            GameEvents.onVesselWasModified.Add(OnVesselModified);
-            GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
+            if (vesselProvider.IsNull())
+                throw new ArgumentNullException("vesselProvider");
 
-            vessel = FlightGlobals.ActiveVessel;
+            _vesselProvider = vesselProvider;
+
             ScheduleRebuild();
         }
 
@@ -39,13 +50,27 @@ namespace ScienceAlert.Experiments.Science
 
         public void OnDestroy()
         {
-            GameEvents.onVesselDestroy.Remove(OnVesselDestroyed);
-            GameEvents.onVesselWasModified.Remove(OnVesselModified);
-            GameEvents.onVesselChange.Remove(OnVesselChange);
+
 
             RemoveMagicTransmitter(false);
         }
 
+
+
+        private void SubscribeVesselEvents()
+        {
+            GameEvents.onVesselChange.Add(OnVesselChange);
+            GameEvents.onVesselWasModified.Add(OnVesselModified);
+            GameEvents.onVesselDestroy.Add(OnVesselDestroyed);
+        }
+
+
+        private void UnsubscribeVesselEvents()
+        {
+            GameEvents.onVesselDestroy.Remove(OnVesselDestroyed);
+            GameEvents.onVesselWasModified.Remove(OnVesselModified);
+            GameEvents.onVesselChange.Remove(OnVesselChange);
+        }
 
 
 
