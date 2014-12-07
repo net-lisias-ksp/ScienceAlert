@@ -20,9 +20,7 @@ namespace ScienceAlert.Windows
         ScienceAlertCore _scienceAlert;
         SSUICamera _uiCamera;
 
-/******************************************************************************
- *                    Implementation Details
- ******************************************************************************/
+
 
         /// <summary>
         /// Create the window components we'll be using
