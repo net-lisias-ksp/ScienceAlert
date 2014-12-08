@@ -116,29 +116,7 @@ namespace ScienceAlert.ProfileData
         }
 
 
-        
-        // Those I've looked at seem to define the biome and
-        // situation masks in ScienceDefs correctly, so although
-        // we won't be able to interact directly with the experiment,
-        // we should at least be able to tell when it could run under
-        // our desired filter
-        //private bool _assumeOnboard = false;
-        //public bool AssumeOnboard
-        //{
-        //    get
-        //    {
-        //        return _assumeOnboard;
-        //    }
-        //    set
-        //    {
-        //        if (value != _assumeOnboard)
-        //        {
-        //            _assumeOnboard = value;
-        //            OnChanged();
-        //        }
-        //    }
-        //}
-
+      
 
 
         public bool IsDefault = false;
@@ -151,7 +129,6 @@ namespace ScienceAlert.ProfileData
             AnimationOnDiscovery = other.AnimationOnDiscovery;
             StopWarpOnDiscovery = other.StopWarpOnDiscovery;
             Filter = other.Filter;
-            //AssumeOnboard = other.AssumeOnboard;
             IsDefault = other.IsDefault;
         }
 
@@ -161,8 +138,6 @@ namespace ScienceAlert.ProfileData
         {
             Enabled = ConfigUtil.Parse<bool>(node, "Enabled", true);
             SoundOnDiscovery = ConfigUtil.Parse<bool>(node, "SoundOnDiscovery", true);
-            AnimationOnDiscovery = ConfigUtil.Parse<bool>(node, "AnimationOnDiscovery", true);
-            //AssumeOnboard = ConfigUtil.Parse<bool>(node, "AssumeOnboard", false);
             StopWarpOnDiscovery = ConfigUtil.Parse<bool>(node, "StopWarpOnDiscovery", false);
 
             var strFilterName = node.GetValue("Filter");
@@ -184,7 +159,6 @@ namespace ScienceAlert.ProfileData
             node.AddValue("SoundOnDiscovery", SoundOnDiscovery);
             node.AddValue("AnimationOnDiscovery", AnimationOnDiscovery);
             node.AddValue("StopWarpOnDiscovery", StopWarpOnDiscovery);
-            //node.AddValue("AssumeOnboard", AssumeOnboard);
             node.AddValue("Filter", Filter);
             node.AddValue("IsDefault", IsDefault);
         }

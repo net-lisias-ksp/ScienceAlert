@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ScienceAlert.ProfileData.Implementations;
 using UnityEngine;
 using ReeperCommon;
 using ScienceAlert.ProfileData;
@@ -21,7 +22,7 @@ namespace ScienceAlert
                  ScenarioCreationOptions.AddToNewCareerGames                |
                  ScenarioCreationOptions.AddToNewScienceSandboxGames,       
                  GameScenes.FLIGHT)]
-    class ScienceAlertProfileManager : ScenarioModule
+    class ScienceAlertProfileManager : ScenarioModule, IProfileManager
     {
         private readonly string ProfileStoragePath = ConfigUtil.GetDllDirectoryPath() + "/profiles.cfg";
         ProfileTable storedProfiles;

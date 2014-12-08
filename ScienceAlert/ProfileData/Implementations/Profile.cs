@@ -1,31 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using ReeperCommon;
 
-namespace ScienceAlert.ProfileData
+namespace ScienceAlert.ProfileData.Implementations
 {
     /// <summary>
     /// A set of experiment settings for a particular vessel
     /// </summary>
-    class Profile
+    class Profile : IProfile
     {
-        //------------------------------------------------------
-        // Profile identifier
-        //------------------------------------------------------
-        public string Name = string.Empty;
-
-
-        //------------------------------------------------------
-        // Science threshold
-        //------------------------------------------------------
-
         private float _scienceThreshold = 0f;
+        private string _name;
 
-
-        //------------------------------------------------------
-        // Per-experiment settings
-        //------------------------------------------------------
         [NonSerialized]
         private Dictionary<string /* expid */, ProfileData.SensorSettings> _settings;
 
@@ -167,7 +153,7 @@ namespace ScienceAlert.ProfileData
 
 
 
-        public Profile Clone()
+        public IProfile Clone()
         {
             return new Profile(this);
         }
@@ -191,28 +177,42 @@ namespace ScienceAlert.ProfileData
         /// </summary>
         /// <param name="expid"></param>
         /// <returns></returns>
-        public ProfileData.SensorSettings this[string expid]
+        public ProfileData.SensorSettings GetSensorSettings(string expid)
         {
-            get
-            {
-                if (_settings.ContainsKey(expid))
-                    return _settings[expid];
-
-                // I never expect to see this. If it shows up, something in
-                // loading or initialization has broken
-                Log.Warning("Profile '{0}' has no settings for expid {1}; creating a default", Name, expid);
-
-                _settings[expid] = new ProfileData.SensorSettings();
-
+            if (_settings.ContainsKey(expid))
                 return _settings[expid];
-            }
 
-            private set
-            {
-                _settings.Add(expid.ToLower(), value);
-            }
+            // I never expect to see this. If it shows up, something in
+            // loading or initialization has broken
+            Log.Warning("Profile '{0}' has no settings for expid {1}; creating a default", Name, expid);
+
+            _settings[expid] = new ProfileData.SensorSettings();
+
+            return _settings[expid];
         }
 
+
+        public void SetSensorSettings(string expid, SensorSettings settings)
+        {
+            if (_settings.ContainsKey(expid))
+                _settings[expid] = settings;
+            else _settings.Add(expid.ToLower(), settings);
+        }
+
+
+        public string Name {
+            get
+            {
+                return _name;
+            }
+
+            set
+            {
+                if (!string.Equals(_name, value))
+                    Modified = true;
+                _name = value;
+            } 
+        }
 
 
         public string DisplayName
@@ -224,7 +224,6 @@ namespace ScienceAlert.ProfileData
                 return Name;
             }
         }
-
 
 
         public float ScienceThreshold

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ScienceAlert.ProfileData.Implementations;
 using UnityEngine;
 using ReeperCommon;
 
@@ -12,7 +13,7 @@ namespace ScienceAlert.Windows.Implementations
         internal string editText = string.Empty;
         internal string lockName = string.Empty;
         internal bool flag = false;
-        internal ProfileData.Profile editProfile;
+        internal Profile editProfile;
 
         internal PopupDialog popup;
         internal Rect popupRect = new Rect(Screen.width / 2f - 380f / 2f, Screen.height / 2 - 200f / 2f, 380f, 600f);
@@ -97,7 +98,7 @@ namespace ScienceAlert.Windows.Implementations
         /// </summary>
         /// <param name="target"></param>
         /// <param name="clone"></param>
-        private void SpawnRenamePopup(ProfileData.Profile target)
+        private void SpawnRenamePopup(Profile target)
         {
             editProfile = target;
             editText = target.Name;
@@ -211,7 +212,7 @@ namespace ScienceAlert.Windows.Implementations
 
 #region delete popup
 
-        private void SpawnDeletePopup(ProfileData.Profile target)
+        private void SpawnDeletePopup(Profile target)
         {
             editProfile = target;
             LockControls("ScienceAlertDeletePopup");
@@ -233,7 +234,7 @@ namespace ScienceAlert.Windows.Implementations
 
         #region load popup
 
-        private void SpawnOpenPopup(ProfileData.Profile target)
+        private void SpawnOpenPopup(Profile target)
         {
             editProfile = target;
             LockControls("ScienceAlertOpenPopup");

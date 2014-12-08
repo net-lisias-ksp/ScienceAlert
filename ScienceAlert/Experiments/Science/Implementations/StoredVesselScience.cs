@@ -6,16 +6,6 @@ using ScienceAlert.KSPInterfaces.FlightGlobals;
 
 namespace ScienceAlert.Experiments.Science
 {
-    public interface IStoredVesselScience
-    {
-        void OnVesselChange(IVessel vessel);
-        void OnVesselWasModified(IVessel vessel);
-        void OnVesselDestroy(IVessel vessel);
-
-        IEnumerable<ScienceData> StoredScience { get; }
-    }
-
-
     /// <summary>
     /// The purpose of this object is to reduce redundancy between 
     /// ExperimentObservers.  ScienceData isn't sorted by ScienceExperiment

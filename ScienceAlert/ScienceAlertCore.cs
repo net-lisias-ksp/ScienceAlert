@@ -5,6 +5,8 @@ using System.Linq;
 using ScienceAlert.Experiments.Science;
 using ScienceAlert.KSPInterfaces.ResearchAndDevelopment;
 using ScienceAlert.KSPInterfaces.ResearchAndDevelopment.Implementations;
+using ScienceAlert.ProfileData;
+using ScienceAlert.ProfileData.Implementations;
 using ScienceAlert.ResearchAndDevelopment;
 using UnityEngine;
 using ReeperCommon;
@@ -33,6 +35,7 @@ namespace ScienceAlert
 
 
         private IResearchAndDevelopmentProvider _rndProvider;
+        private IProfileManagerProvider _profileManagerProvider;
 
 
 
@@ -42,15 +45,19 @@ namespace ScienceAlert
         System.Collections.IEnumerator Start()
         {
             _rndProvider = new KspResearchAndDevelopmentProvider();
+            _profileManagerProvider = new ProfileManagerProvider();
 
-
-
+            // wait for ScenarioModules like R&D and our own ProfileManager to initialize, since
+            // they may lag behind our own construction
             Log.Normal("Waiting on R&D...");
             while (!_rndProvider.Instance.Any()) yield return 0;
 
 
             Log.Normal("Waiting on ProfileManager...");
-            while (ScienceAlertProfileManager.Instance == null || !ScienceAlertProfileManager.Instance.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
+            while (!_profileManagerProvider.GetProfileManager().Any()) yield return 0;
+
+
+
 
             Log.Normal("Initializing ScienceAlert");
 

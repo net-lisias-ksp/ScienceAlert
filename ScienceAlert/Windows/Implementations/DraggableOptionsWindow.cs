@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using ReeperCommon;
+using ScienceAlert.ProfileData.Implementations;
 using UnityEngine;
 
 namespace ScienceAlert.Windows.Implementations
@@ -630,7 +631,7 @@ namespace ScienceAlert.Windows.Implementations
                     // always draw default profile first
                     DrawProfileList_ListItem(ProfileManager.DefaultProfile);
 
-                    foreach (ProfileData.Profile profile in profileList.Values)
+                    foreach (Profile profile in profileList.Values)
                         if (profile != ProfileManager.DefaultProfile)
                             DrawProfileList_ListItem(profile);
 
@@ -653,7 +654,7 @@ namespace ScienceAlert.Windows.Implementations
         }
 
 
-        private void DrawProfileList_ListItem(ProfileData.Profile profile)
+        private void DrawProfileList_ListItem(Profile profile)
         {
             GUILayout.BeginHorizontal();
             {
