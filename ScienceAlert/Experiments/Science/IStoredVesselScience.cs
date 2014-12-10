@@ -9,6 +9,6 @@ namespace ScienceAlert.Experiments.Science
         void OnVesselWasModified(IVessel vessel);
         void OnVesselDestroy(IVessel vessel);
 
-        IEnumerable<ScienceData> StoredScience { get; }
+        IEnumerable<ScienceData> ScienceData { get; }
     }
 }

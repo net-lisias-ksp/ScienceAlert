@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ScienceAlert.ProfileData
 {
-    interface IProfile
+    public interface IProfile
     {
         string Name { get; }
         string DisplayName { get; }
@@ -15,7 +15,7 @@ namespace ScienceAlert.ProfileData
 
         IProfile Clone();
         SensorSettings GetSensorSettings(string expid);
-        void SetSensorSettings(string expid);
+        void SetSensorSettings(string expid, SensorSettings settings);
         void OnSave(ConfigNode node);
         void OnLoad(ConfigNode node);
     }

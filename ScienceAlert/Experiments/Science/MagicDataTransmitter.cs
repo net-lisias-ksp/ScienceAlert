@@ -122,7 +122,7 @@ namespace ScienceAlert.Experiments.Science
                 toBeTransmitted.Clear();
                 realTransmitters.Clear();
 
-                cacheOwner.ScheduleRebuild();  
+                cacheOwner.ScanVesselForScienceContainers();
             }
         }
 
@@ -251,7 +251,7 @@ namespace ScienceAlert.Experiments.Science
                 if (badFlag)
                 {
                     Log.Warning("Resetting MagicDataTransmitter due to bad transmitter key or value");
-                    cacheOwner.ScheduleRebuild();
+                    cacheOwner.ScanVesselForScienceContainers();
                 }
 
                 return list;

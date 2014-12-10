@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using ReeperCommon;
 using ReeperCommon.Window;
-
+using ScienceAlert.Experiments.Science;
 using UnityEngine;
 
 namespace ScienceAlert.Windows
@@ -9,7 +9,7 @@ namespace ScienceAlert.Windows
     /// <summary>
     /// This class controls which window(s) are shown when
     /// </summary>
-    class WindowEventLogic : MonoBehaviour
+    class WindowEventLogic
     {
         // Windows
         Implementations.DraggableExperimentList _experimentList;
@@ -25,7 +25,7 @@ namespace ScienceAlert.Windows
         /// <summary>
         /// Create the window components we'll be using
         /// </summary>
-        private void Awake()
+        public WindowEventLogic(ScienceAlertCore scienceAlert, BiomeFilter biomeFilter, IStoredVesselScience storedVesselScience)
         {
             Log.Verbose("Customizing DraggableWindow");
 
@@ -36,7 +36,7 @@ namespace ScienceAlert.Windows
             DraggableWindow.ButtonSound = "click1";
 
 
-            _scienceAlert = GetComponent<ScienceAlertCore>();
+            _scienceAlert = scienceAlert;
             
 
             // note to self: these are on separate gameobjects because they use a UIButton to catch
@@ -53,7 +53,8 @@ namespace ScienceAlert.Windows
 
             Log.Normal("Creating debug window");
             _debugWindow = new GameObject("ScienceAlert.DebugWindow").AddComponent<Implementations.DraggableDebugWindow>();
-            
+            _debugWindow.BiomeFilter = biomeFilter;
+            _debugWindow.StoredVesselScience = storedVesselScience;
 
             // initially hide windows
             _optionsWindow.Visible = _experimentList.Visible = _debugWindow.Visible = false;

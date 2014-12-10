@@ -11,11 +11,22 @@ namespace ScienceAlert.KSPInterfaces.FlightGlobals.Implementations
     {
         private readonly Vessel _vessel;
 
-        public KspVessel(Vessel v)
+        public KspVessel(Vessel vessel)
         {
-            _vessel = v;
+            if (vessel.IsNull())
+                throw new ArgumentNullException("vessel");
+            _vessel = vessel;
         }
 
+
+        public List<Part> Parts
+        {
+            get { return _vessel.Parts; }
+        }
+
+        public Part rootPart { get { return _vessel.rootPart;  }}
+
+        public string vesselName { get { return _vessel.vesselName; }}
 
         public IEnumerable<IModuleScienceExperiment> GetScienceExperimentModules()
         {
@@ -23,6 +34,17 @@ namespace ScienceAlert.KSPInterfaces.FlightGlobals.Implementations
                 _vessel.FindPartModulesImplementing<ModuleScienceExperiment>()
                     .Select(mse => new KspModuleScienceExperiment(mse))
                     .Cast<IModuleScienceExperiment>();
+        }
+
+        public IEnumerable<IScienceDataContainer> GetScienceContainers()
+        {
+            return
+                _vessel.FindPartModulesImplementing<IScienceDataContainer>();
+        }
+
+        public IEnumerable<IScienceDataTransmitter> GetTransmitters()
+        {
+            return _vessel.FindPartModulesImplementing<IScienceDataTransmitter>();
         }
     }
 }

@@ -9,11 +9,18 @@ namespace ScienceAlert.Experiments.Factory
     class SensorFactory : ISensorFactory
     {
         private readonly IStoredVesselScience _storedVesselScienceCache;
+        private readonly BiomeFilter _biomeFilter;
 
 
-        public SensorFactory(IStoredVesselScience storedVesselData)
+        public SensorFactory(IStoredVesselScience storedVesselData, BiomeFilter biomeFilter)
         {
+            if (storedVesselData.IsNull())
+                throw new ArgumentNullException("storedVesselData");
+            if (biomeFilter.IsNull())
+                throw new ArgumentNullException("biomeFilter");
+
             _storedVesselScienceCache = storedVesselData;
+            _biomeFilter = biomeFilter;
         }
 
 
@@ -40,7 +47,7 @@ namespace ScienceAlert.Experiments.Factory
                     break;
 
                 default:
-                    return new ExperimentSensor(experiment, ScienceAlertProfileManager.ActiveProfile.GetSensorSettings(experimentid), _storedVesselScienceCache, allOnboardScienceModules);
+                    return new ExperimentSensor(experiment, ScienceAlertProfileManager.ActiveProfile.GetSensorSettings(experimentid), _biomeFilter, _storedVesselScienceCache, allOnboardScienceModules);
                     break;
             }
         }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using ReeperCommon;
 using System;
 using ScienceAlert.Experiments.Sensors;
@@ -21,7 +22,7 @@ namespace ScienceAlert
         /// <param name="onboard"></param>
         /// <param name="xmitScalar"></param>
         /// <returns></returns>
-        public static float CalculateNextReport(this ScienceSubject subject, ScienceExperiment experiment, List<ScienceData> onboard, float xmitScalar = 1f)
+        public static float CalculateNextReport(this ScienceSubject subject, ScienceExperiment experiment, IEnumerable<ScienceData> onboard, float xmitScalar = 1f)
         {
             return GetNextReportValue(subject, experiment, onboard, xmitScalar);
         }
@@ -37,7 +38,7 @@ namespace ScienceAlert
         /// <param name="onboard"></param>
         /// <param name="xmitScalar"></param>
         /// <returns></returns>
-        public static float GetNextReportValue(ScienceSubject subject, ScienceExperiment experiment, List<ScienceData> onboard, float xmitScalar = 1f)
+        public static float GetNextReportValue(ScienceSubject subject, ScienceExperiment experiment, IEnumerable<ScienceData> onboard, float xmitScalar = 1f)
         {
             // I dislike having to create a new ScienceData but it's the simplest way to get the game to 
             // calculate the next report value for us
@@ -48,19 +49,20 @@ namespace ScienceAlert
 
             xmitScalar += data.labBoost;
 
+            int itemCount = onboard.Count();
 #if DEBUG
             //Log.Debug("GetNextReportValue for {0}, calculated labBoost of {1}", experiment.experimentTitle, data.labBoost);
 #endif
-            if (onboard.Count == 0)
+            if (itemCount == 0)
                 return ResearchAndDevelopment.GetScienceValue(experiment.baseValue * experiment.dataScale, subject, xmitScalar) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
 
             float experimentValue = ResearchAndDevelopment.GetNextScienceValue(experiment.baseValue * experiment.dataScale, subject, xmitScalar) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
 
-            if (onboard.Count == 1)
+            if (itemCount == 1)
                 return experimentValue;
 
             // we'll have to estimate
-            return experimentValue / UnityEngine.Mathf.Pow(4f, onboard.Count - 1);
+            return experimentValue / UnityEngine.Mathf.Pow(4f, itemCount - 1);
         }
 
 

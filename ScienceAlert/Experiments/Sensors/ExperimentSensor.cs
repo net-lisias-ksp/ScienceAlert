@@ -10,28 +10,28 @@ namespace ScienceAlert.Experiments.Sensors
     {
 
         // members
-        private BiomeFilter filter;
-        IStoredVesselScience cache;
+        private BiomeFilter _biomeFilter;
+        IStoredVesselScience _storedVesselScience;
 
-        private List<IModuleScienceExperiment> recoveryModules;                         // cache of all ModuleScienceExperiments on the Vessel, sorted
+        private List<IModuleScienceExperiment> _recoveryModules;                         // cache of all ModuleScienceExperiments on the Vessel, sorted
                                                                                         // least-to-greatest by xmitScalar
-        private List<IModuleScienceExperiment> transmitModules;                         // same as above, but in reverse order
+        private List<IModuleScienceExperiment> _transmitModules;                         // same as above, but in reverse order
 
 
 
-        public ExperimentSensor(ScienceExperiment experiment, ProfileData.SensorSettings settings, IStoredVesselScience cache, IEnumerable<IModuleScienceExperiment> modules)
+        public ExperimentSensor(ScienceExperiment experiment, ProfileData.SensorSettings settings, BiomeFilter biomeFilter, IStoredVesselScience storedVesselScience, IEnumerable<IModuleScienceExperiment> modules)
         {
             Settings = settings;
             Experiment = experiment;
 
-            this.cache = cache;
-            this.filter = API.ScienceAlert.BiomeFilter;
+            this._storedVesselScience = storedVesselScience;
+            this._biomeFilter = biomeFilter;
 
             // sort onboard modules according to their efficiency at transmission. We want
             // to use the best transmission
-            transmitModules = modules.OrderByDescending(mse => mse.xmitDataScalar).ToList();
-            recoveryModules = new List<ModuleScienceExperiment>(transmitModules);
-            recoveryModules.Reverse();
+            _transmitModules = modules.OrderByDescending(mse => mse.xmitDataScalar).ToList();
+            _recoveryModules = new List<IModuleScienceExperiment>(_transmitModules);
+            _recoveryModules.Reverse();
         }
 
 
@@ -52,7 +52,7 @@ namespace ScienceAlert.Experiments.Sensors
             // science already collected and stored aboard the vessel will affect the next report's 
             // value so we need to find any similar samples and consider them in our projections of
             // the next report's value
-            var stored = cache.FindStoredData(subject.id);
+            var stored = _storedVesselScience.ScienceData.Where(sd => sd.subjectID == subject.id).ToList();
 
             UpdateScienceCollectionValues(subject, stored);
 
@@ -145,11 +145,11 @@ namespace ScienceAlert.Experiments.Sensors
         /// </summary>
         /// <param name="forRecovery">True if this module will be used for recovery and so should be the worst xmitDataScalar</param>
         /// <returns></returns>
-        protected virtual ModuleScienceExperiment GetNextModule(bool forRecovery = true)
+        protected virtual IModuleScienceExperiment GetNextModule(bool forRecovery = true)
         {
             return forRecovery
-                ? recoveryModules.First(mse => !mse.Deployed && !mse.Inoperable)
-                : transmitModules.First(mse => !mse.Deployed && !mse.Inoperable);
+                ? _recoveryModules.First(mse => !mse.Deployed && !mse.Inoperable)
+                : _transmitModules.First(mse => !mse.Deployed && !mse.Inoperable);
         }
 
 #region properties
@@ -162,7 +162,7 @@ namespace ScienceAlert.Experiments.Sensors
         {
             get
             {
-                return recoveryModules.Any(mse => !mse.Deployed && !mse.Inoperable);
+                return _recoveryModules.Any(mse => !mse.Deployed && !mse.Inoperable);
             }
         }
 

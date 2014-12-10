@@ -11,7 +11,7 @@ using ScienceAlert.KSPInterfaces.ResearchAndDevelopment;
 using ScienceAlert.KSPInterfaces.ResearchAndDevelopment.Implementations;
 using ScienceAlert.ProfileData;
 using ScienceAlert.ProfileData.Implementations;
-using ScienceAlert.ResearchAndDevelopment;
+using ScienceAlert.Windows;
 using UnityEngine;
 using ReeperCommon;
 
@@ -44,7 +44,12 @@ namespace ScienceAlert
 
         private ISensorFactory _sensorFactory;
         private IStoredVesselScience _storedVesselScience;
+        
+
+        // need interface adapters still
         private SensorManager _sensorManager;
+        private WindowEventLogic _windowLogic;
+
 
 /******************************************************************************
  *                    Implementation Details
@@ -95,9 +100,9 @@ namespace ScienceAlert
             _sensorFactory = new SensorFactory(_storedVesselScience);
             _sensorManager = new Experiments.SensorManager(_sensorFactory, _storedVesselScience, _activeVesselProvider);
 
-            
 
-            gameObject.AddComponent<Windows.WindowEventLogic>();
+
+            _windowLogic = new WindowEventLogic(this, BiomeFilter, _storedVesselScience);
 
 
 
@@ -158,8 +163,6 @@ namespace ScienceAlert
 
 
 
-        #region properties
-
 
         public Toolbar.IToolbar Button
         {
@@ -169,6 +172,8 @@ namespace ScienceAlert
             }
         }
 
+
+        public BiomeFilter BiomeFilter { get; private set; }
 
 
         /// <summary>
@@ -286,8 +291,6 @@ namespace ScienceAlert
                 }
             }
         }
-
-#endregion 
 
 
 

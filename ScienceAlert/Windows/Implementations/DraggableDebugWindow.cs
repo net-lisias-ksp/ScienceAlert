@@ -1,4 +1,5 @@
 ﻿using ReeperCommon;
+using ScienceAlert.Experiments.Science;
 using UnityEngine;
 using System.Collections.Generic;
 using ScienceAlert;
@@ -11,6 +12,10 @@ namespace ScienceAlert.Windows.Implementations
 {
     class DraggableDebugWindow : ReeperCommon.Window.DraggableWindow
     {
+        public BiomeFilter BiomeFilter; // note: find a way to clean this up
+        public IStoredVesselScience StoredVesselScience;
+
+
         /// <summary>
         /// DraggableWindow setup here
         /// </summary>
@@ -46,7 +51,7 @@ namespace ScienceAlert.Windows.Implementations
             GUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.MinHeight(128f));
 
             // current biome
-            GUILayout.Label(string.Format("Biome: {0}", API.ScienceAlert.BiomeFilter.CurrentBiome), GUILayout.MinWidth(256f));
+            GUILayout.Label(string.Format("Biome: {0}", BiomeFilter.CurrentBiome), GUILayout.MinWidth(256f));
 
 #region debug-only
 #if DEBUG
@@ -83,7 +88,7 @@ namespace ScienceAlert.Windows.Implementations
 
             if (exp.BiomeIsRelevantWhile(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)))
             {
-                subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, API.ScienceAlert.BiomeFilter.CurrentBiome);
+                subject = ResearchAndDevelopment.GetExperimentSubject(exp, ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel), FlightGlobals.currentMainBody, BiomeFilter.CurrentBiome);
 
                 // we need to look at the eva kerbal part
                 PartLoader.LoadedPartsList.ForEach(ap =>
@@ -110,7 +115,7 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Debug("subject value: " + subject.subjectValue);
                 Log.Debug("body multiplier: " + API.GetBodyScienceValueMultipler(ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel)));
                 Log.Debug("xmitScalar: " + xmitScalar);
-                Log.Debug("sample count: " + API.ScienceAlert.StoredVesselScience.FindStoredData(subject.id).Count);
+                Log.Debug("sample count: " + StoredVesselScience.ScienceData.Count(sd => sd.subjectID == subject.id));
 
                 FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>().Where(mse => mse.experimentID == exp.id).ToList().ForEach(mse => Log.Debug("xmitScalar: {0}", mse.xmitDataScalar));
 
@@ -118,13 +123,13 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Normal("Next absolute recovery: {0}", subject.CalculateNextReport(exp, new List<ScienceData>()));
 
                 // this should also be correct (considers stored experiments)
-                Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, API.ScienceAlert.StoredVesselScience.FindStoredData(subject.id)));
+                Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, StoredVesselScience.ScienceData.Where(sd => sd.subjectID == subject.id));
 
                 // value to be checked, absolute
                 Log.Normal("next absolute transmission: {0}", subject.CalculateNextReport(exp, new List<ScienceData>(), xmitScalar));
 
                 // value to be checked, next transmitted sample
-                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, API.ScienceAlert.StoredVesselScience.FindStoredData(subject.id), xmitScalar));
+                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, StoredVesselScience.FindStoredData(subject.id), xmitScalar));
             }
         }
 
