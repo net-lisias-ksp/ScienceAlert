@@ -2,6 +2,7 @@
 using System.Linq;
 using ReeperCommon;
 using ScienceAlert.Experiments.Science;
+using ScienceAlert.KSPInterfaces.PartModules;
 
 namespace ScienceAlert.Experiments.Sensors
 {
@@ -10,15 +11,15 @@ namespace ScienceAlert.Experiments.Sensors
 
         // members
         private BiomeFilter filter;
-        StoredVesselScience cache;                  
+        IStoredVesselScience cache;
 
-        private List<ModuleScienceExperiment> recoveryModules;                         // cache of all ModuleScienceExperiments on the Vessel, sorted
-                                                                    // least-to-greatest by xmitScalar
-        private List<ModuleScienceExperiment> transmitModules;                         // same as above, but in reverse order
+        private List<IModuleScienceExperiment> recoveryModules;                         // cache of all ModuleScienceExperiments on the Vessel, sorted
+                                                                                        // least-to-greatest by xmitScalar
+        private List<IModuleScienceExperiment> transmitModules;                         // same as above, but in reverse order
 
 
 
-        public ExperimentSensor(ScienceExperiment experiment, ProfileData.SensorSettings settings, StoredVesselScience cache, IEnumerable<ModuleScienceExperiment> modules)
+        public ExperimentSensor(ScienceExperiment experiment, ProfileData.SensorSettings settings, IStoredVesselScience cache, IEnumerable<IModuleScienceExperiment> modules)
         {
             Settings = settings;
             Experiment = experiment;

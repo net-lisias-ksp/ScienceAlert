@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ScienceAlert.Experiments.Science;
 using ScienceAlert.Experiments.Sensors;
 using ScienceAlert.Experiments.Factory;
 using ScienceAlert.KSPInterfaces.FlightGlobals;
@@ -19,6 +20,7 @@ namespace ScienceAlert.Experiments
     {
         private readonly ISensorFactory _sensorFactory;
         private readonly IActiveVesselProvider _activeVesselProvider;
+        private readonly IStoredVesselScience _storedVesselScience;
 
 
         private System.Collections.IEnumerator _sensorLoop;                     // infinite-looping method used to update experiment monitors
@@ -43,17 +45,20 @@ namespace ScienceAlert.Experiments
 
 
         public SensorManager(
-            ISensorFactory sensorFactory, 
-            Experiments.Science.StoredVesselScience storedVesselCache, 
+            ISensorFactory sensorFactory,
+            IStoredVesselScience storedVesselScience, 
             IActiveVesselProvider activeVesselProvider)
         {
             if (sensorFactory.IsNull())
                 throw new ArgumentNullException("sensorFactory");
             if (activeVesselProvider.IsNull())
                 throw new ArgumentNullException("activeVesselProvider");
+            if (storedVesselScience.IsNull())
+                throw new ArgumentNullException("storedVesselScience");
 
             _sensorFactory = sensorFactory;
             _activeVesselProvider = activeVesselProvider;
+            _storedVesselScience = storedVesselScience;
 
             SubscribeVesselEvents();
             CreateSensorsForVessel();

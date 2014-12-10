@@ -2,7 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ScienceAlert.Experiments;
+using ScienceAlert.Experiments.Factory;
 using ScienceAlert.Experiments.Science;
+using ScienceAlert.KSPInterfaces.FlightGlobals;
+using ScienceAlert.KSPInterfaces.FlightGlobals.Implementations;
 using ScienceAlert.KSPInterfaces.ResearchAndDevelopment;
 using ScienceAlert.KSPInterfaces.ResearchAndDevelopment.Implementations;
 using ScienceAlert.ProfileData;
@@ -36,8 +40,11 @@ namespace ScienceAlert
 
         private IResearchAndDevelopmentProvider _rndProvider;
         private IProfileManagerProvider _profileManagerProvider;
+        private IActiveVesselProvider _activeVesselProvider;
 
-
+        private ISensorFactory _sensorFactory;
+        private IStoredVesselScience _storedVesselScience;
+        private SensorManager _sensorManager;
 
 /******************************************************************************
  *                    Implementation Details
@@ -68,19 +75,25 @@ namespace ScienceAlert
             Log.Verbose("Renaming asteroidSample title");
             var exp = ResearchAndDevelopment.GetExperiment("asteroidSample");
             if (exp != null) exp.experimentTitle = "Sample (Asteroid)";
-            
+
+
+
+            _activeVesselProvider = new KspActiveVesselProvider();
 
             Log.Verbose("Loading sounds...");
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
-            StoredVesselScience = gameObject.AddComponent<StoredVesselScience>();
+            _storedVesselScience = new StoredVesselScience(_activeVesselProvider);
+
+
 
 
             CreateBiomeFilter();
 
 
-            SensorManager = new Experiments.SensorManager(StoredVesselScience);
+            _sensorFactory = new SensorFactory(_storedVesselScience);
+            _sensorManager = new Experiments.SensorManager(_sensorFactory, _storedVesselScience, _activeVesselProvider);
 
             
 
@@ -276,22 +289,7 @@ namespace ScienceAlert
 
 #endregion 
 
-        public BiomeFilter BiomeFilter
-        {
-            get;
-            private set;
-        }
 
-        public StoredVesselScience StoredVesselScience
-        {
-            get
-            {
-                throw new System.NotImplementedException();
-            }
-            set
-            {
-            }
-        }
 
         public ScanInterface ScanInterface
         {
@@ -299,11 +297,7 @@ namespace ScienceAlert
             private set;
         }
 
-        public ScienceAlert.Experiments.SensorManager SensorManager
-        {
-            get;
-            private set;
-        }
+
 
     }
 

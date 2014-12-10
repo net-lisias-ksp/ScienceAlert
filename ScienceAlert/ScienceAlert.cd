@@ -49,13 +49,10 @@
   <Class Name="ScienceAlert.ScienceAlertCore">
     <Position X="12.25" Y="0.75" Width="3.75" />
     <TypeIdentifier>
-      <HashCode>AEQBAABAAiAAAAACAAEAAAAAAgAAAAAGAAAAlAEBEII=</HashCode>
+      <HashCode>AEQBQABAACAAAAACCAAAAAAAAgAABAAEAAAAlAEBEII=</HashCode>
       <FileName>ScienceAlertCore.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Property Name="BiomeFilter" />
-      <Property Name="SensorManager" />
-      <Property Name="StoredVesselScience" />
       <Property Name="Button" />
     </ShowAsAssociation>
   </Class>

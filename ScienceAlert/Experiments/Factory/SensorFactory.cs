@@ -1,29 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ScienceAlert.Experiments.Sensors;
 using ScienceAlert.Experiments.Science;
-using ReeperCommon;
+using ScienceAlert.Experiments.Sensors;
+using ScienceAlert.KSPInterfaces.PartModules;
 
-namespace ScienceAlert.Experiments
+namespace ScienceAlert.Experiments.Factory
 {
-    using ProfileManager = ScienceAlertProfileManager;
-
-    class SensorFactory
+    class SensorFactory : ISensorFactory
     {
-        private readonly StoredVesselScience _storedVesselScienceCache;
+        private readonly IStoredVesselScience _storedVesselScienceCache;
 
 
-        public SensorFactory(StoredVesselScience storedVesselData)
+        public SensorFactory(IStoredVesselScience storedVesselData)
         {
             _storedVesselScienceCache = storedVesselData;
         }
 
 
-        public IExperimentSensor Create(string experimentid, IEnumerable<ModuleScienceExperiment> allOnboardScienceModules)
+
+        public IExperimentSensor Create(string experimentid, IEnumerable<IModuleScienceExperiment> allOnboardScienceModules)
         {
-            if (allOnboardScienceModules == null) allOnboardScienceModules = new List<ModuleScienceExperiment>();
+            if (allOnboardScienceModules == null) allOnboardScienceModules = new List<IModuleScienceExperiment>();
 
             ScienceExperiment experiment = ResearchAndDevelopment.GetExperiment(experimentid);
             if (ReferenceEquals(experiment, null)) return null;
@@ -43,7 +40,7 @@ namespace ScienceAlert.Experiments
                     break;
 
                 default:
-                    return new ExperimentSensor(experiment, ProfileManager.ActiveProfile[experimentid], _storedVesselScienceCache, allOnboardScienceModules);
+                    return new ExperimentSensor(experiment, ScienceAlertProfileManager.ActiveProfile.GetSensorSettings(experimentid), _storedVesselScienceCache, allOnboardScienceModules);
                     break;
             }
         }
