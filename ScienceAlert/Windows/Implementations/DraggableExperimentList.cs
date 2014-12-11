@@ -13,8 +13,9 @@ namespace ScienceAlert.Windows.Implementations
     {
         private const string WindowTitle = "Available Experiments";
 
-        // members
+
         private bool _adjustedSkin = false;
+        public ScienceAlertCore _scienceAlert; 
 
 /******************************************************************************
  *                    Implementation Details
@@ -73,14 +74,14 @@ namespace ScienceAlert.Windows.Implementations
                     //        return;
                     //    }
                     //}
-                    if (API.ScienceAlert.ScanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude,
+                    if (_scienceAlert.ScanInterface.HaveScanData(FlightGlobals.ActiveVessel.latitude,
                         FlightGlobals.ActiveVessel.longitude, FlightGlobals.ActiveVessel.mainBody))
                     {
                         Title = "Not scanned";
                         return;
                     }
 
-                    Title = API.ScienceAlert.BiomeFilter.CurrentBiome;
+                    Title = _scienceAlert.BiomeFilter.CurrentBiome;
                     return;
                 }  
                     

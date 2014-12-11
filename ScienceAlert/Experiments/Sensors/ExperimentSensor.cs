@@ -69,7 +69,7 @@ namespace ScienceAlert.Experiments.Sensors
 
         private ScienceSubject UpdateSubject(CelestialBody body, ExperimentSituations situation)
         {
-            var subject = ResearchAndDevelopment.GetExperimentSubject(Experiment, situation, FlightGlobals.ActiveVessel.mainBody, Experiment.BiomeIsRelevantWhile(situation) ? filter.CurrentBiome : string.Empty);
+            var subject = ResearchAndDevelopment.GetExperimentSubject(Experiment, situation, FlightGlobals.ActiveVessel.mainBody, Experiment.BiomeIsRelevantWhile(situation) ? _biomeFilter.CurrentBiome : string.Empty);
             Subject = subject.id;
             return subject;
         }

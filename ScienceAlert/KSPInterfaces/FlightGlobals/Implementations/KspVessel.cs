@@ -19,14 +19,17 @@ namespace ScienceAlert.KSPInterfaces.FlightGlobals.Implementations
         }
 
 
-        public List<Part> Parts
-        {
-            get { return _vessel.Parts; }
-        }
-
+        public List<Part> Parts { get { return _vessel.Parts; }}
         public Part rootPart { get { return _vessel.rootPart;  }}
-
         public string vesselName { get { return _vessel.vesselName; }}
+        public VesselType vesselType { get { return _vessel.vesselType; }}
+        public bool loaded { get { return _vessel.loaded; }}
+        public Guid id { get { return _vessel.id; }}
+
+        public IProtoVessel protoVessel
+        {
+            get { return new KspProtoVessel(_vessel.protoVessel); }
+        }
 
         public IEnumerable<IModuleScienceExperiment> GetScienceExperimentModules()
         {

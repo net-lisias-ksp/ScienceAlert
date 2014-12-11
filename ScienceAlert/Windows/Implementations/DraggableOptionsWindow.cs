@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using ReeperCommon;
+using ScienceAlert.Experiments;
+using ScienceAlert.ProfileData;
 using ScienceAlert.ProfileData.Implementations;
 using UnityEngine;
 
@@ -16,6 +18,10 @@ namespace ScienceAlert.Windows.Implementations
         // --------------------------------------------------------------------
         //    Members
         // --------------------------------------------------------------------
+
+        public IProfileManager _profileManager;
+        public ScienceAlertCore _scienceAlert;
+        public SensorManager _sensorManager;
 
         // Control position and scrollbars
         private Vector2 scrollPos = new Vector2();                  // scrollbar for profile experiment settings
@@ -91,7 +97,11 @@ namespace ScienceAlert.Windows.Implementations
 
             foreach (var id in sortedIds)
             {
-                experimentIds.Add(id, (int)Convert.ChangeType(ProfileManager.ActiveProfile[id].Filter, ProfileManager.ActiveProfile[id].Filter.GetTypeCode()));
+                //experimentIds.Add(id, (int)Convert.ChangeType(ProfileManager.ActiveProfile[id].Filter, ProfileManager.ActiveProfile[id].Filter.GetTypeCode()));
+                experimentIds.Add(id,
+                    (int)
+                        Convert.ChangeType(_profileManager.ActiveProfile.GetSensorSettings(id).Filter,
+                            _profileManager.ActiveProfile.GetSensorSettings(id).Filter.GetTypeCode()));
                 Log.Debug("Settings: experimentId {0} has filter index {1}", id, experimentIds[id]);
             }
 
@@ -190,7 +200,7 @@ namespace ScienceAlert.Windows.Implementations
             if (tf)
             {
                 // just became visible; update threshold var
-                thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+                thresholdValue = _profileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
             }
         }
 
@@ -291,7 +301,7 @@ namespace ScienceAlert.Windows.Implementations
                         {
                             GUILayout.Label("Globally Enable Animation", GUILayout.ExpandWidth(true));
                             Settings.Instance.FlaskAnimationEnabled = AudibleToggle(Settings.Instance.FlaskAnimationEnabled, string.Empty, null, new GUILayoutOption[] { GUILayout.ExpandWidth(false) });
-                            if (!Settings.Instance.FlaskAnimationEnabled && API.ScienceAlert.Button.IsAnimating) API.ScienceAlert.Button.SetLit();
+                            if (!Settings.Instance.FlaskAnimationEnabled && _scienceAlert.Button.IsAnimating) _scienceAlert.Button.SetLit();
                         }
                         GUILayout.EndHorizontal();
 
@@ -352,7 +362,7 @@ namespace ScienceAlert.Windows.Implementations
 
                             Settings.Instance.ScanInterfaceType = enableSCANinterface ? Settings.ScanInterface.ScanSat : Settings.ScanInterface.None;
 
-                            API.ScienceAlert.ScanInterfaceType = Settings.Instance.ScanInterfaceType;
+                            _scienceAlert.ScanInterfaceType = Settings.Instance.ScanInterfaceType;
                         }
                         GUILayout.EndHorizontal();
                     } // end scan interface options
@@ -379,8 +389,8 @@ namespace ScienceAlert.Windows.Implementations
 
                             Settings.Instance.ToolbarInterfaceType = enableBlizzyToolbar ? Settings.ToolbarInterface.BlizzyToolbar : Settings.ToolbarInterface.ApplicationLauncher;
 
-                            if (API.ScienceAlert.ToolbarType != Settings.Instance.ToolbarInterfaceType)
-                                API.ScienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
+                            if (_scienceAlert.ToolbarType != Settings.Instance.ToolbarInterfaceType)
+                                _scienceAlert.ToolbarType = Settings.Instance.ToolbarInterfaceType;
                         }
                         GUILayout.EndHorizontal();
                     } // end toolbar interface options
@@ -408,7 +418,7 @@ namespace ScienceAlert.Windows.Implementations
                             Settings.Instance.CheckSurfaceSampleNotEva = AudibleToggle(prev, "Track surface sample in vessel");
 
                             if (prev != Settings.Instance.CheckSurfaceSampleNotEva)
-                                API.ScienceAlert.SensorManager.CreateSensorsForVessel();
+                                _sensorManager.CreateSensorsForVessel();
 
                         }
 
@@ -440,14 +450,14 @@ namespace ScienceAlert.Windows.Implementations
 
                 GUILayout.BeginHorizontal();
                 {
-                    GUILayout.Box(string.Format("Profile: {0}", ProfileManager.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+                    GUILayout.Box(string.Format("Profile: {0}", _profileManager.ActiveProfile.DisplayName), GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
 
                     // rename profile button
                     if (AudibleButton(new GUIContent(renameButton), GUILayout.MaxWidth(24)))
-                        SpawnRenamePopup(ProfileManager.ActiveProfile);
+                        SpawnRenamePopup(_profileManager.ActiveProfile);
 
                     // Save profile (only enabled if profile was actually modified)
-                    GUI.enabled = ProfileManager.ActiveProfile.Modified;
+                    GUI.enabled = _profileManager.ActiveProfile.Modified;
                     if (AudibleButton(new GUIContent(saveButton), GUILayout.MaxWidth(24)))
                     {
                         SaveCurrentProfile();
@@ -483,9 +493,9 @@ namespace ScienceAlert.Windows.Implementations
 
                     GUILayout.BeginHorizontal(GUILayout.ExpandWidth(true), GUILayout.MinHeight(14f));
                     {
-                        if (ProfileManager.ActiveProfile.ScienceThreshold > 0f)
+                        if (_profileManager.ActiveProfile.ScienceThreshold > 0f)
                         {
-                            GUILayout.Label(string.Format("Alert Threshold: {0}", ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter)));
+                            GUILayout.Label(string.Format("Alert Threshold: {0}", _profileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter)));
                         }
                         else
                         {
@@ -498,7 +508,7 @@ namespace ScienceAlert.Windows.Implementations
                         GUILayout.FlexibleSpace();
 
 
-                        if (string.IsNullOrEmpty(thresholdValue)) thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+                        if (string.IsNullOrEmpty(thresholdValue)) thresholdValue = _profileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
 
                         GUI.SetNextControlName("ThresholdText");
                         string result = GUILayout.TextField(thresholdValue, GUILayout.MinWidth(60f));
@@ -516,7 +526,7 @@ namespace ScienceAlert.Windows.Implementations
                             try
                             {
                                 float parsed = float.Parse(result, formatter);
-                                ProfileManager.ActiveProfile.ScienceThreshold = parsed;
+                                _profileManager.ActiveProfile.ScienceThreshold = parsed;
 
                                 thresholdValue = result;
                             }
@@ -539,10 +549,10 @@ namespace ScienceAlert.Windows.Implementations
                     GUILayout.Space(3f); // otherwise the TextField will overlap the slider just slightly
 
                     // threshold slider
-                    float newThreshold = GUILayout.HorizontalSlider(ProfileManager.ActiveProfile.ScienceThreshold, 0f, 100f, GUILayout.ExpandWidth(true), GUILayout.Height(14f));
-                    if (Math.Abs(newThreshold - ProfileManager.ActiveProfile.ScienceThreshold) > 0.001f)
+                    float newThreshold = GUILayout.HorizontalSlider(_profileManager.ActiveProfile.ScienceThreshold, 0f, 100f, GUILayout.ExpandWidth(true), GUILayout.Height(14f));
+                    if (Math.Abs(newThreshold - _profileManager.ActiveProfile.ScienceThreshold) > 0.001f)
                     {
-                        ProfileManager.ActiveProfile.ScienceThreshold = newThreshold;
+                        _profileManager.ActiveProfile.ScienceThreshold = newThreshold;
                         thresholdValue = newThreshold.ToString("F2", formatter);
                     }
 
@@ -569,7 +579,7 @@ namespace ScienceAlert.Windows.Implementations
                     {
                         GUILayout.Space(4f);
 
-                        var settings = ProfileManager.ActiveProfile[key];
+                        var settings = _profileManager.ActiveProfile.GetSensorSettings(key);
 
                         // "asteroidSample" isn't listed in ScienceDefs (has a simple title of "Sample")
                         //   note: band-aided this in ScienceAlert.Start; leaving this note here in case
@@ -619,20 +629,20 @@ namespace ScienceAlert.Windows.Implementations
         {
             profileScrollPos = GUILayout.BeginScrollView(profileScrollPos, Settings.Skin.scrollView);
             {
-                if (ProfileManager.Count > 0)
+                if (_profileManager.Count > 0)
                 {
                     //DrawProfileList_HorizontalDivider();
                     GUILayout.Label("Select a profile to load");
                     GUILayout.Box(blackPixel, GUILayout.ExpandWidth(true), GUILayout.MinHeight(1f), GUILayout.MaxHeight(3f));
                     GUILayout.Space(4f); // just a bit of space to make the bar we drew stand out more
 
-                    var profileList = ProfileManager.Profiles;
+                    var profileList = _profileManager.Profiles;
 
                     // always draw default profile first
-                    DrawProfileList_ListItem(ProfileManager.DefaultProfile);
+                    DrawProfileList_ListItem(_profileManager.DefaultProfile);
 
                     foreach (Profile profile in profileList.Values)
-                        if (profile != ProfileManager.DefaultProfile)
+                        if (profile != _profileManager.DefaultProfile)
                             DrawProfileList_ListItem(profile);
 
                 }
@@ -654,14 +664,14 @@ namespace ScienceAlert.Windows.Implementations
         }
 
 
-        private void DrawProfileList_ListItem(Profile profile)
+        private void DrawProfileList_ListItem(IProfile profile)
         {
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Box(profile.Name, GUILayout.ExpandWidth(true));
 
                 // rename button
-                GUI.enabled = profile != ProfileManager.DefaultProfile;
+                GUI.enabled = profile != _profileManager.DefaultProfile;
                 if (AudibleButton(new GUIContent(renameButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24)))
                     SpawnRenamePopup(profile);
 
@@ -671,7 +681,7 @@ namespace ScienceAlert.Windows.Implementations
                     SpawnOpenPopup(profile);
 
                 // delete button
-                GUI.enabled = profile != ProfileManager.DefaultProfile;
+                GUI.enabled = profile != _profileManager.DefaultProfile;
                 if (AudibleButton(new GUIContent(deleteButton), GUILayout.MaxWidth(24), GUILayout.MinWidth(24)))
                     SpawnDeletePopup(profile);
 

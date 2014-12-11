@@ -7,6 +7,8 @@ using ScienceAlert.Experiments.Factory;
 using ScienceAlert.Experiments.Science;
 using ScienceAlert.KSPInterfaces.FlightGlobals;
 using ScienceAlert.KSPInterfaces.FlightGlobals.Implementations;
+using ScienceAlert.KSPInterfaces.GameEvents;
+using ScienceAlert.KSPInterfaces.GameEvents.Implementations;
 using ScienceAlert.KSPInterfaces.ResearchAndDevelopment;
 using ScienceAlert.KSPInterfaces.ResearchAndDevelopment.Implementations;
 using ScienceAlert.ProfileData;
@@ -40,8 +42,9 @@ namespace ScienceAlert
 
         private IResearchAndDevelopmentProvider _rndProvider;
         private IProfileManagerProvider _profileManagerProvider;
+        private IProfileManager _profileManager;
         private IActiveVesselProvider _activeVesselProvider;
-
+        private IGameEvents _gameEvents;
         private ISensorFactory _sensorFactory;
         private IStoredVesselScience _storedVesselScience;
         
@@ -67,7 +70,7 @@ namespace ScienceAlert
 
             Log.Normal("Waiting on ProfileManager...");
             while (!_profileManagerProvider.GetProfileManager().Any()) yield return 0;
-
+            _profileManager = _profileManagerProvider.GetProfileManager().Single();
 
 
 
@@ -82,7 +85,7 @@ namespace ScienceAlert
             if (exp != null) exp.experimentTitle = "Sample (Asteroid)";
 
 
-
+            _gameEvents = new KspGameEvents();
             _activeVesselProvider = new KspActiveVesselProvider();
 
             Log.Verbose("Loading sounds...");
@@ -97,7 +100,7 @@ namespace ScienceAlert
             CreateBiomeFilter();
 
 
-            _sensorFactory = new SensorFactory(_storedVesselScience);
+            _sensorFactory = new SensorFactory(_profileManager, _storedVesselScience, BiomeFilter);
             _sensorManager = new Experiments.SensorManager(_sensorFactory, _storedVesselScience, _activeVesselProvider);
 
 
@@ -119,12 +122,14 @@ namespace ScienceAlert
             ToolbarType = Settings.Instance.ToolbarInterfaceType;
             Log.Verbose("Toolbar button ready");
 
+
+            Log.Normal("Registering for events");
+            RegisterEvents();
+            
+
+
             Log.Normal("ScienceAlert initialization finished.");
 
-
-#if DEBUG
-            //gameObject.AddComponent<Windows.Implementations.TestDrag>();
-#endif
         }
 
 
@@ -155,6 +160,22 @@ namespace ScienceAlert
             BiomeFilter = null;
         }
 
+
+        private void RegisterEvents()
+        {
+            var profileManager = _profileManagerProvider.GetProfileManager();
+            if (!profileManager.Any())
+                throw new Exception("ProfileManager not found when registering events");
+
+            _gameEvents.OnVesselCreate += profileManager.Single().OnVesselCreate;
+            _gameEvents.OnVesselChange += profileManager.Single().OnVesselChange;
+            _gameEvents.OnVesselDestroy += profileManager.Single().OnVesselDestroy;
+        }
+
+        private void UnregisterEvents()
+        {
+
+        }
 
         private void Update()
         {

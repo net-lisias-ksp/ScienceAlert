@@ -45,11 +45,13 @@ namespace ScienceAlert.Windows
 
             Log.Normal("Creating options window");
             _optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
-            
+            _optionsWindow._scienceAlert = scienceAlert;
+
 
             Log.Normal("Creating experiment window");
             _experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
-            
+            _experimentList._scienceAlert = scienceAlert;
+
 
             Log.Normal("Creating debug window");
             _debugWindow = new GameObject("ScienceAlert.DebugWindow").AddComponent<Implementations.DraggableDebugWindow>();
@@ -168,12 +170,12 @@ namespace ScienceAlert.Windows
             if (_scienceAlert.ToolbarType == Settings.ToolbarInterface.ApplicationLauncher)
                 if (tf)
                 {
-                    GetComponent<Toolbar.AppLauncherInterface>().button.SetTrue(false);
+                    ((Toolbar.AppLauncherInterface) _scienceAlert.Button).button.SetTrue(false);
                 }
                 else
                 {
                     if (!_experimentList.Visible && !_optionsWindow.Visible && !_debugWindow.Visible)
-                        GetComponent<Toolbar.AppLauncherInterface>().button.SetFalse(false);
+                        ((Toolbar.AppLauncherInterface) _scienceAlert.Button).button.SetFalse(false);
                 }
         }
 
@@ -185,7 +187,7 @@ namespace ScienceAlert.Windows
         private void Update()
         {
             var mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-            ReeperCommon.Window.DraggableWindow[] windows = new DraggableWindow[] { _optionsWindow, _experimentList, _debugWindow };
+            var windows = new DraggableWindow[] { _optionsWindow, _experimentList, _debugWindow };
 
             _uiCamera.enabled = !windows.Any(win => win.Visible && win.WindowRect.Contains(mouse));
         }

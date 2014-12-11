@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ScienceAlert.KSPInterfaces.PartModules;
 
 namespace ScienceAlert.KSPInterfaces.FlightGlobals
@@ -8,6 +9,10 @@ namespace ScienceAlert.KSPInterfaces.FlightGlobals
         // ReSharper disable once InconsistentNaming
         string vesselName { get; }
         Part rootPart { get; }
+        Guid id { get; }
+        VesselType vesselType { get; }
+        bool loaded { get; }
+        IProtoVessel protoVessel { get; }
 
         List<Part> Parts { get; }
 

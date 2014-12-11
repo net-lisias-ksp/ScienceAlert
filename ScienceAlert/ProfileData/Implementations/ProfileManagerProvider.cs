@@ -6,9 +6,10 @@ namespace ScienceAlert.ProfileData.Implementations
     {
         public Maybe<IProfileManager> GetProfileManager()
         {
-            return ScienceAlertProfileManager.Instance.IsNull()
-                ? Maybe<IProfileManager>.None
-                : Maybe<IProfileManager>.With(ScienceAlertProfileManager.Instance);
+            // treat profile manager as null until KSP has initialized it
+            var pm = ScenarioRunner.fetch.GetComponent<ScienceAlertProfileManager>();
+   
+            return pm.Ready ? Maybe<IProfileManager>.With(pm) : Maybe<IProfileManager>.None;
         }
     }
 }

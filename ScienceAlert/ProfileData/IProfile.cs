@@ -7,10 +7,10 @@ namespace ScienceAlert.ProfileData
 {
     public interface IProfile
     {
-        string Name { get; }
+        string Name { get; set; }
         string DisplayName { get; }
-        float ScienceThreshold { get; }
-        bool Modified { get; }
+        float ScienceThreshold { get; set; }
+        bool Modified { get; set; }
     
 
         IProfile Clone();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ScienceAlert.KSPInterfaces.FlightGlobals;
 using ScienceAlert.ProfileData.Implementations;
 using UnityEngine;
 using ReeperCommon;
@@ -8,8 +9,8 @@ using ScienceAlert.ProfileData;
 
 namespace ScienceAlert
 {
-    using ProfileTable = Dictionary<string, Profile>;   
-    using VesselTable = Dictionary<Guid, Profile>;     
+    using ProfileTable = Dictionary<string, IProfile>;   
+    using VesselTable = Dictionary<Guid, IProfile>;     
 
     /// <summary>
     /// The main purpose of making this a ScenarioModule is to simplify
@@ -58,19 +59,7 @@ namespace ScienceAlert
 
             Settings.Instance.OnSave += OnSettingsSave; // this triggers saving of stored profiles
 
-            GameEvents.onVesselChange.Add(OnVesselChange);
-            GameEvents.onVesselDestroy.Add(OnVesselDestroy);
-            GameEvents.onVesselCreate.Add(OnVesselCreate);
-            GameEvents.onVesselWasModified.Add(OnVesselModified);
-            GameEvents.onFlightReady.Add(OnFlightReady);
-            GameEvents.onVesselWillDestroy.Add(OnVesselWillDestroy);
-            //GameEvents.onGameStateSave.Add(OnGameSave);
-            //GameEvents.onGameStateLoad.Add(OnGameLoad);
-            GameEvents.onSameVesselUndock.Add(OnSameVesselUndock);
-            GameEvents.onUndock.Add(OnUndock);
-
             Ready = false; // won't be ready until OnLoad
-            Instance = this;
 
             LoadStoredProfiles();
         }
@@ -83,21 +72,7 @@ namespace ScienceAlert
         /// </summary>
         private void OnDestroy()
         {
-            Instance = null;
-
             Log.Debug("ProfileManager: OnDestroy");
-
-            GameEvents.onVesselChange.Remove(OnVesselChange);
-            GameEvents.onVesselDestroy.Remove(OnVesselDestroy);
-            GameEvents.onVesselCreate.Remove(OnVesselCreate);
-            GameEvents.onVesselWasModified.Remove(OnVesselModified);
-            GameEvents.onFlightReady.Remove(OnFlightReady);
-            GameEvents.onVesselWillDestroy.Remove(OnVesselWillDestroy);
-            //GameEvents.onGameStateSave.Remove(OnGameSave);
-            //GameEvents.onGameStateLoad.Remove(OnGameLoad);
-            GameEvents.onSameVesselUndock.Remove(OnSameVesselUndock);
-            GameEvents.onUndock.Remove(OnUndock);
-          
 
             SaveStoredProfiles();
         }
@@ -181,7 +156,7 @@ namespace ScienceAlert
         /// </summary>
         private void SaveStoredProfiles()
         {
-            ConfigNode profiles = new ConfigNode(STORED_NODE_NAME); // note: gave it a name because an empty
+            var profiles = new ConfigNode(STORED_NODE_NAME); // note: gave it a name because an empty
                                                                      // ConfigNode will cause KSP to choke on load
 
             foreach (var kvp in storedProfiles)
@@ -228,11 +203,10 @@ namespace ScienceAlert
         /// it might need to be updated. Just recreating it will do
         /// </summary>
         /// <param name="vessel"></param>
-        private void OnVesselChange(Vessel vessel)
+        public void OnVesselChange(IVessel vessel)
         {
             Log.Debug("ProfileManager.OnVesselChange: {0}", vessel.vesselName);
 
-            if (vessel != null)
                 if (vesselProfiles.ContainsKey(vessel.id))
                     if (!vesselProfiles[vessel.id].Modified)
                     {
@@ -263,7 +237,7 @@ namespace ScienceAlert
         /// Destroy old vessel profiles, if the vessel being destroyed has one
         /// </summary>
         /// <param name="vessel"></param>
-        private void OnVesselDestroy(Vessel vessel)
+        public void OnVesselDestroy(IVessel vessel)
         {
             Log.Debug("ProfileManager.OnVesselDestroy: {0}", vessel.vesselName);
 
@@ -284,7 +258,7 @@ namespace ScienceAlert
         /// profile
         /// </summary>
         /// <param name="newVessel"></param>
-        private void OnVesselCreate(Vessel newVessel)
+        public void OnVesselCreate(IVessel newVessel)
         {
             Log.Debug("ProfileManager.OnVesselCreate: {0}", newVessel.vesselName);
 
@@ -294,7 +268,7 @@ namespace ScienceAlert
             {
                 try
                 {
-                    Profile parentProfile = null;
+                    IProfile parentProfile = null;
 
                     // it's possible the new vessel is in fact packed (almost certain to be a DiscoverableObject)
                     // so we need to be careful not to access any parts if it is
@@ -364,35 +338,7 @@ namespace ScienceAlert
 
 
 
-        private void OnVesselModified(Vessel vessel)
-        {
-            Log.Debug("ProfileManager.OnVesselModified: {0}", vessel.vesselName);   
-        }
 
-
-
-        private void OnFlightReady()
-        {
-            Log.Debug("ProfileManager.OnFlightReady");
-        }
-
-
-        private void OnVesselWillDestroy(Vessel vessel)
-        {
-            Log.Debug("ProfileManager.OnVesselWillDestroy: {0}", vessel.vesselName); 
-        }
-
-
-        private void OnSameVesselUndock(GameEvents.FromToAction<ModuleDockingNode, ModuleDockingNode> nodes)
-        {
-            Log.Debug("ProfileManager.OnSameVesselUndock: from {0}, to {1}", nodes.from.vessel.vesselName, nodes.to.vessel.vesselName);
-        }
-
-
-        private void OnUndock(EventReport report)
-        {
-            Log.Debug("ProfileManager.OnUndock: origin {0}, sender {1}", report.origin.name, report.sender);
-        }
 
 
         /// <summary>
@@ -552,21 +498,20 @@ namespace ScienceAlert
 #endregion
 
 #region Interaction methods
-        public static ScienceAlertProfileManager Instance { private set; get; }
         public bool Ready { private set; get; }
 
-        public static Profile DefaultProfile
+        public IProfile DefaultProfile
         {
             get
             {
-                var key = Instance.storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals("default"));
+                var key = storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals("default"));
 
                 if (!string.IsNullOrEmpty(key))
-                    return Instance.storedProfiles[key];
+                    return storedProfiles[key];
 
                 Log.Error("ProfileManager.DefaultProfile: failed to find a default profile! Creating one.");
                 key = "default";
-                Instance.storedProfiles.Add(key, Profile.MakeDefault());
+                storedProfiles.Add(key, Profile.MakeDefault());
 
                 return DefaultProfile;
             }
@@ -574,7 +519,7 @@ namespace ScienceAlert
 
 
 
-        public static Profile ActiveProfile
+        public IProfile ActiveProfile
         {
             get
             {
@@ -586,13 +531,13 @@ namespace ScienceAlert
                     return null;
                 }
 
-                if (!Instance.vesselProfiles.ContainsKey(vessel.id))
+                if (!vesselProfiles.ContainsKey(vessel.id))
                 {
-                    Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", Instance.VesselIdentifier(vessel.id));
-                    Instance.vesselProfiles.Add(vessel.id, DefaultProfile.Clone());
+                    Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", VesselIdentifier(vessel.id));
+                    vesselProfiles.Add(vessel.id, DefaultProfile.Clone());
                 }
 
-                return Instance.vesselProfiles[vessel.id];
+                return vesselProfiles[vessel.id];
             }
         }
 
@@ -609,27 +554,27 @@ namespace ScienceAlert
 
 
 
-        public static int Count
+        public int Count
         {
             get
             {
-                if (Instance.storedProfiles != null)
-                    return Instance.storedProfiles.Count;
+                if (storedProfiles != null)
+                    return storedProfiles.Count;
                 return 0;
             }
         }
 
 
 
-        public static ProfileTable.KeyCollection Names
+        public ProfileTable.KeyCollection Names
         {
             get
             {
-                return Instance.storedProfiles.Keys;
+                return storedProfiles.Keys;
             }
         }
 
-        public static Profile GetProfileByName(string name)
+        public IProfile GetProfileByName(string name)
         {
             var p = FindStoredProfile(name);
             if (p == null)
@@ -640,11 +585,11 @@ namespace ScienceAlert
 
 
 
-        public static ProfileTable Profiles
+        public ProfileTable Profiles
         {
             get
             {
-                return Instance.storedProfiles;
+                return storedProfiles;
             }
         }
 
@@ -656,34 +601,34 @@ namespace ScienceAlert
         /// </summary>
         /// <param name="profile"></param>
         /// <returns></returns>
-        public static void StoreActiveProfile(string name)
+        public void StoreActiveProfile(string name)
         {
-            Profile p = ActiveProfile;
+            IProfile p = ActiveProfile;
 
             p.Name = name;
             p.Modified = false;
 
-            Profile newProfile = p.Clone();
+            IProfile newProfile = p.Clone();
 
             Log.Verbose("Adding new profile '{0}'..", p.Name);
 
             var existing = FindStoredProfile(newProfile.Name);
-            if (existing != null) { Log.Warning("Overwriting existing profile"); Instance.storedProfiles.Remove(existing.Name); }
+            if (existing != null) { Log.Warning("Overwriting existing profile"); storedProfiles.Remove(existing.Name); }
 
-            Instance.storedProfiles.Add(name, newProfile);
+            storedProfiles.Add(name, newProfile);
             Log.Verbose("Successfully added or updated profile");
         }
 
 
 
-        public static void DeleteProfile(string name)
+        public void DeleteProfile(string name)
         {
             var p = FindStoredProfile(name);
 
             if (p != null)
             {
                 Log.Normal("Deleting stored profile '{0}'", name);
-                Instance.storedProfiles.Remove(name);
+                storedProfiles.Remove(name);
             }
             else Log.Warning("ProfileManager: Cannot delete profile '{0}' because it does not exist");
         }
@@ -696,7 +641,7 @@ namespace ScienceAlert
         /// </summary>
         /// <param name="oldName"></param>
         /// <param name="newName"></param>
-        public static void RenameProfile(string oldName, string newName)
+        public void RenameProfile(string oldName, string newName)
         {
             var p = FindStoredProfile(oldName);
 
@@ -734,7 +679,7 @@ namespace ScienceAlert
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static bool LoadStoredAsActiveProfile(string name)
+        public bool LoadStoredAsActiveProfile(string name)
         {
             var p = FindStoredProfile(name);
 
@@ -751,10 +696,10 @@ namespace ScienceAlert
                     Log.Error("ProfileManager: Cannot load profile because vessel is null"); return false;
                 }
 
-                Profile newProfile = p.Clone();
+                var newProfile = p.Clone();
                 newProfile.Modified = false; // should already be false, just making sure
 
-                Instance.vesselProfiles[vessel.id] = newProfile;
+                vesselProfiles[vessel.id] = newProfile;
                 return true;
             }
         }
@@ -767,14 +712,14 @@ namespace ScienceAlert
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public static bool AssignAsActiveProfile(Profile p)
+        public bool AssignAsActiveProfile(IProfile p)
         {
             var vessel = FlightGlobals.ActiveVessel;
 
             if (vessel != null)
                 if (p != null)
                 {
-                    Instance.vesselProfiles[vessel.id] = p;
+                    vesselProfiles[vessel.id] = p;
                     return true;
                 }
 
@@ -785,18 +730,18 @@ namespace ScienceAlert
 
 #region internal methods
 
-        private static Profile FindStoredProfile(string name)
+        private IProfile FindStoredProfile(string name)
         {
-            var key = Instance.storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals(name.ToLower()));
+            var key = storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals(name.ToLower()));
 
             if (string.IsNullOrEmpty(key))
                 return null;
-            return Instance.storedProfiles[key];
+            return storedProfiles[key];
         }
 
 
 
-        public static bool HaveStoredProfile(string name)
+        public bool HaveStoredProfile(string name)
         {
             return FindStoredProfile(name) != null;
         }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ScienceAlert.ProfileData;
 using ScienceAlert.ProfileData.Implementations;
 using UnityEngine;
 using ReeperCommon;
@@ -13,7 +14,7 @@ namespace ScienceAlert.Windows.Implementations
         internal string editText = string.Empty;
         internal string lockName = string.Empty;
         internal bool flag = false;
-        internal Profile editProfile;
+        internal IProfile editProfile;
 
         internal PopupDialog popup;
         internal Rect popupRect = new Rect(Screen.width / 2f - 380f / 2f, Screen.height / 2 - 200f / 2f, 380f, 600f);
@@ -22,7 +23,7 @@ namespace ScienceAlert.Windows.Implementations
 #region save popup
         void SpawnSavePopup()
         {
-            editText = ProfileManager.ActiveProfile.Name;
+            editText = _profileManager.ActiveProfile.Name;
             LockControls("ScienceAlertSavePopup");
             popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, DrawSaveWindow, "Choose a name for this profile"), false, HighLogic.Skin);
         }
@@ -66,9 +67,10 @@ namespace ScienceAlert.Windows.Implementations
             {
                 popup.Dismiss();
             }
-            else editText = ProfileManager.ActiveProfile.Name; // if there was no popup, SaveCurrentProfile was called directly
+            else editText = _profileManager.ActiveProfile.Name; // if there was no popup, SaveCurrentProfile was called directly
 
-            if (ProfileManager.HaveStoredProfile(editText))
+            
+            if (_profileManager.HaveStoredProfile(editText))
             {
                 Log.Warning("Existing profile named '{0}' found! Asking user for overwrite permission.", editText);
                 popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog("Overwrite existing profile?", string.Format("Profile '{0}' already exists!", editText), HighLogic.Skin, new DialogOption[] { new DialogOption("Overwrite", new Callback(SaveCurrentProfileOverwrite)), new DialogOption("Cancel", new Callback(DismissPopup)) }) { dialogRect = popupRect }, false, HighLogic.Skin);
@@ -85,7 +87,7 @@ namespace ScienceAlert.Windows.Implementations
         private void SaveCurrentProfileOverwrite()
         {
             Log.Debug("OptionsWindow.SaveCurrentProfileOverwrite");
-            ProfileManager.StoreActiveProfile(editText);
+            _profileManager.StoreActiveProfile(editText);
             Settings.Instance.Save();
             DismissPopup();
         }
@@ -98,7 +100,7 @@ namespace ScienceAlert.Windows.Implementations
         /// </summary>
         /// <param name="target"></param>
         /// <param name="clone"></param>
-        private void SpawnRenamePopup(Profile target)
+        private void SpawnRenamePopup(IProfile target)
         {
             editProfile = target;
             editText = target.Name;
@@ -159,7 +161,7 @@ namespace ScienceAlert.Windows.Implementations
         private void RenameTargetProfile()
         {
 
-            if (editProfile.Modified || !ProfileManager.HaveStoredProfile(editProfile.Name))
+            if (editProfile.Modified || !_profileManager.HaveStoredProfile(editProfile.Name))
             {
                 // vessel profile: no need to check stored data
                 RenameTargetProfileOverwrite();
@@ -167,7 +169,7 @@ namespace ScienceAlert.Windows.Implementations
             else
             {
                 // check to see if this stored profile already exists
-                if (ProfileManager.HaveStoredProfile(editText))
+                if (_profileManager.HaveStoredProfile(editText))
                 {
                     // conflict!
                     popup.Dismiss();
@@ -190,14 +192,14 @@ namespace ScienceAlert.Windows.Implementations
         /// </summary>
         private void RenameTargetProfileOverwrite()
         {
-            if (editProfile.Modified == false && ProfileManager.HaveStoredProfile(editProfile.Name))
+            if (editProfile.Modified == false && _profileManager.HaveStoredProfile(editProfile.Name))
             {
-                ProfileManager.RenameProfile(editProfile.Name, editText);
+                _profileManager.RenameProfile(editProfile.Name, editText);
 
                 // if the active profile is unmodified and links to the renamed stored 
                 // profile, then rename it as well
-                if (!ProfileManager.ActiveProfile.Modified)
-                    ProfileManager.ActiveProfile.Name = editText;
+                if (!_profileManager.ActiveProfile.Modified)
+                    _profileManager.ActiveProfile.Name = editText;
             }
             else
             {
@@ -212,7 +214,7 @@ namespace ScienceAlert.Windows.Implementations
 
 #region delete popup
 
-        private void SpawnDeletePopup(Profile target)
+        private void SpawnDeletePopup(IProfile target)
         {
             editProfile = target;
             LockControls("ScienceAlertDeletePopup");
@@ -225,7 +227,7 @@ namespace ScienceAlert.Windows.Implementations
         private void DeleteTargetProfile()
         {
             DismissPopup();
-            ProfileManager.DeleteProfile(editProfile.Name);
+            _profileManager.DeleteProfile(editProfile.Name);
         }
 
 
@@ -234,7 +236,7 @@ namespace ScienceAlert.Windows.Implementations
 
         #region load popup
 
-        private void SpawnOpenPopup(Profile target)
+        private void SpawnOpenPopup(IProfile target)
         {
             editProfile = target;
             LockControls("ScienceAlertOpenPopup");
@@ -247,7 +249,7 @@ namespace ScienceAlert.Windows.Implementations
         {
             DismissPopup();
 
-            if (ProfileManager.AssignAsActiveProfile(editProfile.Clone()))
+            if (_profileManager.AssignAsActiveProfile(editProfile.Clone()))
             {
                 Log.Normal("Assigned new active profile: {0}", editProfile.Name);
                 submenu = OpenPane.None; // close panel

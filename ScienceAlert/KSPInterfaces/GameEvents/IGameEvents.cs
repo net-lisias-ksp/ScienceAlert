@@ -6,6 +6,7 @@ namespace ScienceAlert.KSPInterfaces.GameEvents
 
     public interface IGameEvents
     {
+        event VesselEvent OnVesselCreate;
         event VesselEvent OnVesselChange;
         event VesselEvent OnVesselWasModified;
         event VesselEvent OnVesselDestroy;

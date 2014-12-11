@@ -83,7 +83,9 @@
     <Compile Include="Experiments\Sensors\IExperimentSensor.cs" />
     <Compile Include="KSPInterfaces\FlightGlobals\IActiveVesselProvider.cs" />
     <Compile Include="KSPInterfaces\FlightGlobals\Implementations\KspActiveVesselProvider.cs" />
+    <Compile Include="KSPInterfaces\FlightGlobals\Implementations\KspProtoVessel.cs" />
     <Compile Include="KSPInterfaces\FlightGlobals\Implementations\KspVessel.cs" />
+    <Compile Include="KSPInterfaces\FlightGlobals\IProtoVessel.cs" />
     <Compile Include="KSPInterfaces\FlightGlobals\IVessel.cs" />
     <Compile Include="KSPInterfaces\GameEvents\IGameEvents.cs" />
     <Compile Include="KSPInterfaces\GameEvents\Implementations\KspGameEvents.cs" />

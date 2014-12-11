@@ -123,13 +123,13 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Normal("Next absolute recovery: {0}", subject.CalculateNextReport(exp, new List<ScienceData>()));
 
                 // this should also be correct (considers stored experiments)
-                Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, StoredVesselScience.ScienceData.Where(sd => sd.subjectID == subject.id));
+                Log.Normal("Next recovered sample worth: {0}", subject.CalculateNextReport(exp, StoredVesselScience.ScienceData.Where(sd => sd.subjectID == subject.id).ToList()));
 
                 // value to be checked, absolute
                 Log.Normal("next absolute transmission: {0}", subject.CalculateNextReport(exp, new List<ScienceData>(), xmitScalar));
 
                 // value to be checked, next transmitted sample
-                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, StoredVesselScience.FindStoredData(subject.id), xmitScalar));
+                Log.Normal("next transmitted sample worth: {0}", subject.CalculateNextReport(exp, StoredVesselScience.ScienceData.Where(sd => sd.subjectID == subject.id).ToList(), xmitScalar));
             }
         }
 

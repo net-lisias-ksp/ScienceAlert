@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ScienceAlert.Experiments.Science;
 using ScienceAlert.Experiments.Sensors;
 using ScienceAlert.KSPInterfaces.PartModules;
+using ScienceAlert.ProfileData;
 
 namespace ScienceAlert.Experiments.Factory
 {
@@ -10,15 +11,18 @@ namespace ScienceAlert.Experiments.Factory
     {
         private readonly IStoredVesselScience _storedVesselScienceCache;
         private readonly BiomeFilter _biomeFilter;
+        private readonly IProfileManager _profileManager;
 
-
-        public SensorFactory(IStoredVesselScience storedVesselData, BiomeFilter biomeFilter)
+        public SensorFactory(IProfileManager profileManager, IStoredVesselScience storedVesselData, BiomeFilter biomeFilter)
         {
+            if (profileManager.IsNull())
+                throw new ArgumentNullException("profileManager");
             if (storedVesselData.IsNull())
                 throw new ArgumentNullException("storedVesselData");
             if (biomeFilter.IsNull())
                 throw new ArgumentNullException("biomeFilter");
 
+            _profileManager = profileManager;
             _storedVesselScienceCache = storedVesselData;
             _biomeFilter = biomeFilter;
         }
@@ -47,7 +51,7 @@ namespace ScienceAlert.Experiments.Factory
                     break;
 
                 default:
-                    return new ExperimentSensor(experiment, ScienceAlertProfileManager.ActiveProfile.GetSensorSettings(experimentid), _biomeFilter, _storedVesselScienceCache, allOnboardScienceModules);
+                    return new ExperimentSensor(experiment, _profileManager.ActiveProfile.GetSensorSettings(experimentid), _biomeFilter, _storedVesselScienceCache, allOnboardScienceModules);
                     break;
             }
         }
