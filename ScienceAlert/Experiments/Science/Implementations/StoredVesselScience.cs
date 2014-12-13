@@ -17,7 +17,7 @@ namespace ScienceAlert.Experiments.Science
     /// </summary>
     public class StoredVesselScience : IStoredVesselScience
     {
-        private List<IScienceDataContainer> storage;                      // containers for science data
+        private List<IScienceDataContainer> _storage;                      // containers for science data
         private MagicDataTransmitter _magicTransmitter;                    // MagicDataTransmitter keeps an eye on any queued data for the vessel
         private readonly IActiveVesselProvider _vesselProvider;
         private IVessel _monitoredVessel;
@@ -32,6 +32,7 @@ namespace ScienceAlert.Experiments.Science
                 throw new ArgumentNullException("vesselProvider");
 
             _vesselProvider = vesselProvider;
+            _storage = new List<IScienceDataContainer>();
 
             ScanVesselForScienceContainers();
         }
@@ -82,7 +83,7 @@ namespace ScienceAlert.Experiments.Science
             {
                 Log.Debug("StorageCache.OnVesselDestroyed");
 
-                storage = new List<IScienceDataContainer>();
+                _storage.Clear();
                 _magicTransmitter = null;
                 _monitoredVessel = null;
             }
@@ -94,7 +95,7 @@ namespace ScienceAlert.Experiments.Science
             {
                 var found = new List<ScienceData>();
 
-                storage.ForEach(container => found.AddRange(container.GetData()));
+                _storage.ForEach(container => found.AddRange(container.GetData()));
 
                 if (_magicTransmitter == null) return found;
 
@@ -121,7 +122,7 @@ namespace ScienceAlert.Experiments.Science
             IsBusy = true;
 
             Log.Debug("StorageCache: Rebuilding ...");
-            storage.Clear();
+            _storage.Clear();
 
             if (_vesselProvider.GetActiveVessel().SingleOrDefault() != _monitoredVessel)
             {
@@ -140,9 +141,9 @@ namespace ScienceAlert.Experiments.Science
             if (_monitoredVessel == null) return;
 
             // ScienceContainers are straightforward ...
-            storage = _monitoredVessel.GetScienceContainers().ToList();
+            _storage = _monitoredVessel.GetScienceContainers().ToList();
 
-            Log.Debug("StorageCache: located {0} IScienceDataContainers", storage.Count);
+            Log.Debug("StorageCache: located {0} IScienceDataContainers", _storage.Count);
 
 
             // now we must deal with IScienceDataTransmitters, which are not 
@@ -227,10 +228,10 @@ namespace ScienceAlert.Experiments.Science
         {
             Log.Debug("Dumping container data...");
 
-            if (storage == null)
+            if (_storage == null)
                 Log.Error("storage is null");
 
-            foreach (var container in storage)
+            foreach (var container in _storage)
             {
                 if (container == null)
                     Log.Error("container is null");
@@ -268,7 +269,7 @@ namespace ScienceAlert.Experiments.Science
         {
             get
             {
-                return storage.Count;
+                return _storage.Count;
             }
         }
 

@@ -105,7 +105,7 @@ namespace ScienceAlert
 
 
 
-            _windowLogic = new WindowEventLogic(this, BiomeFilter, _storedVesselScience);
+            _windowLogic = new WindowEventLogic(this, BiomeFilter, _storedVesselScience, _profileManager, _sensorManager);
 
 
 

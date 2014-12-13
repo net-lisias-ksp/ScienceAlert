@@ -98,6 +98,8 @@ namespace ScienceAlert.Windows.Implementations
             foreach (var id in sortedIds)
             {
                 //experimentIds.Add(id, (int)Convert.ChangeType(ProfileManager.ActiveProfile[id].Filter, ProfileManager.ActiveProfile[id].Filter.GetTypeCode()));
+
+#error nullref is in here. Probably sensor settings is null for some reason
                 experimentIds.Add(id,
                     (int)
                         Convert.ChangeType(_profileManager.ActiveProfile.GetSensorSettings(id).Filter,
@@ -116,7 +118,7 @@ namespace ScienceAlert.Windows.Implementations
             filterList.Add(new GUIContent("< 50% collected"));
             filterList.Add(new GUIContent("< 90% collected"));
 
-
+            Log.Debug("Loading options window textures");
             openButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnOpen.png", false);
             saveButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnSave.png", false);
             returnButton = ResourceUtil.GetEmbeddedTexture("ScienceAlert.Resources.btnReturn.png", false);
@@ -141,10 +143,11 @@ namespace ScienceAlert.Windows.Implementations
                 expandButton.Compress(false);
             }
 
+            Log.Debug("Customizing options window gui skin");
             blackPixel.SetPixel(0, 0, Color.black); blackPixel.Apply();
             blackPixel.filterMode = FilterMode.Bilinear;
 
-            whiteLabel = (GUISkin)GUISkin.Instantiate(Settings.Skin);
+            whiteLabel = (GUISkin)Instantiate(Settings.Skin);
             whiteLabel.label.onNormal.textColor = Color.white;
             whiteLabel.toggle.onNormal.textColor = Color.white;
             whiteLabel.label.onActive.textColor = Color.white;
@@ -153,20 +156,19 @@ namespace ScienceAlert.Windows.Implementations
             Title = "ScienceAlert Options";
 
             // smaller label for less important text hints
-            miniLabelLeft = new GUIStyle(Skin.label);
-            miniLabelLeft.fontSize = 10;
+            miniLabelLeft = new GUIStyle(Skin.label) {fontSize = 10};
             miniLabelLeft.normal.textColor = miniLabelLeft.onNormal.textColor = Color.white;
 
-            miniLabelRight = new GUIStyle(miniLabelLeft);
-            miniLabelRight.alignment = TextAnchor.MiddleRight;
+            miniLabelRight = new GUIStyle(miniLabelLeft) {alignment = TextAnchor.MiddleRight};
 
-            miniLabelCenter = new GUIStyle(miniLabelLeft);
-            miniLabelCenter.alignment = TextAnchor.MiddleCenter;
+            miniLabelCenter = new GUIStyle(miniLabelLeft) {alignment = TextAnchor.MiddleCenter};
 
+            Log.Debug("options window subscribing to events");
             Settings.Instance.OnSave += OnAboutToSave;
             base.OnVisibilityChange += OnVisibilityChanged;
             GameEvents.onVesselChange.Add(OnVesselChanged);
 
+            Log.Debug("options window loading window settings");
             LoadFrom(Settings.Instance.additional.GetNode("OptionsWindow") ?? new ConfigNode());
 
             return new Rect(windowRect.x, windowRect.y, 324, Screen.height / 5 * 3);

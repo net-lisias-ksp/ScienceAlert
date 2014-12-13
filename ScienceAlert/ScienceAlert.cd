@@ -17,7 +17,7 @@
   <Class Name="ScienceAlert.ScienceAlertProfileManager">
     <Position X="0.5" Y="1" Width="3" />
     <TypeIdentifier>
-      <HashCode>EAABgNIAQGAAgoUIAAkICAQCIAEgQDAACkQgCgAIAQA=</HashCode>
+      <HashCode>EAABgMIAQGAAgoUIAAEIAAQCIAEAQDAACkQgCgAAAQA=</HashCode>
       <FileName>ProfileData\Implementations\ScienceAlertProfileManager.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -26,27 +26,27 @@
     <Position X="5.25" Y="17.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Scan Interfaces\ScanInterface.cs</FileName>
+      <FileName>ScanInterfaces\ScanInterface.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ScienceAlert.DefaultScanInterface" Collapsed="true">
     <Position X="4" Y="18.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Scan Interfaces\ScanInterface.cs</FileName>
+      <FileName>ScanInterfaces\ScanInterface.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ScienceAlert.SCANsatInterface" Collapsed="true">
     <Position X="6.25" Y="18.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAABAIAAAAAAAIAAAABAAAAAAAAAAAAAAAAIAIACAAA=</HashCode>
-      <FileName>Scan Interfaces\SCANsatInterface.cs</FileName>
+      <FileName>ScanInterfaces\SCANsatInterface.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ScienceAlert.ScienceAlertCore">
     <Position X="12.25" Y="0.75" Width="3.75" />
     <TypeIdentifier>
-      <HashCode>AEQBQABAECAAAAACCAAAAAAAAgAIBAAGAAAAlAEBEII=</HashCode>
+      <HashCode>AEQBQABAECAAAAACCAAAAAAAAgAKBAAGAAQAlAEREII=</HashCode>
       <FileName>ScienceAlertCore.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -381,7 +381,7 @@
   <Class Name="ScienceAlert.Windows.Implementations.DraggableOptionsWindow" Collapsed="true">
     <Position X="2.25" Y="12.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>wAABAAUACAgAgGJEi4IIAkQBIEEYAEKSBBCLIAigSGE=</HashCode>
+      <HashCode>wAABAAUAGAgAgGJEi4IIAkQBIEEYAEKSBBCLIAigSGE=</HashCode>
       <FileName>Windows\Implementations\DraggableOptionsWindow.cs</FileName>
     </TypeIdentifier>
   </Class>

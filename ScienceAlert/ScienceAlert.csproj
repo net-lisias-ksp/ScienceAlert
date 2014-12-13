@@ -103,10 +103,12 @@
     <Compile Include="ProfileData\Implementations\ScienceAlertProfileManager.cs" />
     <Compile Include="KSPInterfaces\ResearchAndDevelopment\Implementations\KspResearchAndDevelopmentProvider.cs" />
     <Compile Include="KSPInterfaces\ResearchAndDevelopment\IResearchAndDevelopmentProvider.cs" />
+    <Compile Include="ScanInterfaces\IBiomeScanData.cs" />
+    <Compile Include="ScanInterfaces\Implementations\BiomeScanData.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
     <Compile Include="ScienceAlertCore.cs" />
-    <Compile Include="Scan Interfaces\ScanInterface.cs" />
-    <Compile Include="Scan Interfaces\SCANsatInterface.cs" />
+    <Compile Include="ScanInterfaces\ScanInterface.cs" />
+    <Compile Include="ScanInterfaces\SCANsatInterface.cs" />
     <Compile Include="Experiments\Science\MagicDataTransmitter.cs" />
     <Compile Include="Windows\Implementations\DraggableDebugWindow.cs" />
     <Compile Include="Windows\Implementations\DraggableExperimentList.cs" />

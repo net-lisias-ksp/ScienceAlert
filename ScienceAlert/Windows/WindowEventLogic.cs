@@ -1,7 +1,9 @@
 ﻿using System.Linq;
 using ReeperCommon;
 using ReeperCommon.Window;
+using ScienceAlert.Experiments;
 using ScienceAlert.Experiments.Science;
+using ScienceAlert.ProfileData;
 using UnityEngine;
 
 namespace ScienceAlert.Windows
@@ -25,7 +27,12 @@ namespace ScienceAlert.Windows
         /// <summary>
         /// Create the window components we'll be using
         /// </summary>
-        public WindowEventLogic(ScienceAlertCore scienceAlert, BiomeFilter biomeFilter, IStoredVesselScience storedVesselScience)
+        public WindowEventLogic(
+            ScienceAlertCore scienceAlert, 
+            BiomeFilter biomeFilter, 
+            IStoredVesselScience storedVesselScience, 
+            IProfileManager profileManager, 
+            SensorManager sensorManager)
         {
             Log.Verbose("Customizing DraggableWindow");
 
@@ -46,6 +53,8 @@ namespace ScienceAlert.Windows
             Log.Normal("Creating options window");
             _optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
             _optionsWindow._scienceAlert = scienceAlert;
+            _optionsWindow._profileManager = profileManager;
+            _optionsWindow._sensorManager = sensorManager;
 
 
             Log.Normal("Creating experiment window");
