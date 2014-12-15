@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using ReeperCommon;
 using ReeperCommon.Window;
 using ScienceAlert.Experiments;
@@ -34,6 +35,12 @@ namespace ScienceAlert.Windows
             IProfileManager profileManager, 
             SensorManager sensorManager)
         {
+            if (scienceAlert.IsNull()) throw new ArgumentNullException("scienceAlert");
+            if (biomeFilter.IsNull()) throw new ArgumentNullException("biomeFilter");
+            if (storedVesselScience.IsNull()) throw new ArgumentNullException("storedVesselScience");
+            if (profileManager.IsNull()) throw new ArgumentNullException("profileManager");
+            if (sensorManager.IsNull()) throw new ArgumentNullException("sensorManager");
+
             Log.Verbose("Customizing DraggableWindow");
 
             DraggableWindow.CloseTexture = ResourceUtil.LocateTexture("ScienceAlert.Resources.btnClose.png");

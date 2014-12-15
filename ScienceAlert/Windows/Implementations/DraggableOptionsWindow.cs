@@ -72,6 +72,9 @@ namespace ScienceAlert.Windows.Implementations
 
         protected override Rect Setup()
         {
+            if (_profileManager.IsNull())
+                throw new Exception("_ProfileManager not set");
+
             // position blocker in front of ApplicationLauncher buttons. The window is going to be drawn on
             // top of them regardless; this will just prevent us from accidentally interacting with them
             backstop.SetZ(ApplicationLauncher.Instance.anchor.transform.position.z - 50f);
@@ -95,16 +98,38 @@ namespace ScienceAlert.Windows.Implementations
 
             Log.Debug("OptionsWindow: sorted {0} experiment IDs", sortedIds.Count());
 
+            if (_profileManager.IsNull()) Log.Error("pm is null");
+
+            if (_profileManager.ActiveProfile == null)
+                Log.Error("active profile null");
+
             foreach (var id in sortedIds)
             {
                 //experimentIds.Add(id, (int)Convert.ChangeType(ProfileManager.ActiveProfile[id].Filter, ProfileManager.ActiveProfile[id].Filter.GetTypeCode()));
 
-#error nullref is in here. Probably sensor settings is null for some reason
-                experimentIds.Add(id,
-                    (int)
-                        Convert.ChangeType(_profileManager.ActiveProfile.GetSensorSettings(id).Filter,
-                            _profileManager.ActiveProfile.GetSensorSettings(id).Filter.GetTypeCode()));
-                Log.Debug("Settings: experimentId {0} has filter index {1}", id, experimentIds[id]);
+                var sensorSettings = _profileManager.ActiveProfile.GetSensorSettings(id);
+
+                if (!sensorSettings.IsNull())
+                {
+                    var converted = Convert.ChangeType(sensorSettings.Filter, sensorSettings.Filter.GetTypeCode());
+
+                    if (converted == null)
+                    {
+                        Log.Error("Failed to convert {0} to typeCode", sensorSettings.Filter.ToString());
+                        continue;
+                    }
+
+                    experimentIds.Add(id,
+                        (int) converted);
+
+//#error nullref is in here. Probably sensor settings is null for some reason
+                    //experimentIds.Add(id,
+                    //    (int)
+                    //        Convert.ChangeType(_profileManager.ActiveProfile.GetSensorSettings(id).Filter,
+                    //            _profileManager.ActiveProfile.GetSensorSettings(id).Filter.GetTypeCode()));
+                    Log.Debug("Settings: experimentId {0} has filter index {1}", id, experimentIds[id]);
+                }
+
             }
 
             /*

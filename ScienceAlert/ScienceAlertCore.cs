@@ -72,6 +72,12 @@ namespace ScienceAlert
             while (!_profileManagerProvider.GetProfileManager().Any()) yield return 0;
             _profileManager = _profileManagerProvider.GetProfileManager().Single();
 
+            
+            if (_profileManager.IsNull())
+            {
+                Log.Error("wtf, profileManager is null?");
+                Log.Error("Any = {0}", _profileManagerProvider.GetProfileManager().Any());
+            }
 
 
             Log.Normal("Initializing ScienceAlert");

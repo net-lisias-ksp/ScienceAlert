@@ -146,7 +146,7 @@
   <Class Name="ScienceAlert.Experiments.Science.StoredVesselScience">
     <Position X="19.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAFIAAAAAAAAAAIAAAAAABSIAEAAAAACAgCIAAAgAA=</HashCode>
+      <HashCode>AAAFIAAAAAAAAAAIAAAAAABSIAEAAAAACAgAIAAAgAA=</HashCode>
       <FileName>Experiments\Science\Implementations\StoredVesselScience.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -196,174 +196,6 @@
       <FileName>Toolbar\IToolbar.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="ReeperCommon.PlayableSound" Collapsed="true">
-    <Position X="11.5" Y="14.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAgAACAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\AudioUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.AudioPlayer" Collapsed="true">
-    <Position X="13.25" Y="10.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAANAQAAAAAAAAMAAAEAAAQAAAAEAAAAgAABAAAAAEA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\AudioUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.ConfigUtil" Collapsed="true">
-    <Position X="15" Y="11.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAkAAAAAAAAFAAAAAAAAACAAAAAAQAAAAEAAABAAAI=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.PositionSentinel" Collapsed="true">
-    <Position X="15" Y="14.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAIAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.LineSentinel" Collapsed="true">
-    <Position X="13.25" Y="13.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAABAAAAAAIAAAAAAAAEAAAABAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.DebugVisualizer" Collapsed="true">
-    <Position X="20.25" Y="11.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAABAAAAABAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.DebugExtensions" Collapsed="true">
-    <Position X="18.5" Y="11.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>CAAACAEgAAIQgAAgAAAAAACAAIAQEAAAAJAAAAgAIAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.DebugCollider" Collapsed="true">
-    <Position X="16.75" Y="11.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAABAAAAAAAAABAAAADAAACAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.PerformanceTest" Collapsed="true">
-    <Position X="9.75" Y="14.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAIgAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.FontUtil" Collapsed="true">
-    <Position X="18.5" Y="12.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAg=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\FontUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.UvAtlas" Collapsed="true">
-    <Position X="13.25" Y="16.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAIAIAAAAEAAAggMAAAAAAAAAAAAAAAABAAAAAAAAgE=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.GuiUtil" Collapsed="true">
-    <Position X="9.75" Y="13.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AJAAAAAAAoAQAAAAAAgAoAAAAAAAEQAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.UIButtonExtensions" Collapsed="true">
-    <Position X="11.5" Y="16.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.Log" Collapsed="true">
-    <Position X="15" Y="13.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AQAAABCQAIAAAYAAAAAAABAAAAAIABABAAgAAIEAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\Log.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.StringDumper" Collapsed="true">
-    <Position X="16.75" Y="15.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AQAAAAAACAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\Misc.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.FieldDumper" Collapsed="true">
-    <Position X="16.75" Y="12.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\Misc.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.ObjectCopier" Collapsed="true">
-    <Position X="20.25" Y="13.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ObjectUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.ResourceUtil" Collapsed="true">
-    <Position X="20.25" Y="14.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AgAABAAAAAAAAACAAAAAAAAAJABAAQABABAAAIQACBI=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ResourceUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.ConfigNodeSerialization.DoNotSerialize" Collapsed="true">
-    <Position X="9.75" Y="12.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.ConfigNodeSerialization.HelpDoc" Collapsed="true">
-    <Position X="11.5" Y="13.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAIAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.ConfigNodeSerialization.Subsection" Collapsed="true">
-    <Position X="18.5" Y="15.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAIAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.ConfigNodeSerialization.ConfigNodeTypeHandler" Collapsed="true">
-    <Position X="13.25" Y="11.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAACAAAAAAACBAAABAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.ConfigNodeSerialization.ReeperConfigNodeExtensions" Collapsed="true">
-    <Position X="18.5" Y="14.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AABAAAAAAAAAAAJAAAAAAAAAAAAAAASAAAAAAQAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="ReeperCommon.Window.DraggableWindow" Collapsed="true">
-    <Position X="4.5" Y="11.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>QAaJRAyADiQIAEUAAQQBAQgABAgEgCQpBBCACIQACEA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="ScienceAlert.Windows.Implementations.DraggableDebugWindow" Collapsed="true">
     <Position X="5.75" Y="12.75" Width="1.5" />
     <TypeIdentifier>
@@ -411,6 +243,174 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
+  <Class Name="ReeperCommon.PlayableSound" Collapsed="true">
+    <Position X="11.5" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAgAACAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\AudioUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.AudioPlayer" Collapsed="true">
+    <Position X="13.25" Y="10.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAANAQAAAAAAAAMAAAEAAAQAAAAEAAAAgAABAAAAAEA=</HashCode>
+      <FileName>ReeperCommon\AudioUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigUtil" Collapsed="true">
+    <Position X="15" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAkAAAAAAAAFAAAAAAAAACAAAAAAQAAAAEAAABAAAI=</HashCode>
+      <FileName>ReeperCommon\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.DoNotSerialize" Collapsed="true">
+    <Position X="9.75" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.HelpDoc" Collapsed="true">
+    <Position X="11.5" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAIAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.Subsection" Collapsed="true">
+    <Position X="18.5" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>ReeperCommon\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.ConfigNodeTypeHandler" Collapsed="true">
+    <Position X="13.25" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAACAAAAAAACBAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ConfigNodeSerialization.ReeperConfigNodeExtensions" Collapsed="true">
+    <Position X="18.5" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAJAAAAAAAAAAAAAAASAAAAAAQAAAAA=</HashCode>
+      <FileName>ReeperCommon\ConfigUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.PositionSentinel" Collapsed="true">
+    <Position X="15" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAIAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.LineSentinel" Collapsed="true">
+    <Position X="13.25" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAIAAAAAAAAEAAAABAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.DebugVisualizer" Collapsed="true">
+    <Position X="20.25" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAABAAAAABAAA=</HashCode>
+      <FileName>ReeperCommon\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.DebugExtensions" Collapsed="true">
+    <Position X="18.5" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAACAEgAAIQgAAgAAAAAACAAIAQEAAAAJAAAAgAIAA=</HashCode>
+      <FileName>ReeperCommon\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.DebugCollider" Collapsed="true">
+    <Position X="16.75" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAABAAAAAAAAABAAAADAAACAAAAAA=</HashCode>
+      <FileName>ReeperCommon\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.PerformanceTest" Collapsed="true">
+    <Position X="9.75" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIgAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\DebugUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.FontUtil" Collapsed="true">
+    <Position X="18.5" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAg=</HashCode>
+      <FileName>ReeperCommon\FontUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.UvAtlas" Collapsed="true">
+    <Position X="13.25" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAIAAAAEAAAggMAAAAAAAAAAAAAAAABAAAAAAAAgE=</HashCode>
+      <FileName>ReeperCommon\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.GuiUtil" Collapsed="true">
+    <Position X="9.75" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AJAAAAAAAoAQAAAAAAgAoAAAAAAAEQAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.UIButtonExtensions" Collapsed="true">
+    <Position X="11.5" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.Window.DraggableWindow" Collapsed="true">
+    <Position X="4.5" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAaJRAyADiQIAEUAAQQBAQgABAgEgCQpBBCACIQACEA=</HashCode>
+      <FileName>ReeperCommon\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.Log" Collapsed="true">
+    <Position X="15" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAABCQAIAAAYAAAAAAABAAAAAIABABAAgAAIEAAAA=</HashCode>
+      <FileName>ReeperCommon\Log.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.StringDumper" Collapsed="true">
+    <Position X="16.75" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAACAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\Misc.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.FieldDumper" Collapsed="true">
+    <Position X="16.75" Y="12.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\Misc.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ObjectCopier" Collapsed="true">
+    <Position X="20.25" Y="13.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
+      <FileName>ReeperCommon\ObjectUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ReeperCommon.ResourceUtil" Collapsed="true">
+    <Position X="20.25" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAABAAAAAAAAACAAAAAAAAAJABAAQABABAAAIQACBI=</HashCode>
+      <FileName>ReeperCommon\ResourceUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Interface Name="ScienceAlert.IToolbarManager" Collapsed="true">
     <Position X="18.5" Y="18" Width="1.5" />
     <TypeIdentifier>
@@ -450,14 +450,14 @@
     <Position X="15" Y="18" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAQAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+      <FileName>ReeperCommon\ConfigUtil.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="ReeperCommon.ConfigNodeSerialization.IConfigNodeTypeFormatter" Collapsed="true">
     <Position X="11.5" Y="18" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACBAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\ConfigUtil.cs</FileName>
+      <FileName>ReeperCommon\ConfigUtil.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Delegate Name="ScienceAlert.ClickHandler" Collapsed="true">
@@ -492,28 +492,28 @@
     <Position X="13.25" Y="19" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAACAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\DebugUtil.cs</FileName>
-    </TypeIdentifier>
-  </Delegate>
-  <Delegate Name="ReeperCommon.FieldTraverseDelegate" Collapsed="true">
-    <Position X="11.5" Y="19" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAEAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\Misc.cs</FileName>
+      <FileName>ReeperCommon\DebugUtil.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="ReeperCommon.Window.WindowDelegate" Collapsed="true">
     <Position X="9.75" Y="19.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
+      <FileName>ReeperCommon\GuiUtil.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Delegate Name="ReeperCommon.Window.WindowClosedDelegate" Collapsed="true">
     <Position X="20.25" Y="19" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>D:\For New Computer\KSPCustomMods\DebugTools\GuiUtil.cs</FileName>
+      <FileName>ReeperCommon\GuiUtil.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Delegate Name="ReeperCommon.FieldTraverseDelegate" Collapsed="true">
+    <Position X="11.5" Y="19" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAEAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReeperCommon\Misc.cs</FileName>
     </TypeIdentifier>
   </Delegate>
   <Font Name="Segoe UI" Size="9" />

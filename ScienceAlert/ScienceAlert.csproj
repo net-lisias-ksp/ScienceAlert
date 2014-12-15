@@ -46,33 +46,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\DebugTools\AudioUtil.cs">
-      <Link>Tools\AudioUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\ConfigUtil.cs">
-      <Link>Tools\ConfigUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\DebugUtil.cs">
-      <Link>Tools\DebugUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\FontUtil.cs">
-      <Link>Tools\FontUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\GuiUtil.cs">
-      <Link>Tools\GuiUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\Log.cs">
-      <Link>Tools\Log.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\Misc.cs">
-      <Link>Tools\Misc.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\ObjectUtil.cs">
-      <Link>Tools\ObjectUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\ResourceUtil.cs">
-      <Link>Tools\ResourceUtil.cs</Link>
-    </Compile>
     <Compile Include="API\API.cs" />
     <Compile Include="BiomeFilter.cs" />
     <Compile Include="Experiments\Factory\ISensorFactory.cs" />
@@ -103,6 +76,19 @@
     <Compile Include="ProfileData\Implementations\ScienceAlertProfileManager.cs" />
     <Compile Include="KSPInterfaces\ResearchAndDevelopment\Implementations\KspResearchAndDevelopmentProvider.cs" />
     <Compile Include="KSPInterfaces\ResearchAndDevelopment\IResearchAndDevelopmentProvider.cs" />
+    <Compile Include="ReeperCommon\AudioUtil.cs" />
+    <Compile Include="ReeperCommon\ConfigUtil.cs" />
+    <Compile Include="ReeperCommon\DebugUtil.cs" />
+    <Compile Include="ReeperCommon\FontUtil.cs" />
+    <Compile Include="ReeperCommon\GuiUtil.cs" />
+    <Compile Include="ReeperCommon\Log.cs" />
+    <Compile Include="ReeperCommon\Misc.cs" />
+    <Compile Include="ReeperCommon\ObjectUtil.cs" />
+    <Compile Include="ReeperCommon\ResourceUtil.cs" />
+    <Compile Include="ReeperCommon\ShaderUtil.cs" />
+    <Compile Include="ReeperCommon\Window\IWindow.cs" />
+    <Compile Include="ReeperCommon\Window\BasicWindow.cs" />
+    <Compile Include="ReeperCommon\Window\WindowComponent.cs" />
     <Compile Include="ScanInterfaces\IBiomeScanData.cs" />
     <Compile Include="ScanInterfaces\Implementations\BiomeScanData.cs" />
     <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
@@ -121,6 +107,8 @@
     <Compile Include="Toolbar\IToolbar.cs" />
     <Compile Include="Toolbar\Wrapper\ToolbarWrapper.cs" />
     <Compile Include="Windows\OptionsWindow_Popups.cs" />
+    <Compile Include="Windows\Logic\DebugWindowView.cs" />
+    <Compile Include="ReeperCommon\Window\IWindowLogic.cs" />
     <Compile Include="Windows\WindowEventLogic.cs" />
   </ItemGroup>
   <ItemGroup>
