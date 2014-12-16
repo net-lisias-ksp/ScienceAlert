@@ -31,8 +31,8 @@ namespace ScienceAlert.Experiments.Observers
     {
         protected List<Part> crewableParts = new List<Part>();
 
-        public RequiresCrew(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid)
-            : base(cache, settings, filter, scanInterface, expid)
+        public RequiresCrew(StorageCache cache, ProfileData.ExperimentSettings settings, ScanInterface scanInterface, string expid)
+            : base(cache, settings, scanInterface, expid)
         {
             this.requireControllable = false;
         }
@@ -68,9 +68,8 @@ namespace ScienceAlert.Experiments.Observers
         {
             get
             {
-                foreach (var crewable in crewableParts)
-                    if (crewable.protoModuleCrew.Count > 0)
-                        return true;
+                if (Experiment.IsUnlocked())
+                    return crewableParts.Any(crewable => crewable.protoModuleCrew.Count > 0);
                 return false;
             }
         }

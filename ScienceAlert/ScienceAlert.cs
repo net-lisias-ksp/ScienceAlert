@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.8                                                              *
+ * Version 1.8.2                                                              *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -21,6 +21,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.8.2
+ *      Updated for KSP 0.90
+ *      
+ *      Bugfix: Flask animation now stops when experiment list is opened 
+ *      
+ *      Bugfix: Overwrite existing profile dialog no longer unnecessarily huge
+ * 
  * 1.8
  *      Feature: Per-vessel profiles
  *      

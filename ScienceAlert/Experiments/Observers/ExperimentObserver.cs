@@ -40,8 +40,6 @@ namespace ScienceAlert.Experiments.Observers
         protected StorageCache storage;                     // Represents possible storage locations on the vessel
         public ProfileData.ExperimentSettings settings;     // settings for this experiment
         protected string lastAvailableId;                   // Id of the last time the experiment was available
-        protected string lastBiomeQuery;                    // the last good biome result we had
-        protected BiomeFilter biomeFilter;                  // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
         protected ScanInterface scanInterface;              // Determines whether we're allowed to know if an experiment is available
         protected float nextReportValue;                    // take a guess
         protected bool requireControllable;                 // Vessel needs to be controllable for the experiment to be available
@@ -54,10 +52,9 @@ namespace ScienceAlert.Experiments.Observers
  ******************************************************************************/
 
 
-        public ExperimentObserver(StorageCache cache, ProfileData.ExperimentSettings expSettings, BiomeFilter filter, ScanInterface scanMapInterface, string expid)
+        public ExperimentObserver(StorageCache cache, ProfileData.ExperimentSettings expSettings, ScanInterface scanMapInterface, string expid)
         {
             settings = expSettings;
-            biomeFilter = filter;
             requireControllable = true;
 
             if (scanMapInterface == null)
@@ -277,14 +274,7 @@ namespace ScienceAlert.Experiments.Observers
                         // biome matters; check to make sure we have biome data available
                         if (scanInterface.HaveScanData(vessel.latitude, vessel.longitude, vessel.mainBody))
                         {
-                            if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad, out biome))
-                            {
-                                lastBiomeQuery = biome;
-                            }
-                            else
-                            {
-                                biome = lastBiomeQuery; // use last good known value
-                            }
+                            biome = Util.GetCurrentBiome();
                         }
                         else
                         { // no biome data available
@@ -360,7 +350,7 @@ namespace ScienceAlert.Experiments.Observers
 
 #if DEBUG
                                 if (GetNextOnboardExperimentModule() != null)
-                                    Log.Debug("Transmission value: {0}", API.AlertUtil.GetNextReportValue(subject, experiment, data, GetNextOnboardExperimentModule().xmitDataScalar));
+                                    Log.Debug("Transmission value: {0}", API.Util.GetNextReportValue(subject, experiment, data, GetNextOnboardExperimentModule().xmitDataScalar));
 #endif
 
                                 if (data.Count() > 0)
@@ -434,7 +424,7 @@ namespace ScienceAlert.Experiments.Observers
 
             if (deployable)
             {
-                Log.Debug("Deploying experiment module on part {0}", deployable.part.ConstructID);
+                Log.Debug("Deploying experiment module on part {0}", deployable.part.name);
 
                 try
                 {
@@ -497,7 +487,7 @@ namespace ScienceAlert.Experiments.Observers
         {
             get
             {
-                return /*settings.AssumeOnboard ||*/ GetNextOnboardExperimentModule() != null;
+                return experiment.IsUnlocked() && GetNextOnboardExperimentModule() != null;
             }
         }
 

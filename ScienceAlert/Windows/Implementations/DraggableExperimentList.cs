@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon;
 using UnityEngine;
+using ScienceAlert.API;
 
 namespace ScienceAlert.Windows.Implementations
 {
@@ -33,9 +34,9 @@ namespace ScienceAlert.Windows.Implementations
 
         // members
         public Experiments.ExperimentManager manager;
-        public BiomeFilter biomeFilter;
         public ScanInterface scanInterface;
-        
+        public ScienceAlert scienceAlert;
+
         private bool adjustedSkin = false;
 
 
@@ -49,6 +50,8 @@ namespace ScienceAlert.Windows.Implementations
         /// <returns></returns>
         protected override Rect Setup()
         {
+            base.OnVisibilityChange += OnVisibilityChanged;
+
             // position blocker in front of ApplicationLauncher buttons. The window is going to be drawn on
             // top of them regardless; this will just prevent us from accidentally interacting with them
             backstop.SetZ(ApplicationLauncher.Instance.anchor.transform.position.z - 50f);
@@ -96,25 +99,13 @@ namespace ScienceAlert.Windows.Implementations
                         }
                     }
 
-                    Title = GetBiomeString();
+                    Title = Util.GetCurrentBiome();
                     return;
                 }  
                     
             Title = WindowTitle; // default experiment window title
         }
 
-
-
-        private string GetBiomeString()
-        {
-            string biome = Title;
-
-            if (biomeFilter.GetCurrentBiome(out biome))
-            {
-                return biome;
-            }
-            else return WindowTitle;
-        }
 
 
         /// <summary>
@@ -202,6 +193,12 @@ namespace ScienceAlert.Windows.Implementations
         #region events
 
 
+        private void OnVisibilityChanged(bool visible)
+        {
+            if (visible)
+                if (scienceAlert.Button.IsAnimating)
+                    scienceAlert.Button.StopAnimation();
+        }
 
 
         #endregion

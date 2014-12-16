@@ -43,7 +43,6 @@ namespace ScienceAlert.Experiments
         // --------------------------------------------------------------------
         private ScienceAlert scienceAlert;
         private StorageCache vesselStorage;
-        private BiomeFilter biomeFilter;
 
         private System.Collections.IEnumerator watcher;
 
@@ -81,7 +80,6 @@ namespace ScienceAlert.Experiments
         void Awake()
         {
             vesselStorage = gameObject.AddComponent<StorageCache>();
-            biomeFilter = gameObject.AddComponent<BiomeFilter>();
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
             audio = GetComponent<AudioPlayer>() ?? AudioPlayer.Audio;
 
@@ -222,6 +220,8 @@ namespace ScienceAlert.Experiments
                                 if (Settings.Instance.GlobalWarp != Settings.WarpSetting.GlobalOff)
                                     if (TimeWarp.CurrentRateIndex > 0)
                                     {
+                                        Log.Normal("Stopping time warp");
+
                                         // Simply setting warp index to zero causes some kind of
                                         // accuracy problem that can seriously affect the
                                         // orbit of the vessel.
@@ -330,12 +330,12 @@ namespace ScienceAlert.Experiments
                     else if (FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>().Any(mse => mse.experimentID == expid))
                     {
                         // only add this observer if at least one applicable experiment is onboard
-                        observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], biomeFilter, scanInterface, expid));
+                        observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], scanInterface, expid));
                     }
 
             // surfaceSample is a special case: it's technically available on any
             // crewed vessel
-            observers.Add(new SurfaceSampleObserver(vesselStorage, ProfileManager.ActiveProfile["surfaceSample"], biomeFilter, scanInterface));
+            observers.Add(new SurfaceSampleObserver(vesselStorage, ProfileManager.ActiveProfile["surfaceSample"], scanInterface));
 
 
             // evaReport is a special case.  It technically exists on any crewed
@@ -353,11 +353,11 @@ namespace ScienceAlert.Experiments
                     if (Settings.Instance.EvaReportOnTop)
                     {
                         observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-                        observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+                        observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], scanInterface));
                     }
                     else
                     {
-                        observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], biomeFilter, scanInterface));
+                        observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], scanInterface));
                         observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
                     }
                 }

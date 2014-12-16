@@ -281,7 +281,7 @@ namespace ScienceAlert
 
         public override string ToString()
         {
-            return string.Format("MagicDataTransmitter attached to {0}; {1} entries in queue", FlightGlobals.ActiveVessel.rootPart.ConstructID, QueuedData.Count);
+            return string.Format("MagicDataTransmitter attached to {0}; {1} entries in queue", FlightGlobals.ActiveVessel.rootPart.name, QueuedData.Count);
         }
     }
 }

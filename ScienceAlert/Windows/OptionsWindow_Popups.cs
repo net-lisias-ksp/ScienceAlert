@@ -33,7 +33,7 @@ namespace ScienceAlert.Windows.Implementations
         internal ProfileData.Profile editProfile;
 
         internal PopupDialog popup;
-        internal Rect popupRect = new Rect(Screen.width / 2f - 380f / 2f, Screen.height / 2 - 200f / 2f, 380f, 600f);
+        internal Rect popupRect = new Rect(Screen.width / 2f - 380f / 2f, Screen.height / 2 - 200f / 2f, 380f, 1f);
         internal string badChars = "()[]?'\":#$%^&*~;\n\t\r!@,.{}/<>";
 
 #region save popup

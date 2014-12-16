@@ -26,8 +26,8 @@ namespace ScienceAlert.Experiments.Observers
     /// </summary>
     internal class SurfaceSampleObserver : EvaReportObserver
     {
-        public SurfaceSampleObserver(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface)
-            : base(cache, settings, filter, scanInterface, "surfaceSample")
+        public SurfaceSampleObserver(StorageCache cache, ProfileData.ExperimentSettings settings, ScanInterface scanInterface)
+            : base(cache, settings, scanInterface, "surfaceSample")
         {
 
         }
@@ -40,7 +40,7 @@ namespace ScienceAlert.Experiments.Observers
                 {
                     if (FlightGlobals.ActiveVessel.isEVA)
                     {
-                        return /*settings.AssumeOnboard ||*/ this.GetNextOnboardExperimentModule() != null;
+                        return /*settings.AssumeOnboard ||*/ Experiment.IsUnlocked() && this.GetNextOnboardExperimentModule() != null;
                     }
                     else return Settings.Instance.CheckSurfaceSampleNotEva && base.IsReadyOnboard;
 

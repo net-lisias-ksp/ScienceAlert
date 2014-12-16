@@ -24,13 +24,17 @@ namespace ScienceAlert.Experiments.Observers
 {
     internal class EvaReportObserver : RequiresCrew
     {
+        readonly bool evaUnlocked = true;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        public EvaReportObserver(StorageCache cache, ProfileData.ExperimentSettings settings, BiomeFilter filter, ScanInterface scanInterface, string expid = "evaReport")
-            : base(cache, settings, filter, scanInterface, expid)
+        public EvaReportObserver(StorageCache cache, ProfileData.ExperimentSettings settings, ScanInterface scanInterface, string expid = "evaReport")
+            : base(cache, settings, scanInterface, expid)
         {
-
+            
+            evaUnlocked = GameVariables.Instance.UnlockedEVA(
+                ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.AstronautComplex));
         }
 
 
@@ -176,6 +180,14 @@ namespace ScienceAlert.Experiments.Observers
 
                 // out he goes!
                 return FlightEVA.SpawnEVA(luckyKerbal.KerbalRef);
+            }
+        }
+
+        public override bool IsReadyOnboard
+        {
+            get
+            {
+                return GameVariables.Instance.EVAIsPossible(evaUnlocked, FlightGlobals.ActiveVessel) && base.IsReadyOnboard;
             }
         }
     }

@@ -19,11 +19,10 @@
 using System.Collections.Generic;
 using ReeperCommon;
 
-/// WIP; cut this release because nothing is broken, redesign takes time and people have been waiting a long
-/// time for this update already
+
 namespace ScienceAlert.API
 {
-    public static class AlertUtil
+    public static class Util
     {
         public static float CalculateNextReport(this ScienceSubject subject, ScienceExperiment experiment, List<ScienceData> onboard, float xmitScalar = 1f)
         {
@@ -51,6 +50,18 @@ namespace ScienceAlert.API
 
             // we'll have to estimate
             return experimentValue / UnityEngine.Mathf.Pow(4f, onboard.Count - 1);
+        }
+
+        public static string GetCurrentBiome()
+        {
+            if (FlightGlobals.ActiveVessel != null)
+            if (FlightGlobals.ActiveVessel.mainBody.BiomeMap != null)
+                return !string.IsNullOrEmpty(FlightGlobals.ActiveVessel.landedAt)
+                                ? Vessel.GetLandedAtString(FlightGlobals.ActiveVessel.landedAt)
+                                : ScienceUtil.GetExperimentBiome(FlightGlobals.ActiveVessel.mainBody,
+                                            FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude); 
+
+            return string.Empty;
         }
     }
 }

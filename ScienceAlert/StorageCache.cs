@@ -210,7 +210,7 @@ namespace ScienceAlert
                         magicTransmitter = vessel.rootPart.AddModule("MagicDataTransmitter") as MagicDataTransmitter;
                         magicTransmitter.cacheOwner = this;
 
-                        Log.Debug("Added MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.ConstructID);
+                        Log.Debug("Added MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.name);
 
                     }
                 } else
