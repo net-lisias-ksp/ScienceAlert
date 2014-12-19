@@ -21,6 +21,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.8.3
+ *      
+ * 
  * 1.8.2
  *      Updated for KSP 0.90
  *      
@@ -209,7 +212,9 @@ namespace ScienceAlert
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
             Log.Verbose("Sounds ready.");
 
-            
+
+            Log.Normal("Creating biome filter");
+            gameObject.AddComponent<Experiments.BiomeFilter>();
 
             Log.Normal("Creating experiment manager");
             gameObject.AddComponent<Experiments.ExperimentManager>();

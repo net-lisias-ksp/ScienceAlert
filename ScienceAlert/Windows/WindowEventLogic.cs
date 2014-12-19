@@ -73,6 +73,7 @@ namespace ScienceAlert.Windows
             experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
             experimentList.manager = GetComponent<Experiments.ExperimentManager>();
             experimentList.scienceAlert = GetComponent<ScienceAlert>();
+            experimentList.biomeFilter = GetComponent<Experiments.BiomeFilter>();
 
             Log.Normal("Creating debug window");
             debugWindow = new GameObject("ScienceAlert.DebugWindow").AddComponent<Implementations.DraggableDebugWindow>();

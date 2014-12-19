@@ -52,16 +52,17 @@ namespace ScienceAlert.API
             return experimentValue / UnityEngine.Mathf.Pow(4f, onboard.Count - 1);
         }
 
-        public static string GetCurrentBiome()
-        {
-            if (FlightGlobals.ActiveVessel != null)
-            if (FlightGlobals.ActiveVessel.mainBody.BiomeMap != null)
-                return !string.IsNullOrEmpty(FlightGlobals.ActiveVessel.landedAt)
-                                ? Vessel.GetLandedAtString(FlightGlobals.ActiveVessel.landedAt)
-                                : ScienceUtil.GetExperimentBiome(FlightGlobals.ActiveVessel.mainBody,
-                                            FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude); 
+        // removed again: biome filter still necessary
+        //public static string GetCurrentBiome()
+        //{
+        //    if (FlightGlobals.ActiveVessel != null)
+        //    if (FlightGlobals.ActiveVessel.mainBody.BiomeMap != null)
+        //        return !string.IsNullOrEmpty(FlightGlobals.ActiveVessel.landedAt)
+        //                        ? Vessel.GetLandedAtString(FlightGlobals.ActiveVessel.landedAt)
+        //                        : ScienceUtil.GetExperimentBiome(FlightGlobals.ActiveVessel.mainBody,
+        //                                    FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude); 
 
-            return string.Empty;
-        }
+        //    return string.Empty;
+        //}
     }
 }

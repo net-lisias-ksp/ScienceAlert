@@ -29,8 +29,8 @@ namespace ScienceAlert.Experiments.Observers
         /// <summary>
         /// Constructor
         /// </summary>
-        public EvaReportObserver(StorageCache cache, ProfileData.ExperimentSettings settings, ScanInterface scanInterface, string expid = "evaReport")
-            : base(cache, settings, scanInterface, expid)
+        public EvaReportObserver(StorageCache cache, BiomeFilter biomeFilter, ProfileData.ExperimentSettings settings, ScanInterface scanInterface, string expid = "evaReport")
+            : base(cache, biomeFilter, settings, scanInterface, expid)
         {
             
             evaUnlocked = GameVariables.Instance.UnlockedEVA(

@@ -318,6 +318,8 @@ namespace ScienceAlert.Experiments
                                                                                                       // is the default but there should always be a ScanInterface-type
                                                                                                       // script attached to this GO
 
+            var biomeFilter = GetComponent<BiomeFilter>();
+
             // construct the experiment observer list ...
             foreach (var expid in ResearchAndDevelopment.GetExperimentIDs())
                 if (expid != "evaReport" && expid != "surfaceSample") // special cases
@@ -330,12 +332,12 @@ namespace ScienceAlert.Experiments
                     else if (FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>().Any(mse => mse.experimentID == expid))
                     {
                         // only add this observer if at least one applicable experiment is onboard
-                        observers.Add(new ExperimentObserver(vesselStorage, ProfileManager.ActiveProfile[expid], scanInterface, expid));
+                        observers.Add(new ExperimentObserver(vesselStorage, biomeFilter, ProfileManager.ActiveProfile[expid], scanInterface, expid));
                     }
 
             // surfaceSample is a special case: it's technically available on any
             // crewed vessel
-            observers.Add(new SurfaceSampleObserver(vesselStorage, ProfileManager.ActiveProfile["surfaceSample"], scanInterface));
+            observers.Add(new SurfaceSampleObserver(vesselStorage, biomeFilter, ProfileManager.ActiveProfile["surfaceSample"], scanInterface));
 
 
             // evaReport is a special case.  It technically exists on any crewed
@@ -353,11 +355,11 @@ namespace ScienceAlert.Experiments
                     if (Settings.Instance.EvaReportOnTop)
                     {
                         observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
-                        observers.Insert(0, new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], scanInterface));
+                        observers.Insert(0, new EvaReportObserver(vesselStorage, biomeFilter, ProfileManager.ActiveProfile["evaReport"], scanInterface));
                     }
                     else
                     {
-                        observers.Add(new EvaReportObserver(vesselStorage, ProfileManager.ActiveProfile["evaReport"], scanInterface));
+                        observers.Add(new EvaReportObserver(vesselStorage, biomeFilter, ProfileManager.ActiveProfile["evaReport"], scanInterface));
                         observers = observers.OrderBy(obs => obs.ExperimentTitle).ToList();
                     }
                 }

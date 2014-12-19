@@ -31,8 +31,8 @@ namespace ScienceAlert.Experiments.Observers
     {
         protected List<Part> crewableParts = new List<Part>();
 
-        public RequiresCrew(StorageCache cache, ProfileData.ExperimentSettings settings, ScanInterface scanInterface, string expid)
-            : base(cache, settings, scanInterface, expid)
+        public RequiresCrew(StorageCache cache, BiomeFilter biomeFilter, ProfileData.ExperimentSettings settings, ScanInterface scanInterface, string expid)
+            : base(cache, biomeFilter, settings, scanInterface, expid)
         {
             this.requireControllable = false;
         }

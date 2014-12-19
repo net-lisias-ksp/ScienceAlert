@@ -36,6 +36,7 @@ namespace ScienceAlert.Windows.Implementations
         public Experiments.ExperimentManager manager;
         public ScanInterface scanInterface;
         public ScienceAlert scienceAlert;
+        public Experiments.BiomeFilter biomeFilter;
 
         private bool adjustedSkin = false;
 
@@ -99,7 +100,7 @@ namespace ScienceAlert.Windows.Implementations
                         }
                     }
 
-                    Title = Util.GetCurrentBiome();
+                    Title = biomeFilter.GetCurrentBiome();
                     return;
                 }  
                     

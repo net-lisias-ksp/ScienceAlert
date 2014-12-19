@@ -43,6 +43,7 @@ namespace ScienceAlert.Experiments.Observers
         protected ScanInterface scanInterface;              // Determines whether we're allowed to know if an experiment is available
         protected float nextReportValue;                    // take a guess
         protected bool requireControllable;                 // Vessel needs to be controllable for the experiment to be available
+        protected BiomeFilter biomeFilter;
 
         // events
         public ExperimentManager.ExperimentAvailableDelegate OnAvailable = delegate { };
@@ -52,9 +53,10 @@ namespace ScienceAlert.Experiments.Observers
  ******************************************************************************/
 
 
-        public ExperimentObserver(StorageCache cache, ProfileData.ExperimentSettings expSettings, ScanInterface scanMapInterface, string expid)
+        public ExperimentObserver(StorageCache cache, BiomeFilter biomeFilter, ProfileData.ExperimentSettings expSettings, ScanInterface scanMapInterface, string expid)
         {
             settings = expSettings;
+            this.biomeFilter = biomeFilter;
             requireControllable = true;
 
             if (scanMapInterface == null)
@@ -274,7 +276,7 @@ namespace ScienceAlert.Experiments.Observers
                         // biome matters; check to make sure we have biome data available
                         if (scanInterface.HaveScanData(vessel.latitude, vessel.longitude, vessel.mainBody))
                         {
-                            biome = Util.GetCurrentBiome();
+                            biome = biomeFilter.GetCurrentBiome();
                         }
                         else
                         { // no biome data available

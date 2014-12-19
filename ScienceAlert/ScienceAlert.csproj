@@ -74,6 +74,7 @@
       <Link>Tools\ResourceUtil.cs</Link>
     </Compile>
     <Compile Include="API\Util.cs" />
+    <Compile Include="Experiments\BiomeFilter.cs" />
     <Compile Include="Experiments\Observers\EvaReportObserver.cs" />
     <Compile Include="Experiments\Observers\RequiresCrew.cs" />
     <Compile Include="Experiments\Observers\SurfaceSampleObserver.cs" />
