@@ -188,6 +188,7 @@ namespace ScienceAlert.Experiments
         /// <returns></returns>
         private System.Collections.IEnumerator UpdateObservers()
         {
+            bool exitedTimewarp = false;
 
             while (true)
             {
@@ -209,10 +210,8 @@ namespace ScienceAlert.Experiments
 #if PROFILE
                     float start = Time.realtimeSinceStartup;
 #endif
-                        bool newReport = false;
-
                         // Is exciting new research available?
-                        if (observer.UpdateStatus(expSituation, out newReport))
+                        if (observer.UpdateStatus(expSituation))
                         {
                             // if we're timewarping, resume normal time if that setting
                             // was used
@@ -229,7 +228,7 @@ namespace ScienceAlert.Experiments
                                         // to avoid this, we'll take a snapshot of the orbit
                                         // pre-warp and then apply it again after we've changed
                                         // the warp rate
-                                        OrbitSnapshot snap = new OrbitSnapshot(FlightGlobals.ActiveVessel.GetOrbitDriver().orbit);
+                                        var snap = new OrbitSnapshot(FlightGlobals.ActiveVessel.GetOrbitDriver().orbit);
                                         TimeWarp.SetRate(0, true);
                                         FlightGlobals.ActiveVessel.GetOrbitDriver().orbit = snap.Load();
                                         FlightGlobals.ActiveVessel.GetOrbitDriver().orbit.UpdateFromUT(Planetarium.GetUniversalTime());
@@ -241,13 +240,6 @@ namespace ScienceAlert.Experiments
                             // the button is important; if it's auto-hidden we should
                             // show it to the player
                             scienceAlert.Button.Important = true;
-
-
-                            if (observer.settings.AnimationOnDiscovery)
-                            {
-                                scienceAlert.Button.PlayAnimation();
-                            }
-                            else if (scienceAlert.Button.IsNormal) scienceAlert.Button.SetLit();
 
                             switch (Settings.Instance.SoundNotification)
                             {
@@ -261,6 +253,16 @@ namespace ScienceAlert.Experiments
                                     audio.PlayUI("bubbles", 2f);
                                     break;
                             }
+
+
+                            if (observer.settings.AnimationOnDiscovery)
+                            {
+                                scienceAlert.Button.PlayAnimation();
+                            }
+                            else if (scienceAlert.Button.IsNormal) scienceAlert.Button.SetLit();
+
+                            
+
 
                             OnExperimentAvailable(observer.Experiment, observer.NextReportValue);
                         }

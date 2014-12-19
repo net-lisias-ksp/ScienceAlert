@@ -234,10 +234,8 @@ namespace ScienceAlert.Experiments.Observers
         /// status changes)
         /// </summary>
         /// <returns></returns>
-        public virtual bool UpdateStatus(ExperimentSituations experimentSituation, out bool newReport)
+        public virtual bool UpdateStatus(ExperimentSituations experimentSituation)
         {
-            newReport = false;
-
             if (FlightGlobals.ActiveVessel == null)
             {
                 Available = false;
@@ -337,10 +335,8 @@ namespace ScienceAlert.Experiments.Observers
                         if (Available)
                         {
                             if (lastAvailableId != subject.id)
-                            {
                                 lastStatus = false; // force a refresh, in case we're going from available -> available in different subject id
-                                newReport = true; // we've available on a brand new report
-                            }
+                            
                             
                             lastAvailableId = subject.id;
 

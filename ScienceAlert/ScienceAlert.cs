@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.8.2                                                              *
+ * Version 1.8.3                                                              *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -22,7 +22,13 @@
  ****************************************************************************
  * Changelog
  * 1.8.3
+ *      Bugfix: EVA/surface sample buttons will no longer deploy while in TimeWarp
  *      
+ *      Change: Biome filtering re-added due to anomalous "phantom" biomes stock
+ *              KSP sometimes reports. This should reduce the incident of "alert blips"--
+ *              where ScienceAlert reports an experiment available only for a few frames
+ *              and interrupting time warp, but the alert ends faster than you can possible
+ *              react to it
  * 
  * 1.8.2
  *      Updated for KSP 0.90

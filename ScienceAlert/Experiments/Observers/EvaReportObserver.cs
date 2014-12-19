@@ -64,6 +64,11 @@ namespace ScienceAlert.Experiments.Observers
                 return false;
             }
 
+            if (TimeWarp.CurrentRateIndex > 0)
+            {
+                Log.Error("Cannot deploy eva experiment because TimeWarp is active");
+                return false;
+            }
 
             // the current vessel IS NOT an eva'ing Kerbal, so
             // find a kerbal and dump him into space

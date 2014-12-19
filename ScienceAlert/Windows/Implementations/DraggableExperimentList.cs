@@ -170,6 +170,8 @@ namespace ScienceAlert.Windows.Implementations
                                 Log.Debug("Deploying {0}", observer.ExperimentTitle);
                                 AudioPlayer.Audio.PlayUI("click2");
                                 observer.Deploy();
+
+                                if (scienceAlert.Button.IsAnimating) scienceAlert.Button.StopAnimation();
                             }
                         }
                 }
