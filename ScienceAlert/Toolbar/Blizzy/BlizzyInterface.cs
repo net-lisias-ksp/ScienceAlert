@@ -53,7 +53,7 @@ namespace ScienceAlert.Toolbar
         /// <summary>
         /// Create Toolbar and associated textures; setup event
         /// </summary>
-        void Start()
+        void Awake()
         {
             Log.Verbose("Initializing BlizzyInterface...");
 

@@ -160,6 +160,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ScienceAlert.Toolbar;
 using UnityEngine;
 using ReeperCommon;
 
@@ -202,6 +203,10 @@ namespace ScienceAlert
 
             Log.Normal("Waiting on ProfileManager...");
             while (ScienceAlertProfileManager.Instance == null || !ScienceAlertProfileManager.Instance.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
+
+            Log.Normal("Waiting on AppLauncher"); // not necessary because it's almost certain to be ready by this time,
+                                                  // but included to make it clear that it's important not to try too early
+            while (!ApplicationLauncher.Ready) yield return 0;
 
             Log.Normal("Initializing ScienceAlert");
 
@@ -322,14 +327,22 @@ namespace ScienceAlert
             {
                 if (value != buttonInterfaceType || button == null)
                 {
-                    if (button != null)
-                    {
-                        var c = gameObject.GetComponent(button.GetType());
-                        if (c == null) Log.Warning("ToolbarInterface: Did not find previous interface");
 
-                        Destroy(c);
-                        button = null;
+                    switch (buttonInterfaceType)
+                    {
+                        case Settings.ToolbarInterface.BlizzyToolbar:
+                            Log.Debug("Destroying BlizzyInterface");
+                            Destroy(button as BlizzyInterface);
+                            break;
+
+                        case Settings.ToolbarInterface.ApplicationLauncher:
+                            Log.Debug("Destroying AppLauncher interface");
+                            Destroy(button as AppLauncherInterface);
+                            break;
+
                     }
+
+                    button = null;
 
                     switch (value)
                     {
@@ -356,6 +369,13 @@ namespace ScienceAlert
                     }
 
                     buttonInterfaceType = value;
+#if DEBUG
+                    Log.Debug("testing button important");
+                    if (button == null) Log.Error("button is null??");
+
+                    button.Important = true;
+#endif
+
                     OnToolbarButtonChanged();
                 }
             }
@@ -378,7 +398,11 @@ namespace ScienceAlert
             {
                 if (value != scanInterfaceType || scanInterface == null)
                 {
-                    if (scanInterface != null) Component.DestroyImmediate(GetComponent<ScanInterface>());
+                    if (scanInterface != null)
+                    {
+                        Component.DestroyImmediate(GetComponent<ScanInterface>());
+                        Log.Debug("Destroyed old interface");
+                    }
 
                     Log.Normal("Setting scan interface type to {0}", value.ToString());
 

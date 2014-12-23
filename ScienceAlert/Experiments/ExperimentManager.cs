@@ -514,6 +514,7 @@ namespace ScienceAlert.Experiments
         private void OnToolbarButtonChanged()
         {
             Log.Debug("ExperimentManager.OnToolbarButtonChanged");
+            
             RebuildObserverList();
         }
 

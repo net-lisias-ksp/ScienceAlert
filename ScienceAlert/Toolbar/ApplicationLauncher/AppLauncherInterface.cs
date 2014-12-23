@@ -49,7 +49,7 @@ namespace ScienceAlert.Toolbar
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
-        void Start() { StartCoroutine(WaitOnAppLauncher()); }
+        void Awake() { StartCoroutine(WaitOnAppLauncher()); }
 
 
         /// <summary>
@@ -132,8 +132,8 @@ namespace ScienceAlert.Toolbar
         {
             if (button != null)
             {
-                //Log.Verbose("Removing ApplicationLauncherButton");
-                //ApplicationLauncher.Instance.RemoveModApplication(button);
+                Log.Verbose("Removing ApplicationLauncherButton");
+                ApplicationLauncher.Instance.RemoveModApplication(button);
                 GameEvents.onGUIApplicationLauncherUnreadifying.Remove(AppLauncherUnreadifying);
             }
         }
