@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.8.3                                                              *
+ * Version 1.8.4                                                              *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -21,6 +21,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.8.4
+ *      Bugfix: EPL/Hangar compatibility re-fixed
+ *      
+ *      Bugfix: Switching to blizzy's toolbar now destroys AppLauncher button properly
+ *      
  * 1.8.3
  *      Bugfix: EVA/surface sample buttons will no longer deploy while in TimeWarp
  *      
@@ -369,12 +374,6 @@ namespace ScienceAlert
                     }
 
                     buttonInterfaceType = value;
-#if DEBUG
-                    Log.Debug("testing button important");
-                    if (button == null) Log.Error("button is null??");
-
-                    button.Important = true;
-#endif
 
                     OnToolbarButtonChanged();
                 }
