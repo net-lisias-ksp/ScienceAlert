@@ -18,6 +18,7 @@
  *****************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using ReeperCommon;
@@ -108,7 +109,7 @@ namespace ScienceAlert.Toolbar
                     }
                     else
                     {
-                        GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(nflask, false, true, true);
+                        GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(null, nflask, false, true, true);
                         ti.name = NormalFlaskTexture;
                         GameDatabase.Instance.databaseTexture.Add(ti);
                         Log.Debug("Created normal flask texture {0}", ti.name);
@@ -131,7 +132,6 @@ namespace ScienceAlert.Toolbar
                     {
                         var rt = RenderTexture.GetTemporary(sheet.width, sheet.height);
                         var oldRt = RenderTexture.active;
-                        int invertHeight = ((FrameCount - 1) / (sheet.width / 24)) * 24;
 
                         Graphics.Blit(sheet, rt);
                         RenderTexture.active = rt;
@@ -141,10 +141,10 @@ namespace ScienceAlert.Toolbar
                             StarFlaskTextures.Add(NormalFlaskTexture + GetFrame(i + 1, 4));
                             Texture2D sliced = new Texture2D(24, 24, TextureFormat.ARGB32, false);
 
-                            sliced.ReadPixels(new Rect((i % (sheet.width / 24)) * 24, /*invertHeight -*/ (i / (sheet.width / 24)) * 24, 24, 24), 0, 0);
+                            sliced.ReadPixels(new Rect((i % (sheet.width / 24)) * 24, (i / (sheet.width / 24)) * 24, 24, 24), 0, 0);
                             sliced.Apply();
 
-                            GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(sliced, false, false, false);
+                            GameDatabase.TextureInfo ti = new GameDatabase.TextureInfo(null, sliced, false, false, false);
                             ti.name = StarFlaskTextures.Last();
 
                             GameDatabase.Instance.databaseTexture.Add(ti);

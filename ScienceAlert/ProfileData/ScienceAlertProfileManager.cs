@@ -646,6 +646,15 @@ namespace ScienceAlert
                     Log.Debug("WARN: ProfileManager.ActiveProfile: vessel is null");
                     return null;
                 }
+
+                if (Instance == null)
+                {
+                    Log.Warning("ProfileManager.Instance is NULL; cannot return ActiveProfile");
+                    return null;
+                }
+
+                if (Instance.vesselProfiles == null) return null;
+
                 if (!Instance.vesselProfiles.ContainsKey(vessel.id))
                 {
                     Log.Normal("Vessel {0} does not have a vessel profile entry. Using default.", Instance.VesselIdentifier(vessel.id));
@@ -663,7 +672,7 @@ namespace ScienceAlert
         {
             get
             {
-                return FlightGlobals.ActiveVessel != null;
+                return FlightGlobals.ActiveVessel != null && Instance != null;
             }
         }
 

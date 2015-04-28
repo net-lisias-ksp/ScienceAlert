@@ -198,7 +198,7 @@ namespace ScienceAlert.Windows.Implementations
 
         private void OnVisibilityChanged(bool visible)
         {
-            if (visible)
+            if (visible && scienceAlert != null && scienceAlert.Button != null)
                 if (scienceAlert.Button.IsAnimating)
                     scienceAlert.Button.StopAnimation();
         }

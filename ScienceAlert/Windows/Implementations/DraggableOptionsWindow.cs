@@ -209,7 +209,10 @@ namespace ScienceAlert.Windows.Implementations
             if (tf)
             {
                 // just became visible; update threshold var
-                thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+                if (ProfileManager.ActiveProfile != null)
+                {
+                    thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+                }
             }
         }
 

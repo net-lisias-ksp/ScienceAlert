@@ -67,17 +67,18 @@ namespace ScienceAlert.Windows
             optionsWindow = new GameObject("ScienceAlert.OptionsWindow").AddComponent<Implementations.DraggableOptionsWindow>();
             optionsWindow.scienceAlert = GetComponent<ScienceAlert>();
             optionsWindow.manager = GetComponent<Experiments.ExperimentManager>();
-            
+            optionsWindow.transform.parent = transform;
 
             Log.Normal("Creating experiment window");
             experimentList = new GameObject("ScienceAlert.ExperimentList").AddComponent<Implementations.DraggableExperimentList>();
             experimentList.manager = GetComponent<Experiments.ExperimentManager>();
             experimentList.scienceAlert = GetComponent<ScienceAlert>();
             experimentList.biomeFilter = GetComponent<Experiments.BiomeFilter>();
+            experimentList.transform.parent = transform;
 
             Log.Normal("Creating debug window");
             debugWindow = new GameObject("ScienceAlert.DebugWindow").AddComponent<Implementations.DraggableDebugWindow>();
-            
+            debugWindow.transform.parent = transform;
 
             // initially hide windows
             optionsWindow.Visible = experimentList.Visible = debugWindow.Visible = false;
@@ -121,12 +122,6 @@ namespace ScienceAlert.Windows
         private void OnInterfaceChanged()
         {
             experimentList.scanInterface = GetComponent<ScanInterface>();
-        }
-
-
-        private void OnDestroy()
-        {
-            // no cleanup; we're attached to ScienceAlert so it'll clean us up
         }
 
 

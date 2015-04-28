@@ -140,23 +140,127 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program\GameData
+    <PostBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program
+set unity=C:\Program Files (x86)\Unity464
 
+
+
+if NOT $(Configuration) == Debug GOTO CopyFiles
+
+call:CheckUnity
+call:CreateMdb "$(ProjectDir)bin\$(Configuration)\$(TargetFileName)"
+
+REM echo copying mdb into project GameData
+robocopy "$(ProjectDir)bin\$(Configuration)" "$(ProjectDir)GameData\$(ProjectName)" $(TargetFileName).mdb
+call:CheckRoboCopyCode "$(TargetFileName).mdb into project GameData"
+
+
+
+:CopyFiles
+
+REM save a copy for unit testing
+copy "$(ProjectDir)bin\$(Configuration)\$(TargetFileName)" "$(SolutionDir)AssemblyReloader\bin\$(Configuration)\$(TargetFileName)" /Y
+
+
+REM ReeperCommon into Project/GameData
+if exist "$(ProjectDir)bin\$(Configuration)\ReeperCommon.dll" (
+echo copying ReeperCommon to project GameData...
+robocopy "$(ProjectDir)bin\$(Configuration)" "$(ProjectDir)GameData\$(ProjectName)" ReeperCommon.dll
+call:CheckRoboCopyCode "ReeperCommon.dll to project"
+)
+
+REM TargetFileName into Project/GameData
+echo copying project binary to project GameData...
 robocopy "$(ProjectDir)bin\$(Configuration)" "$(ProjectDir)GameData\$(ProjectName)" $(TargetFileName)
-robocopy "$(ProjectDir)GameData\$(ProjectName)" "%25ksp%25\$(ProjectName)" /E /xo
+call:CheckRoboCopyCode "Project binary to project GameData"
 
-REM a little hack because robocopy reports code 1 on file copy success
-REM build process will interpret non-zero as an error and report failed build
-set rce=%25errorlevel%25
+REM TargetFileName to TargetFileName.reloadable
+echo renaming project binary to $(TargetFileName).reloadable...
+rename "$(ProjectDir)GameData\$(ProjectName)\$(TargetFileName)" $(TargetFileName).reloadable
 
-if %25rce%25==1 exit 0
-if %25rce%25==2 GOTO ExtraFiles
-if %25rce%25==3 GOTO ExtraFiles
-if not %25rce%25==1 exit %25rce%25 else exit 0
+if exist "$(ProjectDir)GameData\$(ProjectName)\$(TargetFileName).mdb" (
+echo renaming project debug symbols to $(TargetFileName).reloadable.mdb
+rename "$(ProjectDir)GameData\$(ProjectName)\$(TargetFileName).mdb" $(TargetFileName).reloadable.mdb
+)
 
-:ExtraFiles
-echo WARNING: Extra files in output dir
-exit 0</PostBuildEvent>
+
+REM Project/GameData into KSP/GameData/Project
+echo copying files to KSP GameData...
+robocopy "$(ProjectDir)GameData\$(ProjectName)" "%25ksp%25\GameData\$(ProjectName)" /E /xo
+Call:CheckRoboCopyCode "Solution GameData into KSP GameData"
+exit 0
+
+
+REM
+REM CreateMdb - Given a fully qualified path to an assembly, generate MDB with same name + appended with .mdb
+REM
+:CreateMdb
+echo CreateMdb: received "%25~1"
+
+if exist %25~1 (
+call "%25unity%25\Editor\Data\MonoBleedingEdge\bin\cli.bat" "%25unity%25\Editor\Data\MonoBleedingEdge\lib\mono\4.0\pdb2mdb.exe" "%25~1"
+
+IF NOT EXIST "%25~1".mdb (
+echo ERROR: failed to generate %25~1.mdb
+exit -4
+)
+goto:eof
+) else (
+echo CreateMdb: Error - %25~1 not found!
+exit -5
+)
+
+
+
+
+:CheckRoboCopyCode
+    if %25ERRORLEVEL%25 EQU 16 echo ***FATAL ERROR*** &amp; exit 16
+    if %25ERRORLEVEL%25 EQU 15 echo OKCOPY + FAIL + MISMATCHES + XTRA &amp; exit 15
+    if %25ERRORLEVEL%25 EQU 14 echo FAIL + MISMATCHES + XTRA &amp; exit 14
+    if %25ERRORLEVEL%25 EQU 13 echo OKCOPY + FAIL + MISMATCHES &amp; exit 13
+    if %25ERRORLEVEL%25 EQU 12 echo FAIL + MISMATCHES&amp; exit 12
+    if %25ERRORLEVEL%25 EQU 11 echo OKCOPY + FAIL + XTRA &amp; exit 11
+    if %25ERRORLEVEL%25 EQU 10 echo FAIL + XTRA &amp; exit 10
+    if %25ERRORLEVEL%25 EQU 9 echo OKCOPY + FAIL &amp; exit 9
+    if %25ERRORLEVEL%25 EQU 8 echo FAIL &amp; exit 8
+    if %25ERRORLEVEL%25 EQU 7 echo OKCOPY + MISMATCHES + XTRA &amp; goto end
+    if %25ERRORLEVEL%25 EQU 6 echo MISMATCHES + XTRA &amp; goto end
+    if %25ERRORLEVEL%25 EQU 5 echo OKCOPY + MISMATCHES &amp; goto end
+    if %25ERRORLEVEL%25 EQU 4 echo MISMATCHES &amp; goto end
+    if %25ERRORLEVEL%25 EQU 3 echo OKCOPY + XTRA &amp; goto end
+    if %25ERRORLEVEL%25 EQU 2 echo XTRA &amp; goto end
+    if %25ERRORLEVEL%25 EQU 1 echo OKCOPY &amp; goto end
+    if %25ERRORLEVEL%25 EQU 0 echo No Change &amp; goto end
+    :end  
+goto:eof
+
+
+:CheckUnity
+IF NOT EXIST "%25unity%25\Editor\Data\MonoBleedingEdge\lib\mono\4.0\pdb2mdb.exe" (
+echo ERROR: Failed to find pdb2mdb.exe; check Unity path
+exit -1
+)
+
+IF NOT EXIST "$(ProjectDir)bin\$(Configuration)\$(TargetName).pdb" (
+echo ERROR: Failed to find $(TargetName).pdb in $(ProjectDir)bin\$(Configuration)
+exit -2
+)
+goto:eof
+
+
+</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program\GameData
+
+del "%25ksp%25\$(ProjectName)\$(TargetFileName)*.reloadable"
+del "%25ksp%25\$(ProjectName)\$(TargetFileName)*.mdb"
+
+del "$(ProjectDir)bin\$(Configuration)\$(TargetFileName).reloadable"
+del "$(ProjectDir)bin\$(Configuration)\$(TargetFileName)*.mdb"
+
+del "$(ProjectDir)\GameData\$(ProjectName)\$(TargetFileName)*.reloadable"
+del "$(ProjectDir)\GameData\$(ProjectName)\$(TargetFileName)*.mdb"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

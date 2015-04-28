@@ -61,13 +61,19 @@ namespace ScienceAlert
     public class MagicDataTransmitter : PartModule, IScienceDataTransmitter
     {
         // keep track of which (REAL) transmitter is transmitting what
-        private Dictionary<IScienceDataTransmitter, ScienceDataList> realTransmitters = new Dictionary<IScienceDataTransmitter, ScienceDataList>();
+        private Dictionary<IScienceDataTransmitter, KeyValuePair<ScienceDataList, Callback>> realTransmitters =
+            new Dictionary<IScienceDataTransmitter, KeyValuePair<ScienceDataList, Callback>>();
 
         // If all transmitters are busy, we'll need a mechanism to wait for one
         // to become ready. It seems that sending data to a busy transmitter
         // will result in it getting stalled, remaining open but
         // not sending data
-        private Dictionary<IScienceDataTransmitter, ScienceDataList> toBeTransmitted = new Dictionary<IScienceDataTransmitter, ScienceDataList>();
+        private Dictionary<IScienceDataTransmitter,
+            Queue<
+                KeyValuePair<ScienceDataList, Callback>>
+            > toBeTransmitted =
+                new Dictionary<IScienceDataTransmitter, Queue<KeyValuePair<ScienceDataList, Callback>>>();
+
         internal StorageCache cacheOwner;
 
 
@@ -94,13 +100,22 @@ namespace ScienceAlert
 
             foreach (var tx in transmitters)
             {
-                realTransmitters.Add(tx, new ScienceDataList());
-                toBeTransmitted.Add(tx, new ScienceDataList());
+                realTransmitters.Add(tx, new KeyValuePair<ScienceDataList, Callback>());
+                toBeTransmitted.Add(tx, new Queue<KeyValuePair<ScienceDataList, Callback>>());
             }
 
             Log.Debug("MagicDataTransmitter has found {0} useable transmitters", transmitters.Count);
         }
 
+
+
+        private void BeginTransmissionWithRealTransmitter(IScienceDataTransmitter transmitter, ScienceDataList science,
+            Callback callback)
+        {
+            if (callback != null)
+                transmitter.TransmitData(science, () => TransmissionComplete(transmitter));
+            else transmitter.TransmitData(science, null);
+        }
 
 
         public void Update()
@@ -115,11 +130,11 @@ namespace ScienceAlert
                     if (toBeTransmitted[tx].Count > 0)
                         if (!tx.IsBusy() && tx.CanTransmit())
                         {
-          
-                                realTransmitters[tx].AddRange(toBeTransmitted[tx]);
-                                toBeTransmitted[tx].Clear();
-                                tx.TransmitData(realTransmitters[tx]);
+                            var nextData = toBeTransmitted[tx].Dequeue();
 
+                            realTransmitters[tx] = nextData;
+
+                            BeginTransmissionWithRealTransmitter(tx, nextData.Key, nextData.Value);
                         }
             }
             catch (KeyNotFoundException)
@@ -169,7 +184,7 @@ namespace ScienceAlert
         /// </summary>
         /// <param name="data"></param>
         /// <param name="transmitter"></param>
-        private void QueueTransmission(ScienceDataList data, IScienceDataTransmitter transmitter)
+        private void QueueTransmission(ScienceDataList data, IScienceDataTransmitter transmitter, Callback callback)
         {
             if (data.Count == 0)
                 return;
@@ -179,7 +194,7 @@ namespace ScienceAlert
                 Log.Error("MagicDataTransmitter.DoTransmit - Given transmitter isn't in real transmitter list!");
 #endif
 
-            toBeTransmitted[transmitter].AddRange(data);
+            toBeTransmitted[transmitter].Enqueue(new KeyValuePair<ScienceDataList, Callback>(data, callback));
         }
 
 
@@ -190,7 +205,12 @@ namespace ScienceAlert
         /// <param name="data"></param>
         void IScienceDataTransmitter.TransmitData(ScienceDataList data)
         {
-            Log.Debug("MagicTransmitter: received {0} ScienceData entries", data.Count);
+            TransmitData(data, null);
+        }
+
+        public void TransmitData(ScienceDataList dataQueue, Callback callback)
+        {
+            Log.Debug("MagicTransmitter: received {0} ScienceData entries", dataQueue.Count);
 
             // locate the best actual transmitter to send this data through
             // lower scores seem to be better
@@ -203,7 +223,7 @@ namespace ScienceAlert
             {
                 potentials = potentials.OrderBy(potential => ScienceUtil.GetTransmitterScore(potential)).ToList();
 
-                QueueTransmission(data, potentials.First());
+                QueueTransmission(dataQueue, potentials.First(), callback);
             }
             else Log.Error("MagicDataTransmitter: Did not find any real transmitters");
         }
@@ -232,8 +252,25 @@ namespace ScienceAlert
             {
                 return 0d;
             }
-        } 
+        }
 
+
+        private void TransmissionComplete(IScienceDataTransmitter transmitter)
+        {
+            KeyValuePair<ScienceDataList, Callback> detail;
+
+            if (realTransmitters.TryGetValue(transmitter, out detail))
+            {
+                Log.Debug("TransmissionComplete received from " + transmitter.GetType().FullName + (detail.Value != null ? " dispatching original callback" : ""));
+
+                if (detail.Value != null)
+                    detail.Value(); // call originally-sent callback
+
+            }
+            else
+                Log.Warning(
+                    "Received TransmissionComplete callback but did not find a transmitter which matches sender!");
+        }
         
         public ScienceDataList     QueuedData
         {
@@ -247,20 +284,27 @@ namespace ScienceAlert
                 {
                     foreach (var kvp in realTransmitters)
                     {
-                        if (kvp.Key == null || kvp.Value == null || !realTransmitters.ContainsKey(kvp.Key))
+                        if (kvp.Key == null)
                         {
                             // something happened to cause our transmitter list to
                             // be wrong somehow
                             Log.Error("MagicDataTransmitter: Encountered a bad transmitter value.");
+                            Log.Error("I just added ths line");
+                            Log.Error("I added this line too");
+                            if (kvp.Key == null) Log.Error("IScienceDataTransmitter key was null");
+                            if (kvp.Value.Key == null) Log.Error("IScienceDataTransmitter KeyValuePair was null");
+
                             badFlag = true;
                             continue;
                         }
 
-                        if (!kvp.Key.IsBusy())
-                            kvp.Value.Clear(); // it's not doing anything, therefore nothing is queued
+                        if (!kvp.Key.IsBusy() && kvp.Value.Key != null)
+                            kvp.Value.Key.Clear();
+                        
+                        if (kvp.Value.Key != null)
+                            list.AddRange(kvp.Value.Key);
 
-                        list.AddRange(kvp.Value);
-                        list.AddRange(toBeTransmitted[kvp.Key]);
+                        list.AddRange(toBeTransmitted[kvp.Key].SelectMany(transmitterData => transmitterData.Key));
                     }
 
                 } catch (Exception e)

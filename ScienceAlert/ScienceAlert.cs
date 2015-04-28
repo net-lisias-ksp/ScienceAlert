@@ -21,6 +21,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.8.5
+ *      Updated for KSP 1.0.0
+ *      
  * 1.8.4
  *      Bugfix: EPL/Hangar compatibility re-fixed
  *      
@@ -164,7 +167,6 @@
 //#define PROFILE
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using ScienceAlert.Toolbar;
 using UnityEngine;
 using ReeperCommon;
@@ -172,11 +174,6 @@ using ReeperCommon;
 
 namespace ScienceAlert
 {
-    using Window = ReeperCommon.Window;
-
-
-    
-
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class ScienceAlert : MonoBehaviour
     {
@@ -315,6 +312,14 @@ namespace ScienceAlert
         private void Awake()
         {
             Log.Debug("ScienceAlert.Awake");
+        }
+
+
+        private void OnPluginReloadRequested()
+        {
+            Log.Warning("Plugin reload requested -- shutting down");
+
+            Destroy(this);
         }
 #endif
 
