@@ -219,10 +219,24 @@ namespace ScienceAlert
 // it should be okay since asteroidSample isn't actually defined
 // in scienceDefs, who would know to mess with it?
 #warning Changes asteroidSample title
-            Log.Verbose("Renaming asteroidSample title");
-            var exp = ResearchAndDevelopment.GetExperiment("asteroidSample");
-            if (exp != null) exp.experimentTitle = "Sample (Asteroid)";
-            
+            try
+            {
+                Log.Verbose("Renaming asteroidSample title");
+                var exp = ResearchAndDevelopment.GetExperiment("asteroidSample");
+                if (exp != null) exp.experimentTitle = "Sample (Asteroid)";
+            }
+            catch (KeyNotFoundException e)
+            {
+                Log.Error("KeyNotFound when interacting with ResearchAndDevelopment. Possible duplicate experimentids");
+
+                //var scienceNodes = GameDatabase.Instance.GetConfigNodes("SCIENCE_DEFINITION");
+                //Log.Warning("Found {0} scienceNodes", scienceNodes.Length);
+
+
+                Log.Warning("ScienceAlert will not be able to run until the problem is resolved.");
+                Destroy(this);
+            }
+
 
             Log.Verbose("Loading sounds...");
             gameObject.AddComponent<AudioPlayer>().LoadSoundsFrom(ConfigUtil.GetDllDirectoryPath() + "/sounds");
