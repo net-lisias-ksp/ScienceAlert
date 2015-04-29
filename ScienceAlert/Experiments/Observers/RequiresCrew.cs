@@ -69,9 +69,15 @@ namespace ScienceAlert.Experiments.Observers
             get
             {
                 if (Experiment.IsUnlocked())
-                    return crewableParts.Any(crewable => crewable.protoModuleCrew.Count > 0);
+                    return crewableParts.Any(PartHasCrewThatAreNotTourists);
                 return false;
             }
+        }
+
+
+        private bool PartHasCrewThatAreNotTourists(Part part)
+        {
+            return part.protoModuleCrew.Any(crew => crew.type != ProtoCrewMember.KerbalType.Tourist);
         }
     }
 }

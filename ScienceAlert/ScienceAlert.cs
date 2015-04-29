@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.8.4                                                              *
+ * Version 1.8.6                                                              *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -21,6 +21,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.8.6
+ *      Bugfix: transmitted science works again
+ *      Bugfix: Tourists no longer eligible to go on EVA for science
+ *      Feature: EVA reports now choose the most experienced scientist onboard
+ *      
  * 1.8.5
  *      Updated for KSP 1.0.0
  *      
@@ -167,6 +172,7 @@
 //#define PROFILE
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ScienceAlert.Toolbar;
 using UnityEngine;
 using ReeperCommon;
@@ -196,6 +202,7 @@ namespace ScienceAlert
 /******************************************************************************
  *                    Implementation Details
  ******************************************************************************/
+
         System.Collections.IEnumerator Start()
         {
             Log.Normal("Waiting on R&D...");

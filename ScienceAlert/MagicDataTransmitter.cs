@@ -113,8 +113,8 @@ namespace ScienceAlert
             Callback callback)
         {
             if (callback != null)
-                transmitter.TransmitData(science, () => TransmissionComplete(transmitter));
-            else transmitter.TransmitData(science, null);
+                transmitter.TransmitData(science, () => TransmissionComplete(transmitter, callback));
+            else transmitter.TransmitData(science);
         }
 
 
@@ -211,6 +211,8 @@ namespace ScienceAlert
         public void TransmitData(ScienceDataList dataQueue, Callback callback)
         {
             Log.Debug("MagicTransmitter: received {0} ScienceData entries", dataQueue.Count);
+            if (callback == null) Log.Debug(" with no callback");
+            else Log.Debug("With callback");
 
             // locate the best actual transmitter to send this data through
             // lower scores seem to be better
@@ -255,21 +257,11 @@ namespace ScienceAlert
         }
 
 
-        private void TransmissionComplete(IScienceDataTransmitter transmitter)
+        private void TransmissionComplete(IScienceDataTransmitter transmitter, Callback original)
         {
-            KeyValuePair<ScienceDataList, Callback> detail;
+            Log.Debug("Received TransmissionComplete callback from " + transmitter.GetType().Name);
 
-            if (realTransmitters.TryGetValue(transmitter, out detail))
-            {
-                Log.Debug("TransmissionComplete received from " + transmitter.GetType().FullName + (detail.Value != null ? " dispatching original callback" : ""));
-
-                if (detail.Value != null)
-                    detail.Value(); // call originally-sent callback
-
-            }
-            else
-                Log.Warning(
-                    "Received TransmissionComplete callback but did not find a transmitter which matches sender!");
+            if (original != null) original();
         }
         
         public ScienceDataList     QueuedData
@@ -289,8 +281,6 @@ namespace ScienceAlert
                             // something happened to cause our transmitter list to
                             // be wrong somehow
                             Log.Error("MagicDataTransmitter: Encountered a bad transmitter value.");
-                            Log.Error("I just added ths line");
-                            Log.Error("I added this line too");
                             if (kvp.Key == null) Log.Error("IScienceDataTransmitter key was null");
                             if (kvp.Value.Key == null) Log.Error("IScienceDataTransmitter KeyValuePair was null");
 

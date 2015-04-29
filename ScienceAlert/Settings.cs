@@ -251,7 +251,6 @@ namespace ScienceAlert
                 Log.Error("Exception while creating ConfigNode from settings: {0}", e);
             }
 
-            Log.Error("Log.SaveInto being called now ...");
             Log.SaveInto(saved);
 
             Log.Debug("About to save: {0}", saved.ToString());

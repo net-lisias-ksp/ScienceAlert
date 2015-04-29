@@ -17,6 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 using System.Collections.Generic;
+using System.Linq;
+using Experience.Effects;
 using ReeperCommon;
 using UnityEngine;
 
@@ -145,12 +147,10 @@ namespace ScienceAlert.Experiments.Observers
             // finding the possibilities and then picking one totally at 
             // pseudorandom
 
-            List<ProtoCrewMember> crewChoices = new List<ProtoCrewMember>();
+            var crewChoices = crewableParts.SelectMany(p => p.protoModuleCrew).ToList();
 
-            foreach (var crewable in crewableParts)
-                crewChoices.AddRange(crewable.protoModuleCrew);
 
-            if (crewChoices.Count == 0)
+            if (!crewChoices.Any())
             {
                 Log.Error("{0}.Deploy - No crew choices available.  Check logic", GetType().Name);
                 return false;
@@ -175,12 +175,7 @@ namespace ScienceAlert.Experiments.Observers
                 }
 
 
-                Log.Debug("Choices of kerbal:");
-                foreach (var crew in crewChoices)
-                    Log.Debug(" - {0}", crew.name);
-
-                // select a kerbal target...
-                var luckyKerbal = crewChoices[UnityEngine.Random.Range(0, crewChoices.Count - 1)];
+                var luckyKerbal = GetBestScienceEvaCandidiate(crewChoices);
                 Log.Debug("{0} is the lucky Kerbal.  Out the airlock with him!", luckyKerbal.name);
 
                 // out he goes!
@@ -194,6 +189,21 @@ namespace ScienceAlert.Experiments.Observers
             {
                 return GameVariables.Instance.EVAIsPossible(evaUnlocked, FlightGlobals.ActiveVessel) && base.IsReadyOnboard;
             }
+        }
+
+
+        private ProtoCrewMember GetBestScienceEvaCandidiate(List<ProtoCrewMember> crew)
+        {
+            // use the best science experience available
+            var bestScientist = crew
+                .Where(
+                    pcm =>
+                        pcm.experienceTrait != null && pcm.experienceTrait.Effects.Any(effect => effect is ScienceSkill))
+                .OrderByDescending(pcm => pcm.experienceLevel)
+                .FirstOrDefault();
+
+            // if we haven't got a scientist, just use the first crew we find
+            return bestScientist ?? crew.First(pcm => pcm.type != ProtoCrewMember.KerbalType.Tourist);
         }
     }
 }
