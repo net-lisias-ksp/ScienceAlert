@@ -187,14 +187,14 @@ namespace ScienceAlert.Experiments.Observers
         {
             get
             {
-                return GameVariables.Instance.EVAIsPossible(evaUnlocked, FlightGlobals.ActiveVessel) && base.IsReadyOnboard;
+                return (FlightGlobals.ActiveVessel.isEVA || (HighLogic.CurrentGame.Parameters.Flight.CanEVA && GameVariables.Instance.EVAIsPossible(evaUnlocked, FlightGlobals.ActiveVessel)))
+                    && base.IsReadyOnboard;
             }
         }
 
 
         private ProtoCrewMember GetBestScienceEvaCandidiate(List<ProtoCrewMember> crew)
         {
-            // use the best science experience available
             var bestScientist = crew
                 .Where(
                     pcm =>

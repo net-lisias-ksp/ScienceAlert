@@ -65,6 +65,7 @@ namespace ScienceAlert
             GameEvents.onVesselWasModified.Remove(OnVesselModified);
             GameEvents.onVesselChange.Remove(OnVesselChange);
 
+            Log.Normal("Removing MagicDataTransmitter");
             RemoveMagicTransmitter(false);
         }
 
