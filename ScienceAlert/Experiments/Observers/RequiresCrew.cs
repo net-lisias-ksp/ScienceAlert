@@ -27,10 +27,11 @@ namespace ScienceAlert.Experiments.Observers
     /// an available ModuleScienceExperiment, to determine whether
     /// the experiment is possible
     /// </summary>
-    class RequiresCrew : ExperimentObserver
+    public class RequiresCrew : ExperimentObserver
     {
-        protected List<Part> crewableParts = new List<Part>();
-
+        protected readonly List<Part> CrewableParts = new List<Part>();
+        protected readonly List<KerbalSeat> CommandSeats = new List<KerbalSeat>();
+ 
         public RequiresCrew(StorageCache cache, BiomeFilter biomeFilter, ProfileData.ExperimentSettings settings, ScanInterface scanInterface, string expid)
             : base(cache, biomeFilter, settings, scanInterface, expid)
         {
@@ -45,7 +46,8 @@ namespace ScienceAlert.Experiments.Observers
         {
             base.Rescan();
 
-            crewableParts.Clear();
+            CrewableParts.Clear();
+            CommandSeats.Clear();
 
             if (FlightGlobals.ActiveVessel == null)
             {
@@ -58,7 +60,8 @@ namespace ScienceAlert.Experiments.Observers
             // when updating status
             FlightGlobals.ActiveVessel.parts.ForEach(p =>
             {
-                if (p.CrewCapacity > 0) crewableParts.Add(p);
+                if (p.CrewCapacity > 0) CrewableParts.Add(p);
+                if (p.GetComponent<KerbalSeat>() != null) CommandSeats.Add(p.GetComponent<KerbalSeat>());
             });
 
         }
@@ -69,7 +72,7 @@ namespace ScienceAlert.Experiments.Observers
             get
             {
                 if (Experiment.IsUnlocked())
-                    return crewableParts.Any(PartHasCrewThatAreNotTourists);
+                    return CrewableParts.Any(PartHasCrewThatAreNotTourists);
                 return false;
             }
         }
@@ -78,6 +81,13 @@ namespace ScienceAlert.Experiments.Observers
         private bool PartHasCrewThatAreNotTourists(Part part)
         {
             return part.protoModuleCrew.Any(crew => crew.type != ProtoCrewMember.KerbalType.Tourist);
+        }
+
+
+        protected bool CrewIsInCommandSeat(ProtoCrewMember pcm)
+        {
+            return CommandSeats
+                .Any(cs => cs.Occupant != null && cs.Occupant.protoModuleCrew.Contains(pcm));
         }
     }
 }

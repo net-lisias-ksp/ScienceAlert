@@ -24,9 +24,10 @@ using UnityEngine;
 
 namespace ScienceAlert.Experiments.Observers
 {
-    internal class EvaReportObserver : RequiresCrew
+    public class EvaReportObserver : RequiresCrew
     {
-        readonly bool evaUnlocked = true;
+        private readonly bool _evaUnlocked = true;
+
 
         /// <summary>
         /// Constructor
@@ -35,7 +36,7 @@ namespace ScienceAlert.Experiments.Observers
             : base(cache, biomeFilter, settings, scanInterface, expid)
         {
             
-            evaUnlocked = GameVariables.Instance.UnlockedEVA(
+            _evaUnlocked = GameVariables.Instance.UnlockedEVA(
                 ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.AstronautComplex));
         }
 
@@ -109,18 +110,10 @@ namespace ScienceAlert.Experiments.Observers
             }
             else
             {
-                // The vessel is indeed a kerbalEva, so we can expect to find the
-                // appropriate science module now
-                var evas = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
-                foreach (var exp in evas)
-                    if (!exp.Deployed && exp.experimentID == experiment.id)
-                    {
-                        exp.DeployExperiment();
-                        break;
-                    }
-
-                return true;
+                DoDeployExperiment();
             }
+
+            return true;
         }
 
 
@@ -147,7 +140,7 @@ namespace ScienceAlert.Experiments.Observers
             // finding the possibilities and then picking one totally at 
             // pseudorandom
 
-            var crewChoices = crewableParts.SelectMany(p => p.protoModuleCrew).ToList();
+            var crewChoices = CrewableParts.SelectMany(p => p.protoModuleCrew).ToList();
 
 
             if (!crewChoices.Any())
@@ -178,19 +171,63 @@ namespace ScienceAlert.Experiments.Observers
                 var luckyKerbal = GetBestScienceEvaCandidiate(crewChoices);
                 Log.Debug("{0} is the lucky Kerbal.  Out the airlock with him!", luckyKerbal.name);
 
-                // out he goes!
-                return FlightEVA.SpawnEVA(luckyKerbal.KerbalRef);
+                return DoExpelCrewman(luckyKerbal);
             }
+        }
+
+
+        protected virtual bool DoExpelCrewman(ProtoCrewMember lucky)
+        {
+            if (FlightGlobals.ActiveVessel.packed)
+            {
+                Log.Error("DoExpelCrewman failed because active vessel is packed");
+                return false;
+            }
+
+            if (lucky.KerbalRef == null)
+            {
+                // crew might be in a command chair
+                if (CrewIsInCommandSeat(lucky))
+                {
+                    Log.Debug(lucky.name + " is in an external chair; no need to expel");
+                    DoDeployExperiment();
+                    return true;
+                }
+                else Log.Error(lucky.name + ".KerbalRef is null and doesn't appear to be in a command seat");
+
+                return false;
+            }
+
+            // out he goes!
+            FlightEVA.SpawnEVA(lucky.KerbalRef);
+            return true;
+    
+        }
+
+
+        private void DoDeployExperiment()
+        {
+            // The vessel is indeed a kerbalEva, so we can expect to find the
+            // appropriate science module now
+            var evas = FlightGlobals.ActiveVessel.FindPartModulesImplementing<ModuleScienceExperiment>();
+            foreach (var exp in evas)
+                if (!exp.Deployed && exp.experimentID == experiment.id)
+                {
+                    exp.DeployExperiment();
+                    break;
+                }
         }
 
         public override bool IsReadyOnboard
         {
             get
             {
-                return (FlightGlobals.ActiveVessel.isEVA || (HighLogic.CurrentGame.Parameters.Flight.CanEVA && GameVariables.Instance.EVAIsPossible(evaUnlocked, FlightGlobals.ActiveVessel)))
+                return (FlightGlobals.ActiveVessel.isEVA || (HighLogic.CurrentGame.Parameters.Flight.CanEVA && GameVariables.Instance.EVAIsPossible(_evaUnlocked, FlightGlobals.ActiveVessel)))
                     && base.IsReadyOnboard;
             }
         }
+
+
 
 
         private ProtoCrewMember GetBestScienceEvaCandidiate(List<ProtoCrewMember> crew)

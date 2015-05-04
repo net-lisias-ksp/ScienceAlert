@@ -16,6 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
+
+using System.Linq;
+
 namespace ScienceAlert.Experiments.Observers
 {
     /// <summary>
@@ -38,9 +41,9 @@ namespace ScienceAlert.Experiments.Observers
             {
                 if (FlightGlobals.ActiveVessel != null)
                 {
-                    if (FlightGlobals.ActiveVessel.isEVA)
+                    if (FlightGlobals.ActiveVessel.isEVA || CommandSeats.Any(cs => cs.Occupant != null))
                     {
-                        return /*settings.AssumeOnboard ||*/ Experiment.IsUnlocked() && this.GetNextOnboardExperimentModule() != null;
+                        return Experiment.IsUnlocked() && this.GetNextOnboardExperimentModule() != null;
                     }
                     else return Settings.Instance.CheckSurfaceSampleNotEva && base.IsReadyOnboard;
 

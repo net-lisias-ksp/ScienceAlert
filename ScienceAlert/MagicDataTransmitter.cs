@@ -112,6 +112,9 @@ namespace ScienceAlert
         private void BeginTransmissionWithRealTransmitter(IScienceDataTransmitter transmitter, ScienceDataList science,
             Callback callback)
         {
+            Log.Debug("Beginning real transmission of " + science.Count + " science reports on transmitter " +
+                      ((PartModule) transmitter).part.flightID);
+
             if (callback != null)
                 transmitter.TransmitData(science, () => TransmissionComplete(transmitter, callback));
             else transmitter.TransmitData(science);
@@ -131,6 +134,8 @@ namespace ScienceAlert
                         if (!tx.IsBusy() && tx.CanTransmit())
                         {
                             var nextData = toBeTransmitted[tx].Dequeue();
+
+                            Log.Debug("Dispatching " + nextData.Key.Count + " science data entries to transmitter");
 
                             realTransmitters[tx] = nextData;
 
@@ -166,8 +171,7 @@ namespace ScienceAlert
 
         public override void OnSave(ConfigNode node)
         {
-            node.ClearData(); // don't save anything about MagicDataTransmitter or
-                              // the save file will be poisoned
+            node.ClearData();
         }
 
 
@@ -186,15 +190,22 @@ namespace ScienceAlert
         /// <param name="transmitter"></param>
         private void QueueTransmission(ScienceDataList data, IScienceDataTransmitter transmitter, Callback callback)
         {
+
             if (data.Count == 0)
+            {
+                Log.Warning("Empty science list cannot be queued for transmission");
                 return;
+            }
+            Log.Debug("Queued " + data.Count + " science reports for transmission");
 
 #if DEBUG
             if (!realTransmitters.ContainsKey(transmitter))
                 Log.Error("MagicDataTransmitter.DoTransmit - Given transmitter isn't in real transmitter list!");
 #endif
 
-            toBeTransmitted[transmitter].Enqueue(new KeyValuePair<ScienceDataList, Callback>(data, callback));
+            toBeTransmitted[transmitter].Enqueue(new KeyValuePair<ScienceDataList, Callback>(
+                new ScienceDataList(data), callback)); // note: we copy the list, else somebody else might try messing with it
+                                                       // before transmission is complete (I'm looking at you, SCANsat)
         }
 
 

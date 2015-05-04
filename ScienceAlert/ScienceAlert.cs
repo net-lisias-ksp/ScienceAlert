@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.8.6                                                              *
+ * Version 1.8.7                                                              *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -22,7 +22,10 @@
  ****************************************************************************
  * Changelog
  * 1.8.7
- *      Bugfix: EVA reports now trigger while in EVA on kerbin
+ *      Bugfix: Taking surface samples or EVA reports from a vessel with command chair 
+ *              should no longer result in clones
+ *      Bugfix: SCANsat science transmission fixed
+ *      Bugfix: EVA reports (while flying) now trigger while in EVA on kerbin
  *      bugfix: UI transparency now applies to experiment list window     
  * 
  * 1.8.6
