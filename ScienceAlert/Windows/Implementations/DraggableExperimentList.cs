@@ -132,6 +132,15 @@ namespace ScienceAlert.Windows.Implementations
                         return maxWidth;
                     }));
 
+
+                //Skin.window.onActive.background =
+                // Skin.window.onFocused.background =
+                // Skin.window.onNormal.background =
+                // Skin.window.onHover.background =
+                // Skin.window.active.background =
+                // Skin.window.focused.background =
+                // Skin.window.hover.background =
+                // Skin.window.normal.background = Settings.Skin.window.normal.background;
                 adjustedSkin = true;
             }
 

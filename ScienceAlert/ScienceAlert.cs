@@ -21,6 +21,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.8.7
+ *      Bugfix: EVA reports now trigger while in EVA on kerbin
+ *      bugfix: UI transparency now applies to experiment list window     
+ * 
  * 1.8.6
  *      Bugfix: transmitted science works again
  *      Bugfix: Tourists no longer eligible to go on EVA for science

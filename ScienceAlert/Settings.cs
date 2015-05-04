@@ -105,6 +105,7 @@ namespace ScienceAlert
                 // adjust the skin a little bit.  It wastes a lot of space in its
                 // current form
 
+                    skin.button = new GUIStyle(skin.button);
                     skin.button.fixedHeight = 24f;
                     skin.button.padding = new RectOffset() { left = 2, right = 2, top = 0, bottom = 0 };
                     skin.button.border = new RectOffset() { left = 2, right = 2, top = 1, bottom = 1 };
@@ -121,6 +122,16 @@ namespace ScienceAlert
                     skin.horizontalSlider.margin = new RectOffset();
 
                     // make the window background opaque by default
+                    skin.window = new GUIStyle(skin.GetStyle("window"));
+                    skin.window.onActive.background =
+                    skin.window.onFocused.background =
+                    skin.window.onNormal.background =
+                    skin.window.onHover.background =
+                    skin.window.active.background =
+                    skin.window.focused.background =
+                    skin.window.hover.background =
+                    skin.window.normal.background = skin.window.normal.background.CreateReadable();
+
                     WindowOpacity = 255;
 
                     skin.window.onNormal.textColor =
@@ -391,7 +402,7 @@ namespace ScienceAlert
             set
             {
 
-                Texture2D tex = skin.window.normal.background.CreateReadable();
+                Texture2D tex = skin.window.normal.background;
                 windowOpacity = value;
 
                 //#if DEBUG
@@ -409,14 +420,14 @@ namespace ScienceAlert
                 //                tex.SaveToDisk("usermodified_window_bkg.png");
                 //#endif
                 // one of these apparently fixes the right thing
-                skin.window.onActive.background =
-                skin.window.onFocused.background =
-                skin.window.onNormal.background =
-                skin.window.onHover.background =
-                skin.window.active.background =
-                skin.window.focused.background =
-                skin.window.hover.background =
-                skin.window.normal.background = tex;
+                //skin.window.onActive.background =
+                //skin.window.onFocused.background =
+                //skin.window.onNormal.background =
+                //skin.window.onHover.background =
+                //skin.window.active.background =
+                //skin.window.focused.background =
+                //skin.window.hover.background =
+                //skin.window.normal.background = tex;
             }
         }
 
