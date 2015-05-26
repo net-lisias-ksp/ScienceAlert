@@ -192,8 +192,7 @@ namespace ScienceAlert.ProfileData
 
         public Profile Clone()
         {
-            Profile p = new Profile(this);
-            return p;
+            return new Profile(this);
         }
 
 
@@ -282,5 +281,6 @@ namespace ScienceAlert.ProfileData
             foreach (var kvp in settings)
                 kvp.Value.OnChanged += SettingChanged;
         }
+
     }
 }

@@ -28,7 +28,7 @@ namespace ScienceAlert.Windows.Implementations
     using ProfileManager = ScienceAlertProfileManager;
     using ExperimentManager = Experiments.ExperimentManager;
 
-    internal partial class DraggableOptionsWindow : ReeperCommon.Window.DraggableWindow
+    public partial class DraggableOptionsWindow : ReeperCommon.Window.DraggableWindow
     {
         // --------------------------------------------------------------------
         //    Members
@@ -102,17 +102,6 @@ namespace ScienceAlert.Windows.Implementations
 
             if (audio == null) Log.Error("DraggableOptionsWindow: Failed to find AudioPlayer instance");
 
-
-            var rawIds = ResearchAndDevelopment.GetExperimentIDs();
-            var sortedIds = rawIds.OrderBy(expid => ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
-
-            Log.Debug("OptionsWindow: sorted {0} experiment IDs", sortedIds.Count());
-
-            foreach (var id in sortedIds)
-            {
-                experimentIds.Add(id, (int)Convert.ChangeType(ProfileManager.ActiveProfile[id].Filter, ProfileManager.ActiveProfile[id].Filter.GetTypeCode()));
-                Log.Debug("Settings: experimentId {0} has filter index {1}", id, experimentIds[id]);
-            }
 
             /*
                 Unresearched = 0,                           
@@ -208,12 +197,35 @@ namespace ScienceAlert.Windows.Implementations
         {
             if (tf)
             {
-                // just became visible; update threshold var
-                if (ProfileManager.ActiveProfile != null)
+                // just became visible; update state values
+                OnProfileChanged();
+            }
+        }
+
+
+        public void OnProfileChanged()
+        {
+            if (ProfileManager.ActiveProfile != null)
+            {
+                thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+
+                var rawIds = ResearchAndDevelopment.GetExperimentIDs();
+                var sortedIds = rawIds.OrderBy(expid => ResearchAndDevelopment.GetExperiment(expid).experimentTitle);
+
+                Log.Debug("OptionsWindow: sorted {0} experiment IDs", sortedIds.Count());
+
+                experimentIds.Clear();
+
+                foreach (var id in sortedIds)
                 {
-                    thresholdValue = ProfileManager.ActiveProfile.ScienceThreshold.ToString("F2", formatter);
+                    experimentIds.Add(id,
+                        (int)
+                            Convert.ChangeType(ProfileManager.ActiveProfile[id].Filter,
+                                ProfileManager.ActiveProfile[id].Filter.GetTypeCode()));
+                    Log.Debug("Settings: experimentId {0} has filter index {1}", id, experimentIds[id]);
                 }
             }
+            else Log.Warning("OptionsWindow.OnProfileChanged but no active profile");
         }
 
 

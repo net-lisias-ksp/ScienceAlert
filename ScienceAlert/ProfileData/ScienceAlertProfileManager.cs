@@ -734,6 +734,7 @@ namespace ScienceAlert
 
             Profile newProfile = p.Clone();
 
+
             Log.Verbose("Adding new profile '{0}'..", p.name);
 
             var existing = FindStoredProfile(newProfile.name);

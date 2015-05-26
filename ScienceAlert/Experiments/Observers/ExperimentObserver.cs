@@ -351,7 +351,7 @@ namespace ScienceAlert.Experiments.Observers
                                     Log.Debug("Transmission value: {0}", API.Util.GetNextReportValue(subject, experiment, data, GetNextOnboardExperimentModule().xmitDataScalar));
 #endif
 
-                                if (data.Count() > 0)
+                                if (data.Any())
                                 {
                                     Log.Debug("Raw dataAmount = {0}, nextScience = {1}", data.First().dataAmount, ResearchAndDevelopment.GetScienceValue(data.First().dataAmount, subject) * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier);
                                     Log.Debug("Total science value = {0}", GetScienceTotal(subject, out data));

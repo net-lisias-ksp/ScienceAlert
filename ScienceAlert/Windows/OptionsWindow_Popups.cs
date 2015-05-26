@@ -25,7 +25,7 @@ namespace ScienceAlert.Windows.Implementations
 {
     using ProfileManager = ScienceAlertProfileManager;
 
-    internal partial class DraggableOptionsWindow : ReeperCommon.Window.DraggableWindow
+    public partial class DraggableOptionsWindow : ReeperCommon.Window.DraggableWindow
     {
         internal string editText = string.Empty;
         internal string lockName = string.Empty;
@@ -269,7 +269,7 @@ namespace ScienceAlert.Windows.Implementations
                 Log.Normal("Assigned new active profile: {0}", editProfile.name);
                 submenu = OpenPane.None; // close panel
 
-                OnVisibilityChanged(Visible); // update any ui elements (only threshold text currently)
+                OnVisibilityChanged(Visible); // update any ui elements
             }
             else Log.Error("Failed to load '{0}'", editProfile.name);
         }

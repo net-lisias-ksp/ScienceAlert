@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.8.7                                                              *
+ * Version 1.8.8                                                              *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -21,6 +21,15 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.8.8 
+ *      Feature: todo: if any kerbals are in a command seat, prefer those over iva crew
+ *         if possible
+ *         
+ *      Bugfix: options window filter settings weren't refreshed when loading a new profile, making it
+ *              appear as though the wrong filters were being used
+ *              
+ *      todo: remove 0.98 multiplier for notmaxed, replace with 0.01
+ *         
  * 1.8.7
  *      Bugfix: Taking surface samples or EVA reports from a vessel with command chair 
  *              should no longer result in clones
@@ -181,6 +190,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ScienceAlert.Toolbar;
+using ScienceAlert.Windows.Implementations;
 using UnityEngine;
 using ReeperCommon;
 
@@ -197,6 +207,8 @@ namespace ScienceAlert
         // owned objects
         private Toolbar.IToolbar button;
         private ScanInterface scanInterface;
+        public DraggableOptionsWindow optionsWindow;
+        public static ScienceAlert Instance = null;
 
         // interfaces
         private Settings.ToolbarInterface buttonInterfaceType = Settings.ToolbarInterface.ApplicationLauncher;
@@ -218,6 +230,7 @@ namespace ScienceAlert
             while (!FlightGlobals.ready) yield return 0;
 
             Log.Normal("Waiting on ProfileManager...");
+            Instance = this;
             while (ScienceAlertProfileManager.Instance == null || !ScienceAlertProfileManager.Instance.Ready) yield return 0; // it can sometimes take a few frames for ScenarioModules to be fully initialized
 
             Log.Normal("Waiting on AppLauncher"); // not necessary because it's almost certain to be ready by this time,
