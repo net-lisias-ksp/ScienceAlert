@@ -288,9 +288,10 @@ namespace ScienceAlert
             var found = new List<ScienceData>();
 
             foreach (var container in storage)
-                foreach (var data in container.GetData())
-                    if (data.subjectID == subjectid)
-                        found.Add(data);
+                if (container.GetScienceCount() > 0)
+                    foreach (var data in container.GetData())
+                        if (data.subjectID == subjectid)
+                            found.Add(data);
                     
 
             if (magicTransmitter != null)
