@@ -21,14 +21,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
- * 1.8.8 
- *      Feature: todo: if any kerbals are in a command seat, prefer those over iva crew
- *         if possible
- *         
+ * 1.8.8  
  *      Bugfix: options window filter settings weren't refreshed when loading a new profile, making it
  *              appear as though the wrong filters were being used
  *              
- *      todo: remove 0.98 multiplier for notmaxed, replace with 0.01
+ *      Bugfix: "not maxed" changed from <98% collected to "at least 0.1 science remains"
+ *      
+ * 
  *         
  * 1.8.7
  *      Bugfix: Taking surface samples or EVA reports from a vessel with command chair 

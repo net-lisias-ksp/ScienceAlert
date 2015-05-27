@@ -200,6 +200,13 @@ namespace ScienceAlert.Windows.Implementations
                 // just became visible; update state values
                 OnProfileChanged();
             }
+            else if (manager != null)
+            {
+                Log.Debug("Rebuilding observer list because options window was closed");
+                manager.RebuildObserverList();
+                Log.Debug("Observer list rebuilt");
+            }
+
         }
 
 
@@ -304,9 +311,6 @@ namespace ScienceAlert.Windows.Implementations
         /// </summary>
         private void DrawAdditionalOptions()
         {
-            //GUI.skin = whiteLabel;
-
-            //additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, Settings.Skin.scrollView, GUILayout.ExpandHeight(true));
             additionalScrollPos = GUILayout.BeginScrollView(additionalScrollPos, GUILayout.ExpandHeight(true));
             {
                 GUILayout.Space(4f);
@@ -343,6 +347,15 @@ namespace ScienceAlert.Windows.Implementations
                         //-----------------------------------------------------
                         {
                             Settings.Instance.DisplayCurrentBiome = AudibleToggle(Settings.Instance.DisplayCurrentBiome, "Display Biome in Experiment List");
+                        }
+
+
+                        //-----------------------------------------------------
+                        // EVA reports on top
+                        //-----------------------------------------------------
+                        {
+                            Settings.Instance.EvaReportOnTop = AudibleToggle(Settings.Instance.EvaReportOnTop,
+                                "List EVA Report first");
                         }
 
 

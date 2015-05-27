@@ -134,8 +134,9 @@ namespace ScienceAlert.Toolbar
             {
                 Log.Verbose("Removing ApplicationLauncherButton");
                 ApplicationLauncher.Instance.RemoveModApplication(button);
-                GameEvents.onGUIApplicationLauncherUnreadifying.Remove(AppLauncherUnreadifying);
             }
+
+            GameEvents.onGUIApplicationLauncherUnreadifying.Remove(AppLauncherUnreadifying);
         }
 
 

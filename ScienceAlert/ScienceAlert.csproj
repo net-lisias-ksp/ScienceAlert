@@ -93,7 +93,6 @@
     <Compile Include="Windows\Implementations\DraggableExperimentList.cs" />
     <Compile Include="Windows\Implementations\DraggableOptionsWindow.cs" />
     <Compile Include="Windows\Implementations\TestDrag.cs" />
-    <Compile Include="Windows\OptionsWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="StorageCache.cs" />

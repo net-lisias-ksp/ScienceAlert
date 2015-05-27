@@ -299,8 +299,11 @@ namespace ScienceAlert.Experiments.Observers
                                 break;
 
                             case ProfileData.ExperimentSettings.FilterMethod.NotMaxed:
-                                // <98% of science cap
-                                Available = scienceTotal < subject.scienceCap * 0.98f * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+                                // At least 0.1 science available
+                                //old 98% method: Available = scienceTotal < subject.scienceCap * 0.98f * HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier;
+                                Available = subject.scienceCap *
+                                            HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier - scienceTotal >
+                                            0.1f;
                                 break;
 
                             case ProfileData.ExperimentSettings.FilterMethod.LessThanFiftyPercent:
