@@ -46,61 +46,54 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\DebugTools\AudioUtil.cs">
-      <Link>Tools\AudioUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\ConfigUtil.cs">
-      <Link>Tools\ConfigUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\DebugUtil.cs">
-      <Link>Tools\DebugUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\FontUtil.cs">
-      <Link>Tools\FontUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\GuiUtil.cs">
-      <Link>Tools\GuiUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\Log.cs">
-      <Link>Tools\Log.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\Misc.cs">
-      <Link>Tools\Misc.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\ObjectUtil.cs">
-      <Link>Tools\ObjectUtil.cs</Link>
-    </Compile>
-    <Compile Include="..\..\DebugTools\ResourceUtil.cs">
-      <Link>Tools\ResourceUtil.cs</Link>
-    </Compile>
-    <Compile Include="API\Util.cs" />
-    <Compile Include="Experiments\BiomeFilter.cs" />
-    <Compile Include="Experiments\Observers\EvaReportObserver.cs" />
-    <Compile Include="Experiments\Observers\RequiresCrew.cs" />
-    <Compile Include="Experiments\Observers\SurfaceSampleObserver.cs" />
-    <Compile Include="ProfileData\ExperimentSettings.cs" />
-    <Compile Include="ProfileData\Profile.cs" />
-    <Compile Include="ProfileData\ScienceAlertProfileManager.cs" />
-    <Compile Include="Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
-    <Compile Include="Experiments\ExperimentManager.cs" />
-    <Compile Include="Windows\DebugWindow.cs" />
+    <Compile Include="Commands\CompositeCommand.cs" />
+    <Compile Include="Commands\DestroyUnityObjectCommand.cs" />
+    <Compile Include="Commands\DisablePluginCommand.cs" />
+    <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\SpawnInformationalPopupCommand.cs" />
+    <Compile Include="Core.cs" />
+    <Compile Include="Game\IAssemblyLoader.cs" />
+    <Compile Include="Game\IKspFactory.cs" />
+    <Compile Include="Game\ILoadedAssembly.cs" />
+    <Compile Include="Game\IResearchAndDevelopment.cs" />
+    <Compile Include="Game\KspAssemblyLoader.cs" />
+    <Compile Include="Game\KspFactory.cs" />
+    <Compile Include="Game\KspLoadedAssembly.cs" />
+    <Compile Include="Game\KspResearchAndDevelopment.cs" />
+    <Compile Include="ISensor.cs" />
+    <Compile Include="ISensorFactory.cs" />
+    <Compile Include="ISensorController.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ScienceAlert.cs" />
-    <Compile Include="Experiments\Observers\ExperimentObserver.cs" />
-    <Compile Include="Scan Interfaces\ScanInterface.cs" />
-    <Compile Include="Scan Interfaces\SCANsatInterface.cs" />
-    <Compile Include="MagicDataTransmitter.cs" />
-    <Compile Include="Windows\Implementations\DraggableDebugWindow.cs" />
-    <Compile Include="Windows\Implementations\DraggableExperimentList.cs" />
-    <Compile Include="Windows\Implementations\DraggableOptionsWindow.cs" />
-    <Compile Include="Windows\Implementations\TestDrag.cs" />
+    <Compile Include="old\ScienceAlert\API\Util.cs" />
+    <Compile Include="old\ScienceAlert\Experiments\BiomeFilter.cs" />
+    <Compile Include="old\ScienceAlert\Experiments\Observers\EvaReportObserver.cs" />
+    <Compile Include="old\ScienceAlert\Experiments\Observers\RequiresCrew.cs" />
+    <Compile Include="old\ScienceAlert\Experiments\Observers\SurfaceSampleObserver.cs" />
+    <Compile Include="old\ScienceAlert\ProfileData\ExperimentSettings.cs" />
+    <Compile Include="old\ScienceAlert\ProfileData\Profile.cs" />
+    <Compile Include="old\ScienceAlert\ProfileData\ScienceAlertProfileManager.cs" />
+    <Compile Include="old\ScienceAlert\Toolbar\ApplicationLauncher\AppLauncherInterface.cs" />
+    <Compile Include="old\ScienceAlert\Experiments\ExperimentManager.cs" />
+    <Compile Include="old\ScienceAlert\ScienceAlert.cs" />
+    <Compile Include="old\ScienceAlert\Experiments\Observers\ExperimentObserver.cs" />
+    <Compile Include="old\ScienceAlert\Scan Interfaces\ScanInterface.cs" />
+    <Compile Include="old\ScienceAlert\Scan Interfaces\SCANsatInterface.cs" />
+    <Compile Include="old\ScienceAlert\MagicDataTransmitter.cs" />
+    <Compile Include="old\ScienceAlert\Windows\Implementations\DraggableDebugWindow.cs" />
+    <Compile Include="old\ScienceAlert\Windows\Implementations\DraggableExperimentList.cs" />
+    <Compile Include="old\ScienceAlert\Windows\Implementations\DraggableOptionsWindow.cs" />
+    <Compile Include="old\ScienceAlert\Windows\Implementations\TestDrag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="old\ScienceAlert\Settings.cs" />
+    <Compile Include="old\ScienceAlert\StorageCache.cs" />
+    <Compile Include="old\ScienceAlert\Toolbar\Blizzy\BlizzyInterface.cs" />
+    <Compile Include="old\ScienceAlert\Toolbar\IToolbar.cs" />
+    <Compile Include="old\ScienceAlert\Toolbar\Wrapper\ToolbarWrapper.cs" />
+    <Compile Include="old\ScienceAlert\Windows\OptionsWindow_Popups.cs" />
+    <Compile Include="old\ScienceAlert\Windows\WindowEventLogic.cs" />
+    <Compile Include="SensorController.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="StorageCache.cs" />
-    <Compile Include="Toolbar\Blizzy\BlizzyInterface.cs" />
-    <Compile Include="Toolbar\IToolbar.cs" />
-    <Compile Include="Toolbar\Wrapper\ToolbarWrapper.cs" />
-    <Compile Include="Windows\OptionsWindow_Popups.cs" />
-    <Compile Include="Windows\WindowEventLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\flask.png" />
@@ -136,6 +129,17 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\btnBackground.png" />
     <EmbeddedResource Include="Resources\btnLock.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="old\ScienceAlert\Tools\" />
+    <Folder Include="Providers\" />
+    <Folder Include="Queries\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj">
+      <Project>{fecfa8fc-cf80-4685-a2ba-1566e0f3c26e}</Project>
+      <Name>ReeperCommon</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

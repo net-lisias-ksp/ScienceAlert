@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScienceAlert", "ScienceAlert.csproj", "{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReeperCommon", "..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj", "{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScienceAlertTests", "ScienceAlertTests\ScienceAlertTests.csproj", "{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +17,14 @@ Global
 		{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
