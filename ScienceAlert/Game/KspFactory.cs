@@ -9,5 +9,12 @@ namespace ScienceAlert.Game
             if (la == null) throw new ArgumentNullException("la");
             return new KspLoadedAssembly(la);
         }
+
+        public IVessel Create(Vessel vessel)
+        {
+            if (vessel == null) throw new ArgumentNullException("vessel");
+
+            return new KspVessel(vessel);
+        }
     }
 }

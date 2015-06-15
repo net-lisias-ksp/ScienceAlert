@@ -2,28 +2,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using ScienceAlert.Annotations;
 using ScienceAlert.Game;
-using UnityEngine;
+using ScienceAlert.Providers;
 
 namespace ScienceAlert
 {
     public class SensorController : ISensorController
     {
-        private readonly IResearchAndDevelopment _rnd;
+        private readonly IScienceExperimentProvider _scienceExperimentProvider;
         private readonly ISensorFactory _sensorFactory;
         private List<ISensor> _experimentSensors = new List<ISensor>();
         private IEnumerator _updateLoop;
 
         public SensorController(
-            [NotNull] IResearchAndDevelopment rnd, 
+            [NotNull] IScienceExperimentProvider scienceExperimentProvider,
             [NotNull] ISensorFactory sensorFactory)
         {
-            if (rnd == null) throw new ArgumentNullException("rnd");
+            if (scienceExperimentProvider == null) throw new ArgumentNullException("scienceExperimentProvider");
             if (sensorFactory == null) throw new ArgumentNullException("sensorFactory");
 
-            _rnd = rnd;
+            _scienceExperimentProvider = scienceExperimentProvider;
             _sensorFactory = sensorFactory;
             _updateLoop = PollSensors();
         }
@@ -37,7 +36,10 @@ namespace ScienceAlert
 
         public void CreateSensors()
         {
-            _experimentSensors = _rnd.Experiments.Select(_sensorFactory.Create).ToList();
+            _experimentSensors = _scienceExperimentProvider.Get().Select(exp => 
+                _sensorFactory.Create(exp, OnSensorActivated)).ToList();
+
+
             _updateLoop = PollSensors();
         }
 
@@ -56,6 +58,13 @@ namespace ScienceAlert
 
                 if (!_experimentSensors.Any()) yield return 0;
             }
+// ReSharper disable once FunctionNeverReturns
+        }
+
+
+        private void OnSensorActivated(ISensor sensor)
+        {
+            
         }
     }
 }

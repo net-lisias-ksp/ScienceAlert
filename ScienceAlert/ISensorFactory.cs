@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ScienceAlert
 {
     public interface ISensorFactory
     {
-        ISensor Create(ScienceExperiment experiment);
+        ISensor Create(ScienceExperiment experiment, Action<ISensor> onTriggerAction);
     }
 }

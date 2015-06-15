@@ -34,7 +34,7 @@ namespace ScienceAlert
             {
                 _log.Verbose("Initializing core...");
                 _core = new Core(_settings, _log);
-                _log.Verbose("Finishied initializing");
+                _log.Verbose("Finished initializing");
             }
             catch (Exception e)
             {

@@ -52,18 +52,28 @@
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\SpawnInformationalPopupCommand.cs" />
     <Compile Include="Core.cs" />
+    <Compile Include="Game\IVesselProvider.cs" />
     <Compile Include="Game\IAssemblyLoader.cs" />
     <Compile Include="Game\IKspFactory.cs" />
     <Compile Include="Game\ILoadedAssembly.cs" />
     <Compile Include="Game\IResearchAndDevelopment.cs" />
+    <Compile Include="Game\IVessel.cs" />
+    <Compile Include="Game\KspActiveVesselProvider.cs" />
     <Compile Include="Game\KspAssemblyLoader.cs" />
     <Compile Include="Game\KspFactory.cs" />
     <Compile Include="Game\KspLoadedAssembly.cs" />
     <Compile Include="Game\KspResearchAndDevelopment.cs" />
+    <Compile Include="Game\KspVessel.cs" />
     <Compile Include="ISensor.cs" />
     <Compile Include="ISensorFactory.cs" />
     <Compile Include="ISensorController.cs" />
+    <Compile Include="KspSensorFactory.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Providers\IScienceExperimentModuleProvider.cs" />
+    <Compile Include="Providers\IScienceExperimentProvider.cs" />
+    <Compile Include="Providers\OnboardScienceExperimentProvider.cs" />
+    <Compile Include="Providers\UnlockedScienceExperimentProvider.cs" />
+    <Compile Include="Providers\VesselScienceExperimentModuleProvider.cs" />
     <Compile Include="ScienceAlert.cs" />
     <Compile Include="old\ScienceAlert\API\Util.cs" />
     <Compile Include="old\ScienceAlert\Experiments\BiomeFilter.cs" />
@@ -132,7 +142,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="old\ScienceAlert\Tools\" />
-    <Folder Include="Providers\" />
     <Folder Include="Queries\" />
   </ItemGroup>
   <ItemGroup>

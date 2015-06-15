@@ -9,5 +9,6 @@ namespace ScienceAlert.Game
     public interface IKspFactory
     {
         ILoadedAssembly Create([NotNull] AssemblyLoader.LoadedAssembly la);
+        IVessel Create([NotNull] Vessel vessel);
     }
 }
