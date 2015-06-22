@@ -33,6 +33,8 @@
  *              
  *      Bugfix: "not maxed" changed from <98% collected to "at least 0.1 science remains"
  *      
+ *      Improvement: should now warn on "incorrect" biomes more reliably (specifically, if you're
+ *              near the surface)
  * 
  *         
  * 1.8.7

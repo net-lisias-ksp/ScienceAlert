@@ -44,7 +44,10 @@ namespace ScienceAlert.Experiments
 
             var stockMatch = vessel.mainBody.BiomeMap.GetAtt(lat, lon);
 
-            if (IsResultValid(stockMatch, lat, lon))
+            // bandaid fix: if we're below 2km, ignore the valid result check. This should prevent ScienceAlert
+            // from failing to warn while in "incorrect" biomes, e.g. should warn about tundra even though tundra
+            // is wrong because all the regular experiments are incorrectly reporting tundra
+            if (IsResultValid(stockMatch, lat, lon) || FlightGlobals.ActiveVessel.GetHeightFromSurface() <= 2000f)
                 _currentBiome = stockMatch.name;
 #if DEBUG
             else Log.Warning("{0} looks like a bad biome result", stockMatch.name);
