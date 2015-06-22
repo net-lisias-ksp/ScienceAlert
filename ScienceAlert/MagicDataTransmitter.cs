@@ -92,12 +92,38 @@ namespace ScienceAlert
         {
             Log.Debug("MagicDataTransmitter started");
 
+            RefreshTransmitterQueues(new List<KeyValuePair<ScienceDataList, Callback>>());
+        }
+
+
+        public List<KeyValuePair<ScienceDataList, Callback>> GetQueuedData()
+        {
+            return toBeTransmitted.Values.SelectMany(q => q.ToArray()).ToList();
+        }
+
+
+        public void RefreshTransmitterQueues(List<KeyValuePair<ScienceDataList, Callback>> queuedData)
+        {
+            if (queuedData == null) throw new ArgumentNullException("queuedData");
+
+            // save [currently] outgoing transmissions
+            var outgoing =
+                new Dictionary<IScienceDataTransmitter, KeyValuePair<ScienceDataList, Callback>>(realTransmitters);
+
+            realTransmitters.Clear();
+            toBeTransmitted.Clear();
+
             // locate all available real transmitters
-            var transmitters = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
+            var transmitters = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>()
+                .Where(tx => !(tx is MagicDataTransmitter))
+                .ToList();
 
-            // remove the fake ones ..
-            transmitters.RemoveAll(tx => tx is MagicDataTransmitter);
-
+            if (!transmitters.Any())
+            {
+                Destroy(this);
+                cacheOwner.ScheduleRebuild();
+            }
+   
             foreach (var tx in transmitters)
             {
                 realTransmitters.Add(tx, new KeyValuePair<ScienceDataList, Callback>());
@@ -105,13 +131,41 @@ namespace ScienceAlert
             }
 
             Log.Debug("MagicDataTransmitter has found {0} useable transmitters", transmitters.Count);
-        }
 
+            // re-associate outgoing science transmissions with their transmitters, if that transmitter still exists
+            foreach (var previousTransmitter in outgoing.Keys)
+                if (realTransmitters.ContainsKey(previousTransmitter))
+                    realTransmitters[previousTransmitter] = outgoing[previousTransmitter];
+                
+
+            if (!queuedData.Any()) return; // done
+
+            // re-enqueue any previous data that needs reassignment to a transmitter
+            foreach (var dataList in queuedData)
+                TransmitData(dataList.Key, dataList.Value);
+        }
 
 
         private void BeginTransmissionWithRealTransmitter(IScienceDataTransmitter transmitter, ScienceDataList science,
             Callback callback)
         {
+            if (transmitter == null) throw new ArgumentNullException("transmitter");
+            if (science == null) throw new ArgumentNullException("science");
+
+            // Unity overloads this operator for us. If it equals null, the engine side of
+            // the Component was destroyed and attempting to do anything that would result in
+            // calls it to will throw an exception.
+            //
+            // Note: does not work for interface types, so casting is necessary. Ignore compiler
+            // warnings about unreachable code, it IS reachable
+// ReSharper disable once ConditionIsAlwaysTrueOrFalse
+// ReSharper disable once HeuristicUnreachableCode
+            if (((PartModule) transmitter) == null)
+            {
+                TransmitData(science, callback); // re-enqueue data
+                throw new NonexistentTransmitterException();
+            }
+
             Log.Debug("Beginning real transmission of " + science.Count + " science reports on transmitter " +
                       ((PartModule) transmitter).part.flightID);
 
@@ -141,6 +195,18 @@ namespace ScienceAlert
 
                             BeginTransmissionWithRealTransmitter(tx, nextData.Key, nextData.Value);
                         }
+            }
+            catch (NonexistentTransmitterException)
+            {
+                Log.Warning(
+                    "MagicDataTransmitter: Nonexistent transmitter encountered. Rescanning vessel and re-queuing transmissions");
+                realTransmitters.Clear();
+
+                // save queued data. We lose any previous data-transmitter assocations, sadly
+                RefreshTransmitterQueues(GetQueuedData());
+                if (!realTransmitters.Any())
+                    Log.Warning(
+                        "MagicDataTransmitter: No real transmitters found. Data will stay queued. If the vessel is switched or scenes are changed before it is dispatched, it will be lost.");
             }
             catch (KeyNotFoundException)
             {
@@ -232,7 +298,7 @@ namespace ScienceAlert
             foreach (var kvp in realTransmitters)
                 potentials.Add(kvp.Key);
 
-            if (potentials.Count > 0)
+            if (potentials.Any())
             {
                 potentials = potentials.OrderBy(potential => ScienceUtil.GetTransmitterScore(potential)).ToList();
 

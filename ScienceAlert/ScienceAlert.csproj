@@ -78,6 +78,7 @@
     <Compile Include="Experiments\Observers\EvaReportObserver.cs" />
     <Compile Include="Experiments\Observers\RequiresCrew.cs" />
     <Compile Include="Experiments\Observers\SurfaceSampleObserver.cs" />
+    <Compile Include="NonexistentTransmitterException.cs" />
     <Compile Include="ProfileData\ExperimentSettings.cs" />
     <Compile Include="ProfileData\Profile.cs" />
     <Compile Include="ProfileData\ScienceAlertProfileManager.cs" />

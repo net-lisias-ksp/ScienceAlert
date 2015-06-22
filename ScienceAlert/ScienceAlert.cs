@@ -21,7 +21,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
- * 1.8.8  
+ * 1.8.8
+ *      Bugfix: Semi-fixed an issue that sometimes caused transmissions to fail when RemoteTech
+ *              is installed. Full fix requires a slight adjustment in RemoteTech's code. As long as you
+ *              transmit while you have a valid connection, you'll be fine.
+ *              
+ *      Bugfix: should no longer spam log with exceptions when Impact! is installed
+ *      
  *      Bugfix: options window filter settings weren't refreshed when loading a new profile, making it
  *              appear as though the wrong filters were being used
  *              

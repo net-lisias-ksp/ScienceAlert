@@ -185,37 +185,33 @@ namespace ScienceAlert
 
             // now we must deal with IScienceDataTransmitters, which are not 
             // quite as simple due to the MagicDataTransmitter we're faking
-
-                // remove any existing magic transmitters
-                //   note: we include non-root parts here because it's possible
-                //         for two vessels to have merged, due to docking for instance.
-                // 
-                //          We could theoretically only remove MagicTransmitters from
-                //          the root parts of docked vessels, but there may be cases
-                //          where vessels that couldn't normally dock do (some kind of plugin perhaps)
-                //          so I've opted for a general solution here
-                RemoveMagicTransmitter(false);   
-
-            
-                // count the number of "real" transmitters onboard
-                List<IScienceDataTransmitter> transmitters = FlightGlobals.ActiveVessel.FindPartModulesImplementing<IScienceDataTransmitter>();
-                transmitters.RemoveAll(tx => tx is MagicDataTransmitter);
-
-            
-                if (transmitters.Count > 0)
+                var transmitters = FlightGlobals.ActiveVessel
+                    .FindPartModulesImplementing<IScienceDataTransmitter>()
+                    .Where(tx => !(tx is MagicDataTransmitter))
+                    .ToList();
+       
+      
+                if (transmitters.Any())
                 {
                     // as long as at least one transmitter is "real", the
                     // vessel's root part should have a MagicDataTransmitter
-                    if (transmitters.Any(tx => !(tx is MagicDataTransmitter)))
+                    var mtx = vessel.rootPart.gameObject.GetComponent<MagicDataTransmitter>();
+
+                    if (mtx != null)
                     {
-                        magicTransmitter = vessel.rootPart.AddModule("MagicDataTransmitter") as MagicDataTransmitter;
-                        magicTransmitter.cacheOwner = this;
-
-                        Log.Debug("Added MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.name);
-
+                        // one already exists; refresh it instead of recreating
+                        Log.Debug("Refreshing MagicDataTransmitter");
+                        mtx.RefreshTransmitterQueues(magicTransmitter.GetQueuedData());
+                    } else {
+                        Log.Debug("Adding MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.name);
+                        mtx = vessel.rootPart.AddModule("MagicDataTransmitter") as MagicDataTransmitter;
+                        mtx.cacheOwner = this;
                     }
+
+                    magicTransmitter = mtx;
                 } else
                 {
+                    RemoveMagicTransmitter(false);
                     Log.Debug("Vessel {0} has no transmitters; no magic transmitter added", vessel.name);
                 }
 
