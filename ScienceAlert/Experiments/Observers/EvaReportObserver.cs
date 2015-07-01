@@ -77,25 +77,26 @@ namespace ScienceAlert.Experiments.Observers
             // find a kerbal and dump him into space
             if (!FlightGlobals.ActiveVessel.isEVA)
             {
-                // check conditions outside
-                Log.Warning("Current static pressure: {0}", FlightGlobals.getStaticPressure());
+                // check conditions outside if we won't be using a command seat ...
+
 
                 if (FlightGlobals.getStaticPressure() > Settings.Instance.EvaAtmospherePressureWarnThreshold)
                     if (FlightGlobals.ActiveVessel.GetSrfVelocity().magnitude > Settings.Instance.EvaAtmosphereVelocityWarnThreshold)
-                    {
-                        Log.Debug("setting up dialog options to warn player about eva risk");
+                        if (!CrewIsInCommandSeat(GetBestScienceEvaCandidiate(GetOnboardCrew().ToList())))
+                        {
+                            Log.Debug("setting up dialog options to warn player about eva risk");
 
-                        var options = new DialogOption[2];
+                            var options = new DialogOption[2];
 
-                        options[0] = new DialogOption("Science is worth a little risk", new Callback(OnConfirmEva));
-                        options[1] = new DialogOption("No, it would be a PR nightmare", null);
+                            options[0] = new DialogOption("Science is worth a little risk", new Callback(OnConfirmEva));
+                            options[1] = new DialogOption("No, it would be a PR nightmare", null);
 
-                        var dlg = new MultiOptionDialog("It looks dangerous out there. Are you sure you want to send someone out? They might lose their grip!", "Dangerous Condition Alert", Settings.Skin, options);
+                            var dlg = new MultiOptionDialog("It looks dangerous out there. Are you sure you want to send someone out? They might lose their grip!", "Dangerous Condition Alert", Settings.Skin, options);
 
 
-                        PopupDialog.SpawnPopupDialog(dlg, false, Settings.Skin);
-                        return true;
-                    }
+                            PopupDialog.SpawnPopupDialog(dlg, false, Settings.Skin);
+                            return true;
+                        }
 
 
 
@@ -132,15 +133,13 @@ namespace ScienceAlert.Experiments.Observers
         /// <returns></returns>
         protected virtual bool ExpelCrewman()
         {
-            // You might think HighLogic.CurrentGame.CrewRoster.GetNextAvailableCrewMember
-            // is a logical function to use.  Actually it's possible for it to
-            // generate a crew member out of thin air and put it outside, so nope
-            // 
-            // luckily we can specify a particular onboard Kerbal.  We'll do so by
-            // finding the possibilities and then picking one totally at 
-            // pseudorandom
+            var crewChoices = GetOnboardCrew().ToList();
 
-            var crewChoices = CrewableParts.SelectMany(p => p.protoModuleCrew).ToList();
+            crewChoices.ForEach(
+                crewMember =>
+                    Log.Debug("EVA candidate: " + crewMember.name + ", " + (crewMember.KerbalRef == null
+                        ? " (has KerbalRef)"
+                        : " (no KerbalRef)")));
 
 
             if (!crewChoices.Any())
@@ -184,18 +183,12 @@ namespace ScienceAlert.Experiments.Observers
                 return false;
             }
 
-            if (lucky.KerbalRef == null)
+            if (CrewIsInCommandSeat(lucky))
             {
                 // crew might be in a command chair
-                if (CrewIsInCommandSeat(lucky))
-                {
-                    Log.Debug(lucky.name + " is in an external chair; no need to expel");
-                    DoDeployExperiment();
-                    return true;
-                }
-                else Log.Error(lucky.name + ".KerbalRef is null and doesn't appear to be in a command seat");
-
-                return false;
+                Log.Debug(lucky.name + " is in an external chair; experiment is deployable from here");
+                DoDeployExperiment();
+                return true;
             }
 
             // out he goes!
@@ -218,6 +211,7 @@ namespace ScienceAlert.Experiments.Observers
                 }
         }
 
+
         public override bool IsReadyOnboard
         {
             get
@@ -239,8 +233,18 @@ namespace ScienceAlert.Experiments.Observers
                 .OrderByDescending(pcm => pcm.experienceLevel)
                 .FirstOrDefault();
 
-            // if we haven't got a scientist, just use the first crew we find
-            return bestScientist ?? crew.First(pcm => pcm.type != ProtoCrewMember.KerbalType.Tourist);
+            // if we haven't got a scientist, just use the first crew we find (but prefer ones in command seats already)
+            return bestScientist ?? crew
+                .Where(pcm => pcm.type != ProtoCrewMember.KerbalType.Tourist)
+                .OrderByDescending(CrewIsInCommandSeat)
+                .First();
+        }
+
+
+        protected IEnumerable<ProtoCrewMember> GetOnboardCrew()
+        {
+            // note: command seats are crewable parts so they're already included here
+            return CrewableParts.SelectMany(p => p.protoModuleCrew).ToList();
         }
     }
 }

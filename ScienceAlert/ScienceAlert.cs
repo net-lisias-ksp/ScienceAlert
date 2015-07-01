@@ -23,8 +23,7 @@
  * Changelog
  * 1.8.8
  *      Bugfix: Semi-fixed an issue that sometimes caused transmissions to fail when RemoteTech
- *              is installed. Full fix requires a slight adjustment in RemoteTech's code. As long as you
- *              transmit while you have a valid connection, you'll be fine.
+ *              is installed. Full fix requires RemoteTech 4.7 or better. 
  *              
  *      Bugfix: should no longer spam log with exceptions when Impact! is installed
  *      
@@ -33,8 +32,14 @@
  *              
  *      Bugfix: "not maxed" changed from <98% collected to "at least 0.1 science remains"
  *      
+ *      Bugfix: Deploying an experiment from a command seat in certain conditions will no longer
+ *              turn the seat into a cloning device
+ *              
  *      Improvement: should now warn on "incorrect" biomes more reliably (specifically, if you're
  *              near the surface)
+ *              
+ *      Improvement: preference will be given to Kerbals in command seats unless there's a better
+ *              qualified scientist available
  * 
  *         
  * 1.8.7
