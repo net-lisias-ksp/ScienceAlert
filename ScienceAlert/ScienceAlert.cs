@@ -22,8 +22,13 @@
  ****************************************************************************
  * Changelog
  * 1.8.8
+ *      Bugfix: Fixed an issue that could result in wasteful use of memory because Mono sucks at GC
+ *      
+ *      Bugfix: Fixed a small memory leak caused every time your vessel switched dominant bodies until
+ *              you changed scenes
+ *      
  *      Bugfix: Semi-fixed an issue that sometimes caused transmissions to fail when RemoteTech
- *              is installed. Full fix requires RemoteTech 4.7 or better. 
+ *              is installed. Full fix requires RemoteTech 4.7+ 
  *              
  *      Bugfix: should no longer spam log with exceptions when Impact! is installed
  *      
@@ -32,7 +37,7 @@
  *              
  *      Bugfix: "not maxed" changed from <98% collected to "at least 0.1 science remains"
  *      
- *      Bugfix: Deploying an experiment from a command seat in certain conditions will no longer
+ *      Bugfix: Deploying an experiment from a command seat in certain conditions should no longer
  *              turn the seat into a cloning device
  *              
  *      Improvement: should now warn on "incorrect" biomes more reliably (specifically, if you're
