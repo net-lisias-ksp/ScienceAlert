@@ -39,7 +39,7 @@ namespace ScienceAlert
     /// </summary>
     public class StorageCache : MonoBehaviour
     {
-        protected StorageList storage;                      // containers for science data
+        protected StorageList storage = new StorageList();                      // containers for science data
         protected MagicDataTransmitter magicTransmitter;    // MagicDataTransmitter keeps an eye on any queued data for the vessel
         protected Vessel vessel;                            // which vessel this storage cache is for
 
@@ -159,6 +159,7 @@ namespace ScienceAlert
             IsBusy = true;
 
             Log.Debug("StorageCache: Rebuilding ...");
+            storage.Clear();
 
             yield return new WaitForFixedUpdate();
 
@@ -166,19 +167,24 @@ namespace ScienceAlert
             {
                 // this could be an indication that we're not monitoring
                 // the active vessel properly
-                Log.Error("StorageCache: Active vessel is not monitored vessel.");
-
-
+                Log.Normal("StorageCache: Active vessel is not monitored vessel; rebuilding storage cache");
                 RemoveMagicTransmitter();
-                vessel = FlightGlobals.ActiveVessel;
             }
 
-            while (!FlightGlobals.ready || !vessel.loaded)
+            while ((FlightGlobals.ActiveVessel != null && !vessel.loaded) || !FlightGlobals.ready)
             {
                 Log.Debug("StorageCache.Rebuild - waiting");
                 yield return new WaitForFixedUpdate();
             }
 
+            if (FlightGlobals.ActiveVessel == null)
+            {
+                IsBusy = false;
+                Log.Debug("StorageCache: Active vessel no longer exists");
+                yield break;
+            }
+
+            vessel = FlightGlobals.ActiveVessel; // could've been destroyed last physics frame if we're really unlucky
 
             // ScienceContainers are straightforward ...
             storage = vessel.FindPartModulesImplementing<IScienceDataContainer>();
@@ -187,7 +193,7 @@ namespace ScienceAlert
 
             // now we must deal with IScienceDataTransmitters, which are not 
             // quite as simple due to the MagicDataTransmitter we're faking
-                var transmitters = FlightGlobals.ActiveVessel
+                var transmitters = vessel
                     .FindPartModulesImplementing<IScienceDataTransmitter>()
                     .Where(tx => !(tx is MagicDataTransmitter))
                     .ToList();

@@ -40,6 +40,9 @@
  *      Bugfix: Deploying an experiment from a command seat in certain conditions should no longer
  *              turn the seat into a cloning device
  *              
+ *      Bugfix: Fixed a small issue that could ScienceAlert to stop alerting if conditions are just right
+ *              when rapid unplanned disassembly is occurring yet you still have control of half a ship
+ *              
  *      Improvement: should now warn on "incorrect" biomes more reliably (specifically, if you're
  *              near the surface)
  *              
