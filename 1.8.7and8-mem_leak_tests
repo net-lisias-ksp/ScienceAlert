@@ -1,0 +1,69 @@
+ScienceAlert Memory Log
+
+Stock - No Mods
+Center - 1,937,008 K (went up a while)
+Flight - 1,914,412 K
+Center - 2,002,156 K (+87.7 MB)
+Flight - 1,960,168 K
+Center - 2,034,348 K
+Flight - 1,976,576 K
+Center - 2,052,400 K
+Flight - 1,992,604 K
+Center - 2,058,392 K
+Flight - 1,997,936 K
+Center - 2,066,440 K
+
+
+1.8.7
+Center - 1,938,112 K
+Flight - 1,990,648 K
+Center - 2,056,488 K
+Flight - 2,048,769 K
+Center - 2,120,200 K
+
+
+1.8.8
+Center - 1,939,404 K
+Flight - 1,984,560 K
+Center - 2,057,168 K
+
+
+
+1.8.8 - BiomeFilter disabled
+Center - 1,937
+Flight - 1,922
+Center - 2,008
+Flight - 1,958
+Center - 2,035
+
+
+1.8.8 - BiomeFilter generation disabled
+Center - 1,935
+Flgiht - 1,922
+Center - 2,008
+Flight - 1,962
+
+1.8.8 - BiomeFilter generation enabled, result check disabled
+Center - 1,939
+Flight - 1,991
+Center - 2,064
+Flight - 2,079
+
+
+1.8.8 - BiomeFilter generation disabled (but IEnumerator still active), result check disabled
+Center - 1,939
+Flight - 1,929
+Center - 2,015
+Flight - 1,968
+Center - 2,041
+
+1.8.8 - BiomeFilter generation disabled, no IEnumerator, result check disabled
+Center - 1,938
+Flight - 1,921
+
+1.8.8 - With Texture2D replacing Array; no array created
+Center - 1,937
+Flight - 1,970
+Center - 2,002
+Flight - 2,001
+Center - 2,030

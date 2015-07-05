@@ -36,7 +36,7 @@ namespace ScienceAlert.Windows.Implementations
         internal Rect popupRect = new Rect(Screen.width / 2f - 380f / 2f, Screen.height / 2 - 200f / 2f, 380f, 1f);
         internal string badChars = "()[]?'\":#$%^&*~;\n\t\r!@,.{}/<>";
 
-#region save popup
+        #region save popup
         void SpawnSavePopup()
         {
             editText = ProfileManager.ActiveProfile.name;
@@ -71,7 +71,7 @@ namespace ScienceAlert.Windows.Implementations
                 if (Event.current.keyCode == KeyCode.Escape)
                     DismissPopup();
             }
-            
+
         }
 
 
@@ -106,10 +106,10 @@ namespace ScienceAlert.Windows.Implementations
             Settings.Instance.Save();
             DismissPopup();
         }
-        
-#endregion
 
-#region rename popup
+        #endregion
+
+        #region rename popup
         /// <summary>
         /// Renames the specified profile
         /// </summary>
@@ -191,12 +191,12 @@ namespace ScienceAlert.Windows.Implementations
                     popup = PopupDialog.SpawnPopupDialog(new MultiOptionDialog(string.Empty, string.Format("'{0}' already exists. Overwrite?", editText), HighLogic.Skin, new DialogOption[] { new DialogOption("Yes", new Callback(RenameTargetProfileOverwrite)), new DialogOption("No", new Callback(DismissPopup)) }) { dialogRect = popupRect }, false, HighLogic.Skin);
                     return;
                 }
-                else 
+                else
                 {
                     RenameTargetProfileOverwrite(); // okay to overwrite
                 }
             }
-            
+
             DismissPopup();
         }
 
@@ -225,9 +225,9 @@ namespace ScienceAlert.Windows.Implementations
             DismissPopup();
         }
 
-#endregion
+        #endregion
 
-#region delete popup
+        #region delete popup
 
         private void SpawnDeletePopup(ProfileData.Profile target)
         {
@@ -247,7 +247,7 @@ namespace ScienceAlert.Windows.Implementations
 
 
 
-#endregion
+        #endregion
 
         #region load popup
 

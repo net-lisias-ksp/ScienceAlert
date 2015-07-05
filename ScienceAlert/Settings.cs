@@ -177,8 +177,10 @@ namespace ScienceAlert
             get
             {
                 if (instance == null)
+                {
+                    Log.Debug("Creating new Settings instance");
                     instance = new Settings();
-
+                }
                 return instance;
             }
         }

@@ -67,6 +67,8 @@ namespace ScienceAlert
 
             Log.Normal("Removing MagicDataTransmitter");
             RemoveMagicTransmitter(false);
+
+            Log.Debug("StorageCache destroyed");
         }
 
 

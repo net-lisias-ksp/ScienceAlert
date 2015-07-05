@@ -7,24 +7,30 @@ namespace ScienceAlert.Experiments
     public class BiomeFilter : MonoBehaviour
     {
         private const int HalfSearchDimensions = 3;
+        private const float ColorThreshold = 0.005f;
 
         private string _currentBiome;
-        private Color[,] _mapColors;
-        private bool _mapFinished = false;
+        private Texture2D _cleanedBiomeMap;
+
         private System.Collections.IEnumerator _mapProjector;
-        private const float ColorThreshold = 0.005f;
+        
 
         private void Start()
         {
             GameEvents.onDominantBodyChange.Add(DominantBodyChanged);
             DominantBodyChanged(new GameEvents.FromToAction<CelestialBody, CelestialBody>(null,
                 FlightGlobals.currentMainBody));
+            Log.Debug("BiomeFilter created");
         }
+
 
         private void OnDestroy()
         {
             GameEvents.onDominantBodyChange.Remove(DominantBodyChanged);
+            if (_cleanedBiomeMap != null) Destroy(_cleanedBiomeMap);
+            Log.Debug("BiomeFilter destroyed");
         }
+
 
         private void Update()
         {
@@ -37,7 +43,8 @@ namespace ScienceAlert.Experiments
             }
 
             if (_mapProjector != null)
-                _mapProjector.MoveNext();
+                if (!_mapProjector.MoveNext())
+                    _mapProjector = null;
 
             double lat = vessel.latitude * Mathf.Deg2Rad;
             double lon = vessel.longitude * Mathf.Deg2Rad;
@@ -61,6 +68,10 @@ namespace ScienceAlert.Experiments
             Log.Debug("BiomeFilter.DominantBodyChanged: from {0} to {1}",
                 bodies.from != null ? bodies.from.GetName() : "<null>", bodies.to.GetName());
 
+#if DEBUG
+            bodies.to.BiomeMap.CompileToTexture().CreateReadable().SaveToDisk("body_" + bodies.to.bodyName + " _map.png");
+#endif
+            
             _mapProjector = ProjectMap(bodies.to);
         }
 
@@ -69,9 +80,17 @@ namespace ScienceAlert.Experiments
         {
             float startTime = Time.realtimeSinceStartup;
             var bm = body.BiomeMap;
-            _mapFinished = false;
 
-            _mapColors = new Color[bm.Width, bm.Height];
+            if (_cleanedBiomeMap != null)
+                Destroy(_cleanedBiomeMap);
+
+            if (body.BiomeMap == null)
+            {
+                Log.Debug("No biome map associated with " + body.GetName() + "; not creating cleaned biome map for it");
+                yield break;
+            }
+
+            _cleanedBiomeMap = new Texture2D(body.BiomeMap.Width, body.BiomeMap.Height, TextureFormat.RGBA32, false);
 
             for (int y = 0; y < bm.Height; ++y)
             {
@@ -86,11 +105,15 @@ namespace ScienceAlert.Experiments
                     double lon = 2d * Math.PI * u + Math.PI * 0.5;
 
                     // set biome color in our clean texture
-                    _mapColors[x,y] = body.BiomeMap.GetAtt(lat, lon).mapColor;
+                    // note we're not using a fast and easy array to do this because users will look at
+                    // the GC and not understand what's happening
+                    _cleanedBiomeMap.SetPixel(x, y, body.BiomeMap.GetAtt(lat, lon).mapColor);
                 }
 
                 yield return 0;
             }
+
+            _cleanedBiomeMap.Apply(false);
 
             Log.Normal("Projected biome map in {0} seconds", (Time.realtimeSinceStartup - startTime).ToString("F2"));
 
@@ -100,21 +123,21 @@ namespace ScienceAlert.Experiments
 
         bool IsResultValid(CBAttributeMapSO.MapAttribute attr, double lat, double lon)
         {
-            if (_mapProjector != null)
+            if (_mapProjector != null || _cleanedBiomeMap == null)
                 return true; // can't prove it's wrong
 
             lon -= Mathf.PI * 0.5f;
             if (lon < 0d) lon += Mathf.PI * 2d;
             lon %= Mathf.PI * 2d;
 
-            int x_center = (int)Math.Round(_mapColors.GetLength(0) * (float)(lon / (Mathf.PI * 2)), 0);
-            int y_center = (int)Math.Round(_mapColors.GetLength(1) * ((float)(lat / Mathf.PI) + 0.5f), 0);
+            int x_center = (int)Math.Round(_cleanedBiomeMap.width * (float)(lon / (Mathf.PI * 2)), 0);
+            int y_center = (int)Math.Round(_cleanedBiomeMap.height * ((float)(lat / Mathf.PI) + 0.5f), 0);
 
             for (int y = y_center - HalfSearchDimensions; y < y_center + HalfSearchDimensions; ++y)
-                if (y >= 0 && y < _mapColors.GetLength(1))
+                if (y >= 0 && y < _cleanedBiomeMap.height)
                     for (int x = x_center - HalfSearchDimensions; x < x_center + HalfSearchDimensions; ++x)
-                        if (x >= 0 && x < _mapColors.GetLength(0))
-                            if (Similar(attr.mapColor, _mapColors[x, y]))
+                        if (x >= 0 && x < _cleanedBiomeMap.width)
+                            if (Similar(attr.mapColor, _cleanedBiomeMap.GetPixel(x, y)))
                                 return true;
 
             return false;
