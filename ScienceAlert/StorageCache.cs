@@ -161,13 +161,18 @@ namespace ScienceAlert
             Log.Debug("StorageCache: Rebuilding ...");
             storage.Clear();
 
+            var queuedData = magicTransmitter != null
+                ? magicTransmitter.GetQueuedData()
+                : new List<KeyValuePair<List<ScienceData>, Callback>>();
+            magicTransmitter = null;
+
             yield return new WaitForFixedUpdate();
 
             if (FlightGlobals.ActiveVessel != vessel)
             {
                 // this could be an indication that we're not monitoring
                 // the active vessel properly
-                Log.Normal("StorageCache: Active vessel is not monitored vessel; rebuilding storage cache");
+                Log.Verbose("StorageCache: Active vessel is not monitored vessel; rebuilding storage cache");
                 RemoveMagicTransmitter();
             }
 
@@ -203,20 +208,21 @@ namespace ScienceAlert
                 {
                     // as long as at least one transmitter is "real", the
                     // vessel's root part should have a MagicDataTransmitter
-                    var mtx = vessel.rootPart.gameObject.GetComponent<MagicDataTransmitter>();
+                    magicTransmitter = vessel.rootPart.gameObject.GetComponent<MagicDataTransmitter>();
 
-                    if (mtx != null)
+                    if (magicTransmitter != null)
                     {
                         // one already exists; refresh it instead of recreating
                         Log.Debug("Refreshing MagicDataTransmitter");
-                        mtx.RefreshTransmitterQueues(magicTransmitter.GetQueuedData());
+                        magicTransmitter.RefreshTransmitterQueues(queuedData);
                     } else {
                         Log.Debug("Adding MagicDataTransmitter to root part {0}", FlightGlobals.ActiveVessel.rootPart.name);
-                        mtx = vessel.rootPart.AddModule("MagicDataTransmitter") as MagicDataTransmitter;
-                        mtx.cacheOwner = this;
+                        magicTransmitter = vessel.rootPart.AddModule("MagicDataTransmitter") as MagicDataTransmitter;
+                        if (magicTransmitter == null)
+                        {
+                            Log.Error("Failed to add MagicDataTransmitter to vessel root part!");
+                        } else magicTransmitter.cacheOwner = this;
                     }
-
-                    magicTransmitter = mtx;
                 } else
                 {
                     RemoveMagicTransmitter(false);
@@ -241,9 +247,13 @@ namespace ScienceAlert
         /// <param name="rootOnly"></param>
         private void RemoveMagicTransmitter(bool rootOnly = true)
         {
+            magicTransmitter = null;
+
             if (vessel != null)
                 if (vessel.rootPart != null)
                 {
+                    
+
                     try
                     {
                         if (vessel.rootPart.Modules.Contains("MagicDataTransmitter"))
@@ -258,8 +268,6 @@ namespace ScienceAlert
                         Log.Warning("RemoveMagicTransmitter: caught exception {0}", e);
                     }
                 }
-
-            magicTransmitter = null;
         }
 
 

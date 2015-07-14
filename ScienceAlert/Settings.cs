@@ -26,8 +26,6 @@ using ReeperCommon.ConfigNodeSerialization;
 
 namespace ScienceAlert
 {
-    
-
     public class Settings : IReeperSerializable
     {
         public delegate void SaveCallback(ConfigNode node);

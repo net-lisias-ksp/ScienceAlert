@@ -1,7 +1,7 @@
 ﻿/******************************************************************************
  *                  Science Alert for Kerbal Space Program                    *
  *                                                                            *
- * Version 1.8.8                                                              *
+ * Version 1.8.9                                                              *
  * Author: xEvilReeperx                                                       *
  * Created: 3/3/2014                                                          *
  * ************************************************************************** *
@@ -21,6 +21,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************
  * Changelog
+ * 1.8.9
+ *      Bugfix: Fixed an issue in StorageCache that could sometimes prevent it from properly handling
+ *              OnVesselWasModified events
+ * 
  * 1.8.8
  *      Bugfix: Fixed an issue that could result in wasteful use of memory because Mono sucks at GC
  *      
@@ -331,8 +335,10 @@ namespace ScienceAlert
 
         public void OnDestroy()
         {
-            Button.Drawable = null;
+            if (Button != null)
+                Button.Drawable = null;
             Settings.Instance.Save();
+
             Log.Debug("ScienceAlert destroyed");
         }
 

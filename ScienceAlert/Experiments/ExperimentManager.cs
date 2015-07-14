@@ -132,12 +132,12 @@ namespace ScienceAlert.Experiments
         {
             if (vessel == FlightGlobals.ActiveVessel)
             {
-                Log.Normal("ExperimentManager.OnVesselWasModified: rescanning vessel for experiment modules");
+                Log.Verbose("ExperimentManager.OnVesselWasModified: rescanning vessel for experiment modules");
                 foreach (var obs in observers)
                     obs.Rescan();
 
                 OnExperimentsScanned();
-                Log.Normal("Done");
+                Log.Verbose("Done");
             }
         }
 
