@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reflection;
@@ -17,7 +16,7 @@ namespace ReeperCommon
             byte[] array = Convert.FromBase64String(text);
             text = Encoding.UTF8.GetString(array, 0, array.Length);
 
-            Stream manifestResourceStream = AssemblyLoader.loadedAssemblies.Where(la => la.dllName == "KSP").Single().assembly.GetManifestResourceStream(text);
+            var manifestResourceStream = AssemblyLoader.loadedAssemblies.Single(la => la.dllName == "KSP").assembly.GetManifestResourceStream(text);
 
             return GetString(idx, DecodeStream(manifestResourceStream));
         }
@@ -31,23 +30,23 @@ namespace ReeperCommon
 
             if ((SOH[idx] & 128) == 0)
             {
-                num = (int)SOH[idx];
+                num = SOH[idx];
                 idx++;
             }
             else
             {
                 if ((SOH[idx] & 64) == 0)
                 {
-                    num = ((int)SOH[idx] & -129) << 8;
-                    num |= (int)SOH[idx + 1];
+                    num = (SOH[idx] & -129) << 8;
+                    num |= SOH[idx + 1];
                     idx += 2;
                 }
                 else
                 {
-                    num = ((int)SOH[idx] & -193) << 24;
-                    num |= (int)SOH[idx + 1] << 16;
-                    num |= (int)SOH[idx + 2] << 8;
-                    num |= (int)SOH[idx + 3];
+                    num = (SOH[idx] & -193) << 24;
+                    num |= SOH[idx + 1] << 16;
+                    num |= SOH[idx + 2] << 8;
+                    num |= SOH[idx + 3];
                     idx += 4;
                 }
             }
