@@ -3,9 +3,22 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScienceAlert", "ScienceAlert.csproj", "{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReeperCommon", "..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj", "{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScienceAlertTests", "ScienceAlertTests\ScienceAlertTests.csproj", "{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{953CD566-42B5-4F0A-856D-63D059E36FC0} = {953CD566-42B5-4F0A-856D-63D059E36FC0}
+		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E} = {FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3C8EB19A-D94B-4F4E-A87C-B85451BB3177}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "strange", "..\..\StrangeIoC\StrangeIoC\strange.csproj", "{953CD566-42B5-4F0A-856D-63D059E36FC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReeperCommon", "..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj", "{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,14 +30,15 @@ Global
 		{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3F2DEBB-02BA-45B4-8E79-F0745B9EFBC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{953CD566-42B5-4F0A-856D-63D059E36FC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{953CD566-42B5-4F0A-856D-63D059E36FC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{953CD566-42B5-4F0A-856D-63D059E36FC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FECFA8FC-CF80-4685-A2BA-1566E0F3C26E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

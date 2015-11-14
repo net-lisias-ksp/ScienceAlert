@@ -46,35 +46,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commands\CompositeCommand.cs" />
-    <Compile Include="Commands\DestroyUnityObjectCommand.cs" />
-    <Compile Include="Commands\DisablePluginCommand.cs" />
-    <Compile Include="Commands\ICommand.cs" />
-    <Compile Include="Commands\SpawnInformationalPopupCommand.cs" />
-    <Compile Include="Core.cs" />
-    <Compile Include="Game\IVesselProvider.cs" />
-    <Compile Include="Game\IAssemblyLoader.cs" />
-    <Compile Include="Game\IKspFactory.cs" />
-    <Compile Include="Game\ILoadedAssembly.cs" />
-    <Compile Include="Game\IResearchAndDevelopment.cs" />
-    <Compile Include="Game\IVessel.cs" />
-    <Compile Include="Game\KspActiveVesselProvider.cs" />
-    <Compile Include="Game\KspAssemblyLoader.cs" />
-    <Compile Include="Game\KspFactory.cs" />
-    <Compile Include="Game\KspLoadedAssembly.cs" />
-    <Compile Include="Game\KspResearchAndDevelopment.cs" />
-    <Compile Include="Game\KspVessel.cs" />
-    <Compile Include="ISensor.cs" />
-    <Compile Include="ISensorFactory.cs" />
-    <Compile Include="ISensorController.cs" />
-    <Compile Include="KspSensorFactory.cs" />
-    <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="Providers\IScienceExperimentModuleProvider.cs" />
-    <Compile Include="Providers\IScienceExperimentProvider.cs" />
-    <Compile Include="Providers\OnboardScienceExperimentProvider.cs" />
-    <Compile Include="Providers\UnlockedScienceExperimentProvider.cs" />
-    <Compile Include="Providers\VesselScienceExperimentModuleProvider.cs" />
-    <Compile Include="ScienceAlert.cs" />
+    <Compile Include="CoreConfiguration.cs" />
+    <Compile Include="Core\AssemblyNotFoundException.cs" />
+    <Compile Include="Core\BootstrapCore.cs" />
+    <Compile Include="Core\CommandConfigureAssemblyDirectory.cs" />
+    <Compile Include="Core\CommandConfigureGuiSkinsAndTextures.cs" />
+    <Compile Include="Core\CommandConfigureResourceRepository.cs" />
+    <Compile Include="Core\CommandConfigureScenarioModule.cs" />
+    <Compile Include="Core\CommandCreateGui.cs" />
+    <Compile Include="Core\CommandLoadConfiguration.cs" />
+    <Compile Include="Core\CommandSaveConfiguration.cs" />
+    <Compile Include="Core\CoreContext.cs" />
+    <Compile Include="Core\ScienceAlert.cs" />
+    <Compile Include="Core\ScenarioModuleNotFoundException.cs" />
+    <Compile Include="Core\SignalContext.cs" />
+    <Compile Include="Core\Signals.cs" />
+    <Compile Include="Core\TextureNotFoundException.cs" />
+    <Compile Include="Gui\ApplicationLauncherMediator.cs" />
+    <Compile Include="Gui\ApplicationLauncherView.cs" />
+    <Compile Include="Gui\IGuiSettings.cs" />
+    <Compile Include="Gui\Keys.cs" />
+    <Compile Include="IRoutineRunner.cs" />
     <Compile Include="old\ScienceAlert\API\Util.cs" />
     <Compile Include="old\ScienceAlert\Experiments\BiomeFilter.cs" />
     <Compile Include="old\ScienceAlert\Experiments\Observers\EvaReportObserver.cs" />
@@ -102,8 +94,7 @@
     <Compile Include="old\ScienceAlert\Toolbar\Wrapper\ToolbarWrapper.cs" />
     <Compile Include="old\ScienceAlert\Windows\OptionsWindow_Popups.cs" />
     <Compile Include="old\ScienceAlert\Windows\WindowEventLogic.cs" />
-    <Compile Include="SensorController.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="RoutineRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\flask.png" />
@@ -142,137 +133,127 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="old\ScienceAlert\Tools\" />
-    <Folder Include="Queries\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj">
       <Project>{fecfa8fc-cf80-4685-a2ba-1566e0f3c26e}</Project>
       <Name>ReeperCommon</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\StrangeIoC\StrangeIoC\strange.csproj">
+      <Project>{953cd566-42b5-4f0a-856d-63d059e36fc0}</Project>
+      <Name>strange</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program
-set unity=C:\Program Files (x86)\Unity464
+    <PostBuildEvent>
+
+echo ------------------ Installing %25ProjectName%25 ---------------------
+
+call "$(SolutionDir)SetEnvironment.bat"
+
+set ProjectGameData=$(ProjectDir)GameData\$(ProjectName)\
 
 
+call:CreateSymbolsForDependencies
 
-if NOT $(Configuration) == Debug GOTO CopyFiles
-
-call:CheckUnity
-call:CreateMdb "$(ProjectDir)bin\$(Configuration)\$(TargetFileName)"
-
-REM echo copying mdb into project GameData
-robocopy "$(ProjectDir)bin\$(Configuration)" "$(ProjectDir)GameData\$(ProjectName)" $(TargetFileName).mdb
-call:CheckRoboCopyCode "$(TargetFileName).mdb into project GameData"
-
-
-
-:CopyFiles
-
-REM save a copy for unit testing
-copy "$(ProjectDir)bin\$(Configuration)\$(TargetFileName)" "$(SolutionDir)AssemblyReloader\bin\$(Configuration)\$(TargetFileName)" /Y
-
-
-REM ReeperCommon into Project/GameData
-if exist "$(ProjectDir)bin\$(Configuration)\ReeperCommon.dll" (
-echo copying ReeperCommon to project GameData...
-robocopy "$(ProjectDir)bin\$(Configuration)" "$(ProjectDir)GameData\$(ProjectName)" ReeperCommon.dll
-call:CheckRoboCopyCode "ReeperCommon.dll to project"
-)
-
-REM TargetFileName into Project/GameData
-echo copying project binary to project GameData...
-robocopy "$(ProjectDir)bin\$(Configuration)" "$(ProjectDir)GameData\$(ProjectName)" $(TargetFileName)
-call:CheckRoboCopyCode "Project binary to project GameData"
-
-REM TargetFileName to TargetFileName.reloadable
-echo renaming project binary to $(TargetFileName).reloadable...
-rename "$(ProjectDir)GameData\$(ProjectName)\$(TargetFileName)" $(TargetFileName).reloadable
-
-if exist "$(ProjectDir)GameData\$(ProjectName)\$(TargetFileName).mdb" (
-echo renaming project debug symbols to $(TargetFileName).reloadable.mdb
-rename "$(ProjectDir)GameData\$(ProjectName)\$(TargetFileName).mdb" $(TargetFileName).reloadable.mdb
-)
-
-
-REM Project/GameData into KSP/GameData/Project
-echo copying files to KSP GameData...
-robocopy "$(ProjectDir)GameData\$(ProjectName)" "%25ksp%25\GameData\$(ProjectName)" /E /xo
-Call:CheckRoboCopyCode "Solution GameData into KSP GameData"
-exit 0
-
-
-REM
-REM CreateMdb - Given a fully qualified path to an assembly, generate MDB with same name + appended with .mdb
-REM
-:CreateMdb
-echo CreateMdb: received "%25~1"
-
-if exist %25~1 (
-call "%25unity%25\Editor\Data\MonoBleedingEdge\bin\cli.bat" "%25unity%25\Editor\Data\MonoBleedingEdge\lib\mono\4.0\pdb2mdb.exe" "%25~1"
-
-IF NOT EXIST "%25~1".mdb (
-echo ERROR: failed to generate %25~1.mdb
-exit -4
-)
-goto:eof
+if $(Configuration) == Release (
+echo Merging dependencies for release build...
+call:MergeDependencies
 ) else (
-echo CreateMdb: Error - %25~1 not found!
-exit -5
+echo Copying dependencies
+REM call:CopyDependencies
 )
 
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" $(TargetName).* /xf *.config *.pdb
+
+REM ----------------------------------------------------------
+REM Create debug symbols for ScienceAlert
+REM ----------------------------------------------------------
+echo Creating debug symbols for $(TargetFileName)
+echo Symbol destination: %25ProjectGameData%25
+cd "$(TargetDir)"
+call "$(SolutionDir)CreateMdb.bat" "$(TargetFileName)" "%25ProjectGameData%25"
 
 
+cd "%25ProjectGameData%25"
+if exist "%25ProjectGameData%25$(TargetName).reloadable" (
+del "%25ProjectGameData%25$(TargetName).reloadable"
 
-:CheckRoboCopyCode
-    if %25ERRORLEVEL%25 EQU 16 echo ***FATAL ERROR*** &amp; exit 16
-    if %25ERRORLEVEL%25 EQU 15 echo OKCOPY + FAIL + MISMATCHES + XTRA &amp; exit 15
-    if %25ERRORLEVEL%25 EQU 14 echo FAIL + MISMATCHES + XTRA &amp; exit 14
-    if %25ERRORLEVEL%25 EQU 13 echo OKCOPY + FAIL + MISMATCHES &amp; exit 13
-    if %25ERRORLEVEL%25 EQU 12 echo FAIL + MISMATCHES&amp; exit 12
-    if %25ERRORLEVEL%25 EQU 11 echo OKCOPY + FAIL + XTRA &amp; exit 11
-    if %25ERRORLEVEL%25 EQU 10 echo FAIL + XTRA &amp; exit 10
-    if %25ERRORLEVEL%25 EQU 9 echo OKCOPY + FAIL &amp; exit 9
-    if %25ERRORLEVEL%25 EQU 8 echo FAIL &amp; exit 8
-    if %25ERRORLEVEL%25 EQU 7 echo OKCOPY + MISMATCHES + XTRA &amp; goto end
-    if %25ERRORLEVEL%25 EQU 6 echo MISMATCHES + XTRA &amp; goto end
-    if %25ERRORLEVEL%25 EQU 5 echo OKCOPY + MISMATCHES &amp; goto end
-    if %25ERRORLEVEL%25 EQU 4 echo MISMATCHES &amp; goto end
-    if %25ERRORLEVEL%25 EQU 3 echo OKCOPY + XTRA &amp; goto end
-    if %25ERRORLEVEL%25 EQU 2 echo XTRA &amp; goto end
-    if %25ERRORLEVEL%25 EQU 1 echo OKCOPY &amp; goto end
-    if %25ERRORLEVEL%25 EQU 0 echo No Change &amp; goto end
-    :end  
+if exist "%25ProjectGameData%25$(TargetName).reloadable.mdb" (
+del "%25ProjectGameData%25$(TargetName).reloadable.mdb"
+)
+)
+call:RenameAssemblyToReloadable $(TargetName)
+goto:CopyIntoGameDir
+
+
+REM ----------------------------------------------------------
+REM Copy dependencies into Project GameData
+REM ----------------------------------------------------------
+:CopyDependencies
+echo copy dependencies to project GameData...
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" ReeperCommon.* /xf *.pdb
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" StrangeIoC.* /xf *.pdb
 goto:eof
 
 
-:CheckUnity
-IF NOT EXIST "%25unity%25\Editor\Data\MonoBleedingEdge\lib\mono\4.0\pdb2mdb.exe" (
-echo ERROR: Failed to find pdb2mdb.exe; check Unity path
-exit -1
-)
+REM ----------------------------------------------------------
+REM Merge dependencies into ScienceAlert.dll (used in release builds)
+REM ----------------------------------------------------------
+:MergeDependencies
+echo merge dependencies...
+cd "(TargetDir)"
+"$(SolutionDir)packages\ILRepack.2.0.4\tools\ILRepack.exe" /verbose /out:$(TargetFileName) $(TargetFileName) ReeperCommon.dll StrangeIoC.dll
 
-IF NOT EXIST "$(ProjectDir)bin\$(Configuration)\$(TargetName).pdb" (
-echo ERROR: Failed to find $(TargetName).pdb in $(ProjectDir)bin\$(Configuration)
-exit -2
-)
 goto:eof
 
 
-</PostBuildEvent>
+REM ----------------------------------------------------------
+REM Create debug symbols for dependencies
+REM ----------------------------------------------------------
+:CreateSymbolsForDependencies
+echo Creating symbols for dependencies...
+cd "%25TargetDir%25"
+call "$(SolutionDir)CreateMdb.bat" "$(TargetDir)ReeperCommon.dll" "$(TargetDir)"
+call "$(SolutionDir)CreateMdb.bat" "$(TargetDir)StrangeIoC.dll" "$(TargetDir)"
+goto:eof
+
+
+REM ----------------------------------------------------------
+REM Rename DLL to RELOADABLE so AssemblyReloader will be used to load it 
+REM ----------------------------------------------------------
+:RenameAssemblyToReloadable
+echo renaming %25~1.dll to %25~1.reloadable...
+ren %25~1.dll *.reloadable
+if EXIST "%25~1.dll.mdb" (
+echo renaming %25~1.dll.mdb to %25~1.reloadable.mdb...
+ren %25~1.dll.mdb *.
+ren %25~1.dll *.reloadable.mdb
+)
+echo Done!
+goto:eof
+
+
+REM ----------------------------------------------------------
+REM Copy Project GameData into KSP Project GameData
+REM ----------------------------------------------------------
+:CopyIntoGameDir
+REM Solution GameData to KSP GameData
+
+echo Copying to GameData
+call "$(SolutionDir)CopyToLocation.bat" "%25ProjectGameData%25" "%25ksp%25$(ProjectName)" /E /xo
+
+
+echo Files copied to GameData successfully
+
+
+REM return with no error; robocopy success will set ERRORLEVEL nonzero which will trick VS into thinking the build failed
+exit 0</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>set ksp=D:\For New Computer\Kerbal Space Program\GameData
-
-del "%25ksp%25\$(ProjectName)\$(TargetFileName)*.reloadable"
-del "%25ksp%25\$(ProjectName)\$(TargetFileName)*.mdb"
-
-del "$(ProjectDir)bin\$(Configuration)\$(TargetFileName).reloadable"
-del "$(ProjectDir)bin\$(Configuration)\$(TargetFileName)*.mdb"
-
-del "$(ProjectDir)\GameData\$(ProjectName)\$(TargetFileName)*.reloadable"
-del "$(ProjectDir)\GameData\$(ProjectName)\$(TargetFileName)*.mdb"</PreBuildEvent>
+    <PreBuildEvent>call "$(SolutionDir)SetEnvironment.bat"
+call "$(SolutionDir)CleanDirectories.bat" "$(ProjectDir)GameData\$(ProjectName)" "%25ksp%25\$(ProjectName)"</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
