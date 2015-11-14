@@ -30,6 +30,7 @@ namespace ScienceAlert.Core
             SetupCommandBindings();
 
             mediationBinder.BindView<ApplicationLauncherView>().ToMediator<ApplicationLauncherMediator>();
+            //mediationBinder.BindView<AlertPanelView>().ToMediator<AlertPanelMediator>();
 
             injectionBinder.GetInstance<ILog>().Normal("ScienceAlert is operating normally");
         }

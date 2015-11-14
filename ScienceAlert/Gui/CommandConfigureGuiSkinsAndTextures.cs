@@ -1,22 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
-using System.Text;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using ReeperCommon.Repositories;
-using ScienceAlert.Gui;
+using ScienceAlert.Core;
 using strange.extensions.command.impl;
 using UnityEngine;
 
-namespace ScienceAlert.Core
+namespace ScienceAlert.Gui
 {
+// ReSharper disable once ClassNeverInstantiated.Global
     public class CommandConfigureGuiSkinsAndTextures : Command
     {
         private readonly IResourceRepository _resources;
         private readonly ILog _log;
+
+        private const float TitleBarButtonSize = 16f;
 
         public CommandConfigureGuiSkinsAndTextures(IResourceRepository resources, ILog log)
         {
@@ -41,6 +41,7 @@ namespace ScienceAlert.Core
         {
             _log.Verbose("Configuring GUI skins");
             injectionBinder.Bind<GUISkin>().ToValue(HighLogic.Skin).CrossContext();
+            injectionBinder.Bind<GUIStyle>().ToValue(ConfigureTitleBarButtonStyle()).ToName(Keys.WindowTitleBarButtonStyle).CrossContext();
         }
 
 
@@ -54,6 +55,21 @@ namespace ScienceAlert.Core
                 .ForEach(n => _log.Normal("Resource: " + n));
 
             BindTexture("Resources/sheet_app", Keys.ApplicationLauncherSpriteSheet);
+            BindTexture("Resources/btnClose", Keys.CloseButtonTexture);
+            BindTexture("Resources/btnLock", Keys.LockButtonTexture);
+            BindTexture("Resources/btnUnlock", Keys.UnlockButtonTexture);
+            BindTexture("Resources/btnScale", Keys.RescaleCursorTexture);
+            BindTexture("Resources/cursor", Keys.ResizeCursorTexture);
+        }
+
+
+        private static GUIStyle ConfigureTitleBarButtonStyle()
+        {
+            var style = new GUIStyle(HighLogic.Skin.button) { border = new RectOffset(), padding = new RectOffset() };
+            style.fixedHeight = style.fixedWidth = TitleBarButtonSize;
+            style.margin = new RectOffset();
+
+            return style;
         }
 
 

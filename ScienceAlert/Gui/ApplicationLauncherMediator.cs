@@ -10,13 +10,13 @@ namespace ScienceAlert.Gui
     public class ApplicationLauncherMediator : Mediator
     {
         [Inject] public ApplicationLauncherView View { get; set; }
+        [Inject] public SignalButtonCreated ButtonCreated { get; set; }
 
 
         public override void OnRegister()
         {
             base.OnRegister();
             View.ButtonCreated.AddOnce(OnButtonCreated);
-
             View.Toggle.AddListener(OnButtonToggle);
         }
 
@@ -29,13 +29,13 @@ namespace ScienceAlert.Gui
 
         private void OnButtonCreated()
         {
-            throw new NotImplementedException();
+            ButtonCreated.Dispatch();
         }
 
 
         private void OnButtonToggle(bool b)
         {
-            throw new NotImplementedException();
+            // todo:
         }
     }
 }

@@ -50,10 +50,12 @@
     <Compile Include="Core\AssemblyNotFoundException.cs" />
     <Compile Include="Core\BootstrapCore.cs" />
     <Compile Include="Core\CommandConfigureAssemblyDirectory.cs" />
-    <Compile Include="Core\CommandConfigureGuiSkinsAndTextures.cs" />
+    <Compile Include="Gui\CommandConfigureGuiSkinsAndTextures.cs" />
     <Compile Include="Core\CommandConfigureResourceRepository.cs" />
     <Compile Include="Core\CommandConfigureScenarioModule.cs" />
-    <Compile Include="Core\CommandCreateGui.cs" />
+    <Compile Include="Gui\AlertPanelMediator.cs" />
+    <Compile Include="Gui\AlertPanelView.cs" />
+    <Compile Include="Gui\CommandCreateGui.cs" />
     <Compile Include="Core\CommandLoadConfiguration.cs" />
     <Compile Include="Core\CommandSaveConfiguration.cs" />
     <Compile Include="Core\CoreContext.cs" />
@@ -66,6 +68,8 @@
     <Compile Include="Gui\ApplicationLauncherView.cs" />
     <Compile Include="Gui\IGuiSettings.cs" />
     <Compile Include="Gui\Keys.cs" />
+    <Compile Include="Gui\Signals.cs" />
+    <Compile Include="Gui\StrangeView.cs" />
     <Compile Include="IRoutineRunner.cs" />
     <Compile Include="old\ScienceAlert\API\Util.cs" />
     <Compile Include="old\ScienceAlert\Experiments\BiomeFilter.cs" />
@@ -143,6 +147,10 @@
       <Project>{953cd566-42b5-4f0a-856d-63d059e36fc0}</Project>
       <Name>strange</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\btnScale.png" />
+    <EmbeddedResource Include="Resources\cursor.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

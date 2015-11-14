@@ -18,14 +18,20 @@ namespace ScienceAlert.Gui
         internal readonly Signal ButtonCreated = new Signal();
 
         private ApplicationLauncherButton _button;
+        private PackedSprite _sprite;
 
         private const string EzGuiLayerName = "EzGUI_UI";
         private const string ShaderName = "Sprite/Vertex Colored";
         private const int ButtonWidth = 38;
         private const int ButtonHeight = 38;
 
-        private const string UnlitAnimationName = "Unlit";
-        private const string SpinAnimationName = "Spin";
+
+        public enum Animations
+        {
+            Unlit,
+            Lit,
+            Spinning
+        }
 
         protected override void Start()
         {
@@ -48,7 +54,7 @@ namespace ScienceAlert.Gui
                 yield return 0;
 
 
-            var sprite = CreateSprite(CreateMaterial());
+            _sprite = CreateSprite(CreateMaterial());
 
             _button = ApplicationLauncher.Instance.AddModApplication(
                                                         OnTrue,
@@ -59,11 +65,12 @@ namespace ScienceAlert.Gui
                                                         () => { },
                                                         () => { },
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
-                                                        sprite);
+                                                        _sprite);
 
             yield return new WaitForEndOfFrame();   // the button won't respect toggle state immediately for some reason,
                                                     // so a slight delay is necessary while it finishes doing whatever internal setup
 
+            SetAnimationState(Animations.Unlit);
             ButtonCreated.Dispatch();
         }
 
@@ -88,19 +95,23 @@ namespace ScienceAlert.Gui
             sprite.gameObject.layer = LayerMask.NameToLayer(EzGuiLayerName);
 
             // normal state
-            var normal = new UVAnimation { name = UnlitAnimationName, loopCycles = 0, framerate = GuiSettings.Framerate };
+            var normal = new UVAnimation { name = Animations.Unlit.ToString(), loopCycles = 0, framerate = GuiSettings.Framerate };
             normal.BuildUVAnim(sprite.PixelCoordToUVCoord(9 * ButtonWidth, 8 * ButtonHeight), sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 1, 1, 1);
 
             // animated state
-            var anim = new UVAnimation { name = SpinAnimationName, loopCycles = -1, framerate = GuiSettings.Framerate };
+            var anim = new UVAnimation { name = Animations.Spinning.ToString(), loopCycles = -1, framerate = GuiSettings.Framerate };
             anim.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, ButtonHeight).y), sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 100);
+
+            // lit but not animated state
+            var lit = new UVAnimation {name = Animations.Lit.ToString(), loopCycles = 0, framerate = GuiSettings.Framerate};
+            lit.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, ButtonHeight).y),
+                sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 1);
 
 
             // add animations to button
             sprite.AddAnimation(normal);
             sprite.AddAnimation(anim);
-
-            sprite.PlayAnim(UnlitAnimationName);
+            sprite.AddAnimation(lit);
 
             return sprite;
         }
@@ -123,6 +134,12 @@ namespace ScienceAlert.Gui
             if (tf)
                 _button.Do(b => b.SetTrue(false));
             else _button.Do(b => b.SetFalse(false));
+        }
+
+
+        public void SetAnimationState(Animations anim)
+        {
+            _sprite.Do(spr => spr.PlayAnim(anim.ToString()));
         }
     }
 }
