@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 using ReeperCommon.Gui.Window;
 using ReeperCommon.Gui.Window.Buttons;
 using ReeperCommon.Gui.Window.Decorators;
+using ReeperCommon.Serialization;
 using strange.extensions.implicitBind;
 using strange.extensions.injector;
 using strange.extensions.signal.impl;
@@ -13,18 +15,20 @@ namespace ScienceAlert.Gui
     [MediatedBy(typeof(AlertPanelMediator))]
     public class AlertPanelView : StrangeView
     {
-        [Inject] public GUISkin WindowSkin { get; set; }
+        [Inject(Keys.CompactSkin)] public GUISkin WindowSkin { get; set; }
 
         [Inject(Keys.WindowTitleBarButtonStyle)] public GUIStyle TitleBarButtonStyle { get; set; }
         [Inject(Keys.CloseButtonTexture)] public Texture2D CloseButtonTexture { get; set; }
         [Inject(Keys.LockButtonTexture)] public Texture2D LockButtonTexture { get; set; }
         [Inject(Keys.UnlockButtonTexture)] public Texture2D UnlockButtonTexture { get; set; }
         [Inject(Keys.ResizeCursorTexture)] public Texture2D ResizeCursorTexture { get; set; }
+        [Inject(Keys.LitToggleStyle)] public GUIStyle LitToggleStyle { get; set; }
 
         internal readonly Signal Close = new Signal();
         internal readonly Signal LockToggle = new Signal();
 
         private BasicTitleBarButton _lockButton;
+
 
         protected override IWindowComponent Initialize()
         {
@@ -32,6 +36,9 @@ namespace ScienceAlert.Gui
             Draggable = true;
             Height = 1f;
 
+            var currDim = Dimensions;
+            currDim.center = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            Dimensions = currDim;
 
             var scaling = new WindowScale(this, Vector2.one);
 
@@ -39,10 +46,16 @@ namespace ScienceAlert.Gui
 
             var tb = ConfigureTitleBar(clamp);
 
-            var resizable = new Resizable(tb, ResizableHotzoneSize, MinWindowSize, ResizeCursorTexture)
+            var rowSize = CalculateMinRowSize(); 
+            var minWindowSize = rowSize + Skin.window.CalcSize(new GUIContent()) + new Vector2(0f, LockButtonTexture.height);
+
+            var resizable = new Resizable(tb, ResizableHotzoneSize, minWindowSize, ResizeCursorTexture)
             {
-                Title = "Alert Panel"
+                Title = string.Empty
             };
+
+            Width = minWindowSize.x;
+            Height = minWindowSize.y;
 
             return resizable;
         }
@@ -65,12 +78,115 @@ namespace ScienceAlert.Gui
 
         protected override void DrawWindow()
         {
-            GUILayout.Label("Stuff goes here");
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Experiments");
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginScrollView(Vector2.zero, false, true);
+            {
+                for (int i = 0; i < 10; ++i)
+                {
+                    GUILayout.BeginHorizontal();
+                    {
+                        DrawRow("Experiment" + new string('.', i * 2));
+                    }
+                    GUILayout.EndHorizontal();
+                    
+         
+                }
+            }
+            GUILayout.EndScrollView();
+            GUILayout.Space(5f);
+        }
+
+
+        private void DrawRow(string buttonText)
+        {
+            GUILayout.Button(buttonText);
+            GUILayout.FlexibleSpace();
+
+            GUILayout.Toggle(false, string.Empty, LitToggleStyle);
+            GUILayout.Toggle(true, string.Empty, LitToggleStyle);
+
+            //GUILayout.BeginHorizontal();
+            //{
+            //    GUILayout.Toggle(true, CloseButtonTexture, GUILayout.Width(CloseButtonTexture.width),
+            //        GUILayout.Height(CloseButtonTexture.height));
+            //    GUILayout.Toggle(false, CloseButtonTexture, GUILayout.Width(CloseButtonTexture.width),
+            //        GUILayout.Height(CloseButtonTexture.height));
+            //}
+            //GUILayout.EndHorizontal();
+        }
+
+
+        private Vector2 CalculateMinRowSize()
+        {
+            string longest = "Experiment" + new string('.', 10 * 2);
+
+            // button + toggle x2
+            var button = Skin.button.CalcSize(new GUIContent(longest));
+            var toggle = Skin.toggle.CalcSize(new GUIContent());
+
+            return new Vector2(button.x + 2f * toggle.x, Mathf.Max(button.y, toggle.y));
         }
 
         protected override void FinalizeWindow()
         {
+        }
 
+
+        // Calculates maximum dimensions of a button (this will be the longest experiment title)
+        private Vector2 CalculateButtonSize()
+        {
+            return Skin.button.CalcSize(new GUIContent {text = "This is a very long experiment name"});
+        }
+
+        private Vector2 CalculateScrollbarSize()
+        {
+            return Skin.verticalScrollbar.CalcSize(new GUIContent());
+        }
+
+
+
+        public override void OnUpdate()
+        {
+            base.OnUpdate();
+            return;
+
+            //if (_hasSetInitialSizeFlag) return;
+
+            //_hasSetInitialSizeFlag = true;
+
+            //_minimumWidth = Mathf.Max(AbsoluteMinimumButtonWidth, CalculateButtonSize().x);
+
+            //var sbWidth = CalculateScrollbarSize().x;
+
+            //WindowOptions = new []
+            //{
+            //    GUILayout.MinWidth(
+            //    _minimumWidth + 
+            //        Skin.window.padding.left + 
+            //        Skin.window.padding.right + 
+            //        Skin.window.margin.left + 
+            //        Skin.window.margin.right +
+                    
+            //        Skin.scrollView.padding.left +
+            //        Skin.scrollView.padding.right +
+            //        Skin.scrollView.margin.left +
+            //        Skin.scrollView.margin.right +
+
+            //        sbWidth //+
+            //        //Skin.horizontalScrollbar.padding.left +
+            //        //Skin.horizontalScrollbar.padding.right + 
+            //        //Skin.horizontalScrollbar.margin.left +
+            //        //Skin.horizontalScrollbar.margin.right
+            //        ),
+            //    GUILayout.MinHeight(160f)
+            //};
+
+            //print("MinWidth: " + _minimumWidth);
         }
 
 
@@ -86,11 +202,11 @@ namespace ScienceAlert.Gui
         }
 
 
-        public void Lock(bool tf)
+        public void Lock(bool shouldBeDraggable)
         {
-            Draggable = tf;
+            Draggable = shouldBeDraggable;
 
-            _lockButton.Texture = tf ? LockButtonTexture : UnlockButtonTexture;
+            _lockButton.Texture = shouldBeDraggable ? UnlockButtonTexture : LockButtonTexture;
         }
     }
 }

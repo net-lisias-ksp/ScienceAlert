@@ -1,4 +1,5 @@
-﻿using strange.extensions.signal.impl;
+﻿using ReeperCommon.Containers;
+using strange.extensions.signal.impl;
 using UnityEngine;
 
 namespace ScienceAlert.Core
@@ -17,13 +18,21 @@ namespace ScienceAlert.Core
         internal readonly Signal<ConfigNode> SaveSignal = new Signal<ConfigNode>();
         internal readonly Signal<ConfigNode> LoadSignal = new Signal<ConfigNode>();
 
+        private GameObject _coreContextView;
 
         public override void OnAwake()
         {
             base.OnAwake();
 
-// ReSharper disable once ObjectCreationAsStatement
-            new GameObject("ScienceAlert.ContextView", typeof (BootstrapCore));
+            _coreContextView = new GameObject("ScienceAlert.ContextView", typeof(BootstrapCore));
+        }
+
+
+// ReSharper disable once UnusedMember.Local
+        private void OnPluginReloadRequested()
+        {
+            print("ScienceAlert: Reloading");
+            _coreContextView.Do(Destroy);
         }
 
 

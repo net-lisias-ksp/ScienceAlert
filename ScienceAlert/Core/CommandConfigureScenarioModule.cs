@@ -30,13 +30,12 @@ namespace ScienceAlert.Core
             if (!scienceAlert.Any())
                 throw new ScenarioModuleNotFoundException("ScienceAlert");
 
-            scienceAlert.Do(sa =>
-            {
-                sa.SaveSignal.AddListener(node => _saveSignal.Dispatch(node));
-                sa.LoadSignal.AddListener(node => _loadSignal.Dispatch(node));
+            var sa = scienceAlert.Single();
 
-                injectionBinder.Bind<ScienceAlert>().Bind<ScenarioModule>().To(sa);
-            });
+            sa.SaveSignal.AddListener(node => _saveSignal.Dispatch(node));
+            sa.LoadSignal.AddListener(node => _loadSignal.Dispatch(node));
+
+            injectionBinder.Bind<ScienceAlert>().Bind<ScenarioModule>().To(sa).CrossContext();
         }
 
 

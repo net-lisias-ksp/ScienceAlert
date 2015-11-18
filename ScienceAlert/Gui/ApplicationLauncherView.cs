@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using ReeperCommon.Containers;
+using strange.extensions.implicitBind;
 using strange.extensions.injector;
 using strange.extensions.mediation.impl;
 using strange.extensions.signal.impl;
@@ -8,8 +9,13 @@ using UnityEngine;
 
 namespace ScienceAlert.Gui
 {
+    [MediatedBy(typeof(ApplicationLauncherMediator))]
+// ReSharper disable once ClassNeverInstantiated.Global
     public class ApplicationLauncherView : View
     {
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+
         [Inject(Keys.ApplicationLauncherSpriteSheet)] public Texture2D SpriteSheet { get; set; }
         [Inject] public IRoutineRunner CoroutineRunner { get; set; }
         [Inject] public IGuiSettings GuiSettings { get; set; }
@@ -77,7 +83,10 @@ namespace ScienceAlert.Gui
 
         private Material CreateMaterial()
         {
-            return Shader.Find(ShaderName).With(s => new Material(s)).Do(m => m.mainTexture = SpriteSheet);
+            return Shader.Find(ShaderName)
+                .With(s => new Material(s))
+                .Do(m => m.mainTexture = SpriteSheet)
+                .IfNull(() => { throw new ShaderNotFoundException(ShaderName); });
         }
 
 

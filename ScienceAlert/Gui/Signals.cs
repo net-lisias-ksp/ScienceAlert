@@ -6,11 +6,16 @@ using strange.extensions.signal.impl;
 
 namespace ScienceAlert.Gui
 {
-    public class SignalButtonCreated : Signal
+    public class SignalAppButtonCreated : Signal
     {
     }
 
-    public class SignalButtonToggled : Signal<bool>
+    public class SignalAppButtonToggled : Signal<bool>
+    {
+        
+    }
+
+    public class SignalAlertPanelViewVisibilityChanged : Signal<bool>
     {
         
     }

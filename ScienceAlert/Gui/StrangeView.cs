@@ -27,7 +27,7 @@ namespace ScienceAlert.Gui
         [ReeperPersistent] private bool _visible = true;
 
         public IWindowComponent Decorated;
-
+        protected GUILayoutOption[] WindowOptions = new GUILayoutOption[] { };
 
         protected override void Start()
         {
@@ -67,7 +67,7 @@ namespace ScienceAlert.Gui
 
 
                 Decorated.Dimensions = GUILayout.Window(Decorated.Id.Value, Decorated.Dimensions, DrawWindow,
-                    Decorated.Title, Skin.window);
+                    Decorated.Title, Skin.window, WindowOptions);
 
                 Decorated.OnWindowPostDraw();
             }

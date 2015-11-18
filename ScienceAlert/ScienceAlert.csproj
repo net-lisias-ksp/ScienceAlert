@@ -50,6 +50,7 @@
     <Compile Include="Core\AssemblyNotFoundException.cs" />
     <Compile Include="Core\BootstrapCore.cs" />
     <Compile Include="Core\CommandConfigureAssemblyDirectory.cs" />
+    <Compile Include="Gui\SkinNotCreatedException.cs" />
     <Compile Include="Gui\CommandConfigureGuiSkinsAndTextures.cs" />
     <Compile Include="Core\CommandConfigureResourceRepository.cs" />
     <Compile Include="Core\CommandConfigureScenarioModule.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="Gui\ApplicationLauncherView.cs" />
     <Compile Include="Gui\IGuiSettings.cs" />
     <Compile Include="Gui\Keys.cs" />
+    <Compile Include="Gui\ShaderNotFoundException.cs" />
     <Compile Include="Gui\Signals.cs" />
     <Compile Include="Gui\StrangeView.cs" />
     <Compile Include="IRoutineRunner.cs" />
@@ -151,6 +153,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\btnScale.png" />
     <EmbeddedResource Include="Resources\cursor.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\toggle_frame.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

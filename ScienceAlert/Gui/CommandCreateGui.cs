@@ -35,8 +35,9 @@ namespace ScienceAlert.Gui
 
         private void MapBindings()
         {
-            injectionBinder.Bind<SignalButtonCreated>().ToSingleton().CrossContext();
-            injectionBinder.Bind<SignalButtonToggled>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalAppButtonCreated>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalAppButtonToggled>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalAlertPanelViewVisibilityChanged>().ToSingleton().CrossContext();
         }
     }
 }

@@ -9,6 +9,9 @@
         ResizeCursorTexture, // Texture2D
         RescaleCursorTexture, // Texture2D
 
+        CompactSkin, // GUISkin (compact)
+
         WindowTitleBarButtonStyle, // GUIStyle
+        LitToggleStyle, // GUIStyle
     }
 }
