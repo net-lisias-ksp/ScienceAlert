@@ -49,7 +49,7 @@ namespace ScienceAlert.Gui
             var rowSize = CalculateMinRowSize(); 
             var minWindowSize = rowSize + Skin.window.CalcSize(new GUIContent()) + new Vector2(0f, LockButtonTexture.height);
 
-            var resizable = new Resizable(tb, ResizableHotzoneSize, minWindowSize, ResizeCursorTexture)
+            var resizable = new Resizable(tb, new Vector2(0f, ResizableHotzoneSize.y), minWindowSize, ResizeCursorTexture)
             {
                 Title = string.Empty
             };
@@ -98,14 +98,14 @@ namespace ScienceAlert.Gui
                 }
             }
             GUILayout.EndScrollView();
-            GUILayout.Space(5f);
+            GUILayout.Space(8f);
         }
 
 
         private void DrawRow(string buttonText)
         {
-            GUILayout.Button(buttonText);
-            GUILayout.FlexibleSpace();
+            GUILayout.Button(buttonText, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
+            //GUILayout.FlexibleSpace();
 
             GUILayout.Toggle(false, string.Empty, LitToggleStyle);
             GUILayout.Toggle(true, string.Empty, LitToggleStyle);

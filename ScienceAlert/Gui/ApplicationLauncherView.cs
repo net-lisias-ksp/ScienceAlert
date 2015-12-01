@@ -18,7 +18,7 @@ namespace ScienceAlert.Gui
 
         [Inject(Keys.ApplicationLauncherSpriteSheet)] public Texture2D SpriteSheet { get; set; }
         [Inject] public IRoutineRunner CoroutineRunner { get; set; }
-        [Inject] public IGuiSettings GuiSettings { get; set; }
+        [Inject] public IGuiConfiguration GuiConfiguration { get; set; }
 
         internal readonly Signal<bool> Toggle = new Signal<bool>();
         internal readonly Signal ButtonCreated = new Signal();
@@ -77,6 +77,8 @@ namespace ScienceAlert.Gui
                                                     // so a slight delay is necessary while it finishes doing whatever internal setup
 
             SetAnimationState(Animations.Unlit);
+            SetAnimationState(Animations.Spinning); // temp to make sure it's working
+
             ButtonCreated.Dispatch();
         }
 
@@ -99,20 +101,20 @@ namespace ScienceAlert.Gui
             sprite.SetMaterial(material);
             sprite.renderer.sharedMaterial.mainTexture.filterMode = FilterMode.Point;
             sprite.Setup(ButtonWidth, ButtonHeight);
-            sprite.SetFramerate(GuiSettings.Framerate);
+            sprite.SetFramerate(GuiConfiguration.Framerate);
             sprite.SetAnchor(SpriteRoot.ANCHOR_METHOD.UPPER_LEFT);
             sprite.gameObject.layer = LayerMask.NameToLayer(EzGuiLayerName);
 
             // normal state
-            var normal = new UVAnimation { name = Animations.Unlit.ToString(), loopCycles = 0, framerate = GuiSettings.Framerate };
+            var normal = new UVAnimation { name = Animations.Unlit.ToString(), loopCycles = 0, framerate = GuiConfiguration.Framerate };
             normal.BuildUVAnim(sprite.PixelCoordToUVCoord(9 * ButtonWidth, 8 * ButtonHeight), sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 1, 1, 1);
 
             // animated state
-            var anim = new UVAnimation { name = Animations.Spinning.ToString(), loopCycles = -1, framerate = GuiSettings.Framerate };
+            var anim = new UVAnimation { name = Animations.Spinning.ToString(), loopCycles = -1, framerate = GuiConfiguration.Framerate };
             anim.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, ButtonHeight).y), sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 100);
 
             // lit but not animated state
-            var lit = new UVAnimation {name = Animations.Lit.ToString(), loopCycles = 0, framerate = GuiSettings.Framerate};
+            var lit = new UVAnimation {name = Animations.Lit.ToString(), loopCycles = 0, framerate = GuiConfiguration.Framerate};
             lit.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, ButtonHeight).y),
                 sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 1);
 

@@ -19,4 +19,14 @@ namespace ScienceAlert.Gui
     {
         
     }
+
+    public class SignalLoadGuiSettings : Signal<ConfigNode>
+    {
+        
+    }
+
+    public class SignalSaveGuiSettings : Signal<ConfigNode>
+    {
+        
+    }
 }

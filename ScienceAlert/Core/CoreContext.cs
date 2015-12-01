@@ -8,6 +8,9 @@ using ReeperCommon.FileSystem;
 using ReeperCommon.FileSystem.Providers;
 using ReeperCommon.Logging;
 using ReeperCommon.Repositories;
+using ReeperCommon.Serialization;
+using ScienceAlert.Experiments;
+using ScienceAlert.Game;
 using ScienceAlert.Gui;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -47,27 +50,57 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<IFileSystemFactory>().To<KSPFileSystemFactory>().ToSingleton().CrossContext();
 
             injectionBinder
-                .Bind<CoreConfiguration>()
-                .Bind<IGuiSettings>()
-                .To<CoreConfiguration>().ToSingleton().CrossContext();
+                .Bind<ScenarioConfiguration>()
+                .To<ScenarioConfiguration>().ToSingleton().CrossContext();
+
+            injectionBinder
+                .Bind<IGuiConfiguration>()
+                .Bind<GuiConfiguration>()
+                .To<GuiConfiguration>().ToSingleton().CrossContext();
+
+            injectionBinder.Bind<SignalVesselChanged>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalVesselModified>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalGameTick>().ToSingleton().CrossContext();
+
+            //var activeVesselQuery = new ActiveVesselProvider();
+            //injectionBinder.Bind<IActiveVesselProvider>().To(activeVesselQuery).CrossContext();
+
+            //injectionBinder.GetInstance<SignalVesselChanged>().AddListener(activeVesselQuery.OnVesselChanged);
+            //injectionBinder.GetInstance<SignalVesselDestroyed>().AddListener(activeVesselQuery.OnVesselDestroyed);
         }
 
 
         private void SetupCommandBindings()
         {
             commandBinder.Bind<SignalScenarioModuleLoad>()
-                .To<CommandLoadConfiguration>();
+                .InSequence()
+                .To<CommandCreateGui>()
+                .To<CommandLoadGuiConfiguration>()
+                .To<CommandLoadConfiguration>()
+                //.To<CommandCreateActiveVesselView>() // because we'll definitely have missed the initial OnVesselChanged by now
+                .Once();
+
 
             commandBinder.Bind<SignalScenarioModuleSave>()
                 .To<CommandSaveConfiguration>();
 
+
             commandBinder.Bind<SignalStart>()
                 .InSequence()
-                .To<CommandConfigureScenarioModule>() // it's very important we not miss those OnSave/OnLoads
+                .To<CommandConfigureScenarioModule>()
                 .To<CommandConfigureAssemblyDirectory>()
                 .To<CommandConfigureResourceRepository>()
+                .To<CommandConfigureSerializer>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
-                .To<CommandCreateGui>()
+                .To<CommandConfigureGameEvents>()
+                .Once();
+
+
+            commandBinder.Bind<SignalDestroy>()
+                .InSequence()
+                .To<CommandSaveConfiguration>()
+                .To<CommandSaveGuiConfiguration>()
                 .Once();
         }
 
@@ -76,6 +109,22 @@ namespace ScienceAlert.Core
         {
             base.Launch();
             injectionBinder.GetInstance<SignalStart>().Dispatch();
+        }
+
+
+        public override void OnRemove() // note to self: this won't be called for the first context, i.e. this one
+        {
+            try
+            {
+                Debug.Log("CoreContext.OnRemove");
+                injectionBinder.GetInstance<SignalDestroy>().Dispatch();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Exception while dispatching destroy signal: " + e);
+            }
+            
+            base.OnRemove();
         }
     }
 }

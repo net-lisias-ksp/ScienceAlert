@@ -46,10 +46,44 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoreConfiguration.cs" />
+    <Compile Include="Game\old\CommandConfigureVesselServices.cs" />
+    <Compile Include="Core\IPopupDialogSpawner.cs" />
+    <Compile Include="Core\PopupDialogSpawner.cs" />
+    <Compile Include="Experiments\ExperimentSensor.cs" />
+    <Compile Include="Experiments\Old\ActiveVesselProvider.cs" />
+    <Compile Include="Experiments\IExperimentSensor.cs" />
+    <Compile Include="Experiments\IExperimentSensorFactory.cs" />
+    <Compile Include="Experiments\Old\IActiveVesselProvider.cs" />
+    <Compile Include="Experiments\IScienceReportStorageContainer.cs" />
+    <Compile Include="Experiments\ISensorStatus.cs" />
+    <Compile Include="Game\IVessel.cs" />
+    <Compile Include="Game\KspVessel.cs" />
+    <Compile Include="Experiments\Signals.cs" />
+    <Compile Include="Game\CommandConfigureGameEvents.cs" />
+    <Compile Include="Experiments\Old\CommandCreateActiveVesselView.cs" />
+    <Compile Include="Experiments\Old\CommandDestroyActiveVesselView.cs" />
+    <Compile Include="Game\GameEventMediator.cs" />
+    <Compile Include="Game\GameEventView.cs" />
+    <Compile Include="Core\Keys.cs" />
+    <Compile Include="Game\Signals.cs" />
+    <Compile Include="Experiments\Old\ActiveVesselView.cs" />
+    <Compile Include="Experiments\Old\ActiveVesselMediator.cs" />
+    <Compile Include="Gui\CommandLoadGuiConfiguration.cs" />
+    <Compile Include="Gui\CommandSaveGuiConfiguration.cs" />
+    <Compile Include="Gui\ConfigNodeNotFoundException.cs" />
+    <Compile Include="Gui\EmptyConfigNodeException.cs" />
+    <Compile Include="Gui\GetGuiConfigurationFilePath.cs" />
+    <Compile Include="Gui\GuiConfiguration.cs" />
+    <Compile Include="Gui\IGetGuiConfigurationFilePath.cs" />
+    <Compile Include="Gui\InvalidConfigNodeException.cs" />
+    <Compile Include="Gui\VesselDebugMediator.cs" />
+    <Compile Include="Gui\VesselDebugView.cs" />
+    <Compile Include="ScenarioConfiguration.cs" />
     <Compile Include="Core\AssemblyNotFoundException.cs" />
     <Compile Include="Core\BootstrapCore.cs" />
     <Compile Include="Core\CommandConfigureAssemblyDirectory.cs" />
+    <Compile Include="Core\CommandConfigureSerializer.cs" />
+    <Compile Include="Core\GetObjectFieldsIncludingBaseTypes.cs" />
     <Compile Include="Gui\SkinNotCreatedException.cs" />
     <Compile Include="Gui\CommandConfigureGuiSkinsAndTextures.cs" />
     <Compile Include="Core\CommandConfigureResourceRepository.cs" />
@@ -57,17 +91,17 @@
     <Compile Include="Gui\AlertPanelMediator.cs" />
     <Compile Include="Gui\AlertPanelView.cs" />
     <Compile Include="Gui\CommandCreateGui.cs" />
-    <Compile Include="Core\CommandLoadConfiguration.cs" />
-    <Compile Include="Core\CommandSaveConfiguration.cs" />
+    <Compile Include="CommandLoadConfiguration.cs" />
+    <Compile Include="CommandSaveConfiguration.cs" />
     <Compile Include="Core\CoreContext.cs" />
     <Compile Include="Core\ScienceAlert.cs" />
     <Compile Include="Core\ScenarioModuleNotFoundException.cs" />
     <Compile Include="Core\SignalContext.cs" />
     <Compile Include="Core\Signals.cs" />
-    <Compile Include="Core\TextureNotFoundException.cs" />
+    <Compile Include="Gui\TextureNotFoundException.cs" />
     <Compile Include="Gui\ApplicationLauncherMediator.cs" />
     <Compile Include="Gui\ApplicationLauncherView.cs" />
-    <Compile Include="Gui\IGuiSettings.cs" />
+    <Compile Include="Gui\IGuiConfiguration.cs" />
     <Compile Include="Gui\Keys.cs" />
     <Compile Include="Gui\ShaderNotFoundException.cs" />
     <Compile Include="Gui\Signals.cs" />
@@ -101,6 +135,7 @@
     <Compile Include="old\ScienceAlert\Windows\OptionsWindow_Popups.cs" />
     <Compile Include="old\ScienceAlert\Windows\WindowEventLogic.cs" />
     <Compile Include="RoutineRunner.cs" />
+    <Compile Include="Signals.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\flask.png" />

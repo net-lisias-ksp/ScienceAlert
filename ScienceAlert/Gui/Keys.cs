@@ -13,5 +13,7 @@
 
         WindowTitleBarButtonStyle, // GUIStyle
         LitToggleStyle, // GUIStyle
+
+        GuiSettingsNodeName, // string
     }
 }

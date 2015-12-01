@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using ReeperCommon.Containers;
 using ReeperCommon.FileSystem;
 using strange.extensions.command.impl;
@@ -11,6 +9,7 @@ using strange.extensions.command.impl;
 namespace ScienceAlert.Core
 {
 // ReSharper disable once UnusedMember.Global
+// ReSharper disable once ClassNeverInstantiated.Global
     public class CommandConfigureAssemblyDirectory : Command
     {
         private readonly IFileSystemFactory _fsFactory;

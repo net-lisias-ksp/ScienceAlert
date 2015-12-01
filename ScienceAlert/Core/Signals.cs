@@ -19,4 +19,14 @@ namespace ScienceAlert.Core
     {
         
     }
+
+    public class SignalDestroy : Signal
+    {
+        
+    }
+
+    public class SignalGameTick : Signal // regular MonoBehaviour.Update
+    {
+        
+    }
 }

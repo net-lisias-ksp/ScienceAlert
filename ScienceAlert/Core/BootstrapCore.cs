@@ -1,4 +1,5 @@
 ﻿using System;
+using ReeperCommon.Containers;
 using strange.extensions.context.impl;
 using UnityEngine;
 
@@ -43,10 +44,24 @@ namespace ScienceAlert.Core
             }
         }
 
+
         protected override void OnDestroy()
         {
-            base.OnDestroy();
             print("BootstrapCore.OnDestroy");
+
+            try
+            {
+                context
+                    .With(c => c as CoreContext).injectionBinder.GetInstance<SignalDestroy>()
+                    .Do(ds => ds.Dispatch());
+            }
+            catch (Exception e)
+            {
+                // just swallow it, something went wrong with binding configuration and there's nothing to be done
+                Debug.LogError("Error while signalling destruction: " + e);
+            }
+
+            base.OnDestroy();
         }
     }
 }

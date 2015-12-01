@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using ReeperCommon.FileSystem;
 using ReeperCommon.Repositories;
 using strange.extensions.command.impl;
 
 namespace ScienceAlert.Core
 {
+// ReSharper disable once ClassNeverInstantiated.Global
     public class CommandConfigureResourceRepository : Command
     {
         private readonly IDirectory _pluginDirectory;

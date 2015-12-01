@@ -8,11 +8,11 @@ namespace ScienceAlert.Core
 // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandConfigureScenarioModule : Command
     {
-        private readonly SignalScenarioModuleLoad _saveSignal;
+        private readonly SignalScenarioModuleSave _saveSignal;
         private readonly SignalScenarioModuleLoad _loadSignal;
 
         public CommandConfigureScenarioModule(
-            SignalScenarioModuleLoad saveSignal,
+            SignalScenarioModuleSave saveSignal,
             SignalScenarioModuleLoad loadSignal)
         {
             if (saveSignal == null) throw new ArgumentNullException("saveSignal");

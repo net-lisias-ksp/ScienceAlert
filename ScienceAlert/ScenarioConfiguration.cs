@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ScienceAlert
 {
-    public class CoreConfiguration : IGuiSettings
+    public class ScenarioConfiguration
     {
         [ReeperPersistent] public float ButtonFramerate = 15f;
 

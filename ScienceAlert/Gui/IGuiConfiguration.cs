@@ -1,6 +1,6 @@
 ﻿namespace ScienceAlert.Gui
 {
-    public interface IGuiSettings
+    public interface IGuiConfiguration
     {
         float Framerate { get; }
     }

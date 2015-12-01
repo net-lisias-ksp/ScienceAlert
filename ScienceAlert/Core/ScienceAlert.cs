@@ -1,4 +1,7 @@
-﻿using ReeperCommon.Containers;
+﻿using System;
+using System.Reflection;
+using ReeperCommon.Containers;
+using ReeperCommon.Extensions;
 using strange.extensions.signal.impl;
 using UnityEngine;
 
@@ -20,14 +23,6 @@ namespace ScienceAlert.Core
 
         private GameObject _coreContextView;
 
-        public override void OnAwake()
-        {
-            base.OnAwake();
-
-            _coreContextView = new GameObject("ScienceAlert.ContextView", typeof(BootstrapCore));
-        }
-
-
 // ReSharper disable once UnusedMember.Local
         private void OnPluginReloadRequested()
         {
@@ -39,14 +34,40 @@ namespace ScienceAlert.Core
         public override void OnSave(ConfigNode node)
         {
             base.OnSave(node);
-            SaveSignal.Dispatch(node);
+
+            try
+            {
+                SaveSignal.Do(s => s.Dispatch(node));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("ScienceAlert failed to save due to: " + e);
+                Debug.Log("Contents of ConfigNode: " + node.ToString());
+            }
         }
 
 
         public override void OnLoad(ConfigNode node)
         {
             base.OnLoad(node);
-            LoadSignal.Dispatch(node);
+
+            try
+            {
+                _coreContextView.IfNull(
+                    () => _coreContextView = new GameObject("ScienceAlert.ContextView", typeof (BootstrapCore)));
+
+                LoadSignal.Do(s => s.Dispatch(node));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("ScienceAlert failed to initialize due to: " + e);
+
+                PopupDialog.SpawnPopupDialog("Initialization Failure",
+                    "ScienceAlert failed to initialize properly. It has been disabled.\nSee the log for details.", "OK",
+                    true, HighLogic.Skin);
+
+                Assembly.GetExecutingAssembly().DisablePlugin();
+            }
         }
     }
 }

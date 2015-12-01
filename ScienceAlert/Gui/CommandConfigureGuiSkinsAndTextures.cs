@@ -45,12 +45,8 @@ namespace ScienceAlert.Gui
             // we need to trim off some fat on this skin to make the UI use space a bit more efficiently...
             var customSkin = (Object.Instantiate(HighLogic.Skin) as GUISkin).IfNull(() => { throw new SkinNotCreatedException(HighLogic.Skin); });
 
-            
-
             customSkin.Do(s =>
             {
-                
-
                 s.window.padding = s.window.margin = new RectOffset();
 
                 s.scrollView.padding = new RectOffset(1, 1, 1, 1);
@@ -59,13 +55,15 @@ namespace ScienceAlert.Gui
                 s.button.padding = new RectOffset(1, 1, 1, 1);
                 s.button.margin = new RectOffset(1, 1, 1, 1);
 
-                var largestButtonDimensions = CalculateButtonDimensions(s.button);
-                s.button.fixedWidth = largestButtonDimensions.x;
-                s.button.fixedHeight = largestButtonDimensions.y;
+                
+                //s.button.fixedWidth = largestButtonDimensions.x;
+                //s.button.fixedHeight = largestButtonDimensions.y;
                 //s.button.fontSize = 12;
                 //s.button.fontStyle = FontStyle.Normal;
                 s.button.contentOffset = new Vector2(0f, 3f);
                 s.button.fontSize = 14;
+                s.button.stretchWidth = true;
+                s.button.stretchHeight = true;
 
                 s.toggle.padding = new RectOffset(1, 1, 1, 1);
                 s.toggle.margin = new RectOffset(1, 1, 1, 1);
@@ -98,14 +96,15 @@ namespace ScienceAlert.Gui
             var skin = injectionBinder.GetInstance<GUISkin>(Keys.CompactSkin);
 
             var toggle = new GUIStyle(skin.toggle);
-
-            // todo: replace with actual textures
             var unlit = GetTexture("Resources/toggle_frame");
             var lit = Object.Instantiate(unlit) as Texture2D;
+
             unlit.ChangeLightness(0.25f); // darken a bit
             unlit.Apply();
 
-            toggle.fixedWidth = toggle.fixedHeight = skin.button.fixedHeight;
+            var largestButtonDimensions = CalculateButtonDimensions(skin.button);
+
+            toggle.fixedWidth = toggle.fixedHeight = largestButtonDimensions.y;
             toggle.normal.background = unlit;
             toggle.active.background = unlit;
             toggle.hover.background = unlit;
@@ -114,12 +113,6 @@ namespace ScienceAlert.Gui
             toggle.onHover.background = lit;
             toggle.onActive.background = lit;
 
-            //toggle.onNormal.background.CreateReadable().SaveToDisk("background_tex_onnormal.png");
-            //toggle.normal.background.CreateReadable().SaveToDisk("background_tex_normal.png");
-            //toggle.active.background.CreateReadable().SaveToDisk("background_tex_active.png");
-            //toggle.onActive.background.CreateReadable().SaveToDisk("background_tex_onactive.png");
-
-            //toggle.onNormal.background = GetTexture
             injectionBinder.Bind<GUIStyle>().To(toggle).ToName(Keys.LitToggleStyle).CrossContext();
         }
 
