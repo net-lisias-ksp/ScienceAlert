@@ -125,7 +125,7 @@
 //        {
 //            // keep an eye on queued transmission data and send it as
 //            // as soon as its assigned transmitter becomes available
-//            var txs = toBeTransmitted.Keys;
+//            var txs = toBeTransmitted.CoreKeys;
 
 //            try
 //            {

@@ -609,7 +609,7 @@
 //                    GUILayout.Space(10f);
 
 //                    // individual experiment settings
-//                    var keys = new List<string>(experimentIds.Keys);
+//                    var keys = new List<string>(experimentIds.CoreKeys);
 
 //                    foreach (var key in keys)
 //                    {

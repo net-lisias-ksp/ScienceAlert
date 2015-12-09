@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Reflection;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
@@ -49,25 +50,47 @@ namespace ScienceAlert.Core
 
         public override void OnLoad(ConfigNode node)
         {
-            base.OnLoad(node);
+            StartCoroutine(Bootstrap(node));
+        }
 
+
+        private IEnumerator Bootstrap(ConfigNode onLoadConfig)
+        {
             try
             {
                 _coreContextView.IfNull(
-                    () => _coreContextView = new GameObject("ScienceAlert.ContextView", typeof (BootstrapCore)));
-
-                LoadSignal.Do(s => s.Dispatch(node));
+                   () => _coreContextView = new GameObject("ScienceAlert.ContextView", typeof(BootstrapCore)));
             }
             catch (Exception e)
             {
-                Debug.LogError("ScienceAlert failed to initialize due to: " + e);
-
-                PopupDialog.SpawnPopupDialog("Initialization Failure",
-                    "ScienceAlert failed to initialize properly. It has been disabled.\nSee the log for details.", "OK",
-                    true, HighLogic.Skin);
-
-                Assembly.GetExecutingAssembly().DisablePlugin();
+                InitFailed(e.ToString());
+                yield break;
             }
+
+
+            yield return 0;
+
+
+            try
+            {
+                LoadSignal.Do(s => s.Dispatch(onLoadConfig));
+            }
+            catch (Exception e)
+            {
+                InitFailed("Failed to dispatch load signal: " + e);
+            }
+        }
+
+
+        private static void InitFailed(string message)
+        {
+            Debug.LogError("ScienceAlert failed to initialize due to: " + message);
+
+            PopupDialog.SpawnPopupDialog("Initialization Failure",
+                "ScienceAlert failed to initialize properly. It has been disabled.\nSee the log for details.", "OK",
+                true, HighLogic.Skin);
+
+            Assembly.GetExecutingAssembly().DisablePlugin();
         }
     }
 }

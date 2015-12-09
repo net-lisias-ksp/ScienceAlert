@@ -1,7 +1,6 @@
 ﻿using System;
 using ReeperCommon.Containers;
 using strange.extensions.context.impl;
-using UnityEngine;
 
 namespace ScienceAlert.Core
 {
@@ -19,7 +18,7 @@ namespace ScienceAlert.Core
             }
             catch (Exception e)
             {
-                Debug.LogError("ScienceAlert: Encountered an uncaught exception while creating core context: " + e);
+                Log.Error("ScienceAlert: Encountered an uncaught exception while creating core context: " + e);
             
 #if !DEBUG
                 AssemblyLoader.loadedAssemblies.GetByAssembly(Assembly.GetExecutingAssembly())
@@ -34,8 +33,6 @@ namespace ScienceAlert.Core
                     });
 #endif
 
-                Debug.LogError("Issuing destruction call");
-
                 PopupDialog.SpawnPopupDialog("ScienceAlert unhandled exception",
                     "Encountered an unhandled exception!  See the log for details.\n\nScienceAlert has been disabled.", "Okay",
                     false, HighLogic.Skin);
@@ -47,20 +44,7 @@ namespace ScienceAlert.Core
 
         protected override void OnDestroy()
         {
-            print("BootstrapCore.OnDestroy");
-
-            try
-            {
-                context
-                    .With(c => c as CoreContext).injectionBinder.GetInstance<SignalDestroy>()
-                    .Do(ds => ds.Dispatch());
-            }
-            catch (Exception e)
-            {
-                // just swallow it, something went wrong with binding configuration and there's nothing to be done
-                Debug.LogError("Error while signalling destruction: " + e);
-            }
-
+            (context as CoreContext).Do(c => c.SignalDestruction());
             base.OnDestroy();
         }
     }

@@ -6,9 +6,6 @@ using strange.extensions.signal.impl;
 
 namespace ScienceAlert.Core
 {
-    public class SignalStart : Signal
-    {
-    }
 
     public class SignalScenarioModuleSave : Signal<ConfigNode>
     {
@@ -20,10 +17,7 @@ namespace ScienceAlert.Core
         
     }
 
-    public class SignalDestroy : Signal
-    {
-        
-    }
+
 
     public class SignalGameTick : Signal // regular MonoBehaviour.Update
     {

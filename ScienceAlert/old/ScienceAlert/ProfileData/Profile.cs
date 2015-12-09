@@ -96,7 +96,7 @@
 //        /// <param name="other"></param>
 //        public Profile(Profile other)
 //        {
-//            var otherKeys = other.settings.Keys;
+//            var otherKeys = other.settings.CoreKeys;
 
 //            settings = new Dictionary<string, ProfileData.ExperimentSettings>();
 

@@ -61,7 +61,7 @@
 //            ShrinkHeightToFit = true;
 
 //            Skin = Instantiate(Settings.Skin) as GUISkin; // we'll be altering it a little bit to make sure the buttons are the right size
-//            Settings.Instance.OnSave += AboutToSave;
+//            Settings.Instance.OnSave += LoadSignal;
  
 //            LoadFrom(Settings.Instance.additional.GetNode("ExperimentWindow") ?? new ConfigNode());
 //            return new Rect(windowRect.x, windowRect.y, 256f, 128f);
@@ -73,7 +73,7 @@
 //        /// Instead of updating window position every frame, we'll use an event to let us know
 //        /// when we should update Settings' window position
 //        /// </summary>
-//        private void AboutToSave()
+//        private void LoadSignal()
 //        {
 //            SaveInto(Settings.Instance.additional.GetNode("ExperimentWindow") ?? Settings.Instance.additional.AddNode("ExperimentWindow"));
 //        }

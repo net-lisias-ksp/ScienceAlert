@@ -36,7 +36,7 @@
 
 //            Title = "Debug";
 //            Skin = Settings.Skin;
-//            Settings.Instance.OnSave += AboutToSave;
+//            Settings.Instance.OnSave += LoadSignal;
 
 //            LoadFrom(Settings.Instance.additional.GetNode("DebugWindow") ?? new ConfigNode());
 
@@ -46,9 +46,9 @@
 //        }
 
 
-//        private void AboutToSave()
+//        private void LoadSignal()
 //        {
-//            Log.Debug("DraggableDebugWindow.AboutToSave");
+//            Log.Debug("DraggableDebugWindow.LoadSignal");
 //            SaveInto(Settings.Instance.additional.GetNode("DebugWindow") ?? Settings.Instance.additional.AddNode("DebugWindow"));
 //        }
 

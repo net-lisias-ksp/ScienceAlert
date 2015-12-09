@@ -620,7 +620,7 @@
 //        {
 //            get
 //            {
-//                var key = Instance.storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals("default"));
+//                var key = Instance.storedProfiles.CoreKeys.SingleOrDefault(k => k.ToLower().Equals("default"));
 
 //                if (string.IsNullOrEmpty(key))
 //                {
@@ -694,7 +694,7 @@
 //        {
 //            get
 //            {
-//                return Instance.storedProfiles.Keys;
+//                return Instance.storedProfiles.CoreKeys;
 //            }
 //        }
 
@@ -857,7 +857,7 @@
 
 //        private static Profile FindStoredProfile(string name)
 //        {
-//            var key = Instance.storedProfiles.Keys.SingleOrDefault(k => k.ToLower().Equals(name.ToLower()));
+//            var key = Instance.storedProfiles.CoreKeys.SingleOrDefault(k => k.ToLower().Equals(name.ToLower()));
 
 //            if (string.IsNullOrEmpty(key))
 //                return null;
