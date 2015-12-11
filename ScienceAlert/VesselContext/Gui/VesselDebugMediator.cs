@@ -23,16 +23,7 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalLoadGuiSettings LoadSignal { get; set; }
 
         [Inject] public IConfigNodeSerializer Serializer { get; set; }
-        [Inject(VesselKeys.VesselDebugViewConfig)] private ConfigNode Config { get; set; }
-
-        [PostConstruct]
-        public void AfterRegister()
-        {
-            print("VesselDebugMediator.AfterRegister");
-            OnVesselModified(FlightGlobals.ActiveVessel);
-
-            View.Visible = true;
-        }
+        [Inject(VesselKeys.VesselDebugViewConfig)] public ConfigNode Config { get; set; }
 
 
         public override void OnRegister()
@@ -51,6 +42,7 @@ namespace ScienceAlert.VesselContext.Gui
             GameEvents.onVesselWasModified.Add(OnVesselModified);
 
             View.Visible = true;
+            OnVesselModified(FlightGlobals.ActiveVessel);
         }
 
 
@@ -111,6 +103,8 @@ namespace ScienceAlert.VesselContext.Gui
 // ReSharper disable once UnusedMember.Local
         private void Update()
         {
+            if (!View.Visible) return;
+
             UpdateVesselLocationData();
         }
 

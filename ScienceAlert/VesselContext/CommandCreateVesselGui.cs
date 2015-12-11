@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections;
-using ScienceAlert.Core;
-using ScienceAlert.Gui;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
@@ -35,6 +33,8 @@ namespace ScienceAlert.VesselContext
 
         public override void Execute()
         {
+            Log.Verbose("Creating VesselContext Gui");
+
             Retain();
             _coroutineRunner.StartCoroutine(CreateViews());
         }
@@ -42,8 +42,11 @@ namespace ScienceAlert.VesselContext
 
         private IEnumerator CreateViews()
         {
-            _contextView.AddComponent<ExperimentView>();
-            _contextView.AddComponent<VesselDebugView>();
+            var guiGo = new GameObject("VesselGuiView");
+            guiGo.transform.parent = _contextView.transform;
+
+            guiGo.AddComponent<ExperimentView>();
+            guiGo.AddComponent<VesselDebugView>();
 
             yield return 0; // wait for views to start before proceeding
 

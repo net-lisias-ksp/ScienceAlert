@@ -7,9 +7,9 @@ namespace ScienceAlert.VesselContext
     public class BootstrapActiveVesselContext : ContextView
     {
 // ReSharper disable once UnusedMember.Local
-        public void Start()
+        private void Awake()
         {
-            print("BootstrapActiveVesselContext.Start");
+            Log.Debug("Bootstrapping ActiveVesselContext...");
 
             try
             {
@@ -18,14 +18,34 @@ namespace ScienceAlert.VesselContext
             catch (Exception e)
             {
                 // todo: popup dialog?
-                print("Exception while boostrapping vessel context: " + e);
+                Log.Error("Exception while boostrapping vessel context: " + e);
+            }
+        }
+
+
+        private void Start()
+        {
+            try
+            {
+                context.Do(c => c.Launch());
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception while launching ActiveVesselContext: " + e);
             }
         }
 
 
         protected override void OnDestroy()
         {
-            (context as ActiveVesselContext).Do(c => c.SignalDestruction());
+            try
+            {
+                (context as ActiveVesselContext).Do(c => c.SignalDestruction());
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception while signal ActiveVesselContext destruction: " + e);
+            }
             base.OnDestroy();
         }
     }

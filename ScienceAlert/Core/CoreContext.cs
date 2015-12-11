@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,6 +13,7 @@ using ReeperCommon.Repositories;
 using ReeperCommon.Serialization;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Gui;
+using ScienceAlert.Rules;
 using strange.extensions.context.api;
 using UnityEngine;
 
@@ -17,6 +21,8 @@ namespace ScienceAlert.Core
 {
     public class CoreContext : SignalContext
     {
+        private const string ExperimentRuleConfigNodeName = "SA_EXPERIMENT_RULE";
+
         public CoreContext(MonoBehaviour view)
             : base(view, ContextStartupFlags.MANUAL_MAPPING | ContextStartupFlags.MANUAL_LAUNCH)
         {
@@ -78,9 +84,12 @@ namespace ScienceAlert.Core
                 .ToSingleton()
                 .CrossContext();
 
+            injectionBinder.Bind<RuleDefinitionFactory>().ToSingleton().CrossContext();
+
             ConfigureScienceAlert();
             ConfigureResourceRepository();
             ConfigureSerializer();
+            ConfigureExperiments();
 
             injectionBinder.Bind<SignalVesselChanged>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalVesselModified>().ToSingleton().CrossContext();
@@ -105,6 +114,7 @@ namespace ScienceAlert.Core
             commandBinder.Bind<SignalStart>()
                 .InSequence()
                 .To<CommandLoadSharedConfiguration>()
+                .To<CommandCompileExperimentRulesets>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
                 .Once();
@@ -286,6 +296,30 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<IConfigNodeSerializer>()
                 .To(new ConfigNodeSerializer(includePersistentFieldsSelector))
+                .CrossContext();
+        }
+
+
+        private void ConfigureExperiments()
+        {
+            var experiments =
+                ResearchAndDevelopment.GetExperimentIDs().Select(ResearchAndDevelopment.GetExperiment);
+            var ruleConfigs = GameDatabase.Instance.GetConfigNodes(ExperimentRuleConfigNodeName);
+
+            injectionBinder.Bind<IEnumerable<ScienceExperiment>>().ToValue(experiments).CrossContext();
+
+            foreach (var exp in experiments)
+            {
+                if (injectionBinder.GetBinding<ScienceExperiment>(exp.id).ToMaybe().Any())
+                    throw new DuplicateScienceExperimentException(exp);
+
+                injectionBinder.Bind<ScienceExperiment>().ToValue(exp).ToName(exp.id).CrossContext();
+            }
+
+
+            injectionBinder.Bind<IEnumerable<ConfigNode>>()
+                .ToValue(ruleConfigs)
+                .ToName(CoreKeys.ExperimentRuleConfigs)
                 .CrossContext();
         }
 

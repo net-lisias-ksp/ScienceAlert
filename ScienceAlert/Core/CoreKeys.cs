@@ -6,5 +6,7 @@
         VesselContextView, // GameObject
 
         GameData, // IDirectory
+
+        ExperimentRuleConfigs, // IEnumerable<ConfigNode>
     }
 }

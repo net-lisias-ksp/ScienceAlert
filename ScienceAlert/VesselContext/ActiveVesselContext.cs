@@ -1,4 +1,5 @@
-﻿using ReeperCommon.Containers;
+﻿using System;
+using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ScienceAlert.Core;
 using ScienceAlert.VesselContext.Gui;
@@ -9,7 +10,7 @@ namespace ScienceAlert.VesselContext
 {
     public class ActiveVesselContext : SignalContext
     {
-        public ActiveVesselContext(MonoBehaviour view) : base(view, ContextStartupFlags.AUTOMATIC)
+        public ActiveVesselContext(MonoBehaviour view) : base(view, ContextStartupFlags.MANUAL_LAUNCH)
         {
         }
 
@@ -17,11 +18,6 @@ namespace ScienceAlert.VesselContext
         protected override void mapBindings()
         {
             base.mapBindings();
-
-            //injectionBinder.Bind<GameObject>()
-            //    .To(contextView.With(cv => cv as BootstrapActiveVesselContext).With(bavc => bavc.gameObject))
-            //    .ToName(CoreKeys.VesselContextView)
-            //    .CrossContext();
 
             if (FlightGlobals.ActiveVessel.IsNull())
             {
@@ -34,12 +30,13 @@ namespace ScienceAlert.VesselContext
             var sharedConfig = injectionBinder.GetInstance<SharedConfiguration>();
 
             injectionBinder.Bind<ConfigNode>()
-                .ToValue(sharedConfig.ExperimentViewConfig)
+                .To(sharedConfig.ExperimentViewConfig)
                 .ToName(VesselKeys.ExperimentViewConfig);
 
             injectionBinder.Bind<ConfigNode>()
                 .ToValue(sharedConfig.VesselDebugViewConfig)
                 .ToName(VesselKeys.VesselDebugViewConfig);
+
 
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
@@ -59,6 +56,7 @@ namespace ScienceAlert.VesselContext
 
             commandBinder.Bind<SignalDestroy>()
                 .To<CommandSaveGuiSettings>()
+                .To<CommandDestroyActiveVesselContext>()
                 .Once();
         }
 
@@ -69,7 +67,15 @@ namespace ScienceAlert.VesselContext
 
             Log.Debug("Launching ActiveVesselContext");
 
-            injectionBinder.GetInstance<SignalStart>().Do(s => s.Dispatch());
+            try
+            {
+                injectionBinder.GetInstance<SignalStart>().Do(s => s.Dispatch());
+            }
+            catch (Exception e)
+            {
+                Log.Error("Error while launching ActiveVesselContext: " + e);
+                (contextView as GameObject).If(go => go != null).Do(UnityEngine.Object.Destroy);
+            }
         }
 
 
@@ -77,7 +83,14 @@ namespace ScienceAlert.VesselContext
         {
             Log.Verbose("Signaling ActiveVesselContext destruction");
 
-            injectionBinder.GetInstance<SignalDestroy>().Do(s => s.Dispatch());
+            try
+            {
+                injectionBinder.GetInstance<SignalDestroy>().Do(s => s.Dispatch());
+            }
+            catch (Exception e)
+            {
+                Log.Error("Failed to signal destruction: " + e);
+            }
         }
     }
 }
