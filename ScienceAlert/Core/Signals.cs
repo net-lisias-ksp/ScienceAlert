@@ -19,8 +19,5 @@ namespace ScienceAlert.Core
 
 
 
-    public class SignalGameTick : Signal // regular MonoBehaviour.Update
-    {
-        
-    }
+
 }

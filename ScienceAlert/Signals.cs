@@ -8,7 +8,7 @@ namespace ScienceAlert
     }
 
 
-    public class SignalDestroy : Signal
+    public class SignalDestroy : Signal // signal to destroy the current context
     {
 
     }
@@ -27,4 +27,19 @@ namespace ScienceAlert
     {
 
     }
+
+
+    public class SignalShutdownScienceAlert : Signal
+    {
+        
+    }
+
+
+    public class SignalGameTick : Signal // regular MonoBehaviour.Update
+    {
+
+    }
+
+
+    
 }

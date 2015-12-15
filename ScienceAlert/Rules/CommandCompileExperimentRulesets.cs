@@ -5,7 +5,6 @@ using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ScienceAlert.Core;
 using strange.extensions.command.impl;
-using strange.extensions.injector;
 
 namespace ScienceAlert.Rules
 {
@@ -18,6 +17,13 @@ namespace ScienceAlert.Rules
         private readonly RuleDefinitionFactory _ruleDefinitionFactory;
         private readonly IEnumerable<ScienceExperiment> _experiments;
         private readonly IEnumerable<ConfigNode> _ruleConfigs;
+
+        private readonly Lazy<RuleDefinition> _defaultOnboardRule =
+            new Lazy<RuleDefinition>(CreateDefaultOnboardRuleDefinition);
+
+        private readonly Lazy<RuleDefinition> _defaultAvailabilityRule =
+            new Lazy<RuleDefinition>(CreateDefaultAvailabilityRuleDefinition);
+ 
 
         public CommandCompileExperimentRulesets(
             RuleDefinitionFactory ruleDefinitionFactory,
@@ -36,32 +42,58 @@ namespace ScienceAlert.Rules
 
         public override void Execute()
         {
-            var compiledRules = new Dictionary<ScienceExperiment, ExperimentRuleset>();
+            var definedRulesets = CompileRulesetsFromConfigNodes(_ruleConfigs);
+            var defaultRulesets =
+                CompileDefaultRulesetsForRemainingExperiments(definedRulesets.Select(r => r.Experiment));
+
+            var combinedRules = new List<ExperimentRuleset>(definedRulesets.Union(defaultRulesets));
+
+            Log.Verbose("Compiled " + definedRulesets.Count + " defined experiment rulesets");
+            Log.Verbose("Compiled " + defaultRulesets.Count + " default experiment rulesets");
+
+            foreach (var ruleset in combinedRules)
+                injectionBinder.Bind<ExperimentRuleset>().ToValue(ruleset).ToName(ruleset.Experiment).CrossContext();
+
+            injectionBinder.Bind<IEnumerable<ExperimentRuleset>>().ToValue(combinedRules).CrossContext();
+        }
+
+
+        private IList<ExperimentRuleset> CompileRulesetsFromConfigNodes(IEnumerable<ConfigNode> configs)
+        {
+            if (configs == null) throw new ArgumentNullException("configs");
+
+            var rulesets = new List<ExperimentRuleset>();
 
             foreach (var cfg in _ruleConfigs)
             {
                 var ruleset = CompileRuleset(cfg);
+                var experimentId = GetExperimentID(cfg);
 
                 if (!ruleset.Any())
                     continue;
 
-                if (compiledRules.ContainsKey(ruleset.Value.Experiment))
+                if (rulesets.Any(rs => ReferenceEquals(rs.Experiment, ruleset.Value.Experiment)))
                 {
-                    Log.Error("Multiple rule definitions found for " + GetExperimentID(cfg) +
+                    Log.Error("Multiple rule definitions found for " + experimentId +
                                 "; this one will be ignored");
                     continue;
                 }
 
-
-                compiledRules.Add(ruleset.Value.Experiment, ruleset.Value);
+                rulesets.Add(ruleset.Value);
+                Log.Debug("Compiled ruleset for " + experimentId);
             }
 
-            Log.Verbose("Compiled " + compiledRules.Values.Count + " experiment rulesets");
+            
+            return rulesets;
+        }
 
-            foreach (var ruleset in compiledRules.Values)
-                injectionBinder.Bind<ExperimentRuleset>().ToValue(ruleset).ToName(ruleset.Experiment).CrossContext();
 
-            injectionBinder.Bind<IEnumerable<ExperimentRuleset>>().ToValue(compiledRules.Values.ToList()).CrossContext();
+        private IList<ExperimentRuleset> CompileDefaultRulesetsForRemainingExperiments(
+            IEnumerable<ScienceExperiment> experimentsWithRules)
+        {
+            return
+                _experiments.Except(experimentsWithRules)
+                    .Select(se => new ExperimentRuleset(se, _defaultOnboardRule.Value, _defaultAvailabilityRule.Value)).ToList();
         }
 
 
@@ -132,10 +164,11 @@ namespace ScienceAlert.Rules
         }
 
 
+
         private RuleDefinition CreateOnboardRuleDefinition(ConfigNode config)
         {
             if (!config.HasNode(OnboardRuleDefinitionNodeName))
-                return CreateDefaultOnboardRuleDefinition();
+                return _defaultOnboardRule.Value;
 
             var onboardRules = config.GetNodes(OnboardRuleDefinitionNodeName);
 
@@ -144,38 +177,55 @@ namespace ScienceAlert.Rules
 
             ConfigNode rule = null;
 
-            if (onboardRules.Single().CountNodes == 0)
-            {
-                Log.Debug("Onboard rule empty; creating default");
-                return CreateDefaultOnboardRuleDefinition();
-            }
+            if (onboardRules.Single().CountNodes != 0) return CreateRules(onboardRules.Single());
 
-            if (onboardRules.Single().CountNodes == 1)
-                rule = onboardRules.Single().nodes[0];
-            else if (onboardRules.Single().CountNodes > 1)
-            {
-                Log.Debug("Multiple onboard rules found; creating a composite AND rule that includes all of them");
-                var compositeAll = new ConfigNode(RuleDefinitionFactory.CompositeAllName);
-                onboardRules.Single().CopyTo(compositeAll);
-
-                Log.Debug("Result: " + compositeAll.ToSafeString());
-            }
-
-            return _ruleDefinitionFactory.Create(rule);
+            Log.Debug("Onboard rule empty; using default");
+            return _defaultOnboardRule.Value;
         }
+
 
 
         private RuleDefinition CreateAvailabilityRuleDefinition(ConfigNode config)
         {
             if (!config.HasNode(AvailabilityRuleDefinitionNodeName))
-                return CreateDefaultAvailabilityRuleDefinition();
+                return _defaultAvailabilityRule.Value;
 
             var availabilityRules = config.GetNodes(AvailabilityRuleDefinitionNodeName);
 
             if (availabilityRules.Length > 1)
                 throw new DuplicateConfigNodeSectionException(AvailabilityRuleDefinitionNodeName);
 
-            return _ruleDefinitionFactory.Create(availabilityRules.Single()); 
+            ConfigNode rule = null;
+
+            if (availabilityRules.Single().CountNodes != 0) return CreateRules(availabilityRules.Single());
+
+            Log.Debug("Availability rule empty; using default");
+            return _defaultAvailabilityRule.Value;
+        }
+
+
+
+        private RuleDefinition CreateRules(ConfigNode ruleset)
+        {
+            if (ruleset == null) throw new ArgumentNullException("ruleset");
+            if (!ruleset.HasData) throw new ArgumentException("ruleset must contain data", "ruleset");
+
+            ConfigNode rule = null;
+
+            if (ruleset.CountNodes == 1)
+                rule = ruleset.nodes[0];
+            else if (ruleset.CountNodes > 1)
+            {
+                Log.Debug(() => "Multiple rules found; creating a composite AND rule that includes all of them");
+                Log.Debug(() => ruleset.ToSafeString());
+
+                var compositeAll = new ConfigNode(RuleDefinitionFactory.CompositeAllName);
+                ruleset.CopyTo(compositeAll);
+
+                Log.Debug("Result: " + compositeAll.ToSafeString());
+            }
+
+            return _ruleDefinitionFactory.Create(rule);
         }
     }
 }

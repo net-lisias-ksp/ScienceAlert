@@ -48,12 +48,15 @@
   <ItemGroup>
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
     <Compile Include="Core\CommandDestroyActiveVesselContext.cs" />
+    <Compile Include="Core\CommandCriticalShutdown.cs" />
     <Compile Include="Core\DuplicateScienceExperimentException.cs" />
     <Compile Include="Core\CommandLoadSharedConfiguration.cs" />
     <Compile Include="Core\CommandSaveSharedConfiguration.cs" />
     <Compile Include="Core\Gui\CommandCreateAppLauncherView.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Rules\CommandCompileExperimentRulesets.cs" />
+    <Compile Include="Rules\CommandCreateRuleTypeBindings.cs" />
+    <Compile Include="Rules\CompositeAllRule.cs" />
     <Compile Include="Rules\CompositeRuleEmptyException.cs" />
     <Compile Include="Rules\DuplicateConfigNodeSectionException.cs" />
     <Compile Include="Rules\ExperimentIsAvailableDuringVesselSituation.cs" />
@@ -74,14 +77,23 @@
     <Compile Include="VesselContext\BootstrapActiveVesselContext.cs" />
     <Compile Include="Core\IPopupDialogSpawner.cs" />
     <Compile Include="Core\PopupDialogSpawner.cs" />
-    <Compile Include="VesselContext\Experiments\ExperimentSensor.cs" />
-    <Compile Include="VesselContext\Experiments\IExperimentSensor.cs" />
+    <Compile Include="VesselContext\Experiments\CommandCreateSensors.cs" />
+    <Compile Include="VesselContext\Experiments\CommandSetupGameTick.cs" />
+    <Compile Include="VesselContext\Experiments\ExperimentRuleFactory.cs" />
+    <Compile Include="VesselContext\Experiments\ExperimentRulesetProvider.cs" />
+    <Compile Include="VesselContext\Experiments\ExperimentSensorFactory.cs" />
+    <Compile Include="VesselContext\Experiments\FailedToCreateRuleException.cs" />
+    <Compile Include="VesselContext\Experiments\IExperimentRulesetProvider.cs" />
+    <Compile Include="VesselContext\Experiments\IExperimentRuleFactory.cs" />
+    <Compile Include="VesselContext\Experiments\ISensorValues.cs" />
+    <Compile Include="VesselContext\Experiments\NoRulesetDefinedForExperimentException.cs" />
+    <Compile Include="VesselContext\Experiments\Old\ExperimentSensor.cs" />
+    <Compile Include="VesselContext\Experiments\ISensor.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentSensorFactory.cs" />
+    <Compile Include="VesselContext\Experiments\Old\ISensorStatus.cs" />
     <Compile Include="VesselContext\Experiments\IScienceReportStorageContainer.cs" />
-    <Compile Include="VesselContext\Experiments\ISensorStatus.cs" />
     <Compile Include="IVessel.cs" />
     <Compile Include="KspVessel.cs" />
-    <Compile Include="VesselContext\Experiments\Signals.cs" />
     <Compile Include="CommandConfigureGameEvents.cs" />
     <Compile Include="VesselContext\Experiments\Old\CommandCreateActiveVesselView.cs" />
     <Compile Include="VesselContext\Experiments\Old\CommandDestroyActiveVesselView.cs" />
@@ -98,6 +110,9 @@
     <Compile Include="SharedConfiguration.cs" />
     <Compile Include="ISharedConfigurationFilePathProvider.cs" />
     <Compile Include="Gui\old\InvalidConfigNodeException.cs" />
+    <Compile Include="VesselContext\Experiments\Old\SensorStatus.cs" />
+    <Compile Include="VesselContext\Experiments\CommandUpdateSensors.cs" />
+    <Compile Include="VesselContext\Experiments\Sensor.cs" />
     <Compile Include="VesselContext\Gui\CommandLoadGuiSettings.cs" />
     <Compile Include="VesselContext\Gui\CommandSaveGuiSettings.cs" />
     <Compile Include="VesselContext\Gui\VesselDebugMediator.cs" />
@@ -229,7 +244,7 @@ echo Merging dependencies for release build...
 call:MergeDependencies
 ) else (
 echo Copying dependencies
-REM call:CopyDependencies
+call:CopyDependencies
 )
 
 call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" $(TargetName).* /xf *.config *.pdb

@@ -2,6 +2,7 @@
 {
     public enum CoreKeys
     {
+        CoreContextView, // GameObject
         GameContextView, // GameObject
         VesselContextView, // GameObject
 

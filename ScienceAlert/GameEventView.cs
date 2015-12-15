@@ -1,7 +1,9 @@
-﻿using ReeperCommon.Containers;
+﻿using System.Diagnostics;
+using ReeperCommon.Containers;
 using strange.extensions.implicitBind;
 using strange.extensions.mediation.impl;
 using strange.extensions.signal.impl;
+using UnityEngine;
 
 namespace ScienceAlert
 {
@@ -56,7 +58,9 @@ namespace ScienceAlert
 // ReSharper disable once UnusedMember.Local
         private void Update()
         {
+            var start = Stopwatch.StartNew();
             GameTick.Dispatch();
+            Log.Performance("Update finished in " + start.ElapsedMilliseconds + " ms");
         }
     }
 }

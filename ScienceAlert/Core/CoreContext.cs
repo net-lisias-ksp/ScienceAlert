@@ -84,6 +84,11 @@ namespace ScienceAlert.Core
                 .ToSingleton()
                 .CrossContext();
 
+            injectionBinder.Bind<GameObject>()
+                .ToValue(contextView as GameObject)
+                .ToName(CoreKeys.CoreContextView)
+                .CrossContext();
+
             injectionBinder.Bind<RuleDefinitionFactory>().ToSingleton().CrossContext();
 
             ConfigureScienceAlert();
@@ -91,9 +96,12 @@ namespace ScienceAlert.Core
             ConfigureSerializer();
             ConfigureExperiments();
 
+            injectionBinder.Bind<SignalShutdownScienceAlert>().ToSingleton().CrossContext();
+
             injectionBinder.Bind<SignalVesselChanged>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalVesselModified>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton().CrossContext();
+
             injectionBinder.Bind<SignalGameTick>().ToSingleton().CrossContext();
         }
 
@@ -114,6 +122,7 @@ namespace ScienceAlert.Core
             commandBinder.Bind<SignalStart>()
                 .InSequence()
                 .To<CommandLoadSharedConfiguration>()
+                .To<CommandCreateRuleTypeBindings>()
                 .To<CommandCompileExperimentRulesets>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
@@ -124,6 +133,9 @@ namespace ScienceAlert.Core
                 .InSequence()
                 .To<CommandSaveSharedConfiguration>()
                 .Once();
+
+            injectionBinder.Bind<SignalShutdownScienceAlert>()
+                .To<CommandCriticalShutdown>();
 
             commandBinder.Bind<SignalVesselDestroyed>()
                 .To<CommandDestroyActiveVesselContext>();
@@ -143,22 +155,6 @@ namespace ScienceAlert.Core
         {
             base.Launch();
             injectionBinder.GetInstance<SignalStart>().Dispatch();
-        }
-
-
-        public override void OnRemove() // note to self: this won't be called for the first context, i.e. this one
-        {
-            try
-            {
-                Debug.Log("CoreContext.OnRemove");
-                injectionBinder.GetInstance<SignalDestroy>().Dispatch();
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Exception while dispatching destroy signal: " + e);
-            }
-            
-            base.OnRemove();
         }
 
 

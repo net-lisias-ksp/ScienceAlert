@@ -53,10 +53,6 @@
     <Reference Include="Ploeh.AutoFixture.Xunit">
       <HintPath>..\packages\AutoFixture.Xunit.3.30.4\lib\net40\Ploeh.AutoFixture.Xunit.dll</HintPath>
     </Reference>
-    <Reference Include="ReeperCommon, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Kerbal Space Program\GameData\ReeperCommon.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -88,6 +84,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj">
+      <Project>{fecfa8fc-cf80-4685-a2ba-1566e0f3c26e}</Project>
+      <Name>ReeperCommon</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ScienceAlert.csproj">
       <Project>{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}</Project>
       <Name>ScienceAlert</Name>

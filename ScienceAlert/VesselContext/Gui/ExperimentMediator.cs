@@ -33,9 +33,6 @@ namespace ScienceAlert.VesselContext.Gui
         {
             base.OnRegister();
 
-            SaveSignal.AddListener(OnSave);
-            LoadSignal.AddListener(OnLoad);
-
             View.LockToggle.AddListener(OnLockToggle);
             View.Close.AddListener(OnClose);
         }
@@ -44,14 +41,13 @@ namespace ScienceAlert.VesselContext.Gui
         public override void OnRemove()
         {
             base.OnRemove();
-            SaveSignal.RemoveListener(OnSave);
-            LoadSignal.RemoveListener(OnLoad);
 
             View.LockToggle.RemoveListener(OnLockToggle);
             View.Close.RemoveListener(OnClose);
         }
 
-
+        [ListensTo(typeof(SignalSaveGuiSettings))]
+// ReSharper disable once UnusedMember.Local
         private void OnSave()
         {
             try
@@ -72,6 +68,8 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
+        [ListensTo(typeof(SignalLoadGuiSettings))]
+// ReSharper disable once UnusedMember.Local
         private void OnLoad()
         {
             try

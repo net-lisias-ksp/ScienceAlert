@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon.Containers;
-using strange.extensions.implicitBind;
 using strange.extensions.injector.api;
 
 namespace ScienceAlert.Rules
@@ -12,6 +11,12 @@ namespace ScienceAlert.Rules
     public class ExperimentRuleTypeProvider : IExperimentRuleTypeProvider
     {
         private readonly Lazy<IEnumerable<Type>> _ruleTypes = new Lazy<IEnumerable<Type>>(CreateRuleTypeList);
+
+        public ExperimentRuleTypeProvider()
+        {
+            Log.Warning("ExperimentRuleTypeProvider created");
+        }
+
 
         public IEnumerable<Type> Get()
         {

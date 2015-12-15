@@ -1,7 +1,10 @@
-﻿//namespace ScienceAlert.Experiments
-//{
-//    public interface IExperimentSensorFactory
-//    {
-//        IExperimentSensor Create(ScienceExperiment experiment);
-//    }
-//}
+﻿using System.Collections.Generic;
+using strange.extensions.injector.api;
+
+namespace ScienceAlert.VesselContext.Experiments
+{
+    public interface IExperimentSensorFactory
+    {
+        KeyValuePair<ISensor, ISensorValues> Create(ScienceExperiment experiment);
+    }
+}

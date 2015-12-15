@@ -33,7 +33,7 @@ namespace ScienceAlert.Core
                 .If(vc => vc.injectionBinder.GetInstance<IVessel>().Equals(_destroyedVessel))
                 .Do(vc =>
                 {
-                    (vc.contextView as GameObject).Do(UnityEngine.Object.Destroy);
+                    vc.SignalDestructionAndDestroy();
                     Log.Verbose("Destroyed vessel context");
                 })
                 .IfNull(Fail);

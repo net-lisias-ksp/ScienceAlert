@@ -2,6 +2,7 @@
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ScienceAlert.Core;
+using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -37,10 +38,15 @@ namespace ScienceAlert.VesselContext
                 .ToValue(sharedConfig.VesselDebugViewConfig)
                 .ToName(VesselKeys.VesselDebugViewConfig);
 
+            injectionBinder.Bind<IExperimentRuleFactory>().To<ExperimentRuleFactory>().ToSingleton();
 
+            injectionBinder.Bind<IExperimentRulesetProvider>().To<ExperimentRulesetProvider>().ToSingleton();
+            injectionBinder.Bind<IExperimentSensorFactory>().To<ExperimentSensorFactory>().ToSingleton();
+            
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
-
+            injectionBinder.Bind<SignalSensorValueChanged>().ToSingleton();
+  
             SetupCommandBindings();
         }
 
@@ -52,11 +58,13 @@ namespace ScienceAlert.VesselContext
                 .InSequence()
                 .To<CommandCreateVesselGui>()
                 .To<CommandLoadGuiSettings>()
+                .To<CommandCreateSensors>()
+                .To<CommandSetupGameTick>()
                 .Once();
 
+           
             commandBinder.Bind<SignalDestroy>()
                 .To<CommandSaveGuiSettings>()
-                .To<CommandDestroyActiveVesselContext>()
                 .Once();
         }
 
@@ -74,12 +82,12 @@ namespace ScienceAlert.VesselContext
             catch (Exception e)
             {
                 Log.Error("Error while launching ActiveVesselContext: " + e);
-                (contextView as GameObject).If(go => go != null).Do(UnityEngine.Object.Destroy);
+                SignalDestructionAndDestroy();
             }
         }
 
 
-        public void SignalDestruction()
+        public void SignalDestructionAndDestroy()
         {
             Log.Verbose("Signaling ActiveVesselContext destruction");
 
@@ -90,7 +98,14 @@ namespace ScienceAlert.VesselContext
             catch (Exception e)
             {
                 Log.Error("Failed to signal destruction: " + e);
+                DestroyThisContext();
             }
+        }
+
+
+        private void DestroyThisContext()
+        {
+            (contextView as GameObject).If(go => go != null).Do(UnityEngine.Object.Destroy);
         }
     }
 }

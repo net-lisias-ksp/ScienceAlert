@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using strange.extensions.command.api;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
@@ -19,10 +20,8 @@ namespace ScienceAlert.Core
         protected override void mapBindings()
         {
             base.mapBindings();
-            implicitBinder.ScanForAnnotatedClasses(new[]
-            {
-                new AnnotatedAssembly(Assembly.GetExecutingAssembly(), new [] { "ScienceAlert" })
-            });
+            implicitBinder.ScanForAnnotatedClasses(
+                new KeyValuePair<Assembly, string[]>(Assembly.GetExecutingAssembly(), new [] { "ScienceAlert" }));
         }
 
 

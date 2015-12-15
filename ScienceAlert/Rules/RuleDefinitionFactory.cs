@@ -64,8 +64,6 @@ namespace ScienceAlert.Rules
             if (string.IsNullOrEmpty(config.name))
                 throw new ArgumentException("ConfigNode has no name", "config");
 
-            Log.Verbose("Creating Rule from: " + config.ToSafeString());
-
             var ruleNodeTypeOrRuleType = config.name;
             Func<ConfigNode, RuleDefinition> operation;
 

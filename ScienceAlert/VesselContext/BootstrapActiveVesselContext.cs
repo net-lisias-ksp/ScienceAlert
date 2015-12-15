@@ -40,7 +40,7 @@ namespace ScienceAlert.VesselContext
         {
             try
             {
-                (context as ActiveVesselContext).Do(c => c.SignalDestruction());
+                (context as ActiveVesselContext).Do(c => c.SignalDestructionAndDestroy());
             }
             catch (Exception e)
             {
