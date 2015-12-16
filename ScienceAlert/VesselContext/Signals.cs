@@ -16,10 +16,4 @@ namespace ScienceAlert.VesselContext
     {
         
     }
-
-
-    public class SignalSensorValueChanged : Signal<ScienceExperiment, ISensorValues>
-    {
-        
-    }
 }

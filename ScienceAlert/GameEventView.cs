@@ -11,9 +11,6 @@ namespace ScienceAlert
 // ReSharper disable once ClassNeverInstantiated.Global
     public class GameEventView : View
     {
-        internal readonly Signal GameTick = new Signal();
-
-
         internal readonly Signal<Vessel> VesselModified = new Signal<Vessel>();
         internal readonly Signal<Vessel> VesselChanged = new Signal<Vessel>();
         internal readonly Signal<Vessel> VesselDestroyed = new Signal<Vessel>();
@@ -52,15 +49,6 @@ namespace ScienceAlert
         private void OnVesselModified(Vessel data)
         {
             VesselModified.Dispatch(data);
-        }
-
-
-// ReSharper disable once UnusedMember.Local
-        private void Update()
-        {
-            var start = Stopwatch.StartNew();
-            GameTick.Dispatch();
-            Log.Performance("Update finished in " + start.ElapsedMilliseconds + " ms");
         }
     }
 }

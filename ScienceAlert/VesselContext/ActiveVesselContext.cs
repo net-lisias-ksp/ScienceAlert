@@ -45,7 +45,7 @@ namespace ScienceAlert.VesselContext
             
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
-            injectionBinder.Bind<SignalSensorValueChanged>().ToSingleton();
+ 
   
             SetupCommandBindings();
         }
@@ -58,8 +58,7 @@ namespace ScienceAlert.VesselContext
                 .InSequence()
                 .To<CommandCreateVesselGui>()
                 .To<CommandLoadGuiSettings>()
-                .To<CommandCreateSensors>()
-                .To<CommandSetupGameTick>()
+                .To<CommandCreateSensorUpdater>()
                 .Once();
 
            

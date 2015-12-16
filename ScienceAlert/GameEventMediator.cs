@@ -17,9 +17,9 @@ namespace ScienceAlert
 
         [Inject] public SignalVesselChanged VesselChangedSignal { get; set; }
         [Inject] public SignalVesselModified VesselModifiedSignal { get; set; }
+        [Inject] public SignalActiveVesselModified ActiveVesselModifiedSignal { get; set; }
         [Inject] public SignalVesselDestroyed VesselDestroyedSignal { get; set; }
-
-        [Inject] public SignalGameTick GameTickSignal { get; set; }
+        [Inject] public SignalActiveVesselDestroyed ActiveVesselDestroyedSignal { get; set; }
 
 
         public override void OnRegister()
@@ -28,7 +28,6 @@ namespace ScienceAlert
             View.VesselChanged.AddListener(OnVesselChanged);
             View.VesselModified.AddListener(OnVesselModified);
             View.VesselDestroyed.AddListener(OnVesselDestroyed);
-            View.GameTick.AddListener(OnGameTick);
         }
 
 
@@ -38,7 +37,6 @@ namespace ScienceAlert
             View.VesselChanged.RemoveListener(OnVesselChanged);
             View.VesselModified.RemoveListener(OnVesselModified);
             View.VesselDestroyed.RemoveListener(OnVesselDestroyed);
-            View.GameTick.RemoveListener(OnGameTick);
         }
 
 
@@ -63,40 +61,44 @@ namespace ScienceAlert
 
         private void OnVesselChanged(Vessel data)
         {
+            Log.Debug("GameEventMediator.OnVesselChanged");
+
             TryAction(() => VesselChangedSignal.Dispatch(new KspVessel(data)));
         }
 
 
+
         private void OnVesselModified(Vessel data)
         {
+            Log.Debug("GameEventMediator.OnVesselModified");
+
             TryAction(() => VesselModifiedSignal.Dispatch(new KspVessel(data)));
+
+            if (IsActiveVessel(data))
+            {
+                Log.Debug("GameEventMediator.OnVesselModified - dispatching active vessel modified signal");
+                TryAction(() => ActiveVesselModifiedSignal.Dispatch());
+            }
         }
 
 
         private void OnVesselDestroyed(Vessel data)
         {
+            Log.Debug("GameEventMediator.OnVesselDestroyed");
+
             TryAction(() => VesselDestroyedSignal.Dispatch(new KspVessel(data)));
+
+            if (IsActiveVessel(data))
+            {
+                Log.Debug("GameEventMediator.OnVesselDestroyed - dispatching active vessel destroyed signal");
+                TryAction(() => ActiveVesselDestroyedSignal.Dispatch());
+            }
         }
 
 
-        private void OnGameTick()
+        private static bool IsActiveVessel(Vessel data)
         {
-            try
-            {
-                GameTickSignal.Dispatch();
-            }
-            catch (Exception e)
-            {
-                Log.Error("Encountered exception during update tick: " + e);
-
-                // whatever just happened will now likely spam the log so we're going to have to shut down...
-                // unfortunately we can't really trust the binder now to dispatch events so preventing further
-                // spam and disabling the plugin is the best thing to be done
-
-                DialogSpawner.CriticalError("ScienceAlert has experienced a problem! Details are in the log.");
-                Assembly.GetExecutingAssembly().DisablePlugin();
-                View.GameTick.RemoveListener(OnGameTick);
-            }
+            return ReferenceEquals(data, FlightGlobals.ActiveVessel);
         }
     }
 }

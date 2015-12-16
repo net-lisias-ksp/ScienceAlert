@@ -100,9 +100,9 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<SignalVesselChanged>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalVesselModified>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton().CrossContext();
-
-            injectionBinder.Bind<SignalGameTick>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton().CrossContext();
         }
 
 

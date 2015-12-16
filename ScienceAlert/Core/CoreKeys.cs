@@ -4,7 +4,6 @@
     {
         CoreContextView, // GameObject
         GameContextView, // GameObject
-        VesselContextView, // GameObject
 
         GameData, // IDirectory
 

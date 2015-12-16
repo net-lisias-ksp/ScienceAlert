@@ -53,7 +53,7 @@ namespace ScienceAlert
             //commandBinder.Bind<SignalVesselDestroyed>()
             //    .To<CommandDestroyActiveVesselView>();
 
-            //commandBinder.Bind<SignalVesselChanged>()
+            //commandBinder.Bind<SignalActiveVesselChanged>()
             //    .To<CommandDestroyActiveVesselView>()
             //    .To<CommandCreateActiveVesselView>();
         }
