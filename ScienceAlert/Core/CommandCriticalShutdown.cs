@@ -10,7 +10,7 @@ namespace ScienceAlert.Core
     {
         private readonly GameObject _coreContextView;
 
-        public CommandCriticalShutdown([Name(CoreKeys.GameContextView)] GameObject coreContextView)
+        public CommandCriticalShutdown([Name(CoreKeys.CoreContextView)] GameObject coreContextView)
         {
             if (coreContextView == null) throw new ArgumentNullException("coreContextView");
             _coreContextView = coreContextView;

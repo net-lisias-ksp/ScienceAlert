@@ -1,9 +1,9 @@
 ﻿using System;
 using ReeperCommon.Containers;
+using ScienceAlert.Game;
 using ScienceAlert.VesselContext;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
-using strange.extensions.injector;
 using UnityEngine;
 
 namespace ScienceAlert.Core
@@ -33,7 +33,7 @@ namespace ScienceAlert.Core
                 .If(vc => vc.injectionBinder.GetInstance<IVessel>().Equals(_destroyedVessel))
                 .Do(vc =>
                 {
-                    vc.SignalDestructionAndDestroy();
+                    vc.SignalDestruction(true);
                     Log.Verbose("Destroyed vessel context");
                 })
                 .IfNull(Fail);

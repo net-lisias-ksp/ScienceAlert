@@ -1,4 +1,5 @@
-﻿using strange.extensions.signal.impl;
+﻿using ScienceAlert.Game;
+using strange.extensions.signal.impl;
 
 namespace ScienceAlert
 {

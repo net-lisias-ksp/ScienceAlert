@@ -3,7 +3,7 @@ using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.Serialization;
-using ScienceAlert.Rules;
+using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.injector.api;
 using strange.framework.impl;
 

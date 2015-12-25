@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using ReeperCommon.Containers;
+using ReeperCommon.Extensions;
 using ReeperCommon.FileSystem;
 using ReeperCommon.FileSystem.Providers;
 using ReeperCommon.Logging;
@@ -13,7 +14,8 @@ using ReeperCommon.Repositories;
 using ReeperCommon.Serialization;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Gui;
-using ScienceAlert.Rules;
+using ScienceAlert.VesselContext;
+using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.context.api;
 using UnityEngine;
 
@@ -98,11 +100,11 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<SignalShutdownScienceAlert>().ToSingleton().CrossContext();
 
-            injectionBinder.Bind<SignalVesselChanged>().ToSingleton().CrossContext();
-            injectionBinder.Bind<SignalVesselModified>().ToSingleton().CrossContext();
-            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton().CrossContext();
-            injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton().CrossContext();
-            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
+            injectionBinder.Bind<SignalVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
         }
 
 
@@ -122,7 +124,6 @@ namespace ScienceAlert.Core
             commandBinder.Bind<SignalStart>()
                 .InSequence()
                 .To<CommandLoadSharedConfiguration>()
-                .To<CommandCreateRuleTypeBindings>()
                 .To<CommandCompileExperimentRulesets>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
@@ -153,8 +154,20 @@ namespace ScienceAlert.Core
 
         public override void Launch()
         {
-            base.Launch();
-            injectionBinder.GetInstance<SignalStart>().Dispatch();
+            try
+            {
+                base.Launch();
+                injectionBinder.GetInstance<SignalStart>().Dispatch();
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception while launching core context: " + e);
+                Log.Error("ScienceAlert must shut down");
+                UnityEngine.Object.Destroy(contextView as GameObject);
+#if !DEBUG
+                Assembly.GetExecutingAssembly().DisablePlugin();
+#endif
+            }
         }
 
 

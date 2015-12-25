@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using ScienceAlert.Rules;
+using ScienceAlert.VesselContext.Experiments.Rules;
 using Xunit;
 using Xunit.Extensions;
 

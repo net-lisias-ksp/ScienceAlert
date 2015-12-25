@@ -3,7 +3,6 @@
     public enum CoreKeys
     {
         CoreContextView, // GameObject
-        GameContextView, // GameObject
 
         GameData, // IDirectory
 

@@ -14,6 +14,16 @@ namespace ScienceAlert.VesselContext.Gui
     [MediatedBy(typeof(ExperimentMediator))]
     public class ExperimentView : StrangeView
     {
+        //public class ExperimentStatus
+        //{
+        //    public ScienceExperiment experimentTitle;
+
+        //    public float CollectionValue;
+        //    public float TransmissionValue;
+        //    public float LabDataValue;
+
+        //}
+
         [Inject(GuiKeys.CompactSkin)] public GUISkin WindowSkin { get; set; }
 
         [Inject(GuiKeys.WindowTitleBarButtonStyle)] public GUIStyle TitleBarButtonStyle { get; set; }

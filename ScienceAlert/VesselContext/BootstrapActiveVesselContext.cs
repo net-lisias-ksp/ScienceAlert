@@ -40,13 +40,14 @@ namespace ScienceAlert.VesselContext
         {
             try
             {
-                (context as ActiveVesselContext).Do(c => c.SignalDestructionAndDestroy());
+                (context as ActiveVesselContext).Do(c => c.SignalDestruction(false));
+                base.OnDestroy();
             }
             catch (Exception e)
             {
                 Log.Error("Exception while signal ActiveVesselContext destruction: " + e);
             }
-            base.OnDestroy();
+            
         }
     }
 }

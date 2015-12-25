@@ -1,25 +1,30 @@
 ﻿using System;
-using ScienceAlert.Rules;
+using ScienceAlert.VesselContext.Experiments.Rules;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
-    public class Sensor : ISensor//, ISensorValues
+    public class Sensor : ISensor, ISensorState
     {
+        private readonly ScienceExperiment _experiment;
         private readonly IExperimentRule _onboardRule;
         private readonly IExperimentRule _availableRule;
+        private readonly SignalSensorStateChanged _stateChangedSignal;
 
         public Sensor(
             ScienceExperiment experiment,
             IExperimentRule onboardRule,
-            IExperimentRule availableRule)
+            IExperimentRule availableRule,
+            SignalSensorStateChanged stateChangedSignal)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
             if (onboardRule == null) throw new ArgumentNullException("onboardRule");
             if (availableRule == null) throw new ArgumentNullException("availableRule");
+            if (stateChangedSignal == null) throw new ArgumentNullException("stateChangedSignal");
 
-            Experiment = experiment;
+            _experiment = experiment;
             _onboardRule = onboardRule;
             _availableRule = availableRule;
+            _stateChangedSignal = stateChangedSignal;
         }
 
 
@@ -37,17 +42,9 @@ namespace ScienceAlert.VesselContext.Experiments
         }
 
 
-        public void OnVesselModified()
+        public void UpdateOnboardStatus()
         {
-            Log.Warning("Sensor.OnVesselModified");
-            UpdateOnboardAvailability();
-        }
-
-        
-        
-        public void UpdateOnboardAvailability()
-        {
-            Log.Debug("Sensor.OnVesselModified");
+            Log.Debug("Sensor.UpdateOnboardStatus");
             var onboard = _onboardRule.Get();
             var changed = onboard == IsOnboard;
 
@@ -93,7 +90,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
         private void DispatchChangedSignal()
         {
-            //_sensorChangedSignal.Dispatch(Experiment, this);
+            _stateChangedSignal.Dispatch(_experiment, this);
         }
         
 
@@ -103,6 +100,5 @@ namespace ScienceAlert.VesselContext.Experiments
         public bool IsOnboard { get; private set; }
         public bool IsAvailable { get; private set; }
         public bool IsRunnable { get; private set; }
-        public ScienceExperiment Experiment { get; private set; }
     }
 }

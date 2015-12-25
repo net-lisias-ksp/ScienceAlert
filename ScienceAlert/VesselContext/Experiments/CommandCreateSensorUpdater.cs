@@ -1,7 +1,4 @@
 ﻿using System;
-using ReeperCommon.Extensions;
-using ReeperCommon.Logging;
-using ScienceAlert.Core;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -25,7 +22,7 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             Log.Debug("Creating sensor updater");
 
-            var updater = _vesselContext.GetComponent<SensorUpdater>() ?? _vesselContext.AddComponent<SensorUpdater>();
+            var updater = _vesselContext.GetComponent<SensorManager>() ?? _vesselContext.AddComponent<SensorManager>();
 
             injectionBinder.injector.Inject(updater, false);
         }

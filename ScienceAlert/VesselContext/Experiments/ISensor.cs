@@ -3,5 +3,6 @@
     public interface ISensor
     {
         void Poll();
+        void UpdateOnboardStatus();
     }
 }

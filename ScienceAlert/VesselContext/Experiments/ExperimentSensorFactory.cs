@@ -2,23 +2,25 @@
 
 namespace ScienceAlert.VesselContext.Experiments
 {
+// ReSharper disable once ClassNeverInstantiated.Global
     public class ExperimentSensorFactory : IExperimentSensorFactory
     {
         private readonly IExperimentRulesetProvider _rulesetProvider;
         private readonly IExperimentRuleFactory _ruleFactory;
-        private readonly SignalActiveVesselModified _vesselModifiedSignal;
- 
+        private readonly SignalSensorStateChanged _sensorChangedSignal;
+
         public ExperimentSensorFactory(
             IExperimentRulesetProvider rulesetProvider, 
             IExperimentRuleFactory ruleFactory,
-            SignalActiveVesselModified vesselModifiedSignal)
+            SignalSensorStateChanged sensorChangedSignal)
         {
             if (rulesetProvider == null) throw new ArgumentNullException("rulesetProvider");
             if (ruleFactory == null) throw new ArgumentNullException("ruleFactory");
-            if (vesselModifiedSignal == null) throw new ArgumentNullException("vesselModifiedSignal");
+            if (sensorChangedSignal == null) throw new ArgumentNullException("sensorChangedSignal");
+
             _rulesetProvider = rulesetProvider;
             _ruleFactory = ruleFactory;
-            _vesselModifiedSignal = vesselModifiedSignal;
+            _sensorChangedSignal = sensorChangedSignal;
         }
         
 
@@ -30,7 +32,8 @@ namespace ScienceAlert.VesselContext.Experiments
 
             var sensor = new Sensor(experiment, 
                 _ruleFactory.Create(experiment, ruleset.OnboardDefinition),
-                _ruleFactory.Create(experiment, ruleset.AvailabilityDefinition));
+                _ruleFactory.Create(experiment, ruleset.AvailabilityDefinition),
+                _sensorChangedSignal);
 
             return sensor;
         }

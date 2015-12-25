@@ -1,8 +1,8 @@
 ﻿using System;
 using ScienceAlert.Core;
+using ScienceAlert.Game;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
-using strange.extensions.injector;
 using UnityEngine;
 
 namespace ScienceAlert
@@ -23,17 +23,7 @@ namespace ScienceAlert
 
         public override void Execute()
         {
-            SetupBindings();
             CreateViews();
-            MapCommands();
-        }
-
-
-        private void SetupBindings()
-        {
-
-
-            
         }
 
 
@@ -42,20 +32,7 @@ namespace ScienceAlert
             var gameContext = new GameObject(GameContextViewName);
             gameContext.transform.parent = _contextView.transform;
 
-            injectionBinder.Bind<GameObject>().To(gameContext).ToName(CoreKeys.GameContextView).CrossContext();
-
             gameContext.AddComponent<GameEventView>();
-        }
-
-
-        private void MapCommands()
-        {
-            //commandBinder.Bind<SignalVesselDestroyed>()
-            //    .To<CommandDestroyActiveVesselView>();
-
-            //commandBinder.Bind<SignalActiveVesselChanged>()
-            //    .To<CommandDestroyActiveVesselView>()
-            //    .To<CommandCreateActiveVesselView>();
         }
     }
 }

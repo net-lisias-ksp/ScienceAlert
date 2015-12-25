@@ -2,7 +2,7 @@
 using NSubstitute;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Xunit;
-using ScienceAlert.Rules;
+using ScienceAlert.VesselContext.Experiments.Rules;
 
 namespace ScienceAlertTests
 {
@@ -25,7 +25,8 @@ namespace ScienceAlertTests
             Fixture.Register(() => new ConfigNode("root"));
             Fixture.Register(() => rules);
             Fixture.Register(() => new RuleDefinitionFactory(ruleProvider));
-
+            Fixture.Register(() => new ProtoCrewMember(ProtoCrewMember.KerbalType.Crew) {name = "Test Kerman"});
+            
             //Fixture.Register(() => new SimplePersistentObject());
             //Fixture.Register(() => new ComplexPersistentObject());
             //Fixture.Register(() => new GetSerializableFields());

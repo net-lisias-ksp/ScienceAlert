@@ -13,7 +13,7 @@ namespace ScienceAlert.Core.Gui
         private readonly ICoroutineRunner _coroutineRunner;
 
         public CommandCreateAppLauncherView(
-            [Name(CoreKeys.GameContextView)] GameObject gameContext,
+            [Name(CoreKeys.CoreContextView)] GameObject gameContext,
             ICoroutineRunner coroutineRunner)
         {
             if (gameContext == null) throw new ArgumentNullException("gameContext");
