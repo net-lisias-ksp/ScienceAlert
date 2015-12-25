@@ -64,7 +64,10 @@
     <Compile Include="Game\KspScienceUtil.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="VesselContext\CommandLogSensorStatusUpdate.cs" />
+    <Compile Include="VesselContext\Experiments\ValuePredictors\ICollectionValuePredictor.cs" />
+    <Compile Include="VesselContext\Experiments\ValuePredictors\ILabDataPredictor.cs" />
     <Compile Include="VesselContext\Experiments\ISensorState.cs" />
+    <Compile Include="VesselContext\Experiments\ValuePredictors\ITransmissionValuePredictor.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CommandCompileExperimentRulesets.cs" />
     <Compile Include="VesselContext\CommandCreateRuleTypeBindings.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeAllRule.cs" />

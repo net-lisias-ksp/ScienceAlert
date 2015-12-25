@@ -21,7 +21,7 @@ namespace ScienceAlert.VesselContext.Experiments
 // ReSharper disable once UnusedMember.Global
         public void Initialize()
         {
-            Log.Warning("Initializing SensorManager");
+            Log.Debug("Initializing SensorManager");
             _sensors = Experiments.Select(exp => SensorFactory.Create(exp)).ToArray();
 
             ActiveVesselModified.AddListener(OnActiveVesselModified);
@@ -37,7 +37,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
         private void OnActiveVesselModified()
         {
-            Log.Warning("SensorManager.OnActiveVesselModified");
+            Log.Debug("SensorManager.OnActiveVesselModified");
 
             SetOnboardStatusOfExperiments();
         }
@@ -46,7 +46,7 @@ namespace ScienceAlert.VesselContext.Experiments
         [PostConstruct(1)]
         public void SetOnboardStatusOfExperiments()
         {
-            Log.Warning("Setting onboard status");
+            Log.Debug("Setting onboard status");
             foreach (var sensor in _sensors)
             {
                 sensor.UpdateOnboardStatus();
