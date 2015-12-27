@@ -1,29 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using ReeperCommon.Gui.Window;
 using ReeperCommon.Gui.Window.Buttons;
 using ReeperCommon.Gui.Window.Decorators;
-using ReeperCommon.Serialization.Exceptions;
-using strange.extensions.implicitBind;
-using strange.extensions.injector;
 using strange.extensions.signal.impl;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    [MediatedBy(typeof(ExperimentMediator))]
+    //[MediatedBy(typeof(ExperimentMediator))]
+    //[MediatedBy(typeof(ExperimentPopupMediator))]
     public class ExperimentView : StrangeView
     {
-        //public class ExperimentStatus
-        //{
-        //    public ScienceExperiment experimentTitle;
-
-        //    public float CollectionValue;
-        //    public float TransmissionValue;
-        //    public float LabDataValue;
-
-        //}
-
         [Inject(GuiKeys.CompactSkin)] public GUISkin WindowSkin { get; set; }
 
         [Inject(GuiKeys.WindowTitleBarButtonStyle)] public GUIStyle TitleBarButtonStyle { get; set; }
@@ -33,11 +22,24 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject(GuiKeys.ResizeCursorTexture)] public Texture2D ResizeCursorTexture { get; set; }
         [Inject(GuiKeys.LitToggleStyle)] public GUIStyle LitToggleStyle { get; set; }
 
+        public enum PopupType
+        {
+            None,
+            Alert,
+            Collection,
+            Transmission,
+            Lab
+        }
 
         internal readonly Signal Close = new Signal();
         internal readonly Signal LockToggle = new Signal();
+        internal readonly Signal<ExperimentStatusReport, PopupType> SpawnPopup = new Signal<ExperimentStatusReport, PopupType>();
+        internal readonly Signal ClosePopup = new Signal();
 
         private BasicTitleBarButton _lockButton;
+
+        private readonly Dictionary<ScienceExperiment, ExperimentStatusReport> _experimentStatuses =
+            new Dictionary<ScienceExperiment, ExperimentStatusReport>(); 
 
 
         protected override IWindowComponent Initialize()
@@ -86,6 +88,12 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
+        public void SetExperimentStatus(ExperimentStatusReport statusReport)
+        {
+            _experimentStatuses[statusReport.Experiment] = statusReport;
+        }
+
+
         protected override void DrawWindow()
         {
             GUILayout.BeginHorizontal();
@@ -96,38 +104,77 @@ namespace ScienceAlert.VesselContext.Gui
 
             GUILayout.BeginScrollView(Vector2.zero, false, true);
             {
-                for (int i = 0; i < 10; ++i)
-                {
-                    GUILayout.BeginHorizontal();
-                    {
-                        DrawRow("Experiment" + new string('.', i * 2));
-                    }
-                    GUILayout.EndHorizontal();
-                    
-         
-                }
+                DrawExperimentList();
             }
             GUILayout.EndScrollView();
             GUILayout.Space(8f);
         }
 
 
-        private void DrawRow(string buttonText)
+        private bool ShouldDisplayExperimentInList(ExperimentStatusReport statusReport)
         {
-            GUILayout.Button(buttonText, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
-            //GUILayout.FlexibleSpace();
+            return statusReport.Onboard;
+        }
 
-            GUILayout.Toggle(false, string.Empty, LitToggleStyle);
-            GUILayout.Toggle(true, string.Empty, LitToggleStyle);
 
-            //GUILayout.BeginHorizontal();
-            //{
-            //    GUILayout.Toggle(true, CloseButtonTexture, GUILayout.Width(CloseButtonTexture.width),
-            //        GUILayout.Height(CloseButtonTexture.height));
-            //    GUILayout.Toggle(false, CloseButtonTexture, GUILayout.Width(CloseButtonTexture.width),
-            //        GUILayout.Height(CloseButtonTexture.height));
-            //}
-            //GUILayout.EndHorizontal();
+        private void DrawExperimentList()
+        {
+            var experimentEnumerator = _experimentStatuses.GetEnumerator(); // avoid Using... because Mono boxes iterator creating extra garbage
+
+            try
+            {
+                bool popupInUse = false;
+
+                while (experimentEnumerator.MoveNext())
+                {
+                    var item = experimentEnumerator.Current.Value;
+                    popupInUse |= DrawExperimentStatus(item);
+                }
+
+                if (!popupInUse) ClosePopup.Dispatch();
+            }
+            finally
+            {
+                experimentEnumerator.Dispose();
+            }
+        }
+
+
+        // Returns true if a popup for this experiment was created or needs to stay open
+        private bool DrawExperimentStatus(ExperimentStatusReport statusReport)
+        {
+            if (!ShouldDisplayExperimentInList(statusReport)) return false;
+
+            bool popupNeeded = false;
+
+            GUILayout.BeginHorizontal();
+            {
+                GUILayout.Button(statusReport.Experiment.experimentTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
+
+                // todo: use tooltip property instead of these boolean shenanigans
+                popupNeeded |= DrawToggleAndSignalOnMouseOver(statusReport, true, PopupType.Alert);
+                popupNeeded |= DrawToggleAndSignalOnMouseOver(statusReport, statusReport.CollectionValue > 0f, PopupType.Collection);
+                popupNeeded |= DrawToggleAndSignalOnMouseOver(statusReport, statusReport.TransmissionValue > 0f, PopupType.Transmission);
+                popupNeeded |= DrawToggleAndSignalOnMouseOver(statusReport, statusReport.LabValue > 0f, PopupType.Lab);
+            }
+            GUILayout.EndHorizontal();
+
+            return popupNeeded;
+        }
+
+
+        // Returns whether or not a popup is needed for this toggle
+        private bool DrawToggleAndSignalOnMouseOver(ExperimentStatusReport report, bool lit, PopupType popup)
+        {
+            GUILayout.Toggle(lit, string.Empty, LitToggleStyle); // ignore whether it's actually pressed, we don't care
+
+            if (Event.current.type != EventType.Repaint) return false;
+            if (!GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition)) return false;
+
+            Log.Debug("Mouseover: " + popup);
+            SpawnPopup.Dispatch(report, popup);
+
+            return true;
         }
 
 
@@ -135,12 +182,13 @@ namespace ScienceAlert.VesselContext.Gui
         {
             string longest = "Experiment" + new string('.', 10 * 2);
 
-            // button + toggle x2
+            // button + toggle x4
             var button = Skin.button.CalcSize(new GUIContent(longest));
             var toggle = Skin.toggle.CalcSize(new GUIContent());
 
-            return new Vector2(button.x + 2f * toggle.x, Mathf.Max(button.y, toggle.y));
+            return new Vector2(button.x + 4f * toggle.x, Mathf.Max(button.y, toggle.y));
         }
+
 
         protected override void FinalizeWindow()
         {

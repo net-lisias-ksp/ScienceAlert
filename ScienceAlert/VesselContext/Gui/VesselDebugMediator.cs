@@ -23,7 +23,7 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalLoadGuiSettings LoadSignal { get; set; }
 
         [Inject] public IConfigNodeSerializer Serializer { get; set; }
-        [Inject(VesselKeys.VesselDebugViewConfig)] public ConfigNode Config { get; set; }
+        [Inject(VesselContextKeys.VesselDebugViewConfig)] public ConfigNode Config { get; set; }
 
 
         public override void OnRegister()

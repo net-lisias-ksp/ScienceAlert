@@ -12,21 +12,17 @@ namespace ScienceAlert.VesselContext
     public class CommandCreateVesselGui : Command
     {
         private readonly GameObject _contextView;
-        private readonly SignalLoadGuiSettings _loadGuiSettings;
         private readonly ICoroutineRunner _coroutineRunner;
 
 
         public CommandCreateVesselGui(
             [Name(ContextKeys.CONTEXT_VIEW)] GameObject contextView, 
-            SignalLoadGuiSettings loadGuiSettings,
             ICoroutineRunner coroutineRunner)
         {
             if (contextView == null) throw new ArgumentNullException("contextView");
-            if (loadGuiSettings == null) throw new ArgumentNullException("loadGuiSettings");
             if (coroutineRunner == null) throw new ArgumentNullException("coroutineRunner");
 
             _contextView = contextView;
-            _loadGuiSettings = loadGuiSettings;
             _coroutineRunner = coroutineRunner;
         }
 
@@ -45,12 +41,15 @@ namespace ScienceAlert.VesselContext
             var guiGo = new GameObject("VesselGuiView");
             guiGo.transform.parent = _contextView.transform;
 
+            injectionBinder.Bind<GameObject>().ToValue(guiGo).ToName(VesselContextKeys.GuiContainer);
+
+            Log.Debug("Adding ExperimentView");
             guiGo.AddComponent<ExperimentView>();
+
+            Log.Debug("Adding VesselDebugView");
             guiGo.AddComponent<VesselDebugView>();
 
             yield return 0; // wait for views to start before proceeding
-
-            _loadGuiSettings.Dispatch();
 
             Release();
         }

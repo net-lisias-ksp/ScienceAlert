@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Serialization;
 using strange.extensions.injector;
@@ -21,7 +22,7 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public ICoroutineRunner CoroutineRunner { get; set; }
         [Inject] public IConfigNodeSerializer Serializer { get; set; }
 
-        [Inject(VesselKeys.ExperimentViewConfig)] public ConfigNode Config { get; set; }
+        [Inject(VesselContextKeys.ExperimentViewConfig)] public ConfigNode Config { get; set; }
 
         [Inject] public SignalLoadGuiSettings LoadSignal { get; set; }
         [Inject] public SignalSaveGuiSettings SaveSignal { get; set; }
@@ -31,10 +32,23 @@ namespace ScienceAlert.VesselContext.Gui
 
         public override void OnRegister()
         {
+            Log.Debug("ExperimentMediator.OnRegister");
+
             base.OnRegister();
 
             View.LockToggle.AddListener(OnLockToggle);
             View.Close.AddListener(OnClose);
+
+            // Temp!
+            Log.Warning("Using Temp code to initialize experiment list");
+            ResearchAndDevelopment.GetExperimentIDs().Select(ResearchAndDevelopment.GetExperiment)
+                .ToList()
+                .ForEach(experiment =>
+                    View.SetExperimentStatus(new ExperimentStatusReport(experiment,
+                        UnityEngine.Random.Range(0f, 100f),
+                        UnityEngine.Random.Range(0f, 100f),
+                        UnityEngine.Random.Range(0f, 100f),
+                        true, true, true)));
         }
 
 

@@ -1,4 +1,4 @@
-﻿using ScienceAlert.VesselContext.Experiments;
+﻿using ScienceAlert.VesselContext.Gui;
 using strange.extensions.signal.impl;
 
 namespace ScienceAlert.VesselContext
@@ -18,7 +18,18 @@ namespace ScienceAlert.VesselContext
     }
 
 
-    public class SignalSensorStateChanged : Signal<ScienceExperiment, ISensorState>
+    public class SignalSpawnExperimentReportPopup : Signal<ExperimentStatusReport, ExperimentView.PopupType>
+    {
+        
+    }
+
+
+    public class SignalDestroyExperimentReportPopup : Signal
+    {
+        
+    }
+
+    public class SignalExperimentValueChanged : Signal<ScienceExperiment>
     {
         
     }
