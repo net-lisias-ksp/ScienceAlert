@@ -17,8 +17,8 @@ namespace ScienceAlert
         public const string Filename = "ScienceAlert.cfg";
 
         [ReeperPersistent] public float ButtonFramerate = 15f;
-        [ReeperPersistent] public ConfigNode ExperimentViewConfig = new ConfigNode("ExperimentView");
-        [ReeperPersistent] public ConfigNode VesselDebugViewConfig = new ConfigNode("VesselDebugView");
+        [ReeperPersistent] public readonly ConfigNode ExperimentViewConfig = new ConfigNode("ExperimentListView");
+        [ReeperPersistent] public readonly ConfigNode VesselDebugViewConfig = new ConfigNode("VesselDebugView");
 
         private const float FramerateMin = 1f;
         private const float FramerateMax = 60f;

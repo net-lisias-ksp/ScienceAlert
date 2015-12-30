@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
 {
-    [MediatedBy(typeof(ExperimentStatusReportPopupMediator))]
+    [MediatedBy(typeof(ExperimentPopupMediator))]
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class ExperimentStatusReportPopup : View
+    public class ExperimentPopupView : View
     {
-        [Inject(GuiKeys.CompactSkin)] public GUISkin WindowSkin { get; set; }
+        [Inject(GuiKeys.PopupSkin)] public GUISkin WindowSkin { get; set; }
         [Inject(GuiKeys.ClipboardTexture)] public Texture2D ClipboardTexture { get; set; }
         [Inject(GuiKeys.DishTexture)] public Texture2D DishTexture { get; set; }
         [Inject(GuiKeys.SampleTexture)] public Texture2D SampleTexture { get; set; }
@@ -20,26 +20,27 @@ namespace ScienceAlert.VesselContext.Gui
                 _statusReport = value;
                 RebuildDisplayData();
             }
+            get { return _statusReport; }
         }
 
-        public ExperimentView.PopupType PopupType {
+        public ExperimentListView.PopupType PopupType {
             set
             {
                 _popupType = value;
                 RebuildDisplayData();
             }
+            get { return _popupType; }
         } 
 
         private ExperimentStatusReport _statusReport = default(ExperimentStatusReport);
-        private ExperimentView.PopupType _popupType = ExperimentView.PopupType.None;
+        private ExperimentListView.PopupType _popupType = ExperimentListView.PopupType.None;
 
-        private Rect _rect = new Rect(0f, 0f, 20f, 50f);
+        public Rect WindowRect = new Rect(0f, 0f, 20f, 50f);
         private GUIStyle _flavorTexture = GUIStyle.none; // this is the image associated with the popup type -- just a little bit extra to make it more interesting
 
         protected override void Awake()
         {
             base.Awake();
-            _rect = CalculateMinRect();
             _flavorTexture = new GUIStyle(WindowSkin.box);
             _flavorTexture.normal.background = _flavorTexture.onNormal.background = _flavorTexture.hover.background = _flavorTexture.onHover.background =
     DishTexture;
@@ -57,30 +58,24 @@ namespace ScienceAlert.VesselContext.Gui
 
         public void SetLocation(Vector2 center)
         {
-            var newLocation = _rect;
+            var newLocation = WindowRect;
 
             newLocation.center = center;
 
-            _rect = KSPUtil.ClampRectToScreen(newLocation);
-            Log.Debug("Setting location to " + center);
+            WindowRect = KSPUtil.ClampRectToScreen(newLocation);
         }
 
-
-        // calculate min window size -- note that the status report and popup type won't change while the popup is open so 
-        // we need only do this at the start
-        private Rect CalculateMinRect()
-        {
-            return new Rect(0f, 0f, 100f, 100f);
-        }
 
 
         // We desperately want to avoid generating any garbage in OnGUI so all the visual stuff is cached by this method
         private void RebuildDisplayData()
         {
-            enabled = _popupType != ExperimentView.PopupType.None;
+            enabled = _popupType != ExperimentListView.PopupType.None;
         }
 
 
+// ReSharper disable once UnusedMember.Local
+// ReSharper disable once InconsistentNaming
         private void OnGUI()
         {
             /*     Experiment Title
@@ -93,7 +88,7 @@ namespace ScienceAlert.VesselContext.Gui
             GUI.skin = WindowSkin;
             GUI.depth = 0;
 
-            GUILayout.BeginArea(_rect, WindowSkin.window);
+            GUILayout.BeginArea(WindowRect, WindowSkin.window);
             GUILayout.BeginHorizontal();
             {
                 GUILayout.Box(DishTexture, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));

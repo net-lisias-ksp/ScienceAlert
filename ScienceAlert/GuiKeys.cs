@@ -14,6 +14,7 @@
         SampleTexture, // Texture2D
 
         CompactSkin, // GUISkin (compact)
+        PopupSkin, // GUISkin
 
         WindowTitleBarButtonStyle, // GUIStyle
         LitToggleStyle, // GUIStyle

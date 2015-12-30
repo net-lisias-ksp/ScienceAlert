@@ -41,6 +41,7 @@ namespace ScienceAlert.Core.Gui
             injectionBinder.Bind<GUISkin>().ToValue(HighLogic.Skin).CrossContext();
 
             ConfigureCompactSkin();
+            ConfigurePopupSkin();
             ConfigureAlertViewToggle();
         }
 
@@ -84,6 +85,18 @@ namespace ScienceAlert.Core.Gui
             injectionBinder.Bind<GUIStyle>().ToValue(ConfigureTitleBarButtonStyle()).ToName(GuiKeys.WindowTitleBarButtonStyle).CrossContext();
         }
 
+
+        private void ConfigurePopupSkin()
+        {
+            var customSkin = (Object.Instantiate(injectionBinder.GetInstance<GUISkin>()) as GUISkin).IfNull(
+                () => { throw new SkinNotCreatedException("PopupSkin"); });
+
+            customSkin.label.fontStyle = FontStyle.Normal;
+            customSkin.label.fontSize = 12;
+            customSkin.label.normal.textColor = Color.white;
+
+            injectionBinder.Bind<GUISkin>().ToValue(customSkin).ToName(GuiKeys.PopupSkin).CrossContext();
+        }
 
         /// <summary>
         /// The indicators on the alert panel are going to be toggle buttons. We need to customize them a bit with

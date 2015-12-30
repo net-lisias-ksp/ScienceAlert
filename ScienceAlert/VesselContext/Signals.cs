@@ -19,24 +19,7 @@ namespace ScienceAlert.VesselContext
     }
 
 
-    public class SignalSpawnExperimentReportPopup : Signal<ExperimentStatusReport, ExperimentView.PopupType, Vector2>
-    {
-        
-    }
-
-
-    public class SignalUpdateExperimentReportPopupLocation : Signal<Vector2>
-    {
-        
-    }
-
-
-    public class SignalDestroyExperimentReportPopup : Signal
-    {
-        
-    }
-
-    public class SignalExperimentValueChanged : Signal<ScienceExperiment>
+    public class SignalUpdateExperimentListPopup : Signal<ExperimentStatusReport, ExperimentListView.PopupType, Vector2>
     {
         
     }

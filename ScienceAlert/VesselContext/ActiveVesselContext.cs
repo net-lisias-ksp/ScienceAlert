@@ -42,11 +42,11 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<IExperimentRuleFactory>().To<ExperimentRuleFactory>().ToSingleton();
 
             injectionBinder.Bind<IExperimentRulesetProvider>().To<ExperimentRulesetProvider>().ToSingleton();
-            //injectionBinder.Bind<IExperimentSensorFactory>().To<ExperimentSensorFactory>().ToSingleton();
+
 
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
-            //injectionBinder.Bind<SignalSensorStateChanged>().ToSingleton();
+
 
             // note to self: see how these are NOT cross context? That's because each ContextView
             // has its own GameEventView. This is done to avoid having to do any extra bookkeeping (of
@@ -60,12 +60,14 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
             injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
+            injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
+            injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
 
-            injectionBinder.Bind<SignalUpdateExperimentReportPopupLocation>().ToSingleton();
+            injectionBinder.Bind<SignalUpdateExperimentListPopup>().ToSingleton();
 
-            mediationBinder.BindView<ExperimentView>()
-                .ToMediator<ExperimentMediator>()
-                .ToMediator<ExperimentPopupMediator>();
+            mediationBinder.BindView<ExperimentListView>()
+                .ToMediator<ExperimentListMediator>()
+                .ToMediator<ExperimentListPopupMediator>();
 
             var gameFactory = injectionBinder.GetInstance<IGameFactory>();
             var activeVessel = new KspVessel(gameFactory, FlightGlobals.ActiveVessel);
@@ -85,19 +87,14 @@ namespace ScienceAlert.VesselContext
                 .To<CommandCreateRuleTypeBindings>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandLoadGuiSettings>()
-                //.To<CommandCreateSensorUpdater>()
                 .Once();
 
-            //commandBinder.Bind<SignalSensorStateChanged>()
-            //    .To<CommandLogSensorStatusUpdate>();
-
-            commandBinder.Bind<SignalSpawnExperimentReportPopup>()
-                .To<CommandSpawnExperimentStatusReportPopup>();
-
-            commandBinder.Bind<SignalDestroyExperimentReportPopup>()
-                .To<CommandDestroyExperimentStatusReportPopup>();
-
+ 
             commandBinder.Bind<SignalDestroy>()
+                .To<CommandSaveGuiSettings>()
+                .Once();
+
+            commandBinder.Bind<SignalApplicationQuit>()
                 .To<CommandSaveGuiSettings>()
                 .Once();
         }

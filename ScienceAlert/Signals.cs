@@ -28,6 +28,7 @@ namespace ScienceAlert
     }
 
 
+// ReSharper disable once ClassNeverInstantiated.Global
     public class SignalActiveVesselModified : Signal
     {
     }
@@ -41,13 +42,25 @@ namespace ScienceAlert
     }
 
 
+// ReSharper disable once ClassNeverInstantiated.Global
     public class SignalActiveVesselDestroyed : Signal
     {
     }
 
 
+// ReSharper disable once UnusedMember.Global
+    public class SignalGameSceneLoadRequested : Signal<GameScenes>
+    {
+    }
+
+// ReSharper disable once UnusedMember.Global
+    public class SignalApplicationQuit : Signal
+    {
+    }
+
+
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class SignalShutdownScienceAlert : Signal
+    public class SignalCriticalShutdown : Signal
     {
         
     }

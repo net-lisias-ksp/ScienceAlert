@@ -1,78 +1,63 @@
-﻿using System;
-using System.Linq;
-using ReeperCommon.Containers;
-using strange.extensions.mediation.impl;
+﻿using strange.extensions.mediation.impl;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
 {
-// ReSharper disable once ClassNeverInstantiated.Global
     public class ExperimentPopupMediator : Mediator
     {
-        [Inject] public ExperimentView View { get; set; }
-        [Inject] public SignalSpawnExperimentReportPopup SpawnSignal { get; set; }
-        [Inject] public SignalUpdateExperimentReportPopupLocation LocationSignal { get; set; }
-        [Inject] public SignalDestroyExperimentReportPopup DestroySignal { get; set; }
-
-        private Maybe<ExperimentStatusReport> _currentPopup = Maybe<ExperimentStatusReport>.None;
-        private ExperimentView.PopupType _currentType = ExperimentView.PopupType.None;
+        [Inject] public ExperimentPopupView View { get; set; }
+        [Inject]
+        public SignalUpdateExperimentListPopup UpdateSignal { get; set; }
 
         public override void OnRegister()
         {
-            Log.Debug("ExperimentPopupMediator.OnRegister");
             base.OnRegister();
-            View.SpawnPopup.AddListener(SpawnPopup);
-            View.ClosePopup.AddListener(ClosePopup);
-        }
+            UpdateSignal.AddListener(OnUpdate);
 
+            View.WindowRect = new Rect(0f, 0f, 100f, 60f); // todo: properly calculate min size
+        }
 
 
         public override void OnRemove()
         {
+            UpdateSignal.RemoveListener(OnUpdate);
             base.OnRemove();
-            View.SpawnPopup.RemoveListener(SpawnPopup);
-            View.ClosePopup.RemoveListener(ClosePopup);
         }
 
 
-
-        private void SpawnPopup(ExperimentStatusReport experimentStatusReport, ExperimentView.PopupType popupType, Vector2 location)
+        private void OnUpdate(ExperimentStatusReport status, ExperimentListView.PopupType popupType, Vector2 mouseLocation)
         {
-            if (_currentType != ExperimentView.PopupType.None)
+            if (popupType == ExperimentListView.PopupType.None)
             {
-                if (popupType == _currentType && _currentPopup.Value.Equals(experimentStatusReport))
-                {
-                    Log.Debug("position update " + Time.realtimeSinceStartup);
-                    LocationSignal.Dispatch(location);
-                    return; // same popup; already spawned
-                }
-
-                ClosePopup();
+                if (View.enabled) ClosePopup();
+                return;
             }
 
-            _currentPopup = experimentStatusReport.ToMaybe();
-            _currentType = popupType;
+            if (View.PopupType != popupType || !View.Status.Equals(status))
+                OpenPopup(status, popupType, mouseLocation);
 
-            SpawnSignal.Dispatch(experimentStatusReport, popupType, location);
+            UpdatePopupLocation(mouseLocation);
         }
 
 
         private void ClosePopup()
         {
-            if (_currentType == ExperimentView.PopupType.None) return; 
+            View.PopupType = ExperimentListView.PopupType.None;
+            View.enabled = false;
+        }
 
-            try
-            {
-                DestroySignal.Dispatch();
-                _currentPopup = Maybe<ExperimentStatusReport>.None;
-                _currentType = ExperimentView.PopupType.None;
-            }
-            catch (Exception e)
-            {
-                Log.Error("Exception while destroying experiment popup: " + e);
 
-                // todo: what do we do!? maybe signal plugin to terminate because something is horribly broken
-            }
+        private void OpenPopup(ExperimentStatusReport report, ExperimentListView.PopupType type, Vector2 location)
+        {
+            View.PopupType = type;
+            View.Status = report;
+            View.enabled = true;
+        }
+
+
+        private void UpdatePopupLocation(Vector2 location)
+        {
+            View.SetLocation(location);
         }
     }
 }

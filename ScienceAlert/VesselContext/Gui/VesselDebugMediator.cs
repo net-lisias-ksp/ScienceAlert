@@ -90,6 +90,13 @@ namespace ScienceAlert.VesselContext.Gui
         {
             try
             {
+                if (!Config.HasData)
+                {
+                    Log.Warning("Cannot deserialize " + typeof(VesselDebugView).Name +
+                                " from ConfigNode; no data found");
+                    return;
+                }
+
                 Serializer.LoadObjectFromConfigNode(ref _view, Config);
                 Log.Verbose("Successfully deserialized VesselDebugView");
             }

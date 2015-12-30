@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
 using ReeperCommon.Containers;
+using ReeperCommon.Extensions;
 using ReeperCommon.Serialization;
-using strange.extensions.injector;
 using strange.extensions.mediation.impl;
-using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class ExperimentMediator : Mediator
+    public class ExperimentListMediator : Mediator
     {
         [Inject]
-        public ExperimentView View
+        public ExperimentListView View
         {
             get { return _view; }
             set { _view = value; }
@@ -27,17 +25,20 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalLoadGuiSettings LoadSignal { get; set; }
         [Inject] public SignalSaveGuiSettings SaveSignal { get; set; }
 
-        private ExperimentView _view;
+        private ExperimentListView _view;
 
 
         public override void OnRegister()
         {
-            Log.Debug("ExperimentMediator.OnRegister");
+            Log.Debug("ExperimentListMediator.OnRegister");
 
             base.OnRegister();
 
             View.LockToggle.AddListener(OnLockToggle);
             View.Close.AddListener(OnClose);
+
+            LoadSignal.AddListener(OnLoad);
+            SaveSignal.AddListener(OnSave);
 
             // Temp!
             Log.Warning("Using Temp code to initialize experiment list");
@@ -56,11 +57,14 @@ namespace ScienceAlert.VesselContext.Gui
         {
             base.OnRemove();
 
+            LoadSignal.RemoveListener(OnLoad);
+            SaveSignal.RemoveListener(OnSave);
+
             View.LockToggle.RemoveListener(OnLockToggle);
             View.Close.RemoveListener(OnClose);
         }
 
-        [ListensTo(typeof(SignalSaveGuiSettings))]
+
 // ReSharper disable once UnusedMember.Local
         private void OnSave()
         {
@@ -73,7 +77,9 @@ namespace ScienceAlert.VesselContext.Gui
                         n.CopyTo(Config);
                     });
 
-                Log.Verbose("Successfully serialized ExperimentView");
+                Log.Verbose("Successfully serialized ExperimentListView");
+                Log.Debug(() => "Serialized " + typeof(ExperimentListView).Name + " to " + Config.ToSafeString());
+
             }
             catch (Exception e)
             {
@@ -82,14 +88,22 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        [ListensTo(typeof(SignalLoadGuiSettings))]
 // ReSharper disable once UnusedMember.Local
         private void OnLoad()
         {
             try
             {
+                Log.Debug(() => "Deserializing " + typeof (ExperimentListView).Name + " from " + Config.ToSafeString());
+
+                if (!Config.HasData)
+                {
+                    Log.Warning("Cannot deserialize " + typeof (ExperimentListView).Name +
+                                " from ConfigNode; no data found");
+                    return;
+                }
+
                 Serializer.LoadObjectFromConfigNode(ref _view, Config);
-                Log.Verbose("Successfully deserialized ExperimentView");
+                Log.Verbose("Successfully deserialized ExperimentListView");
             }
             catch (Exception e)
             {
@@ -119,7 +133,6 @@ namespace ScienceAlert.VesselContext.Gui
         private void ChangeVisibility(bool tf)
         {
             View.Visible = tf;
-            //AlertPanelVisibilitySignal.Dispatch(View.Visible);
         }
     }
 }

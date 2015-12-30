@@ -129,14 +129,12 @@
     <Compile Include="VesselContext\Experiments\Old\CommandCreateSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\Old\Sensor.cs" />
     <Compile Include="VesselContext\Experiments\Old\SensorManager.cs" />
-    <Compile Include="VesselContext\Gui\CommandDestroyExperimentStatusReportPopup.cs" />
     <Compile Include="VesselContext\Gui\CommandLoadGuiSettings.cs" />
     <Compile Include="VesselContext\Gui\CommandSaveGuiSettings.cs" />
     <Compile Include="VesselContext\ExperimentStatusReport.cs" />
-    <Compile Include="VesselContext\Gui\CommandSpawnExperimentStatusReportPopup.cs" />
+    <Compile Include="VesselContext\Gui\ExperimentListPopupMediator.cs" />
     <Compile Include="VesselContext\Gui\ExperimentPopupMediator.cs" />
-    <Compile Include="VesselContext\Gui\ExperimentStatusReportPopupMediator.cs" />
-    <Compile Include="VesselContext\Gui\ExperimentStatusReportPopup.cs" />
+    <Compile Include="VesselContext\Gui\ExperimentPopupView.cs" />
     <Compile Include="VesselContext\Gui\VesselDebugMediator.cs" />
     <Compile Include="VesselContext\Gui\VesselDebugView.cs" />
     <Compile Include="ScenarioConfiguration.cs" />
@@ -145,8 +143,8 @@
     <Compile Include="Core\GetObjectFieldsIncludingBaseTypes.cs" />
     <Compile Include="Core\Gui\SkinNotCreatedException.cs" />
     <Compile Include="Core\Gui\CommandConfigureGuiSkinsAndTextures.cs" />
-    <Compile Include="VesselContext\Gui\ExperimentMediator.cs" />
-    <Compile Include="VesselContext\Gui\ExperimentView.cs" />
+    <Compile Include="VesselContext\Gui\ExperimentListMediator.cs" />
+    <Compile Include="VesselContext\Gui\ExperimentListView.cs" />
     <Compile Include="VesselContext\CommandCreateVesselGui.cs" />
     <Compile Include="Core\CoreContext.cs" />
     <Compile Include="Core\ScienceAlert.cs" />

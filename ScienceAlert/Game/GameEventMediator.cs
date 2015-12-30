@@ -16,7 +16,8 @@ namespace ScienceAlert.Game
         [Inject] public SignalActiveVesselModified ActiveVesselModifiedSignal { get; set; }
         [Inject] public SignalVesselDestroyed VesselDestroyedSignal { get; set; }
         [Inject] public SignalActiveVesselDestroyed ActiveVesselDestroyedSignal { get; set; }
-
+        [Inject] public SignalGameSceneLoadRequested GameSceneLoadRequestedSignal { get; set; }
+        [Inject] public SignalApplicationQuit ApplicationQuitSignal { get; set; } 
 
         public override void OnRegister()
         {
@@ -24,15 +25,19 @@ namespace ScienceAlert.Game
             View.VesselChanged.AddListener(OnVesselChanged);
             View.VesselModified.AddListener(OnVesselModified);
             View.VesselDestroyed.AddListener(OnVesselDestroyed);
+            View.GameSceneLoadRequested.AddListener(OnGameSceneLoadRequested);
+            View.ApplicationQuit.AddListener(OnApplicationQuit);
         }
 
 
         public override void OnRemove()
         {
-            base.OnRemove();
             View.VesselChanged.RemoveListener(OnVesselChanged);
             View.VesselModified.RemoveListener(OnVesselModified);
             View.VesselDestroyed.RemoveListener(OnVesselDestroyed);
+            View.GameSceneLoadRequested.RemoveListener(OnGameSceneLoadRequested);
+            View.ApplicationQuit.RemoveListener(OnApplicationQuit);
+            base.OnRemove();
         }
 
 
@@ -91,6 +96,19 @@ namespace ScienceAlert.Game
             }
         }
 
+
+        private void OnGameSceneLoadRequested(GameScenes data)
+        {
+            Log.Debug(() => typeof(GameEventMediator).Name + ".OnGameSceneLoadRequested " + data);
+            TryAction(() => GameSceneLoadRequestedSignal.Dispatch(data));
+        }
+
+
+        private void OnApplicationQuit()
+        {
+            Log.Debug(() => typeof (GameEventMediator).Name + ".OnApplicationQuit");
+            TryAction(() => ApplicationQuitSignal.Dispatch());
+        }
 
         private static bool IsActiveVessel(Vessel data)
         {

@@ -98,13 +98,15 @@ namespace ScienceAlert.Core
             ConfigureSerializer();
             ConfigureExperiments();
 
-            injectionBinder.Bind<SignalShutdownScienceAlert>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalCriticalShutdown>().ToSingleton().CrossContext();
 
             injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
             injectionBinder.Bind<SignalVesselModified>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
             injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
+            injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
+            injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
         }
 
 
@@ -135,7 +137,7 @@ namespace ScienceAlert.Core
                 .To<CommandSaveSharedConfiguration>()
                 .Once();
 
-            injectionBinder.Bind<SignalShutdownScienceAlert>()
+            injectionBinder.Bind<SignalCriticalShutdown>()
                 .To<CommandCriticalShutdown>();
 
             commandBinder.Bind<SignalVesselDestroyed>()

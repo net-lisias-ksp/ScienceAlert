@@ -3,7 +3,6 @@ using System.Collections;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
-using strange.extensions.injector;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext
@@ -43,12 +42,17 @@ namespace ScienceAlert.VesselContext
 
             injectionBinder.Bind<GameObject>().ToValue(guiGo).ToName(VesselContextKeys.GuiContainer);
 
-            Log.Debug("Adding ExperimentView");
-            guiGo.AddComponent<ExperimentView>();
-
-            Log.Debug("Adding VesselDebugView");
-            guiGo.AddComponent<VesselDebugView>();
-
+            try
+            {
+                guiGo.AddComponent<ExperimentListView>();
+                guiGo.AddComponent<VesselDebugView>();
+                guiGo.AddComponent<ExperimentPopupView>();
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception while creating Vessel GUI: " + e);
+                // todo: bail out of vessel context? chances are good something is broken
+            }
             yield return 0; // wait for views to start before proceeding
 
             Release();

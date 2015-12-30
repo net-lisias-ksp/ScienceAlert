@@ -10,7 +10,8 @@ namespace ScienceAlert.Game
         internal readonly Signal<Vessel> VesselModified = new Signal<Vessel>();
         internal readonly Signal<Vessel> VesselChanged = new Signal<Vessel>();
         internal readonly Signal<Vessel> VesselDestroyed = new Signal<Vessel>();
-
+        internal readonly Signal<GameScenes> GameSceneLoadRequested = new Signal<GameScenes>();
+        internal readonly Signal ApplicationQuit = new Signal();
 
         protected override void Start()
         {
@@ -18,6 +19,7 @@ namespace ScienceAlert.Game
             GameEvents.onVesselChange.Add(OnVesselChange);
             GameEvents.onVesselDestroy.Add(OnVesselDestroy);
             GameEvents.onVesselWasModified.Add(OnVesselModified);
+            GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
         }
 
 
@@ -26,6 +28,7 @@ namespace ScienceAlert.Game
             GameEvents.onVesselChange.Remove(OnVesselChange);
             GameEvents.onVesselDestroy.Remove(OnVesselDestroy);
             GameEvents.onVesselWasModified.Remove(OnVesselModified);
+            GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
             base.OnDestroy();
         }
 
@@ -45,6 +48,18 @@ namespace ScienceAlert.Game
         private void OnVesselModified(Vessel data)
         {
             VesselModified.Dispatch(data);
+        }
+
+
+        private void OnGameSceneLoadRequested(GameScenes data)
+        {
+            GameSceneLoadRequested.Dispatch(data);
+        }
+
+
+        private void OnApplicationQuit()
+        {
+            ApplicationQuit.Dispatch();
         }
     }
 }

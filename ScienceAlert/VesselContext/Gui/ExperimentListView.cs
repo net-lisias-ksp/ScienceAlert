@@ -9,9 +9,7 @@ using UnityEngine;
 namespace ScienceAlert.VesselContext.Gui
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    //[MediatedBy(typeof(ExperimentMediator))]
-    //[MediatedBy(typeof(ExperimentPopupMediator))]
-    public class ExperimentView : StrangeView
+    public class ExperimentListView : StrangeView
     {
         [Inject(GuiKeys.CompactSkin)] public GUISkin WindowSkin { get; set; }
 
@@ -80,8 +78,7 @@ namespace ScienceAlert.VesselContext.Gui
 
         internal readonly Signal Close = new Signal();
         internal readonly Signal LockToggle = new Signal();
-        internal readonly Signal<ExperimentStatusReport, PopupType, Vector2> SpawnPopup = new Signal<ExperimentStatusReport, PopupType, Vector2>();
-        internal readonly Signal ClosePopup = new Signal();
+        internal readonly Signal<ExperimentStatusReport, PopupType, Vector2> ExperimentPopup = new Signal<ExperimentStatusReport, PopupType, Vector2>();
 
         private BasicTitleBarButton _lockButton;
         private readonly ExperimentReportDisplay.Factory _displayFactory = new ExperimentReportDisplay.Factory();
@@ -183,18 +180,7 @@ namespace ScienceAlert.VesselContext.Gui
 
                 if (Event.current.type != EventType.Repaint) return;
 
-                if (!string.IsNullOrEmpty(GUI.tooltip) && mousedOverReport != null)
-                {
-                    Log.Debug("Spawn popup: " + GUI.tooltip);
-                    SpawnPopupBasedOnTooltip(mousedOverReport, Event.current.mousePosition);
-                }
-                else
-                {
-                    Log.Debug("Close popup: tooltip empty");
-                    ClosePopup.Dispatch();
-                }
-
-            
+                UpdateExperimentPopup(mousedOverReport, Event.current.mousePosition);
             }
             finally
             {
@@ -203,13 +189,23 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        private void SpawnPopupBasedOnTooltip(ExperimentReportDisplay display, Vector2 popupLocation)
+        private void UpdateExperimentPopup(ExperimentReportDisplay display, Vector2 popupLocation)
         {
             try
             {
-                var popupType = (PopupType)Enum.Parse(typeof (PopupType), GUI.tooltip);
+                if (!string.IsNullOrEmpty(GUI.tooltip) && display != null)
+                {
+                    var screenMousePos = GUIUtility.GUIToScreenPoint(popupLocation);
+                    if (Dimensions.Contains(screenMousePos))
+                    {
+                        var popupType = (PopupType) Enum.Parse(typeof (PopupType), GUI.tooltip);
 
-                SpawnPopup.Dispatch(display.Report, popupType, GUIUtility.GUIToScreenPoint(popupLocation));
+                        ExperimentPopup.Dispatch(display.Report, popupType, GUIUtility.GUIToScreenPoint(popupLocation));
+                        return;
+                    }
+                }
+                
+                ExperimentPopup.Dispatch(default(ExperimentStatusReport), PopupType.None, popupLocation);
             }
             catch (Exception e)
             {
@@ -221,7 +217,6 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        // Returns true if a popup for this experiment was created or needs to stay open
         private void DrawExperimentStatus(ExperimentReportDisplay display)
         {
             if (!ShouldDisplayExperimentInList(display.Report)) return;
