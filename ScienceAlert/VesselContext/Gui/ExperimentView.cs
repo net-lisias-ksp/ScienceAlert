@@ -31,15 +31,63 @@ namespace ScienceAlert.VesselContext.Gui
             Lab
         }
 
+        class ExperimentReportDisplay
+        {
+            public readonly ExperimentStatusReport Report;
+
+            public readonly GUIContent AlertContent;
+            public readonly GUIContent CollectionContent;
+            public readonly GUIContent TransmissionContent;
+            public readonly GUIContent LabContent;
+
+            private ExperimentReportDisplay(
+                ExperimentStatusReport report, 
+                GUIContent alertContent, 
+                GUIContent collectionContent,
+                GUIContent transmissionContent, 
+                GUIContent labContent)
+            {
+                if (alertContent == null) throw new ArgumentNullException("AlertContent");
+                if (collectionContent == null) throw new ArgumentNullException("CollectionContent");
+                if (transmissionContent == null) throw new ArgumentNullException("TransmissionContent");
+                if (labContent == null) throw new ArgumentNullException("LabContent");
+                Report = report;
+                AlertContent = alertContent;
+                CollectionContent = collectionContent;
+                TransmissionContent = transmissionContent;
+                LabContent = labContent;
+            }
+
+
+            public class Factory
+            {
+                public ExperimentReportDisplay Create(ExperimentStatusReport report)
+                {
+                    var exp = report.Experiment;
+
+                    return new ExperimentReportDisplay(report, CreateContent(exp, PopupType.Alert),
+                        CreateContent(exp, PopupType.Collection), CreateContent(exp, PopupType.Transmission),
+                        CreateContent(exp, PopupType.Lab));
+                }
+
+
+                private static GUIContent CreateContent(ScienceExperiment experiment, PopupType popup)
+                {
+                    return new GUIContent(string.Empty, popup.ToString());
+                }
+            }
+        }
+
         internal readonly Signal Close = new Signal();
         internal readonly Signal LockToggle = new Signal();
-        internal readonly Signal<ExperimentStatusReport, PopupType> SpawnPopup = new Signal<ExperimentStatusReport, PopupType>();
+        internal readonly Signal<ExperimentStatusReport, PopupType, Vector2> SpawnPopup = new Signal<ExperimentStatusReport, PopupType, Vector2>();
         internal readonly Signal ClosePopup = new Signal();
 
         private BasicTitleBarButton _lockButton;
+        private readonly ExperimentReportDisplay.Factory _displayFactory = new ExperimentReportDisplay.Factory();
 
-        private readonly Dictionary<ScienceExperiment, ExperimentStatusReport> _experimentStatuses =
-            new Dictionary<ScienceExperiment, ExperimentStatusReport>(); 
+        private readonly Dictionary<ScienceExperiment, ExperimentReportDisplay> _experimentStatuses =
+            new Dictionary<ScienceExperiment, ExperimentReportDisplay>(); 
 
 
         protected override IWindowComponent Initialize()
@@ -90,7 +138,7 @@ namespace ScienceAlert.VesselContext.Gui
 
         public void SetExperimentStatus(ExperimentStatusReport statusReport)
         {
-            _experimentStatuses[statusReport.Experiment] = statusReport;
+            _experimentStatuses[statusReport.Experiment] = _displayFactory.Create(statusReport);
         }
 
 
@@ -111,7 +159,7 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        private bool ShouldDisplayExperimentInList(ExperimentStatusReport statusReport)
+        private static bool ShouldDisplayExperimentInList(ExperimentStatusReport statusReport)
         {
             return statusReport.Onboard;
         }
@@ -123,15 +171,30 @@ namespace ScienceAlert.VesselContext.Gui
 
             try
             {
-                bool popupInUse = false;
+                ExperimentReportDisplay mousedOverReport = null;
 
                 while (experimentEnumerator.MoveNext())
                 {
                     var item = experimentEnumerator.Current.Value;
-                    popupInUse |= DrawExperimentStatus(item);
+                    DrawExperimentStatus(item);
+
+                    if (!string.IsNullOrEmpty(GUI.tooltip)) mousedOverReport = item;
                 }
 
-                if (!popupInUse) ClosePopup.Dispatch();
+                if (Event.current.type != EventType.Repaint) return;
+
+                if (!string.IsNullOrEmpty(GUI.tooltip) && mousedOverReport != null)
+                {
+                    Log.Debug("Spawn popup: " + GUI.tooltip);
+                    SpawnPopupBasedOnTooltip(mousedOverReport, Event.current.mousePosition);
+                }
+                else
+                {
+                    Log.Debug("Close popup: tooltip empty");
+                    ClosePopup.Dispatch();
+                }
+
+            
             }
             finally
             {
@@ -140,42 +203,44 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        // Returns true if a popup for this experiment was created or needs to stay open
-        private bool DrawExperimentStatus(ExperimentStatusReport statusReport)
+        private void SpawnPopupBasedOnTooltip(ExperimentReportDisplay display, Vector2 popupLocation)
         {
-            if (!ShouldDisplayExperimentInList(statusReport)) return false;
+            try
+            {
+                var popupType = (PopupType)Enum.Parse(typeof (PopupType), GUI.tooltip);
 
-            bool popupNeeded = false;
+                SpawnPopup.Dispatch(display.Report, popupType, GUIUtility.GUIToScreenPoint(popupLocation));
+            }
+            catch (Exception e)
+            {
+                if (!(e is ArgumentNullException) && !(e is ArgumentException) && !(e is OverflowException)) throw;
+
+                Log.Error("Unrecognized display popup name: " + GUI.tooltip);
+                return;
+            }
+        }
+
+
+        // Returns true if a popup for this experiment was created or needs to stay open
+        private void DrawExperimentStatus(ExperimentReportDisplay display)
+        {
+            if (!ShouldDisplayExperimentInList(display.Report)) return;
 
             GUILayout.BeginHorizontal();
             {
-                GUILayout.Button(statusReport.Experiment.experimentTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
+                GUILayout.Button(display.Report.Experiment.experimentTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
 
-                // todo: use tooltip property instead of these boolean shenanigans
-                popupNeeded |= DrawToggleAndSignalOnMouseOver(statusReport, true, PopupType.Alert);
-                popupNeeded |= DrawToggleAndSignalOnMouseOver(statusReport, statusReport.CollectionValue > 0f, PopupType.Collection);
-                popupNeeded |= DrawToggleAndSignalOnMouseOver(statusReport, statusReport.TransmissionValue > 0f, PopupType.Transmission);
-                popupNeeded |= DrawToggleAndSignalOnMouseOver(statusReport, statusReport.LabValue > 0f, PopupType.Lab);
+                var report = display.Report;
+
+                GUILayout.Toggle(true, display.CollectionContent, LitToggleStyle);
+                GUILayout.Toggle(report.CollectionValue > 0f, display.CollectionContent, LitToggleStyle);
+                GUILayout.Toggle(report.TransmissionValue > 0f, display.TransmissionContent, LitToggleStyle);
+                GUILayout.Toggle(report.LabValue > 0f, display.LabContent, LitToggleStyle);
+
             }
             GUILayout.EndHorizontal();
-
-            return popupNeeded;
         }
 
-
-        // Returns whether or not a popup is needed for this toggle
-        private bool DrawToggleAndSignalOnMouseOver(ExperimentStatusReport report, bool lit, PopupType popup)
-        {
-            GUILayout.Toggle(lit, string.Empty, LitToggleStyle); // ignore whether it's actually pressed, we don't care
-
-            if (Event.current.type != EventType.Repaint) return false;
-            if (!GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition)) return false;
-
-            Log.Debug("Mouseover: " + popup);
-            SpawnPopup.Dispatch(report, popup);
-
-            return true;
-        }
 
 
         private Vector2 CalculateMinRowSize()

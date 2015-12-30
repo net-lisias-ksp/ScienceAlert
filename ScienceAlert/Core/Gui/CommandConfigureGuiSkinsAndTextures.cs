@@ -38,6 +38,15 @@ namespace ScienceAlert.Core.Gui
         {
             Log.Verbose("Configuring GUI skins");
 
+            injectionBinder.Bind<GUISkin>().ToValue(HighLogic.Skin).CrossContext();
+
+            ConfigureCompactSkin();
+            ConfigureAlertViewToggle();
+        }
+
+
+        private void ConfigureCompactSkin()
+        {
             // we need to trim off some fat on this skin to make the UI use space a bit more efficiently...
             var customSkin = (Object.Instantiate(HighLogic.Skin) as GUISkin).IfNull(() => { throw new SkinNotCreatedException(HighLogic.Skin); });
 
@@ -51,7 +60,7 @@ namespace ScienceAlert.Core.Gui
                 s.button.padding = new RectOffset(1, 1, 1, 1);
                 s.button.margin = new RectOffset(1, 1, 1, 1);
 
-                
+
                 //s.button.fixedWidth = largestButtonDimensions.x;
                 //s.button.fixedHeight = largestButtonDimensions.y;
                 //s.button.fontSize = 12;
@@ -70,16 +79,9 @@ namespace ScienceAlert.Core.Gui
                 s.label.contentOffset = new Vector2(3f, 3f);
                 s.label.fontStyle = FontStyle.Bold;
             });
-
-
             
-            injectionBinder.Bind<GUISkin>().ToValue(HighLogic.Skin).CrossContext();
-            injectionBinder.Bind<GUISkin>().ToValue(customSkin).ToName(global::ScienceAlert.GuiKeys.CompactSkin).CrossContext();
-
-            injectionBinder.Bind<GUIStyle>().ToValue(ConfigureTitleBarButtonStyle()).ToName(global::ScienceAlert.GuiKeys.WindowTitleBarButtonStyle).CrossContext();
-
-
-            ConfigureToggles();
+            injectionBinder.Bind<GUISkin>().ToValue(customSkin).ToName(GuiKeys.CompactSkin).CrossContext();
+            injectionBinder.Bind<GUIStyle>().ToValue(ConfigureTitleBarButtonStyle()).ToName(GuiKeys.WindowTitleBarButtonStyle).CrossContext();
         }
 
 
@@ -87,9 +89,9 @@ namespace ScienceAlert.Core.Gui
         /// The indicators on the alert panel are going to be toggle buttons. We need to customize them a bit with
         /// the proper textures and cut down on wasted space
         /// </summary>
-        private void ConfigureToggles()
+        private void ConfigureAlertViewToggle()
         {
-            var skin = injectionBinder.GetInstance<GUISkin>(global::ScienceAlert.GuiKeys.CompactSkin);
+            var skin = injectionBinder.GetInstance<GUISkin>(GuiKeys.CompactSkin);
 
             var toggle = new GUIStyle(skin.toggle);
             var unlit = GetTexture("Resources/toggle_frame");
@@ -109,7 +111,7 @@ namespace ScienceAlert.Core.Gui
             toggle.onHover.background = lit;
             toggle.onActive.background = lit;
 
-            injectionBinder.Bind<GUIStyle>().To(toggle).ToName(global::ScienceAlert.GuiKeys.LitToggleStyle).CrossContext();
+            injectionBinder.Bind<GUIStyle>().To(toggle).ToName(GuiKeys.LitToggleStyle).CrossContext();
         }
 
 
@@ -124,12 +126,15 @@ namespace ScienceAlert.Core.Gui
         {
             Log.Verbose("Configuring GUI textures");
 
-            BindTexture("Resources/sheet_app", global::ScienceAlert.GuiKeys.ApplicationLauncherSpriteSheet);
-            BindTexture("Resources/btnClose", global::ScienceAlert.GuiKeys.CloseButtonTexture);
-            BindTexture("Resources/btnLock", global::ScienceAlert.GuiKeys.LockButtonTexture);
-            BindTexture("Resources/btnUnlock", global::ScienceAlert.GuiKeys.UnlockButtonTexture);
-            BindTexture("Resources/btnScale", global::ScienceAlert.GuiKeys.RescaleCursorTexture);
-            BindTexture("Resources/cursor", global::ScienceAlert.GuiKeys.ResizeCursorTexture);
+            BindTexture("Resources/sheet_app", GuiKeys.ApplicationLauncherSpriteSheet);
+            BindTexture("Resources/btnClose", GuiKeys.CloseButtonTexture);
+            BindTexture("Resources/btnLock", GuiKeys.LockButtonTexture);
+            BindTexture("Resources/btnUnlock", GuiKeys.UnlockButtonTexture);
+            BindTexture("Resources/btnScale", GuiKeys.RescaleCursorTexture);
+            BindTexture("Resources/cursor", GuiKeys.ResizeCursorTexture);
+            BindTexture("Squad/Contracts/Icons/dish", GuiKeys.DishTexture);
+            BindTexture("Squad/Contracts/Icons/report", GuiKeys.ClipboardTexture);
+            BindTexture("Squad/Contracts/Icons/sample", GuiKeys.SampleTexture);
         }
 
 

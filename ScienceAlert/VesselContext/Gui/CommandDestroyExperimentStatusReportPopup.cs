@@ -21,7 +21,7 @@ namespace ScienceAlert.VesselContext.Gui
         {
             _viewContainer.GetComponent<ExperimentStatusReportPopup>()
                 .IfNull(() => Log.Warning("Cannot destroy experiment popup: does not exist"))
-                .Do(UnityEngine.Object.Destroy)
+                .Do(UnityEngine.Object.DestroyImmediate)
                 .Do(p => Log.Debug(() => "Destroyed experiment popup"));
         }
     }

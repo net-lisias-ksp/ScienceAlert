@@ -2,13 +2,16 @@
 using System.Linq;
 using ReeperCommon.Containers;
 using strange.extensions.mediation.impl;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
 {
+// ReSharper disable once ClassNeverInstantiated.Global
     public class ExperimentPopupMediator : Mediator
     {
         [Inject] public ExperimentView View { get; set; }
         [Inject] public SignalSpawnExperimentReportPopup SpawnSignal { get; set; }
+        [Inject] public SignalUpdateExperimentReportPopupLocation LocationSignal { get; set; }
         [Inject] public SignalDestroyExperimentReportPopup DestroySignal { get; set; }
 
         private Maybe<ExperimentStatusReport> _currentPopup = Maybe<ExperimentStatusReport>.None;
@@ -33,12 +36,16 @@ namespace ScienceAlert.VesselContext.Gui
 
 
 
-        private void SpawnPopup(ExperimentStatusReport experimentStatusReport, ExperimentView.PopupType popupType)
+        private void SpawnPopup(ExperimentStatusReport experimentStatusReport, ExperimentView.PopupType popupType, Vector2 location)
         {
             if (_currentType != ExperimentView.PopupType.None)
             {
                 if (popupType == _currentType && _currentPopup.Value.Equals(experimentStatusReport))
+                {
+                    Log.Debug("position update " + Time.realtimeSinceStartup);
+                    LocationSignal.Dispatch(location);
                     return; // same popup; already spawned
+                }
 
                 ClosePopup();
             }
@@ -46,9 +53,8 @@ namespace ScienceAlert.VesselContext.Gui
             _currentPopup = experimentStatusReport.ToMaybe();
             _currentType = popupType;
 
-            SpawnSignal.Dispatch(experimentStatusReport, popupType);
+            SpawnSignal.Dispatch(experimentStatusReport, popupType, location);
         }
-
 
 
         private void ClosePopup()

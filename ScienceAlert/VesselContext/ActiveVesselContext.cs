@@ -61,6 +61,7 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
 
+            injectionBinder.Bind<SignalUpdateExperimentReportPopupLocation>().ToSingleton();
 
             mediationBinder.BindView<ExperimentView>()
                 .ToMediator<ExperimentMediator>()

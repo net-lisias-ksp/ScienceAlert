@@ -1,5 +1,6 @@
 ﻿using ScienceAlert.VesselContext.Gui;
 using strange.extensions.signal.impl;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext
 {
@@ -18,7 +19,13 @@ namespace ScienceAlert.VesselContext
     }
 
 
-    public class SignalSpawnExperimentReportPopup : Signal<ExperimentStatusReport, ExperimentView.PopupType>
+    public class SignalSpawnExperimentReportPopup : Signal<ExperimentStatusReport, ExperimentView.PopupType, Vector2>
+    {
+        
+    }
+
+
+    public class SignalUpdateExperimentReportPopupLocation : Signal<Vector2>
     {
         
     }

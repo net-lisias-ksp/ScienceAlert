@@ -16,6 +16,7 @@ namespace ScienceAlert.Game
 
 
     [Implements(typeof(IScienceUtil), InjectionBindingScope.CROSS_CONTEXT)]
+// ReSharper disable once ClassNeverInstantiated.Global
     public class KspScienceUtil : IScienceUtil
     {
         // Note: this doesn't use the game version of this method because that generates extra garbage appending

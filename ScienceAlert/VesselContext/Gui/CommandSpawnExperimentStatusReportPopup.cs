@@ -9,12 +9,14 @@ namespace ScienceAlert.VesselContext.Gui
         private readonly GameObject _viewContainer;
         private readonly ExperimentStatusReport _statusReport;
         private readonly ExperimentView.PopupType _popupType;
+        private readonly Vector2 _location;
         private readonly SignalDestroyExperimentReportPopup _destroyPopupSignal;
 
         public CommandSpawnExperimentStatusReportPopup(
             [Name(VesselContextKeys.GuiContainer)] GameObject viewContainer, 
             ExperimentStatusReport statusReport,
             ExperimentView.PopupType popupType,
+            Vector2 location,
             SignalDestroyExperimentReportPopup destroyPopupSignal)
         {
             if (viewContainer == null) throw new ArgumentNullException("viewContainer");
@@ -22,6 +24,7 @@ namespace ScienceAlert.VesselContext.Gui
             _viewContainer = viewContainer;
             _statusReport = statusReport;
             _popupType = popupType;
+            _location = location;
             _destroyPopupSignal = destroyPopupSignal;
         }
 
@@ -39,6 +42,8 @@ namespace ScienceAlert.VesselContext.Gui
 
             popupView.PopupType = _popupType;
             popupView.Status = _statusReport;
+
+            popupView.SetLocation(_location);
         }
     }
 }

@@ -9,6 +9,10 @@
         ResizeCursorTexture, // Texture2D
         RescaleCursorTexture, // Texture2D
 
+        DishTexture, // Texture2D
+        ClipboardTexture, // Texture2D
+        SampleTexture, // Texture2D
+
         CompactSkin, // GUISkin (compact)
 
         WindowTitleBarButtonStyle, // GUIStyle
