@@ -38,6 +38,7 @@ namespace ScienceAlert.VesselContext.Gui
             SaveSignal.AddListener(OnSave);
             LoadSignal.AddListener(OnLoad);
 
+            // todo: VesselDebugView is now associated with VesselContext so remove these
             GameEvents.onVesselChange.Add(OnVesselChanged);
             GameEvents.onVesselWasModified.Add(OnVesselModified);
 

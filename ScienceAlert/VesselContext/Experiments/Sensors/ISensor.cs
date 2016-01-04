@@ -2,6 +2,6 @@
 {
     public interface ISensor
     {
-        float Value { get; }
+        bool Poll();
     }
 }

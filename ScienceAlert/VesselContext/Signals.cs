@@ -23,4 +23,9 @@ namespace ScienceAlert.VesselContext
     {
         
     }
+
+
+    public class SignalExperimentStatusChanged : Signal<ExperimentStatusReport>
+    {
+    }
 }

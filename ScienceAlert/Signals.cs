@@ -10,7 +10,7 @@ namespace ScienceAlert
 
 
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class SignalDestroy : Signal // signal to destroy the current context
+    public class SignalContextDestruction : Signal // signal to destroy the current context
     {
 
     }
@@ -60,7 +60,14 @@ namespace ScienceAlert
 
 
 // ReSharper disable once ClassNeverInstantiated.Global
+    // Dispatched after something went wrong during initialization and we're trying to shut down without breaking anything
     public class SignalCriticalShutdown : Signal
+    {
+        
+    }
+
+
+    public class SignalSharedConfigurationSaving : Signal
     {
         
     }

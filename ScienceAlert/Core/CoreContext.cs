@@ -107,6 +107,8 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
+
+            injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
         }
 
 
@@ -132,7 +134,7 @@ namespace ScienceAlert.Core
                 .Once();
 
 
-            commandBinder.Bind<SignalDestroy>()
+            commandBinder.Bind<SignalContextDestruction>()
                 .InSequence()
                 .To<CommandSaveSharedConfiguration>()
                 .Once();
@@ -339,7 +341,7 @@ namespace ScienceAlert.Core
         {
             try
             {
-                injectionBinder.GetInstance<SignalDestroy>().Do(ds => ds.Dispatch());
+                injectionBinder.GetInstance<SignalContextDestruction>().Do(ds => ds.Dispatch());
             }
             catch (Exception e)
             {

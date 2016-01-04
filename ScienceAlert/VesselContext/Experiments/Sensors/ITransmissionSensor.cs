@@ -2,5 +2,6 @@
 {
     public interface ITransmissionSensor : ISensor
     {
+        float Value { get; }
     }
 }

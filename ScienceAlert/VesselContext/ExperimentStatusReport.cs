@@ -11,7 +11,6 @@ namespace ScienceAlert.VesselContext
         public float LabValue { get; private set; }
         public bool Onboard { get; private set; }
         public bool Available { get; private set; }
-        public bool Runnable { get; private set; }
 
         public ExperimentStatusReport(
             ScienceExperiment experiment, 
@@ -19,8 +18,7 @@ namespace ScienceAlert.VesselContext
             float transmissionValue,
             float labValue, 
             bool onboard, 
-            bool available, 
-            bool runnable) : this()
+            bool available) : this()
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
 
@@ -30,7 +28,6 @@ namespace ScienceAlert.VesselContext
             LabValue = labValue;
             Onboard = onboard;
             Available = available;
-            Runnable = runnable;
         }
 
 
@@ -58,8 +55,7 @@ namespace ScienceAlert.VesselContext
                    Mathf.Approximately(TransmissionValue, report.TransmissionValue) &&
                    Mathf.Approximately(LabValue, report.LabValue) &&
                    Onboard == report.Onboard &&
-                   Available == report.Available &&
-                   Runnable == report.Runnable;
+                   Available == report.Available;
         }
 
         public override int GetHashCode()
@@ -73,7 +69,7 @@ namespace ScienceAlert.VesselContext
                 hash = hash * 479 + TransmissionValue.GetHashCode();
                 hash = hash * 479 + Onboard.GetHashCode();
                 hash = hash * 479 + Available.GetHashCode();
-                hash = hash * 479 + Runnable.GetHashCode();
+                //hash = hash * 479 + Runnable.GetHashCode();
 
                 return hash;
             }

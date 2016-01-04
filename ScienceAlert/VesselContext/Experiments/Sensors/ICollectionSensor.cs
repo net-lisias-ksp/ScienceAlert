@@ -2,5 +2,6 @@
 {
     public interface ICollectionSensor : ISensor
     {
+        float Value { get; }
     }
 }

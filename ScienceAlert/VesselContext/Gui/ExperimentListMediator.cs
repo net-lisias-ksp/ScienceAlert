@@ -49,7 +49,7 @@ namespace ScienceAlert.VesselContext.Gui
                         UnityEngine.Random.Range(0f, 100f),
                         UnityEngine.Random.Range(0f, 100f),
                         UnityEngine.Random.Range(0f, 100f),
-                        true, true, true)));
+                        true, true)));
         }
 
 

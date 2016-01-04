@@ -11,8 +11,17 @@ namespace ScienceAlert.Core
 // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandSaveSharedConfiguration : CommandLoadSharedConfiguration
     {
-        public CommandSaveSharedConfiguration(IDirectory pluginDirectory, ISharedConfigurationFilePathProvider configPathProviderQuery, IConfigNodeSerializer serializer, SharedConfiguration sharedConfiguration) : base(pluginDirectory, configPathProviderQuery, serializer, sharedConfiguration)
+        private readonly SignalSharedConfigurationSaving _savingSignal;
+
+        public CommandSaveSharedConfiguration(
+            IDirectory pluginDirectory, 
+            ISharedConfigurationFilePathProvider configPathProviderQuery, 
+            IConfigNodeSerializer serializer, 
+            SharedConfiguration sharedConfiguration,
+            SignalSharedConfigurationSaving savingSignal) : base(pluginDirectory, configPathProviderQuery, serializer, sharedConfiguration)
         {
+            if (savingSignal == null) throw new ArgumentNullException("savingSignal");
+            _savingSignal = savingSignal;
         }
 
         public override void Execute()
@@ -21,6 +30,8 @@ namespace ScienceAlert.Core
 
             try
             {
+                _savingSignal.Dispatch();
+
                 var databaseConfig = GetConfigNodeFromDatabase();
                 var serialized = Serializer.CreateConfigNodeFromObject(base.SharedConfiguration);
 

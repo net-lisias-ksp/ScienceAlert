@@ -91,7 +91,6 @@ namespace ScienceAlert.VesselContext.Gui
         {
             Skin = WindowSkin;
             Draggable = true;
-            Height = 1f;
 
             var currDim = Dimensions;
             currDim.center = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
@@ -112,7 +111,7 @@ namespace ScienceAlert.VesselContext.Gui
             };
 
             Width = minWindowSize.x;
-            Height = minWindowSize.y;
+            Height = Mathf.Max(Height, minWindowSize.y);
 
             return resizable;
         }

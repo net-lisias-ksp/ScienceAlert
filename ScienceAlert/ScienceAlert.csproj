@@ -65,9 +65,15 @@
     <Compile Include="Log.cs" />
     <Compile Include="VesselContext\CommandLogSensorStatusUpdate.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentObserver.cs" />
+    <Compile Include="VesselContext\Experiments\ExperimentObserverFactory.cs" />
+    <Compile Include="VesselContext\Experiments\IExperimentObserver.cs" />
+    <Compile Include="VesselContext\Experiments\IExperimentObserverFactory.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\IAvailabilitySensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\ICollectionSensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\ILabDataSensor.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\IOnboardSensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\ISensor.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\ISensorFactory.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\ITransmissionSensor.cs" />
     <Compile Include="VesselContext\Experiments\Old\ISensorState.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CommandCompileExperimentRulesets.cs" />
@@ -104,7 +110,7 @@
     <Compile Include="VesselContext\Experiments\NoRulesetDefinedForExperimentException.cs" />
     <Compile Include="VesselContext\Experiments\Old\ExperimentSensor.cs" />
     <Compile Include="VesselContext\Experiments\Old\ISensor.cs" />
-    <Compile Include="VesselContext\Experiments\IExperimentSensorFactory.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\IExperimentSensorFactory.cs" />
     <Compile Include="VesselContext\Experiments\Old\ISensorStatus.cs" />
     <Compile Include="VesselContext\Experiments\IScienceReportStorageContainer.cs" />
     <Compile Include="Game\IVessel.cs" />
@@ -129,6 +135,7 @@
     <Compile Include="VesselContext\Experiments\Old\CommandCreateSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\Old\Sensor.cs" />
     <Compile Include="VesselContext\Experiments\Old\SensorManager.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\Signals.cs" />
     <Compile Include="VesselContext\Gui\CommandLoadGuiSettings.cs" />
     <Compile Include="VesselContext\Gui\CommandSaveGuiSettings.cs" />
     <Compile Include="VesselContext\ExperimentStatusReport.cs" />

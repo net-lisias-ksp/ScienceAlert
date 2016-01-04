@@ -90,13 +90,12 @@ namespace ScienceAlert.VesselContext
                 .Once();
 
  
-            commandBinder.Bind<SignalDestroy>()
+            commandBinder.Bind<SignalContextDestruction>()
                 .To<CommandSaveGuiSettings>()
                 .Once();
 
-            commandBinder.Bind<SignalApplicationQuit>()
-                .To<CommandSaveGuiSettings>()
-                .Once();
+            commandBinder.Bind<SignalSharedConfigurationSaving>()
+                .To<CommandSaveGuiSettings>();
         }
 
 
@@ -132,7 +131,7 @@ namespace ScienceAlert.VesselContext
                     return; // context bootstrapper will issue destruction signal
                 }
 
-                injectionBinder.GetInstance<SignalDestroy>().Do(s => s.Dispatch());
+                injectionBinder.GetInstance<SignalContextDestruction>().Do(s => s.Dispatch());
             }
             catch (Exception e)
             {

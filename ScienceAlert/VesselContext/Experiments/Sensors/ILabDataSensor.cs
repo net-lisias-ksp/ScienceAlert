@@ -2,5 +2,6 @@
 {
     public interface ILabDataSensor : ISensor
     {
+        float Value { get; }
     }
 }
