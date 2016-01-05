@@ -13,6 +13,7 @@ using ReeperCommon.Logging;
 using ReeperCommon.Repositories;
 using ReeperCommon.Serialization;
 using ScienceAlert.Core.Gui;
+using ScienceAlert.Game;
 using ScienceAlert.Gui;
 using ScienceAlert.VesselContext;
 using ScienceAlert.VesselContext.Experiments.Rules;

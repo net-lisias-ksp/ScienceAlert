@@ -31,7 +31,7 @@ namespace ScienceAlert.VesselContext.Gui
 
         class ExperimentReportDisplay
         {
-            public readonly ExperimentStatusReport Report;
+            public readonly ExperimentSensorState Report;
 
             public readonly GUIContent AlertContent;
             public readonly GUIContent CollectionContent;
@@ -39,7 +39,7 @@ namespace ScienceAlert.VesselContext.Gui
             public readonly GUIContent LabContent;
 
             private ExperimentReportDisplay(
-                ExperimentStatusReport report, 
+                ExperimentSensorState report, 
                 GUIContent alertContent, 
                 GUIContent collectionContent,
                 GUIContent transmissionContent, 
@@ -59,7 +59,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             public class Factory
             {
-                public ExperimentReportDisplay Create(ExperimentStatusReport report)
+                public ExperimentReportDisplay Create(ExperimentSensorState report)
                 {
                     var exp = report.Experiment;
 
@@ -78,7 +78,7 @@ namespace ScienceAlert.VesselContext.Gui
 
         internal readonly Signal Close = new Signal();
         internal readonly Signal LockToggle = new Signal();
-        internal readonly Signal<ExperimentStatusReport, PopupType, Vector2> ExperimentPopup = new Signal<ExperimentStatusReport, PopupType, Vector2>();
+        internal readonly Signal<ExperimentSensorState, PopupType, Vector2> ExperimentPopup = new Signal<ExperimentSensorState, PopupType, Vector2>();
 
         private BasicTitleBarButton _lockButton;
         private readonly ExperimentReportDisplay.Factory _displayFactory = new ExperimentReportDisplay.Factory();
@@ -132,9 +132,9 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        public void SetExperimentStatus(ExperimentStatusReport statusReport)
+        public void SetExperimentStatus(ExperimentSensorState sensorState)
         {
-            _experimentStatuses[statusReport.Experiment] = _displayFactory.Create(statusReport);
+            _experimentStatuses[sensorState.Experiment] = _displayFactory.Create(sensorState);
         }
 
 
@@ -155,9 +155,9 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        private static bool ShouldDisplayExperimentInList(ExperimentStatusReport statusReport)
+        private static bool ShouldDisplayExperimentInList(ExperimentSensorState sensorState)
         {
-            return statusReport.Onboard;
+            return sensorState.Onboard;
         }
 
 
@@ -204,7 +204,7 @@ namespace ScienceAlert.VesselContext.Gui
                     }
                 }
                 
-                ExperimentPopup.Dispatch(default(ExperimentStatusReport), PopupType.None, popupLocation);
+                ExperimentPopup.Dispatch(default(ExperimentSensorState), PopupType.None, popupLocation);
             }
             catch (Exception e)
             {

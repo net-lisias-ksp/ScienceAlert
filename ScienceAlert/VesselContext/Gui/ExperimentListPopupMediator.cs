@@ -26,9 +26,9 @@ namespace ScienceAlert.VesselContext.Gui
 
 
 
-        private void UpdatePopup(ExperimentStatusReport experimentStatusReport, ExperimentListView.PopupType popupType, Vector2 location)
+        private void UpdatePopup(ExperimentSensorState experimentSensorState, ExperimentListView.PopupType popupType, Vector2 location)
         {
-            UpdateSignal.Dispatch(experimentStatusReport, popupType, location);
+            UpdateSignal.Dispatch(experimentSensorState, popupType, location);
         }
     }
 }

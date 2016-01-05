@@ -1,11 +1,9 @@
 ﻿using System;
-using ScienceAlert.Core;
-using ScienceAlert.Game;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using UnityEngine;
 
-namespace ScienceAlert
+namespace ScienceAlert.Game
 {
 // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandConfigureGameEvents : Command

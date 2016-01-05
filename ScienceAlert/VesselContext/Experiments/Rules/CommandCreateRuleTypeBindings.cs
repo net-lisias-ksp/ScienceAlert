@@ -1,9 +1,8 @@
 ﻿using System;
-using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.command.impl;
 using strange.extensions.injector.api;
 
-namespace ScienceAlert.VesselContext
+namespace ScienceAlert.VesselContext.Experiments.Rules
 {
 // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandCreateRuleTypeBindings : Command

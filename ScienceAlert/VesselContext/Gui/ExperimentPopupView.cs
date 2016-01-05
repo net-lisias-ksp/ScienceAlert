@@ -13,14 +13,14 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject(GuiKeys.DishTexture)] public Texture2D DishTexture { get; set; }
         [Inject(GuiKeys.SampleTexture)] public Texture2D SampleTexture { get; set; }
 
-        public ExperimentStatusReport Status
+        public ExperimentSensorState Status
         {
             set
             {
-                _statusReport = value;
+                _sensorState = value;
                 RebuildDisplayData();
             }
-            get { return _statusReport; }
+            get { return _sensorState; }
         }
 
         public ExperimentListView.PopupType PopupType {
@@ -32,7 +32,7 @@ namespace ScienceAlert.VesselContext.Gui
             get { return _popupType; }
         } 
 
-        private ExperimentStatusReport _statusReport = default(ExperimentStatusReport);
+        private ExperimentSensorState _sensorState = default(ExperimentSensorState);
         private ExperimentListView.PopupType _popupType = ExperimentListView.PopupType.None;
 
         public Rect WindowRect = new Rect(0f, 0f, 20f, 50f);
@@ -103,7 +103,7 @@ namespace ScienceAlert.VesselContext.Gui
             }
             GUILayout.EndHorizontal();
             
-            //GUILayout.Label("Popup here " + _popupType + " : " + _statusReport.Experiment.experimentTitle);
+            //GUILayout.Label("Popup here " + _popupType + " : " + _sensorState.Experiment.experimentTitle);
 
             GUILayout.EndArea();
         }

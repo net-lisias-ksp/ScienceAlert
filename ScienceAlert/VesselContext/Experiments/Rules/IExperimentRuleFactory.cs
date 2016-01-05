@@ -1,7 +1,4 @@
-﻿using ScienceAlert.VesselContext.Experiments.Rules;
-using strange.extensions.injector.api;
-
-namespace ScienceAlert.VesselContext.Experiments
+﻿namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     public interface IExperimentRuleFactory
     {

@@ -2,12 +2,12 @@
 using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Serialization;
-using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.injector.api;
 using strange.framework.impl;
 
-namespace ScienceAlert.VesselContext.Experiments
+namespace ScienceAlert.VesselContext.Experiments.Rules
 {
+// ReSharper disable once ClassNeverInstantiated.Global
     public class ExperimentRuleFactory : IExperimentRuleFactory
     {
         private readonly IInjectionBinder _binder;
@@ -54,7 +54,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
             try
             {
-                _binder.Bind<ScienceExperiment>().To(experiment).CrossContext();
+                _binder.Bind<ScienceExperiment>().To(experiment);//.CrossContext();
 
                 Log.Debug(() => "Creating experiment rule from rule definition: " + definition.Rule.Value.FullName);
 

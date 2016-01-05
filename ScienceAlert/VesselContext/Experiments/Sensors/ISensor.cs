@@ -2,6 +2,8 @@
 {
     public interface ISensor
     {
-        bool Poll();
+        void Update();
+        void ClearChangedFlag();
+        bool HasChanged { get; }
     }
 }

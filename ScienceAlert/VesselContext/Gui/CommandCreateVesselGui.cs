@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections;
-using ScienceAlert.VesselContext.Gui;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using UnityEngine;
 
-namespace ScienceAlert.VesselContext
+namespace ScienceAlert.VesselContext.Gui
 {
 // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandCreateVesselGui : Command

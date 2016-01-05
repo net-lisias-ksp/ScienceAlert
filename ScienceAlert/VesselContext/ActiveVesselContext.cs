@@ -4,6 +4,7 @@ using ReeperCommon.Extensions;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
+using ScienceAlert.VesselContext.Experiments.Rules;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -87,6 +88,8 @@ namespace ScienceAlert.VesselContext
                 .To<CommandCreateRuleTypeBindings>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandLoadGuiSettings>()
+                .To<CommandCreateExperimentSensorMonitors>()
+                .To<CommandCreateExperimentSensorMonitorUpdater>()
                 .Once();
 
  
@@ -96,6 +99,9 @@ namespace ScienceAlert.VesselContext
 
             commandBinder.Bind<SignalSharedConfigurationSaving>()
                 .To<CommandSaveGuiSettings>();
+
+            commandBinder.Bind<SignalExperimentSensorStatusChanged>()
+                .To<CommandLogSensorStatusUpdate>();
         }
 
 

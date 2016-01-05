@@ -3,14 +3,14 @@ using ScienceAlert.VesselContext.Experiments.Sensors;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
-    [Implements(typeof(IExperimentObserverFactory))]
+    [Implements(typeof(IExperimentSensorMonitorFactory))]
 // ReSharper disable once UnusedMember.Global
-    public class ExperimentObserverFactory : IExperimentObserverFactory
+    public class ExperimentSensorMonitorFactory : IExperimentSensorMonitorFactory
     {
         private readonly ISensorFactory _sensorFactory;
-        private readonly SignalExperimentStatusChanged _changedSignal;
+        private readonly SignalExperimentSensorStatusChanged _changedSignal;
 
-        public ExperimentObserverFactory(ISensorFactory sensorFactory, SignalExperimentStatusChanged changedSignal)
+        public ExperimentSensorMonitorFactory(ISensorFactory sensorFactory, SignalExperimentSensorStatusChanged changedSignal)
         {
             if (sensorFactory == null) throw new ArgumentNullException("sensorFactory");
             if (changedSignal == null) throw new ArgumentNullException("changedSignal");
@@ -18,11 +18,11 @@ namespace ScienceAlert.VesselContext.Experiments
             _changedSignal = changedSignal;
         }
 
-        public IExperimentObserver Create(ScienceExperiment experiment)
+        public IExperimentSensorMonitor Create(ScienceExperiment experiment)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
 
-            return new ExperimentObserver(
+            return new ExperimentSensorMonitor(
                 experiment,
                 _changedSignal,
                 _sensorFactory.CreateOnboardSensor(experiment),

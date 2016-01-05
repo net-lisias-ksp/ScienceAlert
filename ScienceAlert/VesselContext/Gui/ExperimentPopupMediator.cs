@@ -25,7 +25,7 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        private void OnUpdate(ExperimentStatusReport status, ExperimentListView.PopupType popupType, Vector2 mouseLocation)
+        private void OnUpdate(ExperimentSensorState status, ExperimentListView.PopupType popupType, Vector2 mouseLocation)
         {
             if (popupType == ExperimentListView.PopupType.None)
             {
@@ -47,7 +47,7 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        private void OpenPopup(ExperimentStatusReport report, ExperimentListView.PopupType type, Vector2 location)
+        private void OpenPopup(ExperimentSensorState report, ExperimentListView.PopupType type, Vector2 location)
         {
             View.PopupType = type;
             View.Status = report;

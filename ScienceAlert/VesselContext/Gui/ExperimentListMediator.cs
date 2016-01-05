@@ -45,7 +45,7 @@ namespace ScienceAlert.VesselContext.Gui
             ResearchAndDevelopment.GetExperimentIDs().Select(ResearchAndDevelopment.GetExperiment)
                 .ToList()
                 .ForEach(experiment =>
-                    View.SetExperimentStatus(new ExperimentStatusReport(experiment,
+                    View.SetExperimentStatus(new ExperimentSensorState(experiment,
                         UnityEngine.Random.Range(0f, 100f),
                         UnityEngine.Random.Range(0f, 100f),
                         UnityEngine.Random.Range(0f, 100f),

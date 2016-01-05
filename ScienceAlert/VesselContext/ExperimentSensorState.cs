@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Text;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext
 {
-    public struct ExperimentStatusReport
+    public struct ExperimentSensorState
     {
         public ScienceExperiment Experiment { get; private set; }
         public float CollectionValue { get; private set; }
@@ -12,7 +13,7 @@ namespace ScienceAlert.VesselContext
         public bool Onboard { get; private set; }
         public bool Available { get; private set; }
 
-        public ExperimentStatusReport(
+        public ExperimentSensorState(
             ScienceExperiment experiment, 
             float collectionValue, 
             float transmissionValue,
@@ -34,11 +35,11 @@ namespace ScienceAlert.VesselContext
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
-            if (!(obj is ExperimentStatusReport)) return false;
+            if (!(obj is ExperimentSensorState)) return false;
 
             try
             {
-                var report = (ExperimentStatusReport) obj;
+                var report = (ExperimentSensorState) obj;
                 return Equals(report);
             }
             catch (Exception)
@@ -48,7 +49,7 @@ namespace ScienceAlert.VesselContext
         }
 
 
-        public bool Equals(ExperimentStatusReport report)
+        public bool Equals(ExperimentSensorState report)
         {
             return ReferenceEquals(Experiment, report.Experiment) &&
                    Mathf.Approximately(CollectionValue, report.CollectionValue) &&
@@ -73,6 +74,20 @@ namespace ScienceAlert.VesselContext
 
                 return hash;
             }
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+
+            sb.Append(typeof (ExperimentSensorState).Name);
+            sb.Append("[");
+            sb.Append(Experiment.id);
+            sb.Append("]");
+            sb.AppendFormat("Onboard: {0}, Available: {1}, Collection: {2}, Transmission: {3}, Lab: {4}", Onboard,
+                Available, CollectionValue, TransmissionValue, LabValue);
+
+            return sb.ToString();
         }
     }
 }

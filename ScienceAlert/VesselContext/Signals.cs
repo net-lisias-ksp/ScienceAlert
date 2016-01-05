@@ -19,13 +19,15 @@ namespace ScienceAlert.VesselContext
     }
 
 
-    public class SignalUpdateExperimentListPopup : Signal<ExperimentStatusReport, ExperimentListView.PopupType, Vector2>
+// ReSharper disable once ClassNeverInstantiated.Global
+    public class SignalUpdateExperimentListPopup : Signal<ExperimentSensorState, ExperimentListView.PopupType, Vector2>
     {
         
     }
 
 
-    public class SignalExperimentStatusChanged : Signal<ExperimentStatusReport>
+// ReSharper disable once ClassNeverInstantiated.Global
+    public class SignalExperimentSensorStatusChanged : Signal<ExperimentSensorState>
     {
     }
 }

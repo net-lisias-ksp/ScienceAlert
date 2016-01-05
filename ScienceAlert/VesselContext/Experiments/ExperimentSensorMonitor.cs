@@ -3,19 +3,25 @@ using ScienceAlert.VesselContext.Experiments.Sensors;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
-    public class ExperimentObserver : IExperimentObserver
+    /// <summary>
+    /// This is the hub where all the various sensors connected to a particular sensor meet. If any of them
+    /// change, a new sensor status update will be dispatched
+    /// </summary>
+    public class ExperimentSensorMonitor : IExperimentSensorMonitor
     {
         private readonly ScienceExperiment _experiment;
-        private readonly SignalExperimentStatusChanged _statusChangedSignal;
+        private readonly SignalExperimentSensorStatusChanged _statusChangedSignal;
         private readonly IOnboardSensor _onboardSensor;
         private readonly IAvailabilitySensor _availabilitySensor;
         private readonly ICollectionSensor _collectionSensor;
         private readonly ITransmissionSensor _transmissionSensor;
         private readonly ILabDataSensor _labSensor;
 
-        public ExperimentObserver(
+        private bool _firstUpdate = true;
+
+        public ExperimentSensorMonitor(
             ScienceExperiment experiment,
-            SignalExperimentStatusChanged statusChangedSignal,
+            SignalExperimentSensorStatusChanged statusChangedSignal,
             IOnboardSensor onboardSensor,
             IAvailabilitySensor availabilitySensor,
             ICollectionSensor collectionSensor,
@@ -42,17 +48,25 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public void Update()
         {
-            bool onboardChanged = _onboardSensor.Poll();
-            bool availableChanged = _availabilitySensor.Poll();
-
-            bool collectionChanged = _collectionSensor.Poll();
-            bool transmissionChanged = _transmissionSensor.Poll();
-            bool labSensorChanged = _labSensor.Poll();
+            _onboardSensor.Update();
+            _availabilitySensor.Update();
+            _collectionSensor.Update();
+            _transmissionSensor.Update();
+            _labSensor.Update();
 
             // if any of the states have changed, we dispatch a signal to let anyone who cares know
-            if (onboardChanged || availableChanged || collectionChanged || transmissionChanged || labSensorChanged)
-                _statusChangedSignal.Dispatch(
-                    new ExperimentStatusReport(_experiment, _collectionSensor.Value, _transmissionSensor.Value,
+            if (_firstUpdate || _onboardSensor.HasChanged || _availabilitySensor.HasChanged || _collectionSensor.HasChanged ||
+                _transmissionSensor.HasChanged || _labSensor.HasChanged)
+                DispatchStateChangeSignal();
+
+            _firstUpdate = false;
+        }
+
+
+        private void DispatchStateChangeSignal()
+        {
+            _statusChangedSignal.Dispatch(
+                    new ExperimentSensorState(_experiment, _collectionSensor.Value, _transmissionSensor.Value,
                         _labSensor.Value, _onboardSensor.Value, _availabilitySensor.Value));
         }
     }

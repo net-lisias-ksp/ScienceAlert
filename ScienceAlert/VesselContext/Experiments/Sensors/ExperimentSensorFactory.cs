@@ -1,42 +1,59 @@
-﻿//using System;
-//using ScienceAlert.VesselContext.Experiments.Sensors;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using ReeperCommon.Containers;
+using ScienceAlert.VesselContext.Experiments.Rules;
 
-//namespace ScienceAlert.VesselContext.Experiments
-//{
-//// ReSharper disable once ClassNeverInstantiated.Global
-//    public class ExperimentSensorFactory : IExperimentSensorFactory
-//    {
-//        private readonly IExperimentRulesetProvider _rulesetProvider;
-//        private readonly IExperimentRuleFactory _ruleFactory;
-//        private readonly SignalSensorStateChanged _sensorChangedSignal;
+namespace ScienceAlert.VesselContext.Experiments.Sensors
+{
+    [Implements(typeof(ISensorFactory))]
+// ReSharper disable once UnusedMember.Global
+    public class ExperimentSensorFactory : ISensorFactory
+    {
+        private readonly IExperimentRuleFactory _ruleFactory;
+        private readonly IEnumerable<ExperimentRuleset> _rulesets;
 
-//        public ExperimentSensorFactory(
-//            IExperimentRulesetProvider rulesetProvider, 
-//            IExperimentRuleFactory ruleFactory,
-//            SignalSensorStateChanged sensorChangedSignal)
-//        {
-//            if (rulesetProvider == null) throw new ArgumentNullException("rulesetProvider");
-//            if (ruleFactory == null) throw new ArgumentNullException("ruleFactory");
-//            if (sensorChangedSignal == null) throw new ArgumentNullException("sensorChangedSignal");
+        public ExperimentSensorFactory(IExperimentRuleFactory ruleFactory, IEnumerable<ExperimentRuleset> rulesets)
+        {
+            if (ruleFactory == null) throw new ArgumentNullException("ruleFactory");
+            if (rulesets == null) throw new ArgumentNullException("rulesets");
+            _ruleFactory = ruleFactory;
+            _rulesets = rulesets;
+        }
 
-//            _rulesetProvider = rulesetProvider;
-//            _ruleFactory = ruleFactory;
-//            _sensorChangedSignal = sensorChangedSignal;
-//        }
-        
+        public IOnboardSensor CreateOnboardSensor(ScienceExperiment experiment)
+        {
+            return new BooleanRuleSensor(_ruleFactory.Create(experiment, GetRuleset(experiment).OnboardDefinition),
+                new NullValueQuery<bool>());
+        }
 
-//        public ISensor Create(ScienceExperiment experiment)
-//        {
-//            if (experiment == null) throw new ArgumentNullException("experiment");
+        public IAvailabilitySensor CreateAvailabilitySensor(ScienceExperiment experiment)
+        {
+            return new BooleanRuleSensor(_ruleFactory.Create(experiment, GetRuleset(experiment).AvailabilityDefinition),
+                new NullValueQuery<bool>());
+        }
 
-//            var ruleset = _rulesetProvider.GetRuleset(experiment);
+        public ICollectionSensor CreateCollectionSensor(ScienceExperiment experiment)
+        {
+            return new FloatSensor(new NullValueQuery<float>());
+        }
 
-//            var sensor = new Sensor(experiment, 
-//                _ruleFactory.Create(experiment, ruleset.OnboardDefinition),
-//                _ruleFactory.Create(experiment, ruleset.AvailabilityDefinition),
-//                _sensorChangedSignal);
+        public ITransmissionSensor CreateTransmissionSensor(ScienceExperiment experiment)
+        {
+            return new FloatSensor(new NullValueQuery<float>());
+        }
 
-//            return sensor;
-//        }
-//    }
-//}
+        public ILabDataSensor CreateLabDataSensor(ScienceExperiment experiment)
+        {
+            return new FloatSensor(new NullValueQuery<float>());
+        }
+
+        private ExperimentRuleset GetRuleset(ScienceExperiment experiment)
+        {
+            if (experiment == null) throw new ArgumentNullException("experiment");
+
+            return _rulesets.FirstOrDefault(rs => rs.Experiment.id == experiment.id)
+                .IfNull(() => { throw new MissingExperimentRulesetException(experiment); });
+        }
+    }
+}
