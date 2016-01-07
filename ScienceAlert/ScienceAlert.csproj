@@ -63,17 +63,18 @@
     <Compile Include="Game\KspPart.cs" />
     <Compile Include="Game\KspScienceUtil.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="VesselContext\CommandBindActiveVessel.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateExperimentSensorMonitors.cs" />
     <Compile Include="VesselContext\CommandLogSensorStatusUpdate.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateExperimentSensorMonitorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensorMonitor.cs" />
-    <Compile Include="VesselContext\Experiments\ExperimentSensorMonitorFactory.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensorMonitorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentSensorMonitor.cs" />
-    <Compile Include="VesselContext\Experiments\IExperimentSensorMonitorFactory.cs" />
+    <Compile Include="VesselContext\Experiments\IExperimentSensorStateFactory.cs" />
     <Compile Include="VesselContext\Experiments\Rules\MissingExperimentRulesetException.cs" />
-    <Compile Include="VesselContext\Experiments\Sensors\BooleanRuleSensor.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\BooleanSensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\FloatSensor.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\RuleToBooleanSensorQueryAdapter.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Sensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\IAvailabilitySensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\ICollectionSensor.cs" />
@@ -119,7 +120,6 @@
     <Compile Include="VesselContext\Experiments\Old\ExperimentSensor.cs" />
     <Compile Include="VesselContext\Experiments\Old\ISensor.cs" />
     <Compile Include="VesselContext\Experiments\Old\ISensorStatus.cs" />
-    <Compile Include="VesselContext\Experiments\IScienceReportStorageContainer.cs" />
     <Compile Include="Game\IVessel.cs" />
     <Compile Include="Game\KspVessel.cs" />
     <Compile Include="Game\CommandConfigureGameEvents.cs" />
@@ -143,7 +143,7 @@
     <Compile Include="VesselContext\Experiments\Old\Sensor.cs" />
     <Compile Include="VesselContext\Experiments\Old\SensorManager.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Signals.cs" />
-    <Compile Include="VesselContext\Experiments\Sensors\NullValueQuery.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\DefaultValueQuery.cs" />
     <Compile Include="VesselContext\Gui\CommandLoadGuiSettings.cs" />
     <Compile Include="VesselContext\Gui\CommandSaveGuiSettings.cs" />
     <Compile Include="VesselContext\ExperimentSensorState.cs" />
@@ -279,7 +279,7 @@ echo Merging dependencies for release build...
 call:MergeDependencies
 ) else (
 echo Copying dependencies
-REM call:CopyDependencies
+call:CopyDependencies
 )
 
 call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" $(TargetName).* /xf *.config *.pdb

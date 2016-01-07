@@ -1,7 +1,6 @@
 ﻿namespace ScienceAlert.VesselContext.Experiments.Sensors
 {
-    public interface IAvailabilitySensor : ISensor
+    public interface IAvailabilitySensor : ISensor<bool>
     {
-        bool Value { get; }
     }
 }

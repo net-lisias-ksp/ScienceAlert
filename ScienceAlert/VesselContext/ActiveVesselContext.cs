@@ -71,8 +71,7 @@ namespace ScienceAlert.VesselContext
                 .ToMediator<ExperimentListPopupMediator>();
 
             var gameFactory = injectionBinder.GetInstance<IGameFactory>();
-            var activeVessel = new KspVessel(gameFactory, FlightGlobals.ActiveVessel);
-            injectionBinder.Bind<IVessel>().ToValue(activeVessel);
+            injectionBinder.Bind<IVessel>().ToValue(gameFactory.Create(FlightGlobals.ActiveVessel));
 
 
             SetupCommandBindings();

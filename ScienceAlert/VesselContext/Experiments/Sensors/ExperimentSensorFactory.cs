@@ -23,29 +23,32 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors
 
         public IOnboardSensor CreateOnboardSensor(ScienceExperiment experiment)
         {
-            return new BooleanRuleSensor(_ruleFactory.Create(experiment, GetRuleset(experiment).OnboardDefinition),
-                new NullValueQuery<bool>());
+            return
+                new BooleanSensor(
+                    new RuleToBooleanSensorQueryAdapter(_ruleFactory.Create(experiment,
+                        GetRuleset(experiment).OnboardDefinition)));
         }
 
         public IAvailabilitySensor CreateAvailabilitySensor(ScienceExperiment experiment)
         {
-            return new BooleanRuleSensor(_ruleFactory.Create(experiment, GetRuleset(experiment).AvailabilityDefinition),
-                new NullValueQuery<bool>());
+            return new BooleanSensor(
+                new RuleToBooleanSensorQueryAdapter(_ruleFactory.Create(experiment, 
+                    GetRuleset(experiment).AvailabilityDefinition)));
         }
 
         public ICollectionSensor CreateCollectionSensor(ScienceExperiment experiment)
         {
-            return new FloatSensor(new NullValueQuery<float>());
+            return new FloatSensor(new DefaultValueQuery<float>());
         }
 
         public ITransmissionSensor CreateTransmissionSensor(ScienceExperiment experiment)
         {
-            return new FloatSensor(new NullValueQuery<float>());
+            return new FloatSensor(new DefaultValueQuery<float>());
         }
 
         public ILabDataSensor CreateLabDataSensor(ScienceExperiment experiment)
         {
-            return new FloatSensor(new NullValueQuery<float>());
+            return new FloatSensor(new DefaultValueQuery<float>());
         }
 
         private ExperimentRuleset GetRuleset(ScienceExperiment experiment)

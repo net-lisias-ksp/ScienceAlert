@@ -1,7 +1,6 @@
 ﻿namespace ScienceAlert.VesselContext.Experiments.Sensors
 {
-    public interface ILabDataSensor : ISensor
+    public interface ILabDataSensor : ISensor<float>
     {
-        float Value { get; }
     }
 }

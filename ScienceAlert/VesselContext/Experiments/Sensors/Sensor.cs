@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors
 {
-    public class Sensor<T> : ISensor where T : struct
+    public class Sensor<T> : ISensor<T> where T : struct
     {
         private readonly ISensorValueQuery<T> _valueQuery;
   

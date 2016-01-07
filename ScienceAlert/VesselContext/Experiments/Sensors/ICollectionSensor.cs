@@ -1,7 +1,6 @@
 ﻿namespace ScienceAlert.VesselContext.Experiments.Sensors
 {
-    public interface ICollectionSensor : ISensor
+    public interface ICollectionSensor : ISensor<float>
     {
-        float Value { get; }
     }
 }

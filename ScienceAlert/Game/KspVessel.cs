@@ -82,6 +82,8 @@ namespace ScienceAlert.Game
             _scienceModules = new ReadOnlyCollection<IModuleScienceExperiment>(
                 _vessel.FindPartModulesImplementing<ModuleScienceExperiment>()
                 .Select(mse => _factory.Create(mse)).ToList());
+
+            Log.Debug("KspVessel: found " + _scienceModules.Count + " ModuleScienceExperiment modules");
         }
 
 

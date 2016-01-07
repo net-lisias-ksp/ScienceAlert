@@ -41,11 +41,18 @@ namespace ScienceAlert.VesselContext.Gui
 
             injectionBinder.Bind<GameObject>().ToValue(guiGo).ToName(VesselContextKeys.GuiContainer);
 
+            var monoBehaviours = new MonoBehaviour[] {};
+
             try
             {
-                guiGo.AddComponent<ExperimentListView>();
-                guiGo.AddComponent<VesselDebugView>();
-                guiGo.AddComponent<ExperimentPopupView>();
+                monoBehaviours = new MonoBehaviour[]
+                {
+                    guiGo.AddComponent<ExperimentListView>(),
+                    guiGo.AddComponent<VesselDebugView>(),
+                    guiGo.AddComponent<ExperimentPopupView>()
+                };
+
+                // todo: disable monobehaviours until gui load signal is dispatched (preventing user from seeing windows that have yet to be moved/sized correctly)
             }
             catch (Exception e)
             {

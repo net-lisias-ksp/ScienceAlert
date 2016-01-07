@@ -2,6 +2,6 @@
 {
     public interface IExperimentSensorMonitor
     {
-        void Update();
+        void UpdateSensorStates();
     }
 }

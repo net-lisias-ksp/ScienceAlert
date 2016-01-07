@@ -56,7 +56,7 @@
 
 
 //// ReSharper disable once UnusedMember.Local
-//        private void Update()
+//        private void UpdateSensorStates()
 //        {
 //            for (int i = 0; i < _sensors.Length; ++i)
 //            {

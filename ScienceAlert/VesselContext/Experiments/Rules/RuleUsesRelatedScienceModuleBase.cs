@@ -27,10 +27,11 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 
         private void VesselOnModified()
         {
-            Log.Debug(() => GetType().FullName + " rescanning for " + Experiment.id);
             ExperimentModules = Vessel.ScienceExperimentModules
                 .Where(mse => mse.experimentID == Experiment.id)
                 .ToList();
+
+            Log.Debug(() => GetType().FullName + " rescanning for " + Experiment.id + ": found " + ExperimentModules.Count + " modules (of " + Vessel.ScienceExperimentModules.Count + ") which match");
         }
     }
 }

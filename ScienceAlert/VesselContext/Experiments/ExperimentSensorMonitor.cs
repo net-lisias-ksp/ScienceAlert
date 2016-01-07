@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ScienceAlert.VesselContext.Experiments.Sensors;
 
 namespace ScienceAlert.VesselContext.Experiments
@@ -7,7 +9,7 @@ namespace ScienceAlert.VesselContext.Experiments
     /// This is the hub where all the various sensors connected to a particular sensor meet. If any of them
     /// change, a new sensor status update will be dispatched
     /// </summary>
-    public class ExperimentSensorMonitor : IExperimentSensorMonitor
+    public class ExperimentSensorMonitor : IExperimentSensorMonitor, IExperimentSensorStateFactory
     {
         private readonly ScienceExperiment _experiment;
         private readonly SignalExperimentSensorStatusChanged _statusChangedSignal;
@@ -18,7 +20,8 @@ namespace ScienceAlert.VesselContext.Experiments
         private readonly ILabDataSensor _labSensor;
 
         private bool _firstUpdate = true;
-
+        private readonly List<ISensor> _sensorList = new List<ISensor>();
+ 
         public ExperimentSensorMonitor(
             ScienceExperiment experiment,
             SignalExperimentSensorStatusChanged statusChangedSignal,
@@ -43,20 +46,25 @@ namespace ScienceAlert.VesselContext.Experiments
             _collectionSensor = collectionSensor;
             _transmissionSensor = transmissionSensor;
             _labSensor = labSensor;
+
+            // makes the update method just a bit cleaner
+            _sensorList = new List<ISensor>
+            {
+                _onboardSensor,
+                _availabilitySensor,
+                _collectionSensor,
+                _transmissionSensor,
+                _labSensor
+            };
         }
 
 
-        public void Update()
+        public void UpdateSensorStates()
         {
-            _onboardSensor.Update();
-            _availabilitySensor.Update();
-            _collectionSensor.Update();
-            _transmissionSensor.Update();
-            _labSensor.Update();
+            _sensorList.ForEach(s => s.ClearChangedFlag());
+            _sensorList.ForEach(s => s.Update());
 
-            // if any of the states have changed, we dispatch a signal to let anyone who cares know
-            if (_firstUpdate || _onboardSensor.HasChanged || _availabilitySensor.HasChanged || _collectionSensor.HasChanged ||
-                _transmissionSensor.HasChanged || _labSensor.HasChanged)
+            if (_firstUpdate || _sensorList.Any(s => s.HasChanged))
                 DispatchStateChangeSignal();
 
             _firstUpdate = false;
@@ -65,9 +73,14 @@ namespace ScienceAlert.VesselContext.Experiments
 
         private void DispatchStateChangeSignal()
         {
-            _statusChangedSignal.Dispatch(
-                    new ExperimentSensorState(_experiment, _collectionSensor.Value, _transmissionSensor.Value,
-                        _labSensor.Value, _onboardSensor.Value, _availabilitySensor.Value));
+            _statusChangedSignal.Dispatch(GetState());
+        }
+
+
+        public ExperimentSensorState GetState()
+        {
+            return new ExperimentSensorState(_experiment, _collectionSensor.Value, _transmissionSensor.Value,
+                _labSensor.Value, _onboardSensor.Value, _availabilitySensor.Value);
         }
     }
 }
