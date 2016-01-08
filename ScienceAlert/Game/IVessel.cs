@@ -14,7 +14,8 @@ namespace ScienceAlert.Game
         bool IsControllable { get; }
         string VesselName { get; }
         Vessel.Situations VesselSituation { get; }
-        ExperimentSituations ExperimentSituation { get; }
-        CelestialBody Body { get; }
+
+        double Latitude { get; }
+        double Longitude { get; }
     }
 }

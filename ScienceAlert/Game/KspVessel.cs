@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.Game
 {
-    public class KspVessel : IVessel
+    public class KspVessel :    IVessel, 
+                                IScienceContainerCollectionProvider, 
+                                ICelestialBodyProvider, 
+                                IExperimentSituationProvider,
+                                IExperimentBiomeProvider
     {
         public event Callback Modified = delegate { };
 
@@ -16,6 +21,8 @@ namespace ScienceAlert.Game
         private ReadOnlyCollection<IModuleScienceExperiment> _scienceModules =
             new ReadOnlyCollection<IModuleScienceExperiment>(Enumerable.Empty<IModuleScienceExperiment>().ToList());
 
+        private ReadOnlyCollection<IScienceDataContainer> _scienceContainers =
+            new ReadOnlyCollection<IScienceDataContainer>(Enumerable.Empty<IScienceDataContainer>().ToList()); 
         
         public KspVessel(
             IGameFactory factory, 
@@ -63,6 +70,7 @@ namespace ScienceAlert.Game
         {
             ScanForCrew();
             ScanForScienceExperimentModules();
+            ScanForScienceContainers();
 
             Modified();
         }
@@ -87,15 +95,26 @@ namespace ScienceAlert.Game
         }
 
 
+        private void ScanForScienceContainers()
+        {
+            _scienceContainers = new ReadOnlyCollection<IScienceDataContainer>(
+                _vessel.FindPartModulesImplementing<IScienceDataContainer>().ToList());
+
+            Log.Debug("KspVessel: found " + _scienceContainers.Count + " IScienceDataContainers");
+        }
+
+
         public ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew
         {
             get { return _evaCapableCrew; }
         }
 
+
         public ReadOnlyCollection<IModuleScienceExperiment> ScienceExperimentModules
         {
             get { return _scienceModules; }
         }
+
 
         public bool IsControllable
         {
@@ -112,14 +131,40 @@ namespace ScienceAlert.Game
             get { return _vessel.situation; }
         }
 
+
+        public ReadOnlyCollection<IScienceDataContainer> Containers
+        {
+            get { return _scienceContainers; }
+        }
+
+        public CelestialBody OrbitingBody
+        {
+            get { return _vessel.mainBody; }
+        }
+
         public ExperimentSituations ExperimentSituation
         {
             get { return ScienceUtil.GetExperimentSituation(_vessel); }
         }
 
-        public CelestialBody Body
+        public double Latitude
         {
-            get { return _vessel.mainBody; }
+            get { return _vessel.latitude; }
+        }
+
+        public double Longitude
+        {
+            get { return _vessel.longitude; }
+        }
+
+        public string Biome
+        {
+            get
+            {
+                return string.IsNullOrEmpty(_vessel.landedAt)
+                    ? ScienceUtil.GetExperimentBiome(OrbitingBody, Latitude, Longitude)
+                    : _vessel.landedAt;
+            }
         }
     }
 }

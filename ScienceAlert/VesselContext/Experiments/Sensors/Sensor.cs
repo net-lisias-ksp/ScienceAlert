@@ -1,21 +1,22 @@
 ﻿using System;
+using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors
 {
     public class Sensor<T> : ISensor<T> where T : struct
     {
-        private readonly ISensorValueQuery<T> _valueQuery;
+        private readonly IQuerySensorValue<T> _value;
   
-        public Sensor(ISensorValueQuery<T> valueQuery)
+        public Sensor(IQuerySensorValue<T> value)
         {
-            if (valueQuery == null) throw new ArgumentNullException("valueQuery");
-            _valueQuery = valueQuery;
+            if (value == null) throw new ArgumentNullException("value");
+            _value = value;
         }
 
 
         public virtual void Update()
         {
-            T nextValue = _valueQuery.Get();
+            T nextValue = _value.Get();
 
             HasChanged = IsValueDifferent(Value, nextValue);
 

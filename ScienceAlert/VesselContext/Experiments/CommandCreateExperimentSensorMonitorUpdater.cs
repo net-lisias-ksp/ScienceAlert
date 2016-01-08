@@ -24,17 +24,5 @@ namespace ScienceAlert.VesselContext.Experiments
 
             injectionBinder.injector.Inject(updater, false);
         }
-
-        //[Inject(ContextKeys.CONTEXT_VIEW)]
-        //public GameObject VesselContextView { get; set; }
-
-        //[Inject] public IEnumerable<IExperimentSensorMonitor> Monitors { get; set; }
-
-        //public override void Execute()
-        //{
-        //    var updater = VesselContextView.AddComponent<ExperimentSensorMonitorUpdater>();
-
-        //    injectionBinder.injector.Inject(updater, false);
-        //}
     }
 }

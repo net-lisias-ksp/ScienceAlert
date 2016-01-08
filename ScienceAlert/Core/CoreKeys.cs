@@ -7,5 +7,7 @@
         GameData, // IDirectory
 
         ExperimentRuleConfigs, // IEnumerable<ConfigNode>
+
+        CareerScienceGainMultiplier, // float
     }
 }

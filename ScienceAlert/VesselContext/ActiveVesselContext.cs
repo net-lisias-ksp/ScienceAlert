@@ -5,6 +5,7 @@ using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Rules;
+using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -71,7 +72,14 @@ namespace ScienceAlert.VesselContext
                 .ToMediator<ExperimentListPopupMediator>();
 
             var gameFactory = injectionBinder.GetInstance<IGameFactory>();
-            injectionBinder.Bind<IVessel>().ToValue(gameFactory.Create(FlightGlobals.ActiveVessel));
+
+            injectionBinder
+                .Bind<IVessel>()
+                .Bind<ICelestialBodyProvider>()
+                .Bind<IExperimentSituationProvider>()
+                .Bind<IExperimentBiomeProvider>()
+                .Bind<IScienceContainerCollectionProvider>()
+                .ToValue(gameFactory.Create(FlightGlobals.ActiveVessel));
 
 
             SetupCommandBindings();

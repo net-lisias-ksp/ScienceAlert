@@ -17,6 +17,7 @@ using ScienceAlert.Game;
 using ScienceAlert.Gui;
 using ScienceAlert.VesselContext;
 using ScienceAlert.VesselContext.Experiments.Rules;
+using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 using strange.extensions.context.api;
 using UnityEngine;
 
@@ -92,7 +93,14 @@ namespace ScienceAlert.Core
                 .ToName(CoreKeys.CoreContextView)
                 .CrossContext();
 
+            injectionBinder.Bind<float>()
+                .ToValue(HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier)
+                .ToName(CoreKeys.CareerScienceGainMultiplier)
+                .CrossContext();
+
             injectionBinder.Bind<RuleDefinitionFactory>().ToSingleton().CrossContext();
+            injectionBinder.Bind<IQueryScienceSubject>().To<QueryScienceSubject>().ToSingleton().CrossContext();
+            injectionBinder.Bind<IQueryScienceValue>().To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
 
             ConfigureScienceAlert();
             ConfigureResourceRepository();

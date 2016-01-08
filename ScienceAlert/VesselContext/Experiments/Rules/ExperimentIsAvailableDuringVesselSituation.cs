@@ -1,27 +1,33 @@
 ﻿using System;
 using ScienceAlert.Game;
+using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     public class ExperimentIsAvailableDuringVesselSituation : IExperimentRule
     {
         private readonly ScienceExperiment _experiment;
-        private readonly IVessel _vessel;
+        private readonly ICelestialBodyProvider _vesselBody;
+        private readonly IExperimentSituationProvider _vesselSituation;
 
         public ExperimentIsAvailableDuringVesselSituation(
             ScienceExperiment experiment, 
-            IVessel vessel)
+            ICelestialBodyProvider vesselBody,
+            IExperimentSituationProvider vesselSituation)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
-            if (vessel == null) throw new ArgumentNullException("vessel");
+            if (vesselBody == null) throw new ArgumentNullException("vesselBody");
+            if (vesselSituation == null) throw new ArgumentNullException("vesselSituation");
+
             _experiment = experiment;
-            _vessel = vessel;
+            _vesselBody = vesselBody;
+            _vesselSituation = vesselSituation;
         }
 
 
         public bool Get()
         {
-            return _experiment.IsAvailableWhile(_vessel.ExperimentSituation, _vessel.Body);
+            return _experiment.IsAvailableWhile(_vesselSituation.ExperimentSituation, _vesselBody.OrbitingBody);
         }
     }
 }
