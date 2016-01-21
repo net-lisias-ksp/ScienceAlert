@@ -1,8 +1,12 @@
 ﻿using System.Collections.ObjectModel;
+using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.Game
 {
-    public interface IVessel
+    public interface IVessel : IScienceContainerCollectionProvider,
+                                ICelestialBodyProvider,
+                                IExperimentSituationProvider,
+                                IExperimentBiomeProvider
     {
         event Callback Modified;
 

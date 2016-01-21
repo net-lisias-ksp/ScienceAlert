@@ -3,7 +3,7 @@
 namespace ScienceAlert.Game
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    [Implements(typeof(IGameFactory))]
+    [Implements(typeof (IGameFactory))]
     public class KspFactory : IGameFactory
     {
         private readonly SignalVesselModified _modifiedSignal;
@@ -39,9 +39,25 @@ namespace ScienceAlert.Game
 
         public IPart Create(Part part)
         {
-            if (part == null) throw new ArgumentNullException("part");
+            if (part == null) throw new ArgumentNullException("Part");
 
             return new KspPart(part);
+        }
+
+
+        public IScienceSubject Create(ScienceSubject subject)
+        {
+            if (subject == null) throw new ArgumentNullException("subject");
+
+            return new KspScienceSubject(this, subject);
+        }
+
+
+        public ICelestialBody Create(CelestialBody body)
+        {
+            if (body == null) throw new ArgumentNullException("body");
+
+            return new KspCelestialBody(body);
         }
     }
 }

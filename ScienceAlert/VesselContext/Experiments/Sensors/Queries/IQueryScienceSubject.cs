@@ -1,7 +1,9 @@
-﻿namespace ScienceAlert.VesselContext.Experiments.Sensors.Queries
+﻿using ScienceAlert.Game;
+
+namespace ScienceAlert.VesselContext.Experiments.Sensors.Queries
 {
     public interface IQueryScienceSubject
     {
-        ScienceSubject GetSubject(ScienceExperiment experiment);
+        IScienceSubject GetSubject(ScienceExperiment experiment);
     }
 }

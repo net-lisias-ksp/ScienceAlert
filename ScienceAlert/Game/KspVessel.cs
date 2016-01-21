@@ -5,11 +5,7 @@ using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.Game
 {
-    public class KspVessel :    IVessel, 
-                                IScienceContainerCollectionProvider, 
-                                ICelestialBodyProvider, 
-                                IExperimentSituationProvider,
-                                IExperimentBiomeProvider
+    public class KspVessel :  IVessel
     {
         public event Callback Modified = delegate { };
 
@@ -137,9 +133,9 @@ namespace ScienceAlert.Game
             get { return _scienceContainers; }
         }
 
-        public CelestialBody OrbitingBody
+        public ICelestialBody OrbitingBody
         {
-            get { return _vessel.mainBody; }
+            get { return _factory.Create(_vessel.mainBody); }
         }
 
         public ExperimentSituations ExperimentSituation
@@ -162,7 +158,7 @@ namespace ScienceAlert.Game
             get
             {
                 return string.IsNullOrEmpty(_vessel.landedAt)
-                    ? ScienceUtil.GetExperimentBiome(OrbitingBody, Latitude, Longitude)
+                    ? ScienceUtil.GetExperimentBiome(_vessel.mainBody, Latitude, Longitude)
                     : _vessel.landedAt;
             }
         }

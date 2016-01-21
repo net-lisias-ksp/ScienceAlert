@@ -5,6 +5,7 @@ using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Rules;
+using ScienceAlert.VesselContext.Experiments.Sensors;
 using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.context.api;
@@ -44,7 +45,7 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<IExperimentRuleFactory>().To<ExperimentRuleFactory>().ToSingleton();
 
             injectionBinder.Bind<IExperimentRulesetProvider>().To<ExperimentRulesetProvider>().ToSingleton();
-
+            injectionBinder.Bind<ISensorFactory>().To<ExperimentSensorFactory>().ToSingleton();
 
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
@@ -127,6 +128,11 @@ namespace ScienceAlert.VesselContext
                 Log.Error("Error while launching ActiveVesselContext: " + e);
                 SignalDestruction(true);
             }
+        }
+
+        private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+        {
+            throw new NotImplementedException();
         }
 
 

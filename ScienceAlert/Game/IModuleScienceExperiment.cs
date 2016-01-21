@@ -2,10 +2,11 @@
 {
     public interface IModuleScienceExperiment
     {
-        IPart part { get; }
+        IPart Part { get; }
 
         bool Deployed { get; }
-        string experimentID { get; }
+// ReSharper disable once InconsistentNaming
+        string ExperimentID { get; }
         ExperimentUsageReqs InternalUsageRequirements { get; }
     }
 }

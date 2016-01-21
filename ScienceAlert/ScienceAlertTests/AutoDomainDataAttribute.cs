@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using NSubstitute;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Xunit;
@@ -27,6 +28,21 @@ namespace ScienceAlertTests
             Fixture.Register(() => new RuleDefinitionFactory(ruleProvider));
             Fixture.Register(() => new ProtoCrewMember(ProtoCrewMember.KerbalType.Crew) {name = "Test Kerman"});
             
+            Fixture.Register(() => 
+                new ScienceExperiment
+                {
+                    baseValue = 0f, 
+                    biomeMask = 0,
+                    dataScale = 0f, 
+                    experimentTitle = "Experiment Title", 
+                    id = "scienceExperiment", 
+                    requireAtmosphere = false,
+                    requiredExperimentLevel = 0f,
+                    scienceCap = 100f, 
+                    situationMask = 0});
+
+            Fixture.Register(() => new ScienceSubject("testId", "test title", 0f, 0f, 100f));
+
             //Fixture.Register(() => new SimplePersistentObject());
             //Fixture.Register(() => new ComplexPersistentObject());
             //Fixture.Register(() => new GetSerializableFields());

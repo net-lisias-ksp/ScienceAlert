@@ -28,7 +28,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         private void VesselOnModified()
         {
             ExperimentModules = Vessel.ScienceExperimentModules
-                .Where(mse => mse.experimentID == Experiment.id)
+                .Where(mse => mse.ExperimentID == Experiment.id)
                 .ToList();
 
             Log.Debug(() => GetType().FullName + " rescanning for " + Experiment.id + ": found " + ExperimentModules.Count + " modules (of " + Vessel.ScienceExperimentModules.Count + ") which match");

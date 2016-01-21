@@ -13,6 +13,8 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
     {
         private const string OnboardRuleDefinitionNodeName = "ONBOARD_RULE";
         private const string AvailabilityRuleDefinitionNodeName = "AVAILABILITY_RULE";
+// ReSharper disable once InconsistentNaming
+        private const string ExperimentIDFieldName = "experimentID";
 
         private readonly RuleDefinitionFactory _ruleDefinitionFactory;
         private readonly IEnumerable<ScienceExperiment> _experiments;
@@ -42,7 +44,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 
         public override void Execute()
         {
-            var definedRulesets = CompileRulesetsFromConfigNodes(_ruleConfigs);
+            var definedRulesets = CompileRulesetsFromConfigNodes();
             var defaultRulesets =
                 CompileDefaultRulesetsForRemainingExperiments(definedRulesets.Select(r => r.Experiment));
 
@@ -58,10 +60,8 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         }
 
 
-        private IList<ExperimentRuleset> CompileRulesetsFromConfigNodes(IEnumerable<ConfigNode> configs)
+        private IList<ExperimentRuleset> CompileRulesetsFromConfigNodes()
         {
-            if (configs == null) throw new ArgumentNullException("configs");
-
             var rulesets = new List<ExperimentRuleset>();
 
             foreach (var cfg in _ruleConfigs)
@@ -117,7 +117,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
             }
             catch (Exception e)
             {
-                if (e is CompositeRuleEmptyException || e is RuleDefinitionMissingExperimentIdException ||
+                if (e is CompositeRuleEmptyException || e is RulesetMissingExperimentIdException ||
                     e is RuleTypeNotFoundException || e is DuplicateConfigNodeSectionException)
                 {
                     Log.Error("Failed to compile rule for " + GetExperimentID(ruleConfig) + ": " + e);
@@ -143,12 +143,15 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         {
             if (config == null) throw new ArgumentNullException("config");
 
-            var targetId = config.GetValue("experimentID");
+            var targetId = config.GetValueEx(ExperimentIDFieldName, false);
 
-            if (!config.HasValue("experimentID") || string.IsNullOrEmpty(targetId))
-                throw new RuleDefinitionMissingExperimentIdException();
+            if (!targetId.Any() || string.IsNullOrEmpty(targetId.Value))
+            {
+                Log.Error("Ruleset missing ExperimentID value: " + config.ToSafeString());
+                throw new RulesetMissingExperimentIdException();
+            }
 
-            return targetId;
+            return targetId.Single();
         }
 
 
@@ -175,7 +178,6 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
             if (onboardRules.Length > 1)
                 throw new DuplicateConfigNodeSectionException(OnboardRuleDefinitionNodeName);
 
-            ConfigNode rule = null;
 
             if (onboardRules.Single().CountNodes != 0) return CreateRules(onboardRules.Single());
 
@@ -194,8 +196,6 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 
             if (availabilityRules.Length > 1)
                 throw new DuplicateConfigNodeSectionException(AvailabilityRuleDefinitionNodeName);
-
-            ConfigNode rule = null;
 
             if (availabilityRules.Single().CountNodes != 0) return CreateRules(availabilityRules.Single());
 

@@ -20,7 +20,7 @@ namespace ScienceAlert.Game
         }
 
 
-        public IPart part
+        public IPart Part
         {
             get { return _part.Value; }
         }
@@ -30,7 +30,7 @@ namespace ScienceAlert.Game
             get { return _mse.Deployed; }
         }
 
-        public string experimentID
+        public string ExperimentID
         {
             get { return _mse.experimentID; }
         }

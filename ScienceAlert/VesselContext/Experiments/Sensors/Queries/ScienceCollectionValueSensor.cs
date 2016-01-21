@@ -1,35 +1,39 @@
 ﻿using System;
+using System.Linq;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors.Queries
 {
-    public class ScienceCollectionValue : IQuerySensorValue<float>
+    public class ScienceCollectionValueSensor : IQuerySensorValue<float>
     {
         private readonly ScienceExperiment _experiment;
         private readonly IQueryScienceSubject _subject;
         private readonly IQueryScienceValue _queryScienceValue;
         private readonly float _careerScienceGainMultiplier;
-        private readonly IQueryScienceDataForScienceSubject _onboardData;
+        protected readonly IScienceContainerCollectionProvider _vesselContainer;
 
-        public ScienceCollectionValue(
+        public ScienceCollectionValueSensor(
             ScienceExperiment experiment,
             IQueryScienceSubject subject,
             IQueryScienceValue queryScienceValue,
             [Name(CoreKeys.CareerScienceGainMultiplier)] float careerScienceGainMultiplier,
-            IQueryScienceDataForScienceSubject onboardData)
+            IScienceContainerCollectionProvider vesselContainer)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
             if (subject == null) throw new ArgumentNullException("subject");
             if (queryScienceValue == null) throw new ArgumentNullException("queryScienceValue");
-            if (onboardData == null) throw new ArgumentNullException("onboardData");
+            if (vesselContainer == null) throw new ArgumentNullException("vesselContainer");
+            if (careerScienceGainMultiplier < 0f)
+                throw new ArgumentOutOfRangeException("careerScienceGainMultiplier", careerScienceGainMultiplier,
+                    "Career multiplier cannot be less than zero");
 
             _experiment = experiment;
             _subject = subject;
             _queryScienceValue = queryScienceValue;
             _careerScienceGainMultiplier = careerScienceGainMultiplier;
-            _onboardData = onboardData;
+            _vesselContainer = vesselContainer;
         }
 
 
@@ -37,7 +41,7 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Queries
         {
             var subject = _subject.GetSubject(_experiment);
 
-            return CalculateNextReportValue(subject, _onboardData.GetScienceData(subject).Count, GetTransmissionMultiplier());
+            return CalculateNextReportValue(subject, GetNumberOnboardReports(subject.Id), GetTransmissionMultiplier());
         }
 
 
@@ -48,7 +52,7 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Queries
 
 
         private float CalculateNextReportValue(
-            ScienceSubject subject,
+            IScienceSubject subject,
             int onboardReportCount,
             float transmissionMultiplier)
         {
@@ -66,6 +70,18 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Queries
                 return experimentValue;
 
             return experimentValue / Mathf.Pow(4f, onboardReportCount - 1);
+        }
+
+
+
+        private static readonly ScienceData[] EmptyScienceArray = new ScienceData[0];
+
+// ReSharper disable once InconsistentNaming
+        private int GetNumberOnboardReports(string subjectID)
+        {
+            return _vesselContainer.Containers.SelectMany(
+                container => container.GetScienceCount() > 0 ? container.GetData() : EmptyScienceArray)
+                .Count(data => data.subjectID == subjectID);
         }
     }
 }

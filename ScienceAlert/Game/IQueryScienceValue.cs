@@ -2,7 +2,7 @@
 {
     public interface IQueryScienceValue
     {
-        float GetScienceValue(float dataAmount, ScienceSubject subject, float xmitScalar);
-        float GetNextScienceValue(float dataAmount, ScienceSubject subject, float xmitScalar);
+        float GetScienceValue(float dataAmount, IScienceSubject subject, float xmitScalar);
+        float GetNextScienceValue(float dataAmount, IScienceSubject subject, float xmitScalar);
     }
 }

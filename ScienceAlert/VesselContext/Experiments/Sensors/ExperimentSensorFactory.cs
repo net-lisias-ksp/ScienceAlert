@@ -9,37 +9,36 @@ using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors
 {
-    [Implements(typeof(ISensorFactory))]
 // ReSharper disable once UnusedMember.Global
     public class ExperimentSensorFactory : ISensorFactory
     {
+        private readonly IVessel _currentVessel;
         private readonly IExperimentRuleFactory _ruleFactory;
         private readonly IEnumerable<ExperimentRuleset> _rulesets;
         private readonly IQueryScienceSubject _queryScienceSubject;
         private readonly IQueryScienceValue _queryScienceValue;
         private readonly float _careerScienceGainMultiplier;
-        private readonly IQueryScienceDataForScienceSubject _queryScienceDataForScienceSubject;
 
         public ExperimentSensorFactory(
+            IVessel currentVessel,
             IExperimentRuleFactory ruleFactory, 
             IEnumerable<ExperimentRuleset> rulesets,
             IQueryScienceSubject queryScienceSubject,
             IQueryScienceValue queryScienceValue,
-            [Name(CoreKeys.CareerScienceGainMultiplier)] float careerScienceGainMultiplier,
-            IQueryScienceDataForScienceSubject queryScienceDataForScienceSubject)
+            [Name(CoreKeys.CareerScienceGainMultiplier)] float careerScienceGainMultiplier)
         {
+            if (currentVessel == null) throw new ArgumentNullException("currentVessel");
             if (ruleFactory == null) throw new ArgumentNullException("ruleFactory");
             if (rulesets == null) throw new ArgumentNullException("rulesets");
             if (queryScienceSubject == null) throw new ArgumentNullException("QueryScienceSubject");
             if (queryScienceValue == null) throw new ArgumentNullException("queryScienceValue");
-            if (queryScienceDataForScienceSubject == null)
-                throw new ArgumentNullException("QueryScienceDataForScienceSubject");
+
+            _currentVessel = currentVessel;
             _ruleFactory = ruleFactory;
             _rulesets = rulesets;
             _queryScienceSubject = queryScienceSubject;
             _queryScienceValue = queryScienceValue;
             _careerScienceGainMultiplier = careerScienceGainMultiplier;
-            _queryScienceDataForScienceSubject = queryScienceDataForScienceSubject;
         }
 
 
@@ -63,15 +62,15 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors
         public ICollectionSensor CreateCollectionSensor(ScienceExperiment experiment)
         {
             return new FloatSensor(
-                new ScienceCollectionValue(
+                new ScienceCollectionValueSensor(
                     experiment, 
                     _queryScienceSubject, 
                     _queryScienceValue, 
                     _careerScienceGainMultiplier, 
-                    _queryScienceDataForScienceSubject));
+                    _currentVessel));
         }
 
-
+        // note to self: scientists apparently affect the value of transmission
         public ITransmissionSensor CreateTransmissionSensor(ScienceExperiment experiment)
         {
             return new FloatSensor(new DefaultValue<float>());

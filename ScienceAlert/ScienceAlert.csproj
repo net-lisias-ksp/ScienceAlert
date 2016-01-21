@@ -53,6 +53,9 @@
     <Compile Include="Core\CommandLoadSharedConfiguration.cs" />
     <Compile Include="Core\CommandSaveSharedConfiguration.cs" />
     <Compile Include="Core\Gui\CommandCreateAppLauncherView.cs" />
+    <Compile Include="Game\ICelestialBody.cs" />
+    <Compile Include="Game\IScienceSubject.cs" />
+    <Compile Include="Game\KspCelestialBody.cs" />
     <Compile Include="Game\KspFactory.cs" />
     <Compile Include="Game\IGameFactory.cs" />
     <Compile Include="Game\IModuleScienceExperiment.cs" />
@@ -61,6 +64,7 @@
     <Compile Include="Game\KspModuleScienceExperiment.cs" />
     <Compile Include="Game\KspPart.cs" />
     <Compile Include="Game\KspResearchAndDevelopment.cs" />
+    <Compile Include="Game\KspScienceSubject.cs" />
     <Compile Include="Game\KspScienceUtil.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="VesselContext\CommandBindActiveVessel.cs" />
@@ -79,13 +83,12 @@
     <Compile Include="Game\IExperimentSituationProvider.cs" />
     <Compile Include="Game\IQueryScienceValue.cs" />
     <Compile Include="Game\IScienceContainerCollectionProvider.cs" />
-    <Compile Include="VesselContext\Experiments\Sensors\Queries\IQueryScienceDataForScienceSubject.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Queries\IQueryScienceSubject.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Queries\IQueryTransmissionMultiplier.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Queries\RuleToQuerySensorAdapter.cs" />
-    <Compile Include="VesselContext\Experiments\Sensors\Queries\ScienceCollectionValue.cs" />
-    <Compile Include="VesselContext\Experiments\Sensors\Queries\QueryScienceDataForScienceSubject.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\Queries\ScienceCollectionValueSensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Queries\QueryScienceSubject.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\Queries\ScienceTransmissionValueSensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Sensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\IAvailabilitySensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\ICollectionSensor.cs" />
@@ -108,7 +111,7 @@
     <Compile Include="VesselContext\Experiments\Rules\IExperimentRuleTypeProvider.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleDefinition.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleDefinitionFactory.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\RuleDefinitionMissingExperimentIdException.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RulesetMissingExperimentIdException.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleMustImplementCorrectInterfaceException.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleTypeNotFoundException.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleUsesRelatedScienceModuleBase.cs" />

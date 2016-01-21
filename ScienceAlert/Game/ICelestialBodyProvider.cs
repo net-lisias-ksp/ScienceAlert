@@ -2,6 +2,6 @@
 {
     public interface ICelestialBodyProvider
     {
-        CelestialBody OrbitingBody { get; }
+        ICelestialBody OrbitingBody { get; }
     }
 }

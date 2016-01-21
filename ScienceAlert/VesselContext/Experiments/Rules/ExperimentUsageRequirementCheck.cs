@@ -28,7 +28,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
                 if (module.Deployed)
                     continue;
 
-                if (_scienceUtil.RequiredUsageInternalAvailable(Vessel, module.part,
+                if (_scienceUtil.RequiredUsageInternalAvailable(Vessel, module.Part,
                     ExperimentModules[moduleIndex].InternalUsageRequirements))
                     return true;
             }

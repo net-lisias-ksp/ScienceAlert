@@ -27,7 +27,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 
         public bool Get()
         {
-            return _experiment.IsAvailableWhile(_vesselSituation.ExperimentSituation, _vesselBody.OrbitingBody);
+            return _experiment.IsAvailableWhile(_vesselSituation.ExperimentSituation, _vesselBody.OrbitingBody.Body);
         }
     }
 }

@@ -5,5 +5,7 @@
         IVessel Create(Vessel vessel);
         IModuleScienceExperiment Create(ModuleScienceExperiment mse);
         IPart Create(Part part);
+        IScienceSubject Create(ScienceSubject subject);
+        ICelestialBody Create(CelestialBody body);
     }
 }
