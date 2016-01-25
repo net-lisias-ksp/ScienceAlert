@@ -429,7 +429,7 @@
 
 //                try
 //                {
-//                    // Get the most-derived type and use its DeployExperiment so we don't
+//                    // Passes the most-derived type and use its DeployExperiment so we don't
 //                    // skip any plugin-derived versions
 //                    deployable.GetType().InvokeMember("DeployExperiment", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.IgnoreReturn | System.Reflection.BindingFlags.InvokeMethod, null, deployable, null);
 //                } catch (Exception e)

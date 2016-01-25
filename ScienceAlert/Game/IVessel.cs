@@ -1,19 +1,20 @@
 ﻿using System.Collections.ObjectModel;
-using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.Game
 {
     public interface IVessel : IScienceContainerCollectionProvider,
                                 ICelestialBodyProvider,
                                 IExperimentSituationProvider,
-                                IExperimentBiomeProvider
+                                IExperimentBiomeProvider,
+                                IScienceDataTransmitterCollectionProvider,
+                                IScienceExperimentModuleCollectionProvider,
+                                IScienceLabCollectionProvider
     {
         event Callback Modified;
 
         void Rescan();
 
         ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew { get; }
-        ReadOnlyCollection<IModuleScienceExperiment> ScienceExperimentModules { get; }
 
         bool IsControllable { get; }
         string VesselName { get; }
@@ -21,5 +22,7 @@ namespace ScienceAlert.Game
 
         double Latitude { get; }
         double Longitude { get; }
+        bool Landed { get; }
+        bool SplashedDown { get; }
     }
 }

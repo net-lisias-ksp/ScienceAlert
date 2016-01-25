@@ -14,9 +14,9 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         }
 
 
-        public bool Get()
+        public bool Passes()
         {
-            return _rules.All(r => r.Get());
+            return _rules.All(r => r.Passes());
         }
     }
 }

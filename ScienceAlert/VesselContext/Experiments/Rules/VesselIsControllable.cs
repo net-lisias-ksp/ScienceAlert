@@ -14,7 +14,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
             _vessel = vessel;
         }
 
-        public bool Get()
+        public bool Passes()
         {
             return _vessel.IsControllable;
         }

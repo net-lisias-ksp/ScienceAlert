@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using ReeperCommon.Containers;
-using ReeperCommon.Extensions;
 using ReeperCommon.FileSystem;
 using ReeperCommon.FileSystem.Providers;
 using ReeperCommon.Logging;
@@ -15,9 +12,7 @@ using ReeperCommon.Serialization;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Game;
 using ScienceAlert.Gui;
-using ScienceAlert.VesselContext;
 using ScienceAlert.VesselContext.Experiments.Rules;
-using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 using strange.extensions.context.api;
 using UnityEngine;
 
@@ -98,8 +93,12 @@ namespace ScienceAlert.Core
                 .ToName(CoreKeys.CareerScienceGainMultiplier)
                 .CrossContext();
 
+            injectionBinder.GetInstance<IGameFactory>()
+                .With(f => f.Create(FlightGlobals.GetHomeBody()))
+                .Do(hw => injectionBinder.Bind<ICelestialBody>().ToValue(hw).ToName(CoreKeys.HomeWorld).CrossContext());
+
             injectionBinder.Bind<RuleDefinitionFactory>().ToSingleton().CrossContext();
-            injectionBinder.Bind<IQueryScienceSubject>().To<QueryScienceSubject>().ToSingleton().CrossContext();
+            //injectionBinder.Bind<IQueryScienceSubject>().To<QueryScienceSubject>().ToSingleton().CrossContext();
             injectionBinder.Bind<IQueryScienceValue>().To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
 
             ConfigureScienceAlert();

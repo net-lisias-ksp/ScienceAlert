@@ -11,5 +11,10 @@ namespace ScienceAlert.Game
         }
 
         public CelestialBody Body { get; private set; }
+
+        public string BodyName
+        {
+            get { return Body.bodyName; }
+        }
     }
 }

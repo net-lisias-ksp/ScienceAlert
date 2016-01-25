@@ -1,6 +1,5 @@
 ﻿using System;
 using ScienceAlert.Game;
-using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
@@ -25,7 +24,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         }
 
 
-        public bool Get()
+        public bool Passes()
         {
             return _experiment.IsAvailableWhile(_vesselSituation.ExperimentSituation, _vesselBody.OrbitingBody.Body);
         }

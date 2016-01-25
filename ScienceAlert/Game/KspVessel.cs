@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using ScienceAlert.VesselContext.Experiments.Sensors.Queries;
 
 namespace ScienceAlert.Game
 {
@@ -18,8 +17,13 @@ namespace ScienceAlert.Game
             new ReadOnlyCollection<IModuleScienceExperiment>(Enumerable.Empty<IModuleScienceExperiment>().ToList());
 
         private ReadOnlyCollection<IScienceDataContainer> _scienceContainers =
-            new ReadOnlyCollection<IScienceDataContainer>(Enumerable.Empty<IScienceDataContainer>().ToList()); 
-        
+            new ReadOnlyCollection<IScienceDataContainer>(Enumerable.Empty<IScienceDataContainer>().ToList());
+
+        private ReadOnlyCollection<IScienceDataTransmitter> _scienceTransmitters =
+            new ReadOnlyCollection<IScienceDataTransmitter>(Enumerable.Empty<IScienceDataTransmitter>().ToList());
+
+        private ReadOnlyCollection<IScienceLab> _scienceLabs = new ReadOnlyCollection<IScienceLab>(Enumerable.Empty<IScienceLab>().ToList());
+ 
         public KspVessel(
             IGameFactory factory, 
             Vessel vessel)
@@ -67,6 +71,8 @@ namespace ScienceAlert.Game
             ScanForCrew();
             ScanForScienceExperimentModules();
             ScanForScienceContainers();
+            ScanForScienceTransmitters();
+            ScanForScienceLabs();
 
             Modified();
         }
@@ -97,6 +103,26 @@ namespace ScienceAlert.Game
                 _vessel.FindPartModulesImplementing<IScienceDataContainer>().ToList());
 
             Log.Debug("KspVessel: found " + _scienceContainers.Count + " IScienceDataContainers");
+        }
+
+
+        private void ScanForScienceTransmitters()
+        {
+            _scienceTransmitters = new ReadOnlyCollection<IScienceDataTransmitter>(
+                _vessel.FindPartModulesImplementing<IScienceDataTransmitter>().ToList());
+
+            Log.Debug("KspVessel: found " + _scienceTransmitters.Count + " IScienceDataTransmitters");
+        }
+
+
+        private void ScanForScienceLabs()
+        {
+            _scienceLabs = new ReadOnlyCollection<IScienceLab>(
+                _vessel.FindPartModulesImplementing<ModuleScienceLab>()
+                    .Select(l => _factory.Create(l))
+                    .ToList());
+
+            Log.Debug("KspVessel: found " + _scienceLabs.Count + " ModuleScienceLab modules");
         }
 
 
@@ -133,6 +159,16 @@ namespace ScienceAlert.Game
             get { return _scienceContainers; }
         }
 
+        public ReadOnlyCollection<IScienceDataTransmitter> Transmitters
+        {
+            get { return _scienceTransmitters; }
+        }
+
+        public ReadOnlyCollection<IScienceLab> Labs
+        {
+            get { return _scienceLabs; }
+        }
+
         public ICelestialBody OrbitingBody
         {
             get { return _factory.Create(_vessel.mainBody); }
@@ -151,6 +187,16 @@ namespace ScienceAlert.Game
         public double Longitude
         {
             get { return _vessel.longitude; }
+        }
+
+        public bool SplashedDown
+        {
+            get { return _vessel.Splashed; }
+        }
+
+        public bool Landed
+        {
+            get { return _vessel.Landed; }
         }
 
         public string Biome

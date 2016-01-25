@@ -47,7 +47,7 @@
 //        {
 //            try
 //            {
-//                var configPath = _configPathQuery.Get();
+//                var configPath = _configPathQuery.Passes();
 
 //                if (!File.Exists(configPath))
 //                {

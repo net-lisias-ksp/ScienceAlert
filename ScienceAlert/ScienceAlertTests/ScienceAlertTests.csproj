@@ -81,6 +81,8 @@
   <ItemGroup>
     <Compile Include="AutoDomainDataAttribute.cs" />
     <Compile Include="DomainCustomization.cs" />
+    <Compile Include="Domain\ScienceExperimentFactory.cs" />
+    <Compile Include="Domain\ScienceSubjectFactory.cs" />
     <Compile Include="ExperimentFixtureFactory.cs" />
     <Compile Include="Game\ExperimentUsageReqsExtensionTests.cs" />
     <Compile Include="Game\KspResearchAndDevelopmentDouble.cs" />
@@ -88,6 +90,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rules\RuleDefinitionFactoryTests.cs" />
     <Compile Include="VesselContext\ExperimentStatusReportTests.cs" />
+    <Compile Include="VesselContext\Experiments\ExperimentReportValueCalculatorTests.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Queries\ScienceCollectionValueSensorTests.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Queries\ScienceTransmissionValueSensorTests.cs" />
   </ItemGroup>

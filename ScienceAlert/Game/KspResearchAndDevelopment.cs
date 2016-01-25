@@ -22,10 +22,12 @@ namespace ScienceAlert.Game
             return ResearchAndDevelopment.GetNextScienceValue(dataAmount, subject.Subject, xmitScalar);
         }
 
-
-        public float GetNextScienceValue(float dataAmount, IScienceSubject subject, float xmitScalar, int duplicateOnboardReportCount)
+        public float GetReferenceDataValue(float dataAmount, IScienceSubject subject)
         {
-            throw new NotImplementedException();
+            if (subject == null) throw new ArgumentNullException("subject");
+            if (dataAmount < 0f) throw new ArgumentException("Negative data amount", "dataAmount");
+
+            return ResearchAndDevelopment.GetReferenceDataValue(dataAmount, subject.Subject);
         }
     }
 }

@@ -7,5 +7,6 @@
         IPart Create(Part part);
         IScienceSubject Create(ScienceSubject subject);
         ICelestialBody Create(CelestialBody body);
+        IScienceLab Create(ModuleScienceLab lab);
     }
 }

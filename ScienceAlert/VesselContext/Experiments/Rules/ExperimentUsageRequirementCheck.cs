@@ -4,7 +4,7 @@ using ScienceAlert.Game;
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
 // ReSharper disable once UnusedMember.Global
-    public class ExperimentUsageRequirementCheck : RuleUsesRelatedScienceModuleBase, IExperimentRule
+    public class ExperimentUsageRequirementCheck : ScienceExperimentModuleTracker, IExperimentRule
     {
         private readonly IScienceUtil _scienceUtil;
 
@@ -17,7 +17,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
             _scienceUtil = scienceUtil;
         }
 
-        public bool Get()
+        public bool Passes()
         {
 // ReSharper disable once LoopCanBeConvertedToQuery
 // ReSharper disable once ForCanBeConvertedToForeach

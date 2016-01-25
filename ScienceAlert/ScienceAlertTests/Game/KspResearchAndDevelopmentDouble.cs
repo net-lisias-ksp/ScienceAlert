@@ -28,7 +28,7 @@ namespace ScienceAlertTests.Game
         }
 
 
-        public static float GetReferenceDataValue(float dataAmount, IScienceSubject subject)
+        public float GetReferenceDataValue(float dataAmount, IScienceSubject subject)
         {
             if (subject == null) throw new ArgumentNullException("subject");
 

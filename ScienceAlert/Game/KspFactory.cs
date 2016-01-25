@@ -33,7 +33,7 @@ namespace ScienceAlert.Game
         {
             if (mse == null) throw new ArgumentNullException("mse");
 
-            return new KspModuleScienceExperiment(this, mse);
+            return new KspScienceExperimentModule(this, mse);
         }
 
 
@@ -58,6 +58,14 @@ namespace ScienceAlert.Game
             if (body == null) throw new ArgumentNullException("body");
 
             return new KspCelestialBody(body);
+        }
+
+
+        public IScienceLab Create(ModuleScienceLab lab)
+        {
+            if (lab == null) throw new ArgumentNullException("lab");
+
+            return new KspScienceLabModule(lab);
         }
     }
 }

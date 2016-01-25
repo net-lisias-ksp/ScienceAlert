@@ -15,7 +15,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         }
 
 
-        public bool Get()
+        public bool Passes()
         {
             return _vessel.EvaCapableCrew.Count > 0;
         }

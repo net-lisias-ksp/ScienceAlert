@@ -9,5 +9,6 @@
         ExperimentRuleConfigs, // IEnumerable<ConfigNode>
 
         CareerScienceGainMultiplier, // float
+        HomeWorld, // ICelestialBody
     }
 }

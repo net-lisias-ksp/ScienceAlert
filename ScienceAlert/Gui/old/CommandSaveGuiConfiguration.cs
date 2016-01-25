@@ -45,7 +45,7 @@
 //        {
 //            try
 //            {
-//                var configPath = _configFileQuery.Get();
+//                var configPath = _configFileQuery.Passes();
 //                var node = new ConfigNode(_nodeName, "Science Alert Shared GUI settings");
 
 //                SaveNonWindowSpecificSettings(node);

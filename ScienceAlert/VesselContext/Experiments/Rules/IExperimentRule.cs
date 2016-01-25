@@ -2,6 +2,6 @@
 {
     public interface IExperimentRule
     {
-        bool Get();
+        bool Passes();
     }
 }
