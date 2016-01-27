@@ -1,4 +1,5 @@
-﻿using strange.extensions.mediation.impl;
+﻿using System;
+using strange.extensions.mediation.impl;
 using strange.extensions.signal.impl;
 
 namespace ScienceAlert.Game
@@ -11,7 +12,11 @@ namespace ScienceAlert.Game
         internal readonly Signal<Vessel> VesselChanged = new Signal<Vessel>();
         internal readonly Signal<Vessel> VesselDestroyed = new Signal<Vessel>();
         internal readonly Signal<GameScenes> GameSceneLoadRequested = new Signal<GameScenes>();
+        internal readonly Signal<float, ScienceSubject, ProtoVessel, bool> ScienceReceived =
+            new Signal<float, ScienceSubject, ProtoVessel, bool>();
         internal readonly Signal ApplicationQuit = new Signal();
+
+        internal readonly Signal GameUpdateTick = new Signal();
 
         protected override void Start()
         {
@@ -20,6 +25,7 @@ namespace ScienceAlert.Game
             GameEvents.onVesselDestroy.Add(OnVesselDestroy);
             GameEvents.onVesselWasModified.Add(OnVesselModified);
             GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
+            GameEvents.OnScienceRecieved.Add(OnScienceReceived);
         }
 
 
@@ -29,6 +35,7 @@ namespace ScienceAlert.Game
             GameEvents.onVesselDestroy.Remove(OnVesselDestroy);
             GameEvents.onVesselWasModified.Remove(OnVesselModified);
             GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
+            GameEvents.OnScienceRecieved.Remove(OnScienceReceived);
             base.OnDestroy();
         }
 
@@ -57,9 +64,23 @@ namespace ScienceAlert.Game
         }
 
 
+// ReSharper disable once UnusedMember.Local
         private void OnApplicationQuit()
         {
             ApplicationQuit.Dispatch();
+        }
+
+
+        private void OnScienceReceived(float data0, ScienceSubject data1, ProtoVessel data2, bool data3)
+        {
+            ScienceReceived.Dispatch(data0, data1, data2, data3);
+        }
+
+
+// ReSharper disable once UnusedMember.Local
+        private void Update()
+        {
+            GameUpdateTick.Dispatch();
         }
     }
 }

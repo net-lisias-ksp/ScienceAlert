@@ -5,7 +5,7 @@
 //namespace ScienceAlert.VesselContext.Experiments.Sensors.Queries
 //{
 //// ReSharper disable once ClassNeverInstantiated.Global
-//    public class QueryScienceSubject : IQueryScienceSubject
+//    public class QueryScienceSubject : IScienceSubjectProvider
 //    {
 //        private readonly ICelestialBodyProvider _bodyProvider;
 //        private readonly IExperimentSituationProvider _situationProvider;
@@ -37,7 +37,7 @@
 //                experiment, 
 //                _situationProvider.ExperimentSituation,
 //                _bodyProvider.OrbitingBody.Body, 
-//                experiment.BiomeIsRelevantWhile(_situationProvider.ExperimentSituation) ? _biomeProvider.Biome : string.Empty);
+//                experiment.BiomeIsRelevantWhile(_situationProvider.ExperimentSituation) ? _biomeProvider.RawBiome : string.Empty);
 
 //            var subj1 = subj;
 //            var existingSubj = ResearchAndDevelopment.GetSubjects().FirstOrDefault(ss => ss.id == subj1.id);

@@ -9,14 +9,14 @@
 //    public class ScienceCollectionValueSensor : IQuerySensorValue<float>
 //    {
 //        protected readonly ScienceExperiment Experiment;
-//        private readonly IQueryScienceSubject _subject;
+//        private readonly IScienceSubjectProvider _subject;
 //        private readonly IQueryScienceValue _queryScienceValue;
 //        private readonly float _careerScienceGainMultiplier;
 //        private readonly IScienceContainerCollectionProvider _vesselContainer;
 
 //        public ScienceCollectionValueSensor(
 //            ScienceExperiment experiment,
-//            IQueryScienceSubject subject,
+//            IScienceSubjectProvider subject,
 //            IQueryScienceValue queryScienceValue,
 //            [Name(CoreKeys.CareerScienceGainMultiplier)] float careerScienceGainMultiplier,
 //            IScienceContainerCollectionProvider vesselContainer)

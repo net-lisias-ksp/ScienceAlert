@@ -4,19 +4,15 @@ namespace ScienceAlert.Game
 {
     public class KspScienceSubject : IScienceSubject
     {
-        private readonly IGameFactory _gameFactory;
-        
-
-        public KspScienceSubject(IGameFactory gameFactory, ScienceSubject subject)
+        public KspScienceSubject(ScienceSubject subject)
         {
-            if (gameFactory == null) throw new ArgumentNullException("gameFactory");
-            _gameFactory = gameFactory;
             if (subject == null) throw new ArgumentNullException("subject");
             Subject = subject;
         }
 
 
         public ScienceSubject Subject { get; private set; }
+
 
         public string Id
         {

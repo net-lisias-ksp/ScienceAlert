@@ -17,7 +17,10 @@ namespace ScienceAlert.Game
         [Inject] public SignalVesselDestroyed VesselDestroyedSignal { get; set; }
         [Inject] public SignalActiveVesselDestroyed ActiveVesselDestroyedSignal { get; set; }
         [Inject] public SignalGameSceneLoadRequested GameSceneLoadRequestedSignal { get; set; }
-        [Inject] public SignalApplicationQuit ApplicationQuitSignal { get; set; } 
+        [Inject] public SignalScienceReceived ScienceReceivedSignal { get; set; }
+
+        [Inject] public SignalApplicationQuit ApplicationQuitSignal { get; set; }
+        [Inject] public SignalGameTick GameTickSignal { get; set; }
 
         public override void OnRegister()
         {
@@ -26,7 +29,10 @@ namespace ScienceAlert.Game
             View.VesselModified.AddListener(OnVesselModified);
             View.VesselDestroyed.AddListener(OnVesselDestroyed);
             View.GameSceneLoadRequested.AddListener(OnGameSceneLoadRequested);
+            View.ScienceReceived.AddListener(OnScienceReceived);
+
             View.ApplicationQuit.AddListener(OnApplicationQuit);
+            View.GameUpdateTick.AddListener(OnGameUpdateTick);
         }
 
 
@@ -36,7 +42,10 @@ namespace ScienceAlert.Game
             View.VesselModified.RemoveListener(OnVesselModified);
             View.VesselDestroyed.RemoveListener(OnVesselDestroyed);
             View.GameSceneLoadRequested.RemoveListener(OnGameSceneLoadRequested);
+            View.ScienceReceived.RemoveListener(OnScienceReceived);
+
             View.ApplicationQuit.RemoveListener(OnApplicationQuit);
+            View.GameUpdateTick.RemoveListener(OnGameUpdateTick);
             base.OnRemove();
         }
 
@@ -104,11 +113,25 @@ namespace ScienceAlert.Game
         }
 
 
+        private void OnScienceReceived(float data0, ScienceSubject data1, ProtoVessel data2, bool data3)
+        {
+            Log.Debug(() => typeof (GameEventMediator).Name + ".OnScienceReceived " + data0);
+            TryAction(() => ScienceReceivedSignal.Dispatch(data0, data1, data2, data3));
+        }
+
+
         private void OnApplicationQuit()
         {
             Log.Debug(() => typeof (GameEventMediator).Name + ".OnApplicationQuit");
-            TryAction(() => ApplicationQuitSignal.Dispatch());
+            ApplicationQuitSignal.Dispatch(); // wrapper not necessary because this isn't a GameEvent supplied by the game
         }
+
+
+        private void OnGameUpdateTick()
+        {
+            GameTickSignal.Dispatch(); // wrapper not necessary because this isn't a GameEvent supplied by the game
+        }
+
 
         private static bool IsActiveVessel(Vessel data)
         {

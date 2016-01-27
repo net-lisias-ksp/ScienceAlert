@@ -1,6 +1,8 @@
-﻿namespace ScienceAlert.Game
+﻿using System;
+
+namespace ScienceAlert.Game
 {
-    public interface ICelestialBody
+    public interface ICelestialBody : IEquatable<ICelestialBody>
     {
         CelestialBody Body { get; }
 

@@ -346,7 +346,7 @@
 //                        // Display current biome in experiment list
 //                        //-----------------------------------------------------
 //                        {
-//                            Settings.Instance.DisplayCurrentBiome = AudibleToggle(Settings.Instance.DisplayCurrentBiome, "Display Biome in Experiment List");
+//                            Settings.Instance.DisplayCurrentBiome = AudibleToggle(Settings.Instance.DisplayCurrentBiome, "Display RawBiome in Experiment List");
 //                        }
 
 

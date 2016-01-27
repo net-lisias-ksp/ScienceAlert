@@ -52,7 +52,7 @@
 // * 1.8.3
 // *      Bugfix: EVA/surface sample buttons will no longer deploy while in TimeWarp
 // *      
-// *      Change: Biome filtering re-added due to anomalous "phantom" biomes stock
+// *      Change: RawBiome filtering re-added due to anomalous "phantom" biomes stock
 // *              KSP sometimes reports. This should reduce the incident of "alert blips"--
 // *              where ScienceAlert reports an experiment available only for a few frames
 // *              and interrupting time warp, but the alert ends faster than you can possible
@@ -106,11 +106,11 @@
 // *      Bugfix: Rapidly disintegrating vessels could sometimes cause an issue
 // *              that spammed KeyNotFound exceptions
 // *              
-// *      Bugfix: Biome map filter function could sometimes be interrupted and
+// *      Bugfix: RawBiome map filter function could sometimes be interrupted and
 // *              be left in a bad state, causing ScienceAlert to stop reporting
 // *              science
 // *              
-// *      Bugfix: Biome map filter function could, in rare circumstances, produce
+// *      Bugfix: RawBiome map filter function could, in rare circumstances, produce
 // *              a wrong result
 // * 
 // * 1.5

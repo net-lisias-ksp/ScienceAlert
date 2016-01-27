@@ -53,9 +53,23 @@ namespace ScienceAlert
     {
     }
 
+
 // ReSharper disable once UnusedMember.Global
     public class SignalApplicationQuit : Signal
     {
+    }
+
+
+    public class SignalScienceReceived : Signal<float, ScienceSubject, ProtoVessel, bool>
+    {
+    
+    }
+
+
+// ReSharper disable once ClassNeverInstantiated.Global
+    public class SignalGameTick : Signal
+    {
+
     }
 
 
@@ -71,4 +85,7 @@ namespace ScienceAlert
     {
         
     }
+
+
+
 }

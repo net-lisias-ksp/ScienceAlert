@@ -40,6 +40,19 @@ namespace ScienceAlertTests.Domain
                         flyingAltitudeThreshold = 12000,
                         spaceAltitudeThreshold = 140000
                     }
+                },
+                {
+                    "Laythe", new CelestialBodyScienceParams
+                    {
+                        LandedDataValue = 14,
+                        SplashedDataValue = 12,
+                        FlyingLowDataValue = 11,
+                        FlyingHighDataValue = 10,
+                        InSpaceLowDataValue = 9,
+                        InSpaceHighDataValue = 8,
+                        flyingAltitudeThreshold = 10000,
+                        spaceAltitudeThreshold = 200000
+                    }
                 }
             };
 

@@ -15,7 +15,7 @@
 //        private readonly IVessel _currentVessel;
 //        private readonly IExperimentRuleFactory _ruleFactory;
 //        private readonly IEnumerable<ExperimentRuleset> _rulesets;
-//        private readonly IQueryScienceSubject _queryScienceSubject;
+//        private readonly IScienceSubjectProvider _queryScienceSubject;
 //        private readonly IQueryScienceValue _queryScienceValue;
 //        private readonly float _careerScienceGainMultiplier;
 
@@ -23,7 +23,7 @@
 //            IVessel currentVessel,
 //            IExperimentRuleFactory ruleFactory, 
 //            IEnumerable<ExperimentRuleset> rulesets,
-//            IQueryScienceSubject queryScienceSubject,
+//            IScienceSubjectProvider queryScienceSubject,
 //            IQueryScienceValue queryScienceValue,
 //            [Name(CoreKeys.CareerScienceGainMultiplier)] float careerScienceGainMultiplier)
 //        {

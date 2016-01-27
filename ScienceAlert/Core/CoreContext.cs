@@ -32,6 +32,18 @@ namespace ScienceAlert.Core
         {
             base.mapBindings();
 
+            injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
+            injectionBinder.Bind<SignalVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
+            injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
+            injectionBinder.Bind<SignalScienceReceived>().ToSingleton();
+
+            injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
+            injectionBinder.Bind<SignalGameTick>().ToSingleton();
+
+
             MapCrossContextBindings();
             SetupCommandBindings();
 
@@ -93,12 +105,9 @@ namespace ScienceAlert.Core
                 .ToName(CoreKeys.CareerScienceGainMultiplier)
                 .CrossContext();
 
-            injectionBinder.GetInstance<IGameFactory>()
-                .With(f => f.Create(FlightGlobals.GetHomeBody()))
-                .Do(hw => injectionBinder.Bind<ICelestialBody>().ToValue(hw).ToName(CoreKeys.HomeWorld).CrossContext());
+            injectionBinder.Bind<ICelestialBody>().ToValue(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CoreKeys.HomeWorld).CrossContext();
 
             injectionBinder.Bind<RuleDefinitionFactory>().ToSingleton().CrossContext();
-            //injectionBinder.Bind<IQueryScienceSubject>().To<QueryScienceSubject>().ToSingleton().CrossContext();
             injectionBinder.Bind<IQueryScienceValue>().To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
 
             ConfigureScienceAlert();
@@ -107,15 +116,6 @@ namespace ScienceAlert.Core
             ConfigureExperiments();
 
             injectionBinder.Bind<SignalCriticalShutdown>().ToSingleton().CrossContext();
-
-            injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
-            injectionBinder.Bind<SignalVesselModified>().ToSingleton();
-            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
-            injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
-            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
-            injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
-            injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
-
             injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
         }
 

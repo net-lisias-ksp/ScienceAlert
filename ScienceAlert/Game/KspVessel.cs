@@ -205,7 +205,7 @@ namespace ScienceAlert.Game
             {
                 return string.IsNullOrEmpty(_vessel.landedAt)
                     ? ScienceUtil.GetExperimentBiome(_vessel.mainBody, Latitude, Longitude)
-                    : _vessel.landedAt;
+                    : Vessel.GetLandedAtString(_vessel.landedAt);
             }
         }
     }

@@ -49,7 +49,7 @@ namespace ScienceAlert.Game
         {
             if (subject == null) throw new ArgumentNullException("subject");
 
-            return new KspScienceSubject(this, subject);
+            return new KspScienceSubject(subject);
         }
 
 

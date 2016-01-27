@@ -16,5 +16,10 @@ namespace ScienceAlert.Game
         {
             get { return Body.bodyName; }
         }
+
+        public bool Equals(ICelestialBody other)
+        {
+            return ReferenceEquals(Body, other.Body);
+        }
     }
 }

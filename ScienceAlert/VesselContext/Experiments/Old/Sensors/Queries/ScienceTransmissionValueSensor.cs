@@ -13,7 +13,7 @@
  
 //        public ScienceTransmissionValueSensor(
 //            ScienceExperiment experiment, 
-//            IQueryScienceSubject subject, 
+//            IScienceSubjectProvider subject, 
 //            IQueryScienceValue queryScienceValue,
 //            [Name(CoreKeys.CareerScienceGainMultiplier)] float careerScienceGainMultiplier, 
 //            IScienceContainerCollectionProvider vesselContainer,

@@ -6,22 +6,22 @@ namespace ScienceAlert.VesselContext.Experiments
     public class ExperimentSensor
     {
         public readonly ScienceExperiment Experiment;
-        private readonly IQueryScienceSubject _scienceSubjectQuery;
+        private readonly IScienceSubjectProvider _scienceSubjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
 
         private IScienceSubject _currentSubject;
  
         public ExperimentSensor(
             ScienceExperiment experiment, 
-            IQueryScienceSubject scienceSubjectQuery,
+            IScienceSubjectProvider scienceSubjectProvider,
             IExperimentReportValueCalculator reportCalculator)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
-            if (scienceSubjectQuery == null) throw new ArgumentNullException("scienceSubjectQuery");
+            if (scienceSubjectProvider == null) throw new ArgumentNullException("scienceSubjectProvider");
             if (reportCalculator == null) throw new ArgumentNullException("reportCalculator");
 
             Experiment = experiment;
-            _scienceSubjectQuery = scienceSubjectQuery;
+            _scienceSubjectProvider = scienceSubjectProvider;
             _reportCalculator = reportCalculator;
         }
 
@@ -79,7 +79,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
         private IScienceSubject GetCurrentScienceSubject()
         {
-            return _scienceSubjectQuery.GetSubject(Experiment);
+            return _scienceSubjectProvider.GetSubject(Experiment);
         }
     }
 }

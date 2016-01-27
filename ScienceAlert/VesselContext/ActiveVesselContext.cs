@@ -62,7 +62,10 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
+            injectionBinder.Bind<SignalScienceReceived>().ToSingleton();
+
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
+            injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
             injectionBinder.Bind<SignalUpdateExperimentListPopup>().ToSingleton();
 
@@ -105,8 +108,6 @@ namespace ScienceAlert.VesselContext
             commandBinder.Bind<SignalSharedConfigurationSaving>()
                 .To<CommandDispatchSaveGuiSettingsSignal>();
 
-            commandBinder.Bind<SignalExperimentSensorStatusChanged>()
-                .To<CommandLogSensorStatusUpdate>();
         }
 
 

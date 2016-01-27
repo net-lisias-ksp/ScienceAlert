@@ -59,7 +59,7 @@
 //            GUILayout.BeginVertical(GUILayout.ExpandHeight(true), GUILayout.MinHeight(128f));
 
 //            // current biome
-//            GUILayout.Label("Biome: to be implemented", GUILayout.MinWidth(256f));
+//            GUILayout.Label("RawBiome: to be implemented", GUILayout.MinWidth(256f));
 
 //            GUILayout.EndVertical();
 //        }

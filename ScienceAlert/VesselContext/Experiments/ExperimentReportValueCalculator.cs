@@ -143,7 +143,7 @@ namespace ScienceAlert.VesselContext.Experiments
                 multiplier *= 1f + lab.ContextBonus;
 
             if ((_activeVessel.Landed || _activeVessel.SplashedDown) &&
-                ReferenceEquals(_homeWorld.Body, _activeVessel.OrbitingBody.Body))
+                _homeWorld.Equals(_activeVessel.OrbitingBody))
                 multiplier *= lab.HomeworldMultiplier; // lack of addition intended
 
             return multiplier;
