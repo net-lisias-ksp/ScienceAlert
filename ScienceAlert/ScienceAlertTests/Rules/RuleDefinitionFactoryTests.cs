@@ -10,14 +10,14 @@ namespace ScienceAlertTests.Rules
         [Theory, AutoDomainData]
         public void Create_WithSingleRule_Test(RuleDefinitionFactory sut)
         {
-            var config = new ConfigNode(typeof(VesselHasExperimentModuleScienceExperimentExperiment).Name);
+            var config = new ConfigNode(typeof(VesselHasModuleScienceExperiment).Name);
 
             var result = sut.Create(config);
 
             Assert.Equal(RuleDefinition.DefinitionType.Rule, result.Type);
             Assert.Empty(result.Rules);
             Assert.Same(config, result.RuleConfig.Value);
-            Assert.Same(typeof (VesselHasExperimentModuleScienceExperimentExperiment), result.Rule.Value);
+            Assert.Same(typeof (VesselHasModuleScienceExperiment), result.Rule.Value);
         }
 
 
@@ -26,15 +26,15 @@ namespace ScienceAlertTests.Rules
         {
             var config = new ConfigNode(RuleDefinitionFactory.CompositeAllName);
 
-            config.AddNode(new ConfigNode(typeof (VesselHasExperimentModuleScienceExperimentExperiment).Name));
-            config.AddNode(new ConfigNode(typeof (VesselHasExperimentModuleScienceExperimentExperiment).Name));
+            config.AddNode(new ConfigNode(typeof (VesselHasModuleScienceExperiment).Name));
+            config.AddNode(new ConfigNode(typeof (VesselHasModuleScienceExperiment).Name));
 
             var result = sut.Create(config);
 
             Assert.Equal(RuleDefinition.DefinitionType.CompositeAll, result.Type);
             Assert.NotEmpty(result.Rules);
             Assert.Null(result.RuleConfig.Value);
-            Assert.Contains(typeof (VesselHasExperimentModuleScienceExperimentExperiment), result.Rules.Select(n => n.Rule.Value));
+            Assert.Contains(typeof (VesselHasModuleScienceExperiment), result.Rules.Select(n => n.Rule.Value));
             Assert.Equal(2, result.Rules.Count);
             Assert.True(result.Rules.All(r => r.Type == RuleDefinition.DefinitionType.Rule));
         }
@@ -59,7 +59,7 @@ namespace ScienceAlertTests.Rules
 */
             var config = new ConfigNode(RuleDefinitionFactory.CompositeAllName);
 
-            config.AddNode(new ConfigNode(typeof (VesselHasExperimentModuleScienceExperimentExperiment).Name));
+            config.AddNode(new ConfigNode(typeof (VesselHasModuleScienceExperiment).Name));
 
             config.AddNode(config.CreateCopy());
 

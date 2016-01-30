@@ -18,7 +18,7 @@ namespace ScienceAlert.VesselContext
             catch (Exception e)
             {
                 // todo: popup dialog?
-                Log.Error("Exception while boostrapping vessel context: " + e);
+                Log.Error("Exception while bootstrapping vessel context: " + e);
             }
         }
 

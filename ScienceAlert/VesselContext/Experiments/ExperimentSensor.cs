@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using ScienceAlert.Game;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
@@ -10,7 +12,8 @@ namespace ScienceAlert.VesselContext.Experiments
         private readonly IExperimentReportValueCalculator _reportCalculator;
 
         private IScienceSubject _currentSubject;
- 
+        
+
         public ExperimentSensor(
             ScienceExperiment experiment, 
             IScienceSubjectProvider scienceSubjectProvider,
@@ -23,6 +26,7 @@ namespace ScienceAlert.VesselContext.Experiments
             Experiment = experiment;
             _scienceSubjectProvider = scienceSubjectProvider;
             _reportCalculator = reportCalculator;
+
         }
 
 
@@ -44,36 +48,51 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             _currentSubject = GetCurrentScienceSubject();
 
-            HasChanged =
-                SetValueAndCheckForChange(CollectionValue, CalculateCollectionValue(), v => CollectionValue = v) ||
-                SetValueAndCheckForChange(TransmissionValue, CalculateTransmissionValue(), v => TransmissionValue = v) ||
-                SetValueAndCheckForChange(LabValue, CalculateLabValue(), v => LabValue = v) ||
-                SetValueAndCheckForChange(Onboard, false, b => Onboard = b) ||
-                SetValueAndCheckForChange(Available, false, b => Available = b);
+            var oldCollection = CollectionValue;
+            var oldTransmission = TransmissionValue;
+            var oldLab = LabValue;
+            var oldOnboard = Onboard;
+            var oldAvailable = Available;
+
+            UpdateCollectionValue();
+            UpdateTransmissionValue();
+            UpdateLabValue();
+            UpdateOnboardValue();
+            UpdateAvailabilityValue();
+
+            HasChanged = !Mathf.Approximately(oldCollection, CollectionValue) ||
+                         !Mathf.Approximately(oldTransmission, TransmissionValue) ||
+                         !Mathf.Approximately(oldLab, LabValue) || oldOnboard != Onboard || oldAvailable != Available;
         }
 
 
-        private static bool SetValueAndCheckForChange<T>(T currentValue, T newValue, Action<T> setAction) where T: struct
+        private void UpdateCollectionValue()
         {
-            setAction(newValue);
-            return currentValue.Equals(newValue);
+            CollectionValue = _reportCalculator.CalculateCollectionValue(Experiment, _currentSubject);
         }
 
 
-        private float CalculateCollectionValue()
+        private void UpdateTransmissionValue()
         {
-            return _reportCalculator.CalculateCollectionValue(Experiment, _currentSubject);
-        }
-
-        private float CalculateTransmissionValue()
-        {
-            return _reportCalculator.CalculateTransmissionValue(Experiment, _currentSubject);
+            TransmissionValue = _reportCalculator.CalculateTransmissionValue(Experiment, _currentSubject);
         }
 
 
-        private float CalculateLabValue()
+        private void UpdateLabValue()
         {
-            return _reportCalculator.CalculateLabValue(Experiment, _currentSubject);
+            LabValue = _reportCalculator.CalculateLabValue(Experiment, _currentSubject);
+        }
+
+
+        private void UpdateOnboardValue()
+        {
+            Onboard = false; // todo
+        }
+
+
+        private void UpdateAvailabilityValue()
+        {
+            Available = false; // todo
         }
 
 

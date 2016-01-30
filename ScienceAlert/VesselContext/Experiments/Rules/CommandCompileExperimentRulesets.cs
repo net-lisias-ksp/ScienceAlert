@@ -157,13 +157,13 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 
         private static RuleDefinition CreateDefaultOnboardRuleDefinition()
         {
-            return new RuleDefinition(typeof (VesselHasExperimentModuleScienceExperimentExperiment));
+            return new RuleDefinition(typeof (VesselHasModuleScienceExperiment));
         }
 
 
         private static RuleDefinition CreateDefaultAvailabilityRuleDefinition()
         {
-            return new RuleDefinition(typeof (VesselHasExperimentModuleScienceExperimentExperiment));
+            return new RuleDefinition(typeof (VesselHasModuleScienceExperiment));
         }
 
 

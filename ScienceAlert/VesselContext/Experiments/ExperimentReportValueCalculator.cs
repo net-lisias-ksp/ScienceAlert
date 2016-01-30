@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
+using ScienceAlert.VesselContext.Experiments.Rules;
 using UnityEngine;
 using ScienceModuleList = System.Collections.Generic.List<ScienceAlert.Game.IModuleScienceExperiment>;
 
@@ -123,9 +124,20 @@ namespace ScienceAlert.VesselContext.Experiments
         // todo: only available ones?
         private float GetBestTransmissionMultiplier(ScienceExperiment experiment)
         {
-            var modulesForExperiment = _experimentModules[experiment];
+            try
+            {
+                var modulesForExperiment = _experimentModules[experiment];
 
-            return modulesForExperiment.Any() ? modulesForExperiment.First().TransmissionMultiplier : 0f;
+                return modulesForExperiment.Any() ? modulesForExperiment.First().TransmissionMultiplier : 0f;
+            }
+            catch (KeyNotFoundException knf)
+            {
+                // something is really hosed here
+                foreach (var exp in _experimentModules)
+                    Log.Error("Known experiment type: " + exp.Key.id);
+
+                throw new MissingExperimentException(experiment);
+            }
         }
 
 

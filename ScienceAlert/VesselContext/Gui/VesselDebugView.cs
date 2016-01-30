@@ -127,7 +127,7 @@ namespace ScienceAlert.VesselContext.Gui
 
         public void SetVesselCoordinates(double lat, double lon)
         {
-            _vesselCoordinates = string.Format("{0}.2,{1}.2", FlightGlobals.ActiveVessel.latitude,
+            _vesselCoordinates = string.Format("{0:0.0000}, {1:0.0000}", FlightGlobals.ActiveVessel.latitude,
                 FlightGlobals.ActiveVessel.longitude);
         }
 

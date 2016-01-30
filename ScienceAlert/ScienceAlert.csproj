@@ -74,13 +74,13 @@
     <Compile Include="Game\KspScienceSubject.cs" />
     <Compile Include="Game\KspScienceUtil.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="VesselContext\CommandBindActiveVessel.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateExperimentReportCalculator.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateExperimentSensors.cs" />
     <Compile Include="VesselContext\CommandLogSensorStatusUpdate.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentReportValueCalculator.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensorFactory.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentSensorFactory.cs" />
+    <Compile Include="VesselContext\Experiments\MissingExperimentException.cs" />
     <Compile Include="VesselContext\Experiments\Old\ExperimentSensorMonitor.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentReportValueCalculator.cs" />
@@ -125,8 +125,8 @@
     <Compile Include="VesselContext\Experiments\Rules\RuleMustImplementCorrectInterfaceException.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleTypeNotFoundException.cs" />
     <Compile Include="VesselContext\Experiments\Rules\ScienceExperimentModuleTracker.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\VesselHasExperimentModuleScienceExperimentExperiment.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\VesselHasOperableExperimentModuleScienceExperimentExperiment.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\VesselHasModuleScienceExperiment.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\VesselHasOperableModuleScienceExperiment.cs" />
     <Compile Include="VesselContext\Experiments\Rules\VesselIsControllable.cs" />
     <Compile Include="VesselContext\Experiments\Rules\VesselIsCrewed.cs" />
     <Compile Include="VesselContext\BootstrapActiveVesselContext.cs" />

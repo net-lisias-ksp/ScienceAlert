@@ -17,10 +17,18 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public override void Execute()
         {
-            injectionBinder.Bind<ExperimentReportValueCalculator>()
+            Log.Verbose("Creating " + typeof (ExperimentReportValueCalculator).Name);
+
+            injectionBinder
+                .Bind<ExperimentReportValueCalculator>()
+                .Bind<IExperimentReportValueCalculator>()
+                .To<ExperimentReportValueCalculator>()
                 .ToSingleton()
                 .With(binding => injectionBinder.GetInstance<ExperimentReportValueCalculator>())
-                .Do(calc => _activeVessel.Modified += calc.OnActiveVesselModified);
+                .Do(calc => _activeVessel.Modified += calc.OnActiveVesselModified)
+                .Do(calc => calc.OnActiveVesselModified());
+
+            Log.Verbose("Created " + typeof (ExperimentReportValueCalculator).Name);
         }
     }
 }

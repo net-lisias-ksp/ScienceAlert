@@ -108,7 +108,10 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<ICelestialBody>().ToValue(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CoreKeys.HomeWorld).CrossContext();
 
             injectionBinder.Bind<RuleDefinitionFactory>().ToSingleton().CrossContext();
-            injectionBinder.Bind<IQueryScienceValue>().To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
+            injectionBinder
+                .Bind<IQueryScienceValue>()
+                .Bind<IResearchAndDevelopment>()
+                .To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
 
             ConfigureScienceAlert();
             ConfigureResourceRepository();

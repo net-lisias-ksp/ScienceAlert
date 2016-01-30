@@ -13,6 +13,7 @@ namespace ScienceAlert.VesselContext
 {
     public class ActiveVesselContext : SignalContext
     {
+
         public ActiveVesselContext(MonoBehaviour view) : base(view, ContextStartupFlags.MANUAL_LAUNCH)
         {
         }
@@ -43,7 +44,6 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<IExperimentRuleFactory>().To<ExperimentRuleFactory>().ToSingleton();
 
             injectionBinder.Bind<IExperimentRulesetProvider>().To<ExperimentRulesetProvider>().ToSingleton();
-            //injectionBinder.Bind<ISensorFactory>().To<ExperimentSensorFactory>().ToSingleton();
 
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
@@ -68,6 +68,7 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
             injectionBinder.Bind<SignalUpdateExperimentListPopup>().ToSingleton();
+            injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
 
             mediationBinder.BindView<ExperimentListView>()
                 .ToMediator<ExperimentListMediator>()
@@ -83,7 +84,12 @@ namespace ScienceAlert.VesselContext
                 .Bind<IScienceContainerCollectionProvider>()
                 .ToValue(gameFactory.Create(FlightGlobals.ActiveVessel));
 
+            injectionBinder.Bind<IScienceSubjectProvider>()
+                .To<KspScienceSubjectProvider>().ToSingleton();
+
             SetupCommandBindings();
+
+            injectionBinder.ReflectAll();
         }
 
 
@@ -100,6 +106,8 @@ namespace ScienceAlert.VesselContext
                 .To<CommandCreateExperimentSensors>()
                 .Once();
 
+            commandBinder.Bind<SignalExperimentSensorStatusChanged>()
+                .To<CommandLogSensorStatusUpdate>();
  
             commandBinder.Bind<SignalContextDestruction>()
                 .To<CommandDispatchSaveGuiSettingsSignal>()
@@ -108,6 +116,8 @@ namespace ScienceAlert.VesselContext
             commandBinder.Bind<SignalSharedConfigurationSaving>()
                 .To<CommandDispatchSaveGuiSettingsSignal>();
 
+            commandBinder.Bind<SignalCriticalShutdown>()
+                .To<CommandCriticalShutdown>().Once();
         }
 
 

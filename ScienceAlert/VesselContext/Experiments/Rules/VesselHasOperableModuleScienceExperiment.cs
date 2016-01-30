@@ -3,9 +3,9 @@
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
 // ReSharper disable once UnusedMember.Global
-    public class VesselHasOperableExperimentModuleScienceExperimentExperiment : ScienceExperimentModuleTracker, IExperimentRule
+    public class VesselHasOperableModuleScienceExperiment : ScienceExperimentModuleTracker, IExperimentRule
     {
-        public VesselHasOperableExperimentModuleScienceExperimentExperiment(ScienceExperiment experiment, IVessel vessel) : base(experiment, vessel)
+        public VesselHasOperableModuleScienceExperiment(ScienceExperiment experiment, IVessel vessel) : base(experiment, vessel)
         {
         }
 

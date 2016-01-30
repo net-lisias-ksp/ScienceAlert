@@ -91,6 +91,7 @@
     <Compile Include="Rules\RuleDefinitionFactoryTests.cs" />
     <Compile Include="VesselContext\ExperimentStatusReportTests.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentReportValueCalculatorTests.cs" />
+    <Compile Include="VesselContext\Experiments\ExperimentSensorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

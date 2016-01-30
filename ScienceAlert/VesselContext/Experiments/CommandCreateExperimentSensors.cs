@@ -32,6 +32,8 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public override void Execute()
         {
+            Log.Verbose("Creating experiment sensors");
+
             var sensorList = _experiments.Select(experiment => _sensorFactory.Create(experiment)).ToList();
 
             injectionBinder.Bind<List<ExperimentSensor>>().ToValue(sensorList);
@@ -41,6 +43,8 @@ namespace ScienceAlert.VesselContext.Experiments
             injectionBinder.injector.Inject(updater, false);
 
             injectionBinder.Unbind<List<ExperimentSensor>>();
+
+            Log.Verbose("Created experiment sensors");
         }
     }
 }
