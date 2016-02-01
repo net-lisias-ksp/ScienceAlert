@@ -124,7 +124,7 @@ namespace ScienceAlert.Core.Gui
             toggle.onHover.background = lit;
             toggle.onActive.background = lit;
 
-            injectionBinder.Bind<GUIStyle>().To(toggle).ToName(GuiKeys.LitToggleStyle).CrossContext();
+            injectionBinder.Bind<GUIStyle>().To(toggle).ToName(GuiKeys.ExperimentAlertToggleStyle).CrossContext();
         }
 
 

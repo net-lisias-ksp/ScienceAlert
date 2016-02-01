@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using ReeperCommon.Containers;
+using ReeperCommon.Extensions;
 using ReeperCommon.FileSystem;
 using ReeperCommon.FileSystem.Providers;
 using ReeperCommon.Logging;
@@ -20,7 +22,9 @@ namespace ScienceAlert.Core
 {
     public class CoreContext : SignalContext
     {
-        private const string ExperimentRuleConfigNodeName = "SA_EXPERIMENT_RULE";
+        private const string ExperimentDefinitionConfigNodeName = "SCIENCE_EXPERIMENT";
+        private const string ExperimentDefinitionIdValueName = "id";
+        
 
         public CoreContext(MonoBehaviour view)
             : base(view, ContextStartupFlags.MANUAL_MAPPING | ContextStartupFlags.MANUAL_LAUNCH)
@@ -43,11 +47,11 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
-
+            injectionBinder.Bind<RuleDefinitionSetFactory>().ToSingleton();
             MapCrossContextBindings();
             SetupCommandBindings();
 
-            injectionBinder.GetInstance<ILog>().Normal("ScienceAlert is operating normally");
+            injectionBinder.GetInstance<ILog>().Verbose("ScienceAlert CoreCore created successfully");
         }
 
 
@@ -107,7 +111,6 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<ICelestialBody>().ToValue(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CoreKeys.HomeWorld).CrossContext();
 
-            injectionBinder.Bind<RuleDefinitionFactory>().ToSingleton().CrossContext();
             injectionBinder
                 .Bind<IQueryScienceValue>()
                 .Bind<IResearchAndDevelopment>()
@@ -138,8 +141,9 @@ namespace ScienceAlert.Core
 
             commandBinder.Bind<SignalStart>()
                 .InSequence()
+                .To<CommandStoreExperimentRuleTypes>()
+                .To<CommandCreateRuleDefinitionSets>()
                 .To<CommandLoadSharedConfiguration>()
-                .To<CommandCompileExperimentRulesets>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
                 .Once();
@@ -150,11 +154,14 @@ namespace ScienceAlert.Core
                 .To<CommandSaveSharedConfiguration>()
                 .Once();
 
+
             injectionBinder.Bind<SignalCriticalShutdown>()
                 .To<CommandCriticalShutdown>();
 
+
             commandBinder.Bind<SignalVesselDestroyed>()
                 .To<CommandDestroyActiveVesselContext>();
+
 
             commandBinder.Bind<SignalVesselChanged>()
                 .InSequence()
@@ -326,11 +333,7 @@ namespace ScienceAlert.Core
 
         private void ConfigureExperiments()
         {
-            var experiments =
-                ResearchAndDevelopment.GetExperimentIDs().Select(ResearchAndDevelopment.GetExperiment);
-            var ruleConfigs = GameDatabase.Instance.GetConfigNodes(ExperimentRuleConfigNodeName);
-
-            injectionBinder.Bind<IEnumerable<ScienceExperiment>>().ToValue(experiments).CrossContext();
+            var experiments = GetScienceExperiments();
 
             foreach (var exp in experiments)
             {
@@ -340,11 +343,50 @@ namespace ScienceAlert.Core
                 injectionBinder.Bind<ScienceExperiment>().ToValue(exp).ToName(exp.id).CrossContext();
             }
 
+            injectionBinder.Bind<IEnumerable<ScienceExperiment>>().Bind<List<ScienceExperiment>>().ToValue(experiments).CrossContext();
+        }
 
-            injectionBinder.Bind<IEnumerable<ConfigNode>>()
-                .ToValue(ruleConfigs)
-                .ToName(CoreKeys.ExperimentRuleConfigs)
-                .CrossContext();
+
+        // Why is this bit off on its down? If the player has duplicate ScienceDefs and we're the first one to try
+        // and access R&D (initializing it), the dictionary it tries to create internally will throw an exception.
+        // If we're looking for this, we can better inform the player and even determine which ConfigNode(s) at which
+        // location(s) are the issue
+// ReSharper disable once ReturnTypeCanBeEnumerable.Local
+        private List<ScienceExperiment> GetScienceExperiments()
+        {
+            Func<ConfigNode, Maybe<string>> getExperimentId =
+                c => c.GetValueEx(ExperimentDefinitionIdValueName, false);
+
+            try
+            {
+                var ids = ResearchAndDevelopment.GetExperimentIDs();
+
+                if (!ids.Any())
+                    throw new Exception("No ScienceExperiment definitions found -- something is wrong in your install!");
+
+                return ids.Select(ResearchAndDevelopment.GetExperiment).ToList();
+            }
+            catch (ArgumentException ae)
+            {
+                
+                // identify the problem node(s)
+                var problemConfigs = GameDatabase.Instance.GetConfigs(ExperimentDefinitionConfigNodeName)
+                    .Where(urlConfig => getExperimentId(urlConfig.config).Any())
+                    .GroupBy(urlConfig => getExperimentId(urlConfig.config).Value)
+                    .Where(grp => grp.Count() > 1)
+                    .SelectMany(k => k)
+                    .OrderBy(j => getExperimentId(j.config).Value)
+                    .ToList();
+
+                Log.Error("Multiple " + ExperimentDefinitionConfigNodeName +
+                          " for the same experiment found! You need to fix your installation.");
+
+                foreach (var problem in problemConfigs)
+                    Debug.LogWarning(getExperimentId(problem.config).Value + " definition found at " +
+                                     problem.url);
+
+                throw;
+            }
         }
 
 

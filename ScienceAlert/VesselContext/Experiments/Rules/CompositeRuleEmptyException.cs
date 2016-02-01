@@ -9,6 +9,10 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
             
         }
 
+        public CompositeRuleEmptyException(string message) : base(message)
+        {
+            
+        }
         public CompositeRuleEmptyException(string message, Exception inner) : base(message, inner)
         {
             

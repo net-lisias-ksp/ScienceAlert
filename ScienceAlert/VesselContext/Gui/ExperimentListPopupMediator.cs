@@ -1,4 +1,5 @@
-﻿using strange.extensions.mediation.impl;
+﻿using System;
+using strange.extensions.mediation.impl;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
@@ -7,14 +8,16 @@ namespace ScienceAlert.VesselContext.Gui
     public class ExperimentListPopupMediator : Mediator
     {
         [Inject] public ExperimentListView View { get; set; }
-        [Inject] public SignalUpdateExperimentListPopup UpdateSignal { get; set; }
+        [Inject] public SignalUpdateExperimentListEntryPopup UpdateSignal { get; set; }
+        [Inject] public SignalCloseExperimentListEntryPopup CloseSignal { get; set; }
 
         public override void OnRegister()
         {
-            Log.Debug("ExperimentListPopupMediator.OnRegister");
             base.OnRegister();
             View.ExperimentPopup.AddListener(UpdatePopup);
+            View.CloseExperimentPopup.AddListener(ClosePopup);
         }
+
 
 
 
@@ -22,13 +25,20 @@ namespace ScienceAlert.VesselContext.Gui
         {
             base.OnRemove();
             View.ExperimentPopup.RemoveListener(UpdatePopup);
+            View.CloseExperimentPopup.RemoveListener(ClosePopup);
         }
 
 
 
-        private void UpdatePopup(ExperimentSensorState experimentSensorState, ExperimentListView.PopupType popupType, Vector2 location)
+        private void UpdatePopup(ExperimentListEntry entry, ExperimentPopupType popupType, Vector2 location)
         {
-            UpdateSignal.Dispatch(experimentSensorState, popupType, location);
+            UpdateSignal.Dispatch(entry, popupType, location);
+        }
+
+
+        private void ClosePopup()
+        {
+            CloseSignal.Dispatch();
         }
     }
 }

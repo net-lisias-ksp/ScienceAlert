@@ -12,13 +12,13 @@ namespace ScienceAlert.VesselContext.Experiments
     {
         private readonly GameObject _vesselContextView;
         private readonly IEnumerable<ScienceExperiment> _experiments;
-        private readonly IExperimentSensorFactory _sensorFactory;
+        private readonly ExperimentSensorFactory _sensorFactory;
 
 
         public CommandCreateExperimentSensors(
             [Name(ContextKeys.CONTEXT_VIEW)] GameObject vesselContextView,
             IEnumerable<ScienceExperiment> experiments,
-            IExperimentSensorFactory sensorFactory)
+            ExperimentSensorFactory sensorFactory)
         {
             if (vesselContextView == null) throw new ArgumentNullException("vesselContextView");
             if (experiments == null) throw new ArgumentNullException("experiments");
@@ -32,19 +32,27 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public override void Execute()
         {
-            Log.Verbose("Creating experiment sensors");
+            var sensors = _experiments.Select(experiment => _sensorFactory.Create(experiment)).ToList();
 
-            var sensorList = _experiments.Select(experiment => _sensorFactory.Create(experiment)).ToList();
+            try
+            {
+                injectionBinder.Bind<List<ExperimentSensor>>().ToValue(sensors);
+                CreateExperimentSensorUpdater();
+            }
+            finally
+            {
+                injectionBinder.Unbind<List<ExperimentSensor>>();
+            }
+            
+            Log.Verbose("Created experiment sensors");
+        }
 
-            injectionBinder.Bind<List<ExperimentSensor>>().ToValue(sensorList);
 
+        private void CreateExperimentSensorUpdater()
+        {
             var updater = _vesselContextView.AddComponent<ExperimentSensorUpdater>();
 
             injectionBinder.injector.Inject(updater, false);
-
-            injectionBinder.Unbind<List<ExperimentSensor>>();
-
-            Log.Verbose("Created experiment sensors");
         }
     }
 }

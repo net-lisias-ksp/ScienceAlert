@@ -6,7 +6,7 @@
 
         GameData, // IDirectory
 
-        ExperimentRuleConfigs, // IEnumerable<ConfigNode>
+        ExperimentRuleTypes, // IEnumerable<Type>
 
         CareerScienceGainMultiplier, // float
         HomeWorld, // ICelestialBody

@@ -17,6 +17,6 @@
         PopupSkin, // GUISkin
 
         WindowTitleBarButtonStyle, // GUIStyle
-        LitToggleStyle, // GUIStyle
+        ExperimentAlertToggleStyle, // GUIStyle
     }
 }

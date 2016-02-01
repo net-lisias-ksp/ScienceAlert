@@ -11,6 +11,11 @@ namespace ScienceAlert.VesselContext.Gui
 // ReSharper disable once ClassNeverInstantiated.Global
     public class ExperimentListView : StrangeView
     {
+        private static readonly GUILayoutOption[] DefaultLayoutOptions = new GUILayoutOption[0]; // Used to avoid allocation of empty GUILayoutOption arrays in GUILayout calls
+        private static readonly GUILayoutOption[] ExperimentButtonOptions = {GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false)};
+        
+        
+
         [Inject(GuiKeys.CompactSkin)] public GUISkin WindowSkin { get; set; }
 
         [Inject(GuiKeys.WindowTitleBarButtonStyle)] public GUIStyle TitleBarButtonStyle { get; set; }
@@ -18,74 +23,23 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject(GuiKeys.LockButtonTexture)] public Texture2D LockButtonTexture { get; set; }
         [Inject(GuiKeys.UnlockButtonTexture)] public Texture2D UnlockButtonTexture { get; set; }
         [Inject(GuiKeys.ResizeCursorTexture)] public Texture2D ResizeCursorTexture { get; set; }
-        [Inject(GuiKeys.LitToggleStyle)] public GUIStyle LitToggleStyle { get; set; }
+        [Inject(GuiKeys.ExperimentAlertToggleStyle)] public GUIStyle ExperimentAlertToggleStyle { get; set; }
 
-        public enum PopupType
-        {
-            None,
-            Alert,
-            Collection,
-            Transmission,
-            Lab
-        }
-
-        class ExperimentReportDisplay
-        {
-            public readonly ExperimentSensorState Report;
-
-            public readonly GUIContent AlertContent;
-            public readonly GUIContent CollectionContent;
-            public readonly GUIContent TransmissionContent;
-            public readonly GUIContent LabContent;
-
-            private ExperimentReportDisplay(
-                ExperimentSensorState report, 
-                GUIContent alertContent, 
-                GUIContent collectionContent,
-                GUIContent transmissionContent, 
-                GUIContent labContent)
-            {
-                if (alertContent == null) throw new ArgumentNullException("AlertContent");
-                if (collectionContent == null) throw new ArgumentNullException("CollectionContent");
-                if (transmissionContent == null) throw new ArgumentNullException("TransmissionContent");
-                if (labContent == null) throw new ArgumentNullException("LabContent");
-                Report = report;
-                AlertContent = alertContent;
-                CollectionContent = collectionContent;
-                TransmissionContent = transmissionContent;
-                LabContent = labContent;
-            }
+        [Inject] public ExperimentListEntryFactory ExperimentListEntryFormatter { get; set; }
 
 
-            public class Factory
-            {
-                public ExperimentReportDisplay Create(ExperimentSensorState report)
-                {
-                    var exp = report.Experiment;
 
-                    return new ExperimentReportDisplay(report, CreateContent(exp, PopupType.Alert),
-                        CreateContent(exp, PopupType.Collection), CreateContent(exp, PopupType.Transmission),
-                        CreateContent(exp, PopupType.Lab));
-                }
-
-
-                private static GUIContent CreateContent(ScienceExperiment experiment, PopupType popup)
-                {
-                    return new GUIContent(string.Empty, popup.ToString());
-                }
-            }
-        }
 
         internal readonly Signal Close = new Signal();
         internal readonly Signal LockToggle = new Signal();
-        internal readonly Signal<ExperimentSensorState, PopupType, Vector2> ExperimentPopup = new Signal<ExperimentSensorState, PopupType, Vector2>();
+        internal readonly Signal<ExperimentListEntry, ExperimentPopupType, Vector2> ExperimentPopup = new Signal<ExperimentListEntry, ExperimentPopupType, Vector2>();
+        internal readonly Signal CloseExperimentPopup = new Signal();
 
         private BasicTitleBarButton _lockButton;
-        private readonly ExperimentReportDisplay.Factory _displayFactory = new ExperimentReportDisplay.Factory();
+        private bool _popupOpenFlag = false;
 
-        private readonly Dictionary<ScienceExperiment, ExperimentReportDisplay> _experimentStatuses =
-            new Dictionary<ScienceExperiment, ExperimentReportDisplay>(); 
-
+        private readonly Dictionary<ScienceExperiment, ExperimentListEntry> _experimentStatuses =
+            new Dictionary<ScienceExperiment, ExperimentListEntry>();
 
         protected override IWindowComponent Initialize()
         {
@@ -134,108 +88,117 @@ namespace ScienceAlert.VesselContext.Gui
 
         public void SetExperimentStatus(ExperimentSensorState sensorState)
         {
-            _experimentStatuses[sensorState.Experiment] = _displayFactory.Create(sensorState);
+            _experimentStatuses[sensorState.Experiment] = ExperimentListEntryFormatter.Create(sensorState);
+        }
+
+
+        public override void OnUpdate()
+        {
+            base.OnUpdate();
+            ClearPopupOpenedFlag();
         }
 
 
         protected override void DrawWindow()
         {
-            GUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(DefaultLayoutOptions);
             GUILayout.FlexibleSpace();
-            GUILayout.Label("Experiments");
+            GUILayout.Label("Experiments", DefaultLayoutOptions);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginScrollView(Vector2.zero, false, true);
+            GUILayout.BeginScrollView(Vector2.zero, false, true, DefaultLayoutOptions);
             {
                 DrawExperimentList();
             }
             GUILayout.EndScrollView();
             GUILayout.Space(8f);
-        }
 
+            if (Event.current.type != EventType.Repaint) return;
 
-        private static bool ShouldDisplayExperimentInList(ExperimentSensorState sensorState)
-        {
-            return sensorState.Onboard;
+            if (!_popupOpenFlag) CloseExperimentPopupIfOpen();
         }
 
 
         private void DrawExperimentList()
         {
-            var experimentEnumerator = _experimentStatuses.GetEnumerator(); // avoid Using... because Mono boxes iterator creating extra garbage
+            //var experimentEnumerator = _experimentStatuses.GetEnumerator(); // avoid Using... because Mono boxes iterator creating extra garbage
+            //_popupOpenFlag = false; 
+            
+            //try
+            //{
+            //    while (experimentEnumerator.MoveNext())
+            //    {
+            //        var item = experimentEnumerator.Current.Value;
+            //        DrawExperimentStatus(item);
+            //    }
+            //}
+            //finally
+            //{
+            //    experimentEnumerator.Dispose();
+            //}
 
-            try
-            {
-                ExperimentReportDisplay mousedOverReport = null;
-
-                while (experimentEnumerator.MoveNext())
-                {
-                    var item = experimentEnumerator.Current.Value;
-                    DrawExperimentStatus(item);
-
-                    if (!string.IsNullOrEmpty(GUI.tooltip)) mousedOverReport = item;
-                }
-
-                if (Event.current.type != EventType.Repaint) return;
-
-                UpdateExperimentPopup(mousedOverReport, Event.current.mousePosition);
-            }
-            finally
-            {
-                experimentEnumerator.Dispose();
-            }
+            foreach (var kvp in _experimentStatuses)
+                DrawExperimentStatus(kvp.Value);
         }
 
 
-        private void UpdateExperimentPopup(ExperimentReportDisplay display, Vector2 popupLocation)
+
+
+
+        private void DrawAlertToggle(
+            ExperimentListEntry entry,
+            bool value,
+            string content, 
+            GUIStyle toggleStyle,
+            ExperimentPopupType popupType)
         {
-            try
-            {
-                if (!string.IsNullOrEmpty(GUI.tooltip) && display != null)
-                {
-                    var screenMousePos = GUIUtility.GUIToScreenPoint(popupLocation);
-                    if (Dimensions.Contains(screenMousePos))
-                    {
-                        var popupType = (PopupType) Enum.Parse(typeof (PopupType), GUI.tooltip);
+            GUILayout.Toggle(value, content, toggleStyle, DefaultLayoutOptions);
 
-                        ExperimentPopup.Dispatch(display.Report, popupType, GUIUtility.GUIToScreenPoint(popupLocation));
-                        return;
-                    }
-                }
-                
-                ExperimentPopup.Dispatch(default(ExperimentSensorState), PopupType.None, popupLocation);
-            }
-            catch (Exception e)
-            {
-                if (!(e is ArgumentNullException) && !(e is ArgumentException) && !(e is OverflowException)) throw;
+            if (Event.current.type != EventType.Repaint) return;
 
-                Log.Error("Unrecognized display popup name: " + GUI.tooltip);
-                return;
-            }
+            var toggleRect = GUILayoutUtility.GetLastRect();
+            if (toggleRect.Contains(Event.current.mousePosition))
+                SpawnOrUpdatePopup(entry, popupType, Event.current.mousePosition);
         }
 
 
-        private void DrawExperimentStatus(ExperimentReportDisplay display)
+        private void DrawExperimentStatus(ExperimentListEntry display)
         {
-            if (!ShouldDisplayExperimentInList(display.Report)) return;
+            if (!display.DisplayInExperimentList) return;
 
-            GUILayout.BeginHorizontal();
+            
+            GUILayout.BeginHorizontal(DefaultLayoutOptions);
             {
-                GUILayout.Button(display.Report.Experiment.experimentTitle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
+                GUI.enabled = display.DeployButtonEnabled;
+                GUILayout.Button(display.ExperimentTitle, ExperimentButtonOptions);
+                GUI.enabled = true;
 
-                var report = display.Report;
-
-                GUILayout.Toggle(true, display.CollectionContent, LitToggleStyle);
-                GUILayout.Toggle(report.CollectionValue > 0f, display.CollectionContent, LitToggleStyle);
-                GUILayout.Toggle(report.TransmissionValue > 0f, display.TransmissionContent, LitToggleStyle);
-                GUILayout.Toggle(report.LabValue > 0f, display.LabContent, LitToggleStyle);
-
+                GUILayout.Toggle(display.CollectionAlert, string.Empty, ExperimentAlertToggleStyle, DefaultLayoutOptions);
+                GUILayout.Toggle(display.TransmissionAlert, string.Empty, ExperimentAlertToggleStyle, DefaultLayoutOptions);
+                DrawAlertToggle(display, display.LabAlert, string.Empty, ExperimentAlertToggleStyle, ExperimentPopupType.Lab);
             }
             GUILayout.EndHorizontal();
         }
 
 
+        private void SpawnOrUpdatePopup(ExperimentListEntry entry, ExperimentPopupType popupType, Vector2 relativeMousePosition)
+        {
+            _popupOpenFlag = true;
+            ExperimentPopup.Dispatch(entry, popupType, GUIUtility.GUIToScreenPoint(relativeMousePosition));
+        }
+
+
+        private void CloseExperimentPopupIfOpen()
+        {
+            CloseExperimentPopup.Dispatch();
+        }
+
+
+        private void ClearPopupOpenedFlag()
+        {
+            _popupOpenFlag = false;
+        }
 
         private Vector2 CalculateMinRowSize()
         {
@@ -263,47 +226,6 @@ namespace ScienceAlert.VesselContext.Gui
         private Vector2 CalculateScrollbarSize()
         {
             return Skin.verticalScrollbar.CalcSize(new GUIContent());
-        }
-
-
-
-        public override void OnUpdate()
-        {
-            base.OnUpdate();
-            return;
-
-            //if (_hasSetInitialSizeFlag) return;
-
-            //_hasSetInitialSizeFlag = true;
-
-            //_minimumWidth = Mathf.Max(AbsoluteMinimumButtonWidth, CalculateButtonSize().x);
-
-            //var sbWidth = CalculateScrollbarSize().x;
-
-            //WindowOptions = new []
-            //{
-            //    GUILayout.MinWidth(
-            //    _minimumWidth + 
-            //        Skin.window.padding.left + 
-            //        Skin.window.padding.right + 
-            //        Skin.window.margin.left + 
-            //        Skin.window.margin.right +
-                    
-            //        Skin.scrollView.padding.left +
-            //        Skin.scrollView.padding.right +
-            //        Skin.scrollView.margin.left +
-            //        Skin.scrollView.margin.right +
-
-            //        sbWidth //+
-            //        //Skin.horizontalScrollbar.padding.left +
-            //        //Skin.horizontalScrollbar.padding.right + 
-            //        //Skin.horizontalScrollbar.margin.left +
-            //        //Skin.horizontalScrollbar.margin.right
-            //        ),
-            //    GUILayout.MinHeight(160f)
-            //};
-
-            //print("MinWidth: " + _minimumWidth);
         }
 
 

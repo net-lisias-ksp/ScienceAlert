@@ -2,6 +2,6 @@
 {
     public interface IExperimentRuleFactory
     {
-        IExperimentRule Create(ScienceExperiment experiment, RuleDefinition definition);
+        IExperimentRule Create(ScienceExperiment experiment, ConfigNode config);
     }
 }

@@ -5,14 +5,22 @@ namespace ScienceAlert.VesselContext.Gui
 {
     public class ExperimentPopupMediator : Mediator
     {
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+
         [Inject] public ExperimentPopupView View { get; set; }
-        [Inject]
-        public SignalUpdateExperimentListPopup UpdateSignal { get; set; }
+
+        [Inject] public SignalUpdateExperimentListEntryPopup UpdateSignal { get; set; }
+        [Inject] public SignalCloseExperimentListEntryPopup CloseSignal { get; set; }
+
+        private ExperimentListEntry _currentPopupEntry;
+        private ExperimentPopupType _currentPopupType = ExperimentPopupType.Default;
 
         public override void OnRegister()
         {
             base.OnRegister();
             UpdateSignal.AddListener(OnUpdate);
+            CloseSignal.AddListener(OnClose);
 
             View.WindowRect = new Rect(0f, 0f, 100f, 60f); // todo: properly calculate min size
         }
@@ -21,43 +29,49 @@ namespace ScienceAlert.VesselContext.Gui
         public override void OnRemove()
         {
             UpdateSignal.RemoveListener(OnUpdate);
+            CloseSignal.RemoveListener(OnClose);
             base.OnRemove();
         }
 
 
-        private void OnUpdate(ExperimentSensorState status, ExperimentListView.PopupType popupType, Vector2 mouseLocation)
+        private void OnUpdate(ExperimentListEntry entry, ExperimentPopupType popupType, Vector2 mouseLocation)
         {
-            if (popupType == ExperimentListView.PopupType.None)
-            {
-                if (View.enabled) ClosePopup();
-                return;
-            }
+            if (_currentPopupType != popupType || !_currentPopupEntry.Equals(entry))
+                OpenPopup(entry, popupType, mouseLocation);
+            else UpdatePopupLocation(mouseLocation);
+        }
 
-            if (View.PopupType != popupType || !View.Status.Equals(status))
-                OpenPopup(status, popupType, mouseLocation);
 
-            UpdatePopupLocation(mouseLocation);
+        private void OnClose()
+        {
+            ClosePopup();
         }
 
 
         private void ClosePopup()
         {
-            View.PopupType = ExperimentListView.PopupType.None;
             View.enabled = false;
         }
 
 
-        private void OpenPopup(ExperimentSensorState report, ExperimentListView.PopupType type, Vector2 location)
+        private void OpenPopup(ExperimentListEntry entry, ExperimentPopupType type, Vector2 location)
         {
-            View.PopupType = type;
-            View.Status = report;
+            _currentPopupEntry = entry;
+            _currentPopupType = type;
+
+            View.RebuildDisplayData(entry, type);
             View.enabled = true;
+
+            UpdatePopupLocation(location);
         }
 
 
         private void UpdatePopupLocation(Vector2 location)
         {
-            View.SetLocation(location);
+            var currentLocation = View.WindowRect;
+            currentLocation.center = location;
+
+            View.WindowRect = KSPUtil.ClampRectToScreen(currentLocation);
         }
     }
 }

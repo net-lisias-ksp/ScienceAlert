@@ -41,13 +41,10 @@ namespace ScienceAlert.VesselContext
                 .ToValue(sharedConfig.VesselDebugViewConfig)
                 .ToName(VesselContextKeys.VesselDebugViewConfig);
 
-            injectionBinder.Bind<IExperimentRuleFactory>().To<ExperimentRuleFactory>().ToSingleton();
-
-            injectionBinder.Bind<IExperimentRulesetProvider>().To<ExperimentRulesetProvider>().ToSingleton();
-
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
 
+            injectionBinder.Bind<ExperimentRuleFactory>().ToSingleton();
 
             // note to self: see how these are NOT cross context? That's because each ContextView
             // has its own GameEventView. This is done to avoid having to do any extra bookkeeping (of
@@ -67,8 +64,12 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
-            injectionBinder.Bind<SignalUpdateExperimentListPopup>().ToSingleton();
+            injectionBinder.Bind<SignalUpdateExperimentListEntryPopup>().ToSingleton();
+            injectionBinder.Bind<SignalCloseExperimentListEntryPopup>().ToSingleton();
+
             injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
+
+            injectionBinder.Bind<ExperimentListEntryFactory>().ToSingleton();
 
             mediationBinder.BindView<ExperimentListView>()
                 .ToMediator<ExperimentListMediator>()
@@ -87,6 +88,9 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<IScienceSubjectProvider>()
                 .To<KspScienceSubjectProvider>().ToSingleton();
 
+            injectionBinder.Bind<ExperimentSensorFactory>().ToSingleton();
+            injectionBinder.Bind<IExperimentRuleFactory>().To<ExperimentRuleFactory>().ToSingleton();
+
             SetupCommandBindings();
 
             injectionBinder.ReflectAll();
@@ -99,15 +103,15 @@ namespace ScienceAlert.VesselContext
             commandBinder.Bind<SignalStart>()
                 .InSequence()
                 .To<CommandConfigureGameEvents>()
-                .To<CommandCreateRuleTypeBindings>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandDispatchLoadGuiSettingsSignal>()
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
                 .Once();
 
-            commandBinder.Bind<SignalExperimentSensorStatusChanged>()
-                .To<CommandLogSensorStatusUpdate>();
+            //commandBinder.Bind<SignalExperimentSensorStatusChanged>()
+            //    .To<CommandLogSensorStatusUpdate>()
+            //    .Pooled();
  
             commandBinder.Bind<SignalContextDestruction>()
                 .To<CommandDispatchSaveGuiSettingsSignal>()

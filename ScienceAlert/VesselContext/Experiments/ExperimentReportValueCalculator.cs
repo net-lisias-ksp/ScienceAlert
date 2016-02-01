@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
-using ScienceAlert.VesselContext.Experiments.Rules;
 using UnityEngine;
 using ScienceModuleList = System.Collections.Generic.List<ScienceAlert.Game.IModuleScienceExperiment>;
 
@@ -21,6 +20,8 @@ namespace ScienceAlert.VesselContext.Experiments
         private Dictionary<ScienceExperiment, ScienceModuleList> _experimentModules =
             new Dictionary<ScienceExperiment, ScienceModuleList>();
 
+        //[Inject]
+        //public IEnumerable<ScienceExperiment> Experiments { get; set; }
 
         public ExperimentReportValueCalculator(
             IEnumerable<ScienceExperiment> experiments,

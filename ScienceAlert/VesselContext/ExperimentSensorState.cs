@@ -12,6 +12,7 @@ namespace ScienceAlert.VesselContext
         public float LabValue { get; private set; }
         public bool Onboard { get; private set; }
         public bool Available { get; private set; }
+        public bool ConditionsMet { get; private set; }
 
         public ExperimentSensorState(
             ScienceExperiment experiment, 
@@ -19,7 +20,8 @@ namespace ScienceAlert.VesselContext
             float transmissionValue,
             float labValue, 
             bool onboard, 
-            bool available) : this()
+            bool available,
+            bool conditionsMet) : this()
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
 
@@ -29,6 +31,7 @@ namespace ScienceAlert.VesselContext
             LabValue = labValue;
             Onboard = onboard;
             Available = available;
+            ConditionsMet = conditionsMet;
         }
 
 
@@ -56,7 +59,8 @@ namespace ScienceAlert.VesselContext
                    Mathf.Approximately(TransmissionValue, report.TransmissionValue) &&
                    Mathf.Approximately(LabValue, report.LabValue) &&
                    Onboard == report.Onboard &&
-                   Available == report.Available;
+                   Available == report.Available &&
+                   ConditionsMet == report.ConditionsMet;
         }
 
         public override int GetHashCode()
@@ -70,7 +74,7 @@ namespace ScienceAlert.VesselContext
                 hash = hash * 479 + TransmissionValue.GetHashCode();
                 hash = hash * 479 + Onboard.GetHashCode();
                 hash = hash * 479 + Available.GetHashCode();
-                //hash = hash * 479 + Runnable.GetHashCode();
+                hash = hash * 479 + ConditionsMet.GetHashCode();
 
                 return hash;
             }
@@ -84,8 +88,8 @@ namespace ScienceAlert.VesselContext
             sb.Append("[");
             sb.Append(Experiment.id);
             sb.Append("]");
-            sb.AppendFormat("Onboard: {0}, Available: {1}, Collection: {2}, Transmission: {3}, Lab: {4}", Onboard,
-                Available, CollectionValue, TransmissionValue, LabValue);
+            sb.AppendFormat("Onboard: {0}, Available: {1}, ConditionsMet: {2}, Collection: {3}, Transmission: {4}, Lab: {5}", Onboard,
+                Available, ConditionsMet, CollectionValue, TransmissionValue, LabValue);
 
             return sb.ToString();
         }

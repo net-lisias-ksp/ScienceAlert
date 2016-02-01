@@ -16,10 +16,12 @@ namespace ScienceAlertTests.VesselContext.Experiments
             IScienceSubjectProvider subjectProvider, 
             IExperimentReportValueCalculator reportValueCalculator)
         {
-            Assert.Throws<ArgumentNullException>(
-                () => new ExperimentSensor(null, subjectProvider, reportValueCalculator));
-            Assert.Throws<ArgumentNullException>(() => new ExperimentSensor(experiment, null, reportValueCalculator));
-            Assert.Throws<ArgumentNullException>(() => new ExperimentSensor(experiment, subjectProvider, null));
+            throw new NotImplementedException();
+
+            //Assert.Throws<ArgumentNullException>(
+            //    () => new ExperimentSensor(null, subjectProvider, reportValueCalculator));
+            //Assert.Throws<ArgumentNullException>(() => new ExperimentSensor(experiment, null, reportValueCalculator));
+            //Assert.Throws<ArgumentNullException>(() => new ExperimentSensor(experiment, subjectProvider, null));
         }
 
 
@@ -44,31 +46,32 @@ namespace ScienceAlertTests.VesselContext.Experiments
             float transmissionValue,
             float labValue)
         {
-            subjectProvider.GetSubject(Arg.Any<ScienceExperiment>()).Returns(subject);
+            throw new NotImplementedException();
+            //subjectProvider.GetSubject(Arg.Any<ScienceExperiment>()).Returns(subject);
 
-            valueCalculator.CalculateCollectionValue(Arg.Is(experiment), Arg.Is(subject))
-                .Returns(collectionValue);
+            //valueCalculator.CalculateCollectionValue(Arg.Is(experiment), Arg.Is(subject))
+            //    .Returns(collectionValue);
 
-            valueCalculator.CalculateTransmissionValue(Arg.Is(experiment), Arg.Is(subject))
-                .Returns(transmissionValue);
+            //valueCalculator.CalculateTransmissionValue(Arg.Is(experiment), Arg.Is(subject))
+            //    .Returns(transmissionValue);
 
-            valueCalculator.CalculateLabValue(Arg.Is(experiment), Arg.Is(subject)).Returns(labValue);
+            //valueCalculator.CalculateLabValue(Arg.Is(experiment), Arg.Is(subject)).Returns(labValue);
 
 
-            var sut = new ExperimentSensor(experiment, subjectProvider, valueCalculator);
+            //var sut = new ExperimentSensor(experiment, subjectProvider, valueCalculator);
 
-            sut.ClearChangedFlag();
-            sut.UpdateSensorValues(); // initially sets values
+            //sut.ClearChangedFlag();
+            //sut.UpdateSensorValues(); // initially sets values
 
-            Assert.Equal(collectionValue, sut.CollectionValue);
-            Assert.Equal(transmissionValue, sut.TransmissionValue);
-            Assert.Equal(labValue, sut.LabValue);
+            //Assert.Equal(collectionValue, sut.CollectionValue);
+            //Assert.Equal(transmissionValue, sut.TransmissionValue);
+            //Assert.Equal(labValue, sut.LabValue);
 
-            sut.ClearChangedFlag();
-            sut.UpdateSensorValues(); // shoudl result in no change
-            var result = sut.HasChanged;
+            //sut.ClearChangedFlag();
+            //sut.UpdateSensorValues(); // shoudl result in no change
+            //var result = sut.HasChanged;
 
-            Assert.False(result, "Incorrect status flag");
+            //Assert.False(result, "Incorrect status flag");
 
 
         }

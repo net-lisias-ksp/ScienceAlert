@@ -17,15 +17,14 @@ namespace ScienceAlertTests
                 .Where(t => typeof (IExperimentRule).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToList();
 
-            var ruleProvider = Substitute.For<IExperimentRuleTypeProvider>();
-            ruleProvider.Get()
-                .Returns(
-                    typeof (IExperimentRule).Assembly.GetTypes()
-                        .Where(t => typeof (IExperimentRule).IsAssignableFrom(t) && !t.IsAbstract));
+            //var ruleProvider = Substitute.For<IExperimentRuleTypeProvider>();
+            //ruleProvider.Get()
+            //    .Returns(
+            //        typeof (IExperimentRule).Assembly.GetTypes()
+            //            .Where(t => typeof (IExperimentRule).IsAssignableFrom(t) && !t.IsAbstract));
 
             Fixture.Register(() => new ConfigNode("root"));
             Fixture.Register(() => rules);
-            Fixture.Register(() => new RuleDefinitionFactory(ruleProvider));
             Fixture.Register(() => new ProtoCrewMember(ProtoCrewMember.KerbalType.Crew) {name = "Test Kerman"});
             
             Fixture.Register(() => 

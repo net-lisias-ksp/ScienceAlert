@@ -88,7 +88,6 @@
     <Compile Include="Game\KspResearchAndDevelopmentDouble.cs" />
     <Compile Include="Game\KspScienceUtilTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rules\RuleDefinitionFactoryTests.cs" />
     <Compile Include="VesselContext\ExperimentStatusReportTests.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentReportValueCalculatorTests.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensorTests.cs" />
@@ -106,6 +105,9 @@
       <Project>{958CBE35-C94F-42A8-AE36-C60C8FD7EBE2}</Project>
       <Name>ScienceAlert</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Rules\" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
