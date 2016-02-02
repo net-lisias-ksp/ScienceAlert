@@ -47,7 +47,6 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
-            injectionBinder.Bind<RuleDefinitionSetFactory>().ToSingleton();
             MapCrossContextBindings();
             SetupCommandBindings();
 
@@ -142,7 +141,6 @@ namespace ScienceAlert.Core
             commandBinder.Bind<SignalStart>()
                 .InSequence()
                 .To<CommandStoreExperimentRuleTypes>()
-                .To<CommandCreateRuleDefinitionSets>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
