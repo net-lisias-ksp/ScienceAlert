@@ -14,7 +14,10 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         private readonly IConfigNodeSerializer _serializer;
         private readonly List<Type> _ruleTypes;  
 
-        public ExperimentRuleFactory([Name(CoreKeys.ExperimentRuleTypes)] IEnumerable<Type> experimentRuleTypes, IInjectionBinder injectionBinder, IConfigNodeSerializer serializer)
+        public ExperimentRuleFactory(
+            [Name(CoreKeys.ExperimentRuleTypes)] IEnumerable<Type> experimentRuleTypes, 
+            IInjectionBinder injectionBinder, 
+            IConfigNodeSerializer serializer)
         {
             if (experimentRuleTypes == null) throw new ArgumentNullException("experimentRuleTypes");
             if (injectionBinder == null) throw new ArgumentNullException("injectionBinder");

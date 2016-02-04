@@ -47,7 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\DefinitionOld\CommandCreateRuleDefinitionSets.cs" />
+    <Compile Include="Game\IGameDatabase.cs" />
+    <Compile Include="Game\IUrlConfig.cs" />
+    <Compile Include="Game\KspGameDatabase.cs" />
+    <Compile Include="Game\KspUrlConfig.cs" />
+    <Compile Include="VesselContext\Experiments\ISensorRuleDefinitionSetProvider.cs" />
+    <Compile Include="VesselContext\Experiments\SensorRuleDefinitionSetProvider.cs" />
     <Compile Include="Core\CommandDestroyActiveVesselContext.cs" />
     <Compile Include="Core\CommandCriticalShutdown.cs" />
     <Compile Include="Core\CommandStoreExperimentRuleTypes.cs" />
@@ -85,10 +90,6 @@
     <Compile Include="VesselContext\Experiments\ExperimentSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentReportValueCalculator.cs" />
     <Compile Include="Game\KspScienceSubjectProvider.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\DefinitionOld\ExperimentRuleDefinitionSetNotFoundException.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\DefinitionOld\IRuleDefinitionSetProvider.cs" />
-    <Compile Include="VesselContext\Experiments\RuleDefinitionSet.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\DefinitionOld\RuleDefinitionSetFactory.cs" />
     <Compile Include="VesselContext\Experiments\Rules\IExperimentRuleFactory.cs" />
     <Compile Include="VesselContext\Experiments\Rules\TestRule.cs" />
     <Compile Include="VesselContext\Experiments\Rules\Old\MissingExperimentRulesetException.cs" />
@@ -105,7 +106,6 @@
     <Compile Include="VesselContext\Experiments\Rules\Old\DuplicateConfigNodeSectionException.cs" />
     <Compile Include="VesselContext\Experiments\Rules\Old\ExperimentIsAvailableDuringVesselSituation.cs" />
     <Compile Include="VesselContext\Experiments\Rules\Old\ExperimentRuleset.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\DefinitionOld\ExperimentRuleTypeProvider.cs" />
     <Compile Include="VesselContext\Experiments\Rules\Old\ExperimentUsageRequirementCheck.cs" />
     <Compile Include="VesselContext\Experiments\Rules\IExperimentRule.cs" />
     <Compile Include="VesselContext\Experiments\Rules\Old\RuleDefinition.cs" />
@@ -140,6 +140,8 @@
     <Compile Include="Gui\old\InvalidConfigNodeException.cs" />
     <Compile Include="VesselContext\Experiments\Rules\ExperimentRuleFactory.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeRule.cs" />
+    <Compile Include="VesselContext\Experiments\SensorRuleDefinitionSet.cs" />
+    <Compile Include="VesselContext\Experiments\SensorRulePackageDefinitionNotFoundException.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchLoadGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchSaveGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\ExperimentSensorState.cs" />

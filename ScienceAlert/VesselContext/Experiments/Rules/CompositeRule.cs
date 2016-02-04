@@ -9,7 +9,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         public enum CompositeType
         {
             All,                // all rules in ruleset must pass
-            Any,                // any passing rule passes the ruleset
+            Any,                // any passing rule passes the rule
         }
 
         private readonly CompositeType _compositeType;

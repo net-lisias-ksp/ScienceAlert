@@ -67,5 +67,13 @@ namespace ScienceAlert.Game
 
             return new KspScienceLabModule(lab);
         }
+
+
+        public IUrlConfig Create(UrlDir.UrlConfig config)
+        {
+            if (config == null) throw new ArgumentNullException("config");
+
+            return new KspUrlConfig(config);
+        }
     }
 }

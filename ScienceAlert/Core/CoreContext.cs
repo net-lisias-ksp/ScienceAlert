@@ -14,6 +14,7 @@ using ReeperCommon.Serialization;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Game;
 using ScienceAlert.Gui;
+using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -47,6 +48,7 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
+
             MapCrossContextBindings();
             SetupCommandBindings();
 
@@ -67,6 +69,8 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<SignalScenarioModuleLoad>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalScenarioModuleSave>().ToSingleton().CrossContext();
+
+            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton().CrossContext();
 
             injectionBinder.Bind<IUrlDirProvider>().To<KSPGameDataUrlDirProvider>().ToSingleton().CrossContext();
             injectionBinder.Bind<IUrlDir>().To(new KSPUrlDir(injectionBinder.GetInstance<IUrlDirProvider>().Get())).CrossContext();
@@ -114,6 +118,11 @@ namespace ScienceAlert.Core
                 .Bind<IQueryScienceValue>()
                 .Bind<IResearchAndDevelopment>()
                 .To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
+
+            injectionBinder.Bind<ISensorRuleDefinitionSetProvider>()
+                .To<SensorRuleDefinitionSetProvider>()
+                .ToSingleton()
+                .CrossContext();
 
             ConfigureScienceAlert();
             ConfigureResourceRepository();
@@ -342,6 +351,9 @@ namespace ScienceAlert.Core
             }
 
             injectionBinder.Bind<IEnumerable<ScienceExperiment>>().Bind<List<ScienceExperiment>>().ToValue(experiments).CrossContext();
+
+            injectionBinder.Bind<SensorRuleDefinitionSetProvider>()
+                .To<ISensorRuleDefinitionSetProvider>().ToSingleton().CrossContext();
         }
 
 
