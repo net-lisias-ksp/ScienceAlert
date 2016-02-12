@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -48,6 +49,7 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
+            injectionBinder.Bind<ITemporaryBindingInstanceFactory>().To<TemporaryBindingInstanceFactory>().ToSingleton();
 
             MapCrossContextBindings();
             SetupCommandBindings();
@@ -70,7 +72,8 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalScenarioModuleLoad>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalScenarioModuleSave>().ToSingleton().CrossContext();
 
-            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton().CrossContext();
+            injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton();
+            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
 
             injectionBinder.Bind<IUrlDirProvider>().To<KSPGameDataUrlDirProvider>().ToSingleton().CrossContext();
             injectionBinder.Bind<IUrlDir>().To(new KSPUrlDir(injectionBinder.GetInstance<IUrlDirProvider>().Get())).CrossContext();
@@ -119,15 +122,12 @@ namespace ScienceAlert.Core
                 .Bind<IResearchAndDevelopment>()
                 .To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
 
-            injectionBinder.Bind<ISensorRuleDefinitionSetProvider>()
-                .To<SensorRuleDefinitionSetProvider>()
-                .ToSingleton()
-                .CrossContext();
 
             ConfigureScienceAlert();
             ConfigureResourceRepository();
             ConfigureSerializer();
             ConfigureExperiments();
+            ConfigureSensorDefinitionFactory();
 
             injectionBinder.Bind<SignalCriticalShutdown>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
@@ -150,6 +150,7 @@ namespace ScienceAlert.Core
             commandBinder.Bind<SignalStart>()
                 .InSequence()
                 .To<CommandStoreExperimentRuleTypes>()
+                .To<CommandCreateSensorDefinitions>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
@@ -351,9 +352,6 @@ namespace ScienceAlert.Core
             }
 
             injectionBinder.Bind<IEnumerable<ScienceExperiment>>().Bind<List<ScienceExperiment>>().ToValue(experiments).CrossContext();
-
-            injectionBinder.Bind<SensorRuleDefinitionSetProvider>()
-                .To<ISensorRuleDefinitionSetProvider>().ToSingleton().CrossContext();
         }
 
 
@@ -376,7 +374,7 @@ namespace ScienceAlert.Core
 
                 return ids.Select(ResearchAndDevelopment.GetExperiment).ToList();
             }
-            catch (ArgumentException ae)
+            catch (ArgumentException)
             {
                 
                 // identify the problem node(s)
@@ -400,6 +398,78 @@ namespace ScienceAlert.Core
         }
 
 
+        private IConfigNodeObjectGraphBuilder<IRuleFactory> CreateRuleFactoryBuilder(ITemporaryBindingInstanceFactory temporaryBinder)
+        {
+            // Get all Types that implement IExperimentRule and create builders which will construct factories to produce them 
+            // I know that sounds insane but this way we can do all the processing of ConfigNodes up front and use those
+            // factory types to bundle all the info necessary to actually create the rule in one place (data such as: ConfigNode
+            // to deserialize the concrete type that implements IExperimentRule)
+            //
+            // All of these rule factory builders can then be hidden behind this composite interface and it'll
+            // look like we have a magic IRuleFactory builder that can handle all kinds of nodes and types
+
+            var allTypes = AssemblyLoader.loadedAssemblies.SelectMany(la => la.assembly.GetTypes()).ToList();
+
+            // these types will be wrapped by RuleFactoryBuilders that will build a factory for the type
+            var experimentRuleTypes =
+                allTypes
+                    .Where(
+                        t =>
+                            !t.IsAbstract && !t.IsInterface &&
+                            t.GetInterfaces().Any(it => typeof(IExperimentRule) == it)).ToList();
+
+            
+
+            // these are concrete builder types for specific type(s). We'll try to handle factory construction requests
+            // through these first
+            var explicitFactoryBuilders =
+                allTypes.Where(
+                    t =>
+                        !t.IsAbstract &&
+                        t.GetInterfaces().Any(it => it == typeof(IConfigNodeObjectGraphBuilder<IRuleFactory>) && !it.IsGenericTypeDefinition && !it.IsAbstract))
+                        .Where(t => temporaryBinder.CanCreate(t))
+                        .ToList();
+
+            experimentRuleTypes.ForEach(t => Log.Debug("IExperimentRule type: " + t.FullName));
+            explicitFactoryBuilders.ForEach(bt => Log.Debug("IRuleFactory builder type: " + bt.FullName));
+
+            var builder = new CompositeConfigNodeObjectGraphBuilder<IRuleFactory>(
+                // we'll prefer explicit builders first
+                explicitFactoryBuilders.Select(explicitFactoryType => (IConfigNodeObjectGraphBuilder<IRuleFactory>)temporaryBinder.Create(explicitFactoryType))
+
+                // then we'll use our generic rule factory builder to handle any unprocessed requests after that
+                .Union(
+                    experimentRuleTypes
+                        .Select(concreteRuleType => typeof(RuleFactoryBuilder<>).MakeGenericType(concreteRuleType))
+                        .Select(
+                            builderType => (IConfigNodeObjectGraphBuilder<IRuleFactory>)temporaryBinder.Create(builderType)))
+
+                // add ability to AND rules together
+                .Union(new [] { (IConfigNodeObjectGraphBuilder<IRuleFactory>)(new CompositeAndRule.CompositeAndRuleFactoryBuilder()) }));
+
+            
+            return builder;
+        }
+
+
+        private void ConfigureSensorDefinitionFactory()
+        {
+            injectionBinder.Bind<IConfigNodeObjectGraphBuilder<IRuleFactory>>()
+                .ToValue(CreateRuleFactoryBuilder(injectionBinder.GetInstance<ITemporaryBindingInstanceFactory>()));
+
+            var experiments = injectionBinder.GetInstance<IEnumerable<ScienceExperiment>>();
+            var ruleFactoryBuilder = injectionBinder.GetInstance<IConfigNodeObjectGraphBuilder<IRuleFactory>>();
+            var gameDatabase = injectionBinder.GetInstance<IGameDatabase>();
+
+            var sensorDefinitionFactory = SensorDefinitionFactory.Factory.Create(experiments, ruleFactoryBuilder, gameDatabase);
+
+            
+            injectionBinder.Bind<IConfigNodeObjectGraphBuilder<IRuleFactory>>()
+                .ToValue(sensorDefinitionFactory)
+                .CrossContext();
+        }
+
+
         public void SignalDestruction()
         {
             try
@@ -411,7 +481,6 @@ namespace ScienceAlert.Core
                 // just swallow it, something went wrong with binding configuration and there's nothing to be done
                 Log.Error("Error while signalling destruction: " + e);
             }
-
         }
     }
 }

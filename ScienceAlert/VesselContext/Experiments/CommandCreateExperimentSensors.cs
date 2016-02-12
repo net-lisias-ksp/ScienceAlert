@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ReeperCommon.Serialization;
+using ScienceAlert.Game;
+using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -11,28 +14,48 @@ namespace ScienceAlert.VesselContext.Experiments
     public class CommandCreateExperimentSensors : Command
     {
         private readonly GameObject _vesselContextView;
-        private readonly IEnumerable<ScienceExperiment> _experiments;
-        private readonly ExperimentSensorFactory _sensorFactory;
-
+        private readonly IConfigNodeSerializer _serializer;
+        private readonly IEnumerable<SensorDefinition> _sensorDefinitions;
+        private readonly IScienceSubjectProvider _subjectProvider;
+        private readonly IExperimentReportValueCalculator _reportCalculator;
+        private readonly SignalCriticalShutdown _seriousProblemSignal;
 
         public CommandCreateExperimentSensors(
             [Name(ContextKeys.CONTEXT_VIEW)] GameObject vesselContextView,
-            IEnumerable<ScienceExperiment> experiments,
-            ExperimentSensorFactory sensorFactory)
+            IConfigNodeSerializer serializer,
+            IEnumerable<SensorDefinition> sensorDefinitions,
+            IScienceSubjectProvider subjectProvider,
+            IExperimentReportValueCalculator reportCalculator,
+            SignalCriticalShutdown seriousProblemSignal)
         {
             if (vesselContextView == null) throw new ArgumentNullException("vesselContextView");
-            if (experiments == null) throw new ArgumentNullException("experiments");
-            if (sensorFactory == null) throw new ArgumentNullException("sensorFactory");
+            if (serializer == null) throw new ArgumentNullException("serializer");
+            if (sensorDefinitions == null) throw new ArgumentNullException("sensorDefinitions");
+            if (subjectProvider == null) throw new ArgumentNullException("subjectProvider");
+            if (reportCalculator == null) throw new ArgumentNullException("reportCalculator");
+            if (seriousProblemSignal == null) throw new ArgumentNullException("seriousProblemSignal");
 
             _vesselContextView = vesselContextView;
-            _experiments = experiments;
-            _sensorFactory = sensorFactory;
+            _serializer = serializer;
+            _sensorDefinitions = sensorDefinitions;
+            _subjectProvider = subjectProvider;
+            _reportCalculator = reportCalculator;
+            _seriousProblemSignal = seriousProblemSignal;
         }
 
 
         public override void Execute()
         {
-            var sensors = _experiments.Select(experiment => _sensorFactory.Create(experiment)).ToList();
+            var sensors = CreateSensors();
+
+            if (!sensors.Any())
+            {
+                Log.Error("Failed to create any experiment sensors -- something is wrong");
+                _seriousProblemSignal.Dispatch();
+                Fail();
+                return;
+            }
+
 
             try
             {
@@ -47,6 +70,33 @@ namespace ScienceAlert.VesselContext.Experiments
             Log.Verbose("Created experiment sensors");
         }
 
+
+        private IEnumerable<ExperimentSensor> CreateSensors()
+        {
+            var sensors = new List<ExperimentSensor>();
+
+            foreach (var sensorDefinition in _sensorDefinitions)
+            {
+                try
+                {
+                    var sensor = new ExperimentSensor(
+                        sensorDefinition.Experiment,
+                        _subjectProvider,
+                        _reportCalculator,
+                        sensorDefinition.OnboardRuleFactory.Create(injectionBinder, _serializer),
+                        sensorDefinition.AvailabilityRuleFactory.Create(injectionBinder, _serializer),
+                        sensorDefinition.ConditionRuleFactory.Create(injectionBinder, _serializer));
+
+                    sensors.Add(sensor);
+                }
+                catch (Exception e)
+                {
+                    Log.Error("Failed to create experiment sensor for " + sensorDefinition);
+                }
+            }
+
+            return sensors;
+        }
 
         private void CreateExperimentSensorUpdater()
         {

@@ -43,7 +43,7 @@
 // ******************************************************************************/
 
 //        /// <summary>
-//        /// Create the window components we'll be using
+//        /// Build the window components we'll be using
 //        /// </summary>
 //        private void Awake()
 //        {

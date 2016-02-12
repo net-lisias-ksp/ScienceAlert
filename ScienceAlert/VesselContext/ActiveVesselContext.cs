@@ -44,7 +44,7 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
 
-            injectionBinder.Bind<ExperimentRuleFactory>().ToSingleton();
+            injectionBinder.Bind<ITemporaryBindingInstanceFactory>().To<TemporaryBindingInstanceFactory>().ToSingleton();
 
             // note to self: see how these are NOT cross context? That's because each ContextView
             // has its own GameEventView. This is done to avoid having to do any extra bookkeeping (of
@@ -87,9 +87,6 @@ namespace ScienceAlert.VesselContext
 
             injectionBinder.Bind<IScienceSubjectProvider>()
                 .To<KspScienceSubjectProvider>().ToSingleton();
-
-            injectionBinder.Bind<ExperimentSensorFactory>().ToSingleton();
-            injectionBinder.Bind<IExperimentRuleFactory>().To<ExperimentRuleFactory>().ToSingleton();
 
             SetupCommandBindings();
 

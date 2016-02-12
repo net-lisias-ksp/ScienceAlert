@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ScienceAlert.VesselContext.Experiments.Rules;
@@ -7,6 +6,7 @@ using strange.extensions.command.impl;
 
 namespace ScienceAlert.Core
 {
+// ReSharper disable once ClassNeverInstantiated.Global
     class CommandStoreExperimentRuleTypes : Command
     {
         public override void Execute()

@@ -80,7 +80,7 @@
 //            }
 
 //            Log.Verbose("Setting up sprite");
-//            sprite = PackedSprite.Create("ScienceAlert.Button.Sprite", Vector3.zero);
+//            sprite = PackedSprite.Build("ScienceAlert.Button.Sprite", Vector3.zero);
 //            sprite.SetMaterial(new Material(Shader.Find("Sprite/Vertex Colored")) { mainTexture = sheet });
 //            sprite.renderer.sharedMaterial.mainTexture.filterMode = FilterMode.Point;
 //            sprite.Setup(38f, 38f);

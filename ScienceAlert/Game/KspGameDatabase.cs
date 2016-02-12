@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using UnityEngine;
 
 namespace ScienceAlert.Game
 {
@@ -19,9 +20,21 @@ namespace ScienceAlert.Game
             if (string.IsNullOrEmpty(nodeName))
                 throw new ArgumentException("Must specify node name", "nodeName");
 
-            return GameDatabase.Instance.GetConfigs(nodeName)
-                .Select(c => _gameFactory.Create(c))
-                .ToArray();
+            var timeStart = Time.realtimeSinceStartup;
+
+            try
+            {
+                return GameDatabase.Instance.GetConfigs(nodeName)
+                    .Select(c => _gameFactory.Create(c))
+                    .ToArray();
+
+
+            }
+            finally
+            {
+                Log.Performance("KspGameDatabase.GetConfigs [ " + nodeName + "] time: " +
+                                (Time.realtimeSinceStartup - timeStart).ToString("F3"));
+            }
         }
     }
 }

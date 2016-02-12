@@ -2,8 +2,6 @@
 using System.Collections;
 using ReeperCommon.Containers;
 using ScienceAlert.Gui;
-using strange.extensions.implicitBind;
-using strange.extensions.injector;
 using strange.extensions.mediation.impl;
 using strange.extensions.signal.impl;
 using UnityEngine;

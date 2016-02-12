@@ -3,7 +3,6 @@
 namespace ScienceAlert.Game
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    [Implements(typeof (IGameFactory))]
     public class KspFactory : IGameFactory
     {
         private readonly SignalVesselModified _modifiedSignal;

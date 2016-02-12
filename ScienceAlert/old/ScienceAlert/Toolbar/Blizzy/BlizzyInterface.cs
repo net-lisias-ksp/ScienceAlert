@@ -52,7 +52,7 @@
 // ******************************************************************************/
 
 //        /// <summary>
-//        /// Create Toolbar and associated textures; setup event
+//        /// Build Toolbar and associated textures; setup event
 //        /// </summary>
 //        void Awake()
 //        {
