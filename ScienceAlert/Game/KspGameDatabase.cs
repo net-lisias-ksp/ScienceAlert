@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ScienceAlert.Game
 {
+    // note: make sure this isn't in the cross context; it uses IGameFactory which uses non-cross-context signals
     public class KspGameDatabase : IGameDatabase
     {
         private readonly IGameFactory _gameFactory;

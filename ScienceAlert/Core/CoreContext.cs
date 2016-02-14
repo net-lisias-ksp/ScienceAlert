@@ -40,6 +40,8 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
             injectionBinder.Bind<SignalVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalCrewOnEva>().ToSingleton();
+            injectionBinder.Bind<SignalCrewTransferred>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
             injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
@@ -50,6 +52,9 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
             injectionBinder.Bind<ITemporaryBindingInstanceFactory>().To<TemporaryBindingInstanceFactory>().ToSingleton();
+
+            injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton();
+            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
 
             MapCrossContextBindings();
             SetupCommandBindings();
@@ -72,8 +77,6 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalScenarioModuleLoad>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalScenarioModuleSave>().ToSingleton().CrossContext();
 
-            injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton();
-            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
 
             injectionBinder.Bind<IUrlDirProvider>().To<KSPGameDataUrlDirProvider>().ToSingleton().CrossContext();
             injectionBinder.Bind<IUrlDir>().To(new KSPUrlDir(injectionBinder.GetInstance<IUrlDirProvider>().Get())).CrossContext();
@@ -85,13 +88,13 @@ namespace ScienceAlert.Core
             if (us == null)
                 throw new AssemblyNotFoundException(assembly);
 
-            injectionBinder.Bind<IFile>().ToValue(us).CrossContext();
-            injectionBinder.Bind<IDirectory>().ToValue(us.Directory).CrossContext();
+            injectionBinder.Bind<IFile>().To(us).CrossContext();
+            injectionBinder.Bind<IDirectory>().To(us.Directory).CrossContext();
             injectionBinder.Bind<IDirectory>()
-                .ToValue(injectionBinder.GetInstance<IFileSystemFactory>().GameData)
+                .To(injectionBinder.GetInstance<IFileSystemFactory>().GameData)
                 .ToName(CoreKeys.GameData)
                 .CrossContext();
-            injectionBinder.Bind<Assembly>().ToValue(assembly).CrossContext();
+            injectionBinder.Bind<Assembly>().To(assembly).CrossContext();
 
             injectionBinder
                 .Bind<IGuiConfiguration>()
@@ -106,7 +109,7 @@ namespace ScienceAlert.Core
                 .CrossContext();
 
             injectionBinder.Bind<GameObject>()
-                .ToValue(contextView as GameObject)
+                .To(contextView as GameObject)
                 .ToName(CoreKeys.CoreContextView)
                 .CrossContext();
 
@@ -115,7 +118,7 @@ namespace ScienceAlert.Core
                 .ToName(CoreKeys.CareerScienceGainMultiplier)
                 .CrossContext();
 
-            injectionBinder.Bind<ICelestialBody>().ToValue(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CoreKeys.HomeWorld).CrossContext();
+            injectionBinder.Bind<ICelestialBody>().To(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CoreKeys.HomeWorld).CrossContext();
 
             injectionBinder
                 .Bind<IQueryScienceValue>()
@@ -254,7 +257,7 @@ namespace ScienceAlert.Core
             injectionBinder
                 .Bind<ScienceAlert>()
                 .Bind<ScenarioModule>()
-                .ToValue(ScenarioRunner.fetch.GetComponent<ScienceAlert>().IfNull(
+                .To(ScenarioRunner.fetch.GetComponent<ScienceAlert>().IfNull(
                     () => { throw new ScenarioModuleNotFoundException("ScienceAlert"); })
                     .Do(sa =>
                     {
@@ -268,7 +271,7 @@ namespace ScienceAlert.Core
         {
             var currentAssemblyResource = new ResourceFromEmbeddedResource(Assembly.GetExecutingAssembly());
 
-            injectionBinder.Bind<IResourceRepository>().ToValue(
+            injectionBinder.Bind<IResourceRepository>().To(
                 new ResourceRepositoryComposite(
                     // search GameDatabase first
                     //   note: GameDatabase expects extensionless urls
@@ -348,10 +351,10 @@ namespace ScienceAlert.Core
                 if (injectionBinder.GetBinding<ScienceExperiment>(exp.id).ToMaybe().Any())
                     throw new DuplicateScienceExperimentException(exp);
 
-                injectionBinder.Bind<ScienceExperiment>().ToValue(exp).ToName(exp.id).CrossContext();
+                injectionBinder.Bind<ScienceExperiment>().To(exp).ToName(exp.id).CrossContext();
             }
 
-            injectionBinder.Bind<IEnumerable<ScienceExperiment>>().Bind<List<ScienceExperiment>>().ToValue(experiments).CrossContext();
+            injectionBinder.Bind<IEnumerable<ScienceExperiment>>().Bind<List<ScienceExperiment>>().To(experiments).CrossContext();
         }
 
 
@@ -454,19 +457,18 @@ namespace ScienceAlert.Core
 
         private void ConfigureSensorDefinitionFactory()
         {
-            injectionBinder.Bind<IConfigNodeObjectGraphBuilder<IRuleFactory>>()
-                .ToValue(CreateRuleFactoryBuilder(injectionBinder.GetInstance<ITemporaryBindingInstanceFactory>()));
-
             var experiments = injectionBinder.GetInstance<IEnumerable<ScienceExperiment>>();
-            var ruleFactoryBuilder = injectionBinder.GetInstance<IConfigNodeObjectGraphBuilder<IRuleFactory>>();
+            var ruleFactoryBuilder = CreateRuleFactoryBuilder(injectionBinder.GetInstance<ITemporaryBindingInstanceFactory>());
             var gameDatabase = injectionBinder.GetInstance<IGameDatabase>();
 
             var sensorDefinitionFactory = SensorDefinitionFactory.Factory.Create(experiments, ruleFactoryBuilder, gameDatabase);
 
-            
             injectionBinder.Bind<IConfigNodeObjectGraphBuilder<IRuleFactory>>()
-                .ToValue(sensorDefinitionFactory)
-                .CrossContext();
+                .To(ruleFactoryBuilder);
+
+            injectionBinder.Bind<IConfigNodeObjectGraphBuilder<SensorDefinition>>()
+                .Bind<ISensorDefinitionFactory>()
+                .To(sensorDefinitionFactory);
         }
 
 

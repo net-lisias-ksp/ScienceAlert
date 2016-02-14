@@ -1,4 +1,5 @@
 ﻿using System;
+using ReeperCommon.Containers;
 using ScienceAlert.Core;
 using strange.extensions.mediation.impl;
 
@@ -14,6 +15,9 @@ namespace ScienceAlert.Game
         [Inject] public SignalVesselChanged VesselChangedSignal { get; set; }
         [Inject] public SignalVesselModified VesselModifiedSignal { get; set; }
         [Inject] public SignalActiveVesselModified ActiveVesselModifiedSignal { get; set; }
+        [Inject] public SignalCrewOnEva CrewOnEvaSignal { get; set; }
+        [Inject] public SignalCrewTransferred CrewTransferredSignal { get; set; }
+
         [Inject] public SignalVesselDestroyed VesselDestroyedSignal { get; set; }
         [Inject] public SignalActiveVesselDestroyed ActiveVesselDestroyedSignal { get; set; }
         [Inject] public SignalGameSceneLoadRequested GameSceneLoadRequestedSignal { get; set; }
@@ -30,6 +34,8 @@ namespace ScienceAlert.Game
             View.VesselDestroyed.AddListener(OnVesselDestroyed);
             View.GameSceneLoadRequested.AddListener(OnGameSceneLoadRequested);
             View.ScienceReceived.AddListener(OnScienceReceived);
+            View.CrewOnEva.AddListener(OnCrewOnEva);
+            View.CrewTransferred.AddListener(OnCrewTransferred);
 
             View.ApplicationQuit.AddListener(OnApplicationQuit);
             View.GameUpdateTick.AddListener(OnGameUpdateTick);
@@ -43,6 +49,8 @@ namespace ScienceAlert.Game
             View.VesselDestroyed.RemoveListener(OnVesselDestroyed);
             View.GameSceneLoadRequested.RemoveListener(OnGameSceneLoadRequested);
             View.ScienceReceived.RemoveListener(OnScienceReceived);
+            View.CrewOnEva.RemoveListener(OnCrewOnEva);
+            View.CrewTransferred.RemoveListener(OnCrewTransferred);
 
             View.ApplicationQuit.RemoveListener(OnApplicationQuit);
             View.GameUpdateTick.RemoveListener(OnGameUpdateTick);
@@ -103,6 +111,30 @@ namespace ScienceAlert.Game
                 Log.Debug("GameEventMediator.OnVesselDestroyed - dispatching active vessel destroyed signal");
                 TryAction(() => ActiveVesselDestroyedSignal.Dispatch());
             }
+        }
+
+
+
+        private void OnCrewOnEva(GameEvents.FromToAction<Part, Part> fromToAction)
+        {
+            Log.Debug("GameEventMediator.OnCrewOnEva");
+
+            TryAction(() => CrewOnEvaSignal.Dispatch(
+                new GameEvents.FromToAction<IPart, IPart>(
+                    fromToAction.from.With(p => GameFactory.Create(p)),
+                    fromToAction.to.With(p => GameFactory.Create(p)))));
+        }
+
+
+        private void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, Part> hostedFromToAction)
+        {
+            Log.Debug("GameEventMediator.OnCrewTransferred");
+
+            TryAction(() => CrewTransferredSignal.Dispatch(
+                new GameEvents.HostedFromToAction<ProtoCrewMember, IPart>(
+                    hostedFromToAction.host,
+                    hostedFromToAction.from.With(p => GameFactory.Create(p)),
+                    hostedFromToAction.to.With(p => GameFactory.Create(p)))));
         }
 
 

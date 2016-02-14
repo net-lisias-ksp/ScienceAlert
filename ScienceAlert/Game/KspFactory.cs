@@ -2,15 +2,26 @@
 
 namespace ScienceAlert.Game
 {
+    // Note to self: make sure this isn't in a cross context binding; it's meant to have the same lifetime as the
+    // dependencies its given (this prevents us from having to explicitly unregister listeners)
 // ReSharper disable once ClassNeverInstantiated.Global
     public class KspFactory : IGameFactory
     {
         private readonly SignalVesselModified _modifiedSignal;
+        private readonly SignalCrewOnEva _evaSignal;
+        private readonly SignalCrewTransferred _transferredSignal;
 
-        public KspFactory(SignalVesselModified modifiedSignal)
+        public KspFactory(
+            SignalVesselModified modifiedSignal,
+            SignalCrewOnEva evaSignal,
+            SignalCrewTransferred transferredSignal)
         {
             if (modifiedSignal == null) throw new ArgumentNullException("modifiedSignal");
+            if (evaSignal == null) throw new ArgumentNullException("evaSignal");
+            if (transferredSignal == null) throw new ArgumentNullException("transferredSignal");
             _modifiedSignal = modifiedSignal;
+            _evaSignal = evaSignal;
+            _transferredSignal = transferredSignal;
         }
 
 
@@ -21,6 +32,8 @@ namespace ScienceAlert.Game
             var v = new KspVessel(this, vessel);
 
             _modifiedSignal.AddListener(v.OnVesselModified);
+            _evaSignal.AddListener(v.OnCrewOnEva);
+            _transferredSignal.AddListener(v.OnCrewTransferred);
 
             v.Rescan();
 
@@ -40,7 +53,7 @@ namespace ScienceAlert.Game
         {
             if (part == null) throw new ArgumentNullException("Part");
 
-            return new KspPart(part);
+            return new KspPart(part, Create(part.vessel));
         }
 
 

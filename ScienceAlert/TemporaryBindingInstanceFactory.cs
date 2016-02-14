@@ -34,8 +34,6 @@ namespace ScienceAlert
                 throw new ArgumentException(concreteType.FullName + " is an interface and cannot be created",
                     "concreteType");
 
-            
-
             bool hasBinding = _binder.GetBinding(concreteType) != null;
 
             try
@@ -58,10 +56,17 @@ namespace ScienceAlert
                 throw new ArgumentException(concreteType.FullName + " is abstract and cannot be created", "concreteType");
 
             var constructors = concreteType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+            var binding = _binder.GetBinding(concreteType);
 
-            return
-                constructors.Any(
-                    ci => ci.GetParameters().Select(pi => pi.ParameterType).All(CanCreate));
+            Log.Verbose("Checking if CanCreate " + concreteType.Name);
+
+            var canCreate = binding != null &&
+                       constructors.Any(
+                           ci => ci.GetParameters().Select(pi => pi.ParameterType).All(CanCreate));
+
+            Log.Verbose("result: " + canCreate);
+
+            return canCreate;
         }
     }
 }

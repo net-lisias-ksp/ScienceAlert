@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon.Containers;
 using strange.extensions.injector.api;
@@ -15,11 +17,13 @@ namespace ScienceAlert.Game
     }
 
 
-    [Implements(typeof(IScienceUtil), InjectionBindingScope.CROSS_CONTEXT)]
 // ReSharper disable once ClassNeverInstantiated.Global
     public class KspScienceUtil : IScienceUtil
     {
-        // Note: this doesn't use the game version of this method because that generates extra garbage appending
+        public const string ScientistTypeName = "Scientist";
+
+
+        // Note: this doesn't use ksp's version of this method because it generates extra garbage appending
         // strings that we don't need
         public bool RequiredUsageInternalAvailable(IVessel vessel, IPart part, ExperimentUsageReqs reqs)
         {
@@ -44,14 +48,14 @@ namespace ScienceAlert.Game
 
             if (reqs.IsFlagSet(ExperimentUsageReqs.CrewInPart))
             {
-                if (part.EvaCapableCrew.All(c => c.experienceTrait.With(t => t.TypeName) != "Scientist"))
+                if (part.EvaCapableCrew.All(c => c.experienceTrait.With(t => t.TypeName) != ScientistTypeName))
                     return false;
             } 
             else
             {
                 if (reqs.IsFlagSet(ExperimentUsageReqs.CrewInVessel))
                     return false;
-                if (vessel.EvaCapableCrew.All(c => c.experienceTrait.With(t => t.TypeName) != "Scientist"))
+                if (vessel.EvaCapableCrew.All(c => c.experienceTrait.With(t => t.TypeName) != ScientistTypeName))
                     return false;
             }
 

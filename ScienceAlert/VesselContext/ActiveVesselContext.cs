@@ -38,13 +38,17 @@ namespace ScienceAlert.VesselContext
                 .ToName(VesselContextKeys.ExperimentViewConfig);
 
             injectionBinder.Bind<ConfigNode>()
-                .ToValue(sharedConfig.VesselDebugViewConfig)
+                .To(sharedConfig.VesselDebugViewConfig)
                 .ToName(VesselContextKeys.VesselDebugViewConfig);
 
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
 
             injectionBinder.Bind<ITemporaryBindingInstanceFactory>().To<TemporaryBindingInstanceFactory>().ToSingleton();
+
+            injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton();
+            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
+            injectionBinder.Bind<IScienceUtil>().To<KspScienceUtil>().ToSingleton();
 
             // note to self: see how these are NOT cross context? That's because each ContextView
             // has its own GameEventView. This is done to avoid having to do any extra bookkeeping (of
@@ -55,6 +59,8 @@ namespace ScienceAlert.VesselContext
             // context was destroyed
             injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
             injectionBinder.Bind<SignalVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalCrewOnEva>().ToSingleton();
+            injectionBinder.Bind<SignalCrewTransferred>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
             injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
@@ -83,7 +89,7 @@ namespace ScienceAlert.VesselContext
                 .Bind<IExperimentSituationProvider>()
                 .Bind<IExperimentBiomeProvider>()
                 .Bind<IScienceContainerCollectionProvider>()
-                .ToValue(gameFactory.Create(FlightGlobals.ActiveVessel));
+                .To(gameFactory.Create(FlightGlobals.ActiveVessel));
 
             injectionBinder.Bind<IScienceSubjectProvider>()
                 .To<KspScienceSubjectProvider>().ToSingleton();

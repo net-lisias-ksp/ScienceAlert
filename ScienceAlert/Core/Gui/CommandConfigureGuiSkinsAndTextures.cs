@@ -38,7 +38,7 @@ namespace ScienceAlert.Core.Gui
         {
             Log.Verbose("Configuring GUI skins");
 
-            injectionBinder.Bind<GUISkin>().ToValue(HighLogic.Skin).CrossContext();
+            injectionBinder.Bind<GUISkin>().To(HighLogic.Skin).CrossContext();
 
             ConfigureCompactSkin();
             ConfigurePopupSkin();
@@ -81,8 +81,8 @@ namespace ScienceAlert.Core.Gui
                 s.label.fontStyle = FontStyle.Bold;
             });
             
-            injectionBinder.Bind<GUISkin>().ToValue(customSkin).ToName(GuiKeys.CompactSkin).CrossContext();
-            injectionBinder.Bind<GUIStyle>().ToValue(ConfigureTitleBarButtonStyle()).ToName(GuiKeys.WindowTitleBarButtonStyle).CrossContext();
+            injectionBinder.Bind<GUISkin>().To(customSkin).ToName(GuiKeys.CompactSkin).CrossContext();
+            injectionBinder.Bind<GUIStyle>().To(ConfigureTitleBarButtonStyle()).ToName(GuiKeys.WindowTitleBarButtonStyle).CrossContext();
         }
 
 
@@ -95,7 +95,7 @@ namespace ScienceAlert.Core.Gui
             customSkin.label.fontSize = 12;
             customSkin.label.normal.textColor = Color.white;
 
-            injectionBinder.Bind<GUISkin>().ToValue(customSkin).ToName(GuiKeys.PopupSkin).CrossContext();
+            injectionBinder.Bind<GUISkin>().To(customSkin).ToName(GuiKeys.PopupSkin).CrossContext();
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace ScienceAlert.Core.Gui
             if (name == null) throw new ArgumentNullException("name");
             if (string.IsNullOrEmpty(url)) throw new ArgumentException("Must contain a value", "url");
 
-            GetTexture(url).Do(t => injectionBinder.Bind<Texture2D>().ToValue(t).ToName(name).CrossContext());
+            GetTexture(url).Do(t => injectionBinder.Bind<Texture2D>().To(t).ToName(name).CrossContext());
         }
     }
 }

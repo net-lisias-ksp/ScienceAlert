@@ -52,5 +52,14 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         {
             return GetGraphBuilderFor(config).Any();
         }
+
+
+        public override string ToString()
+        {
+            return typeof (CompositeConfigNodeObjectGraphBuilder<TTypeProduced>).Name + ";\n" +
+                   string.Join(",\n\t", _builders.Select(b => "[" + b.ToString() + "]").ToArray()) + "\n/" +
+                   typeof (CompositeConfigNodeObjectGraphBuilder<TTypeProduced>).Name;
+
+        }
     }
 }

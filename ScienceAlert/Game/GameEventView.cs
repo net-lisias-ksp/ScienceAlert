@@ -11,9 +11,10 @@ namespace ScienceAlert.Game
         internal readonly Signal<Vessel> VesselModified = new Signal<Vessel>();
         internal readonly Signal<Vessel> VesselChanged = new Signal<Vessel>();
         internal readonly Signal<Vessel> VesselDestroyed = new Signal<Vessel>();
+        internal readonly Signal<GameEvents.FromToAction<Part, Part>> CrewOnEva = new Signal<GameEvents.FromToAction<Part, Part>>();
+        internal readonly Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>> CrewTransferred = new Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>>();
         internal readonly Signal<GameScenes> GameSceneLoadRequested = new Signal<GameScenes>();
-        internal readonly Signal<float, ScienceSubject, ProtoVessel, bool> ScienceReceived =
-            new Signal<float, ScienceSubject, ProtoVessel, bool>();
+        internal readonly Signal<float, ScienceSubject, ProtoVessel, bool> ScienceReceived = new Signal<float, ScienceSubject, ProtoVessel, bool>();
         internal readonly Signal ApplicationQuit = new Signal();
 
         internal readonly Signal GameUpdateTick = new Signal();
@@ -26,6 +27,8 @@ namespace ScienceAlert.Game
             GameEvents.onVesselWasModified.Add(OnVesselModified);
             GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
             GameEvents.OnScienceRecieved.Add(OnScienceReceived);
+            GameEvents.onCrewOnEva.Add(OnCrewOnEva);
+            GameEvents.onCrewTransferred.Add(OnCrewTransferred);
         }
 
 
@@ -36,6 +39,8 @@ namespace ScienceAlert.Game
             GameEvents.onVesselWasModified.Remove(OnVesselModified);
             GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
             GameEvents.OnScienceRecieved.Remove(OnScienceReceived);
+            GameEvents.onCrewOnEva.Remove(OnCrewOnEva);
+            GameEvents.onCrewTransferred.Remove(OnCrewTransferred);
             base.OnDestroy();
         }
 
@@ -55,6 +60,17 @@ namespace ScienceAlert.Game
         private void OnVesselModified(Vessel data)
         {
             VesselModified.Dispatch(data);
+        }
+
+
+        private void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, Part> data)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void OnCrewOnEva(GameEvents.FromToAction<Part, Part> data)
+        {
+            throw new NotImplementedException();
         }
 
 

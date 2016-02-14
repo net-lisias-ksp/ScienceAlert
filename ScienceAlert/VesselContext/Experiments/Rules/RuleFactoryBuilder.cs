@@ -78,11 +78,15 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         {
             var typeNameInConfig = GetTypeNameFromConfig(config).ToUpperInvariant();
 
-            Log.Debug("RuleFactoryBuilder: request for " + typeNameInConfig);
-
             return !string.IsNullOrEmpty(typeNameInConfig) && (
                 typeNameInConfig == typeof (TRuleType).FullName.ToUpperInvariant() ||
                 typeNameInConfig == typeof (TRuleType).Name.ToUpperInvariant());
+        }
+
+
+        public override string ToString()
+        {
+            return typeof (RuleFactoryBuilder<TRuleType>).Name + "[ " + typeof (TRuleType).Name + "]";
         }
     }
 }

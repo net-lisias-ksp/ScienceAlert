@@ -39,7 +39,7 @@ namespace ScienceAlert.VesselContext.Gui
             var guiGo = new GameObject("VesselGuiView");
             guiGo.transform.parent = _contextView.transform;
 
-            injectionBinder.Bind<GameObject>().ToValue(guiGo).ToName(VesselContextKeys.GuiContainer);
+            injectionBinder.Bind<GameObject>().To(guiGo).ToName(VesselContextKeys.GuiContainer);
 
             var monoBehaviours = new MonoBehaviour[] {};
 

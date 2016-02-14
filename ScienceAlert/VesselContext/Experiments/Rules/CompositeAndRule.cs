@@ -81,6 +81,12 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 
                 return _handled.Any(handled => String.Equals(handled, config.name, StringComparison.InvariantCultureIgnoreCase));
             }
+
+
+            public override string ToString()
+            {
+                return typeof (CompositeAndRuleFactoryBuilder).Name + " [ " + string.Join(",", _handled) + "]";
+            }
         }
     }
 }

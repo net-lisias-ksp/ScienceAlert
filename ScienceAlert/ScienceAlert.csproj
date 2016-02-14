@@ -56,8 +56,11 @@
     <Compile Include="VesselContext\Experiments\Rules\CommandCreateSensorDefinitions.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeConfigNodeObjectGraphBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Rules\IConfigNodeObjectGraphBuilder.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\ISensorDefinitionFactory.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RuleExperimentIsAvailableWhileVesselSituation.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RuleExperimentUsageRequirementCheck.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleFactoryBuilder.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\SensorDefinitionFactory.cs" />
+    <Compile Include="VesselContext\Experiments\SensorDefinitionFactory.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeAndRule.cs" />
     <Compile Include="VesselContext\Experiments\Rules\IRuleFactory.cs" />
     <Compile Include="VesselContext\Experiments\Rules\TypeNotHandledByFactoryException.cs" />
@@ -108,9 +111,9 @@
     <Compile Include="VesselContext\Experiments\Rules\IExperimentRule.cs" />
     <Compile Include="VesselContext\Experiments\Rules\ScienceExperimentModuleTracker.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleVesselHasModuleScienceExperiment.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\VesselHasOperableModuleScienceExperiment.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\VesselIsControllable.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\VesselIsCrewed.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RuleVesselHasOperableModuleScienceExperiment.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RuleVesselIsControllable.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RuleVesselIsCrewed.cs" />
     <Compile Include="VesselContext\BootstrapActiveVesselContext.cs" />
     <Compile Include="Core\IPopupDialogSpawner.cs" />
     <Compile Include="Core\PopupDialogSpawner.cs" />

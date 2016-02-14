@@ -72,9 +72,11 @@ namespace ScienceAlert.VesselContext.Experiments
             UpdateOnboardValue();
             UpdateAvailabilityValue();
 
+            // The experiment isn't valid for these conditions so there's no sensible science value to calculate
             if (!ConditionsMet)
             {
                 CollectionValue = TransmissionValue = LabValue = 0f;
+                Available = false;
             }
             else
             {

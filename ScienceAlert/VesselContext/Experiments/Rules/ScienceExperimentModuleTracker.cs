@@ -11,6 +11,8 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         protected readonly IVessel Vessel;
         protected List<IModuleScienceExperiment> ExperimentModules;
 
+        private Func<IModuleScienceExperiment, bool> _moduleMatchesExperiment;
+ 
         public ScienceExperimentModuleTracker(
             ScienceExperiment experiment,
             IVessel vessel)
@@ -19,6 +21,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
             if (vessel == null) throw new ArgumentNullException("vessel");
             Experiment = experiment;
             Vessel = vessel;
+            _moduleMatchesExperiment = IsModuleForOurExperiment;
 
             Vessel.Modified += VesselOnModified;
             VesselOnModified();
@@ -28,10 +31,14 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         private void VesselOnModified()
         {
             ExperimentModules = Vessel.ScienceExperimentModules
-                .Where(mse => mse.ExperimentID == Experiment.id)
+                .Where(_moduleMatchesExperiment)
                 .ToList();
+        }
 
-            Log.Debug(() => GetType().FullName + " rescanning for " + Experiment.id + ": found " + ExperimentModules.Count + " modules (of " + Vessel.ScienceExperimentModules.Count + ") which match");
+
+        private bool IsModuleForOurExperiment(IModuleScienceExperiment experiment)
+        {
+            return experiment.ExperimentID == Experiment.id;
         }
     }
 }

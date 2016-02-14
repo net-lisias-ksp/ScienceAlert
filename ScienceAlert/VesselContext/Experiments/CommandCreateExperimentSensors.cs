@@ -59,7 +59,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
             try
             {
-                injectionBinder.Bind<List<ExperimentSensor>>().ToValue(sensors);
+                injectionBinder.Bind<List<ExperimentSensor>>().To(sensors);
                 CreateExperimentSensorUpdater();
             }
             finally
@@ -75,6 +75,7 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             var sensors = new List<ExperimentSensor>();
 
+            
             foreach (var sensorDefinition in _sensorDefinitions)
             {
                 try
@@ -92,9 +93,11 @@ namespace ScienceAlert.VesselContext.Experiments
                 catch (Exception e)
                 {
                     Log.Error("Failed to create experiment sensor for " + sensorDefinition);
+                    Log.Error("Encountered exception: " + e);
                 }
             }
 
+            Log.Debug("Created " + sensors.Count + " of " + _sensorDefinitions.Count() + " successfully");
             return sensors;
         }
 

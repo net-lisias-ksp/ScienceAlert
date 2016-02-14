@@ -64,6 +64,33 @@ namespace ScienceAlert.Game
             Rescan();
         }
 
+
+        public void OnCrewOnEva(GameEvents.FromToAction<IPart, IPart> data)
+        {
+            if (!data.from.Vessel.Equals(this) && !data.to.Vessel.Equals(this))
+            {
+                Log.Debug("Crew change not related to our vessel of " + VesselName);
+                return;
+            }
+
+            Log.Debug("Updating KspVessel crew due to matching OnCrewOnEva event");
+            Rescan();
+        }
+
+
+        public void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, IPart> data)
+        {
+            if (!data.from.Vessel.Equals(this) && !data.to.Vessel.Equals(this))
+            {
+                Log.Debug("Crew transfer not related to our vessel of " + VesselName);
+                return;
+            }
+
+            Log.Debug("Updating KspVessel crew due to matching OnCrewTransferred event");
+            Rescan();
+        }
+
+
         
 
         public void Rescan()

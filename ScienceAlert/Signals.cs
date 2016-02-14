@@ -28,6 +28,18 @@ namespace ScienceAlert
     }
 
 
+    public class SignalCrewOnEva : Signal<GameEvents.FromToAction<IPart, IPart>>
+    {
+        
+    }
+
+
+    public class SignalCrewTransferred : Signal<GameEvents.HostedFromToAction<ProtoCrewMember, IPart>>
+    {
+        
+    }
+
+
 // ReSharper disable once ClassNeverInstantiated.Global
     public class SignalActiveVesselModified : Signal
     {

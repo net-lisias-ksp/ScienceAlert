@@ -4,11 +4,12 @@ using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ScienceAlert.Game;
+using ScienceAlert.VesselContext.Experiments.Rules;
 
-namespace ScienceAlert.VesselContext.Experiments.Rules
+namespace ScienceAlert.VesselContext.Experiments
 {
     // Creates a SensorDefinition given a ConfigNode that matches "SA_EXPERIMENT_RULESET"
-    public class SensorDefinitionFactory : IConfigNodeObjectGraphBuilder<SensorDefinition>
+    public class SensorDefinitionFactory : IConfigNodeObjectGraphBuilder<SensorDefinition>, ISensorDefinitionFactory
     {
         private readonly IRuleFactory _defaultOnboardRuleFactory;
         private readonly IRuleFactory _defaultAvailabilityRuleFactory;
@@ -23,7 +24,6 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         public const string OnboardRuleNodeName = "ONBOARD_RULE";
         public const string AvailabilityRuleNodeName = "AVAILABILITY_RULE";
         public const string ConditionRuleNodeName = "CONDITION_RULE";
-
 
         private SensorDefinitionFactory(
             IEnumerable<ScienceExperiment> experiments,
@@ -97,6 +97,13 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         public SensorDefinition Build(ConfigNode config)
         {
             return Build(this, config);
+        }
+
+
+        public SensorDefinition Create(ScienceExperiment experiment)
+        {
+            return new SensorDefinition(experiment, _defaultOnboardRuleFactory, _defaultAvailabilityRuleFactory,
+                _defaultAvailabilityRuleFactory);
         }
 
 
