@@ -34,17 +34,17 @@ namespace ScienceAlert
                 throw new ArgumentException(concreteType.FullName + " is an interface and cannot be created",
                     "concreteType");
 
-            bool hasBinding = _binder.GetBinding(concreteType) != null;
+            bool hasBinding = binder.GetBinding(concreteType) != null;
 
             try
             {
-                if (!hasBinding) _binder.Bind(concreteType).To(concreteType);
+                if (!hasBinding) binder.Bind(concreteType).To(concreteType);
 
-                return _binder.GetInstance(concreteType);
+                return binder.GetInstance(concreteType);
             }
             finally
             {
-                if (!hasBinding) _binder.Unbind(concreteType);
+                if (!hasBinding) binder.Unbind(concreteType);
             }
         }
 

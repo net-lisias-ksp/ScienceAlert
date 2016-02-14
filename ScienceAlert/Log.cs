@@ -1,5 +1,26 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text;
 using ReeperCommon.Logging;
+
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsageAttribute(AttributeTargets.Parameter, Inherited = false)]
+    public sealed class CallerMemberNameAttribute : Attribute
+    {
+    }
+
+    [AttributeUsageAttribute(AttributeTargets.Parameter, Inherited = false)]
+    public sealed class CallerFilePathAttribute : Attribute
+    {
+    }
+
+    [AttributeUsageAttribute(AttributeTargets.Parameter, Inherited = false)]
+    public sealed class CallerLineNumberAttribute : Attribute
+    {
+    }
+}
 
 namespace ScienceAlert
 {
@@ -18,6 +39,17 @@ namespace ScienceAlert
             set { _instance = value; }
         }
 
+        [Conditional("DEBUG")]
+        public static void TraceMessage([CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "")
+        {
+            var builder = new StringBuilder(100);
+            builder.Append("Trace: ");
+            builder.Append(memberName);
+            builder.Append(", ");
+            builder.Append(System.IO.Path.GetFileName(filePath));
+
+            Instance.Debug(builder.ToString());
+        }
 
         public static void Debug(string format, params string[] args)
         {

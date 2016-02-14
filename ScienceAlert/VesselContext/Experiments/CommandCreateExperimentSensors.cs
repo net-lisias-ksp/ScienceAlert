@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon.Serialization;
+using ScienceAlert.Core;
 using ScienceAlert.Game;
-using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -18,6 +18,7 @@ namespace ScienceAlert.VesselContext.Experiments
         private readonly IEnumerable<SensorDefinition> _sensorDefinitions;
         private readonly IScienceSubjectProvider _subjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
+        private readonly SignalTriggerSensorStatusUpdate _triggerSignal;
         private readonly SignalCriticalShutdown _seriousProblemSignal;
 
         public CommandCreateExperimentSensors(
@@ -26,6 +27,7 @@ namespace ScienceAlert.VesselContext.Experiments
             IEnumerable<SensorDefinition> sensorDefinitions,
             IScienceSubjectProvider subjectProvider,
             IExperimentReportValueCalculator reportCalculator,
+            SignalTriggerSensorStatusUpdate triggerSignal,
             SignalCriticalShutdown seriousProblemSignal)
         {
             if (vesselContextView == null) throw new ArgumentNullException("vesselContextView");
@@ -33,6 +35,7 @@ namespace ScienceAlert.VesselContext.Experiments
             if (sensorDefinitions == null) throw new ArgumentNullException("sensorDefinitions");
             if (subjectProvider == null) throw new ArgumentNullException("subjectProvider");
             if (reportCalculator == null) throw new ArgumentNullException("reportCalculator");
+            if (triggerSignal == null) throw new ArgumentNullException("triggerSignal");
             if (seriousProblemSignal == null) throw new ArgumentNullException("seriousProblemSignal");
 
             _vesselContextView = vesselContextView;
@@ -40,6 +43,7 @@ namespace ScienceAlert.VesselContext.Experiments
             _sensorDefinitions = sensorDefinitions;
             _subjectProvider = subjectProvider;
             _reportCalculator = reportCalculator;
+            _triggerSignal = triggerSignal;
             _seriousProblemSignal = seriousProblemSignal;
         }
 
@@ -80,6 +84,8 @@ namespace ScienceAlert.VesselContext.Experiments
             {
                 try
                 {
+                    injectionBinder.Bind<ScienceExperiment>().To(sensorDefinition.Experiment);
+
                     var sensor = new ExperimentSensor(
                         sensorDefinition.Experiment,
                         _subjectProvider,
@@ -95,6 +101,10 @@ namespace ScienceAlert.VesselContext.Experiments
                     Log.Error("Failed to create experiment sensor for " + sensorDefinition);
                     Log.Error("Encountered exception: " + e);
                 }
+                finally
+                {
+                    injectionBinder.Unbind<ScienceExperiment>();
+                }
             }
 
             Log.Debug("Created " + sensors.Count + " of " + _sensorDefinitions.Count() + " successfully");
@@ -106,6 +116,8 @@ namespace ScienceAlert.VesselContext.Experiments
             var updater = _vesselContextView.AddComponent<ExperimentSensorUpdater>();
 
             injectionBinder.injector.Inject(updater, false);
+
+            _triggerSignal.AddListener(updater.OnStatusUpdateRequested);
         }
     }
 }

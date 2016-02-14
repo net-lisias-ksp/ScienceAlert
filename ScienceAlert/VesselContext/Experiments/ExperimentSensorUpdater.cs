@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using UnityEngine;
 
@@ -14,7 +16,24 @@ namespace ScienceAlert.VesselContext.Experiments
 // ReSharper disable UnusedAutoPropertyAccessor.Global
         [Inject] public List<ExperimentSensor> Sensors { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
+
         [Inject] public SignalCriticalShutdown CriticalFail { get; set; }
+
+
+        public void OnStatusUpdateRequested(ScienceExperiment scienceExperiment)
+        {
+            if (scienceExperiment == null) throw new ArgumentNullException("scienceExperiment");
+
+            Log.TraceMessage();
+
+            var relatedSensor = Sensors.FirstOrDefault(s => s.Experiment.id == scienceExperiment.id).ToMaybe();
+
+            if (!relatedSensor.Any())
+                throw new ArgumentException("No matching sensor for " + scienceExperiment.id, "scienceExperiment");
+
+            DispatchChangedSignal(relatedSensor.Value);
+        }
+
 
 // ReSharper disable once UnusedMember.Local
         private void Update()
@@ -29,18 +48,10 @@ namespace ScienceAlert.VesselContext.Experiments
                     m.ClearChangedFlag();
                     m.UpdateSensorValues();
 
-                    
+
 
                     if (m.HasChanged)
-                    {
-                        var dispatchTimerStart = Time.realtimeSinceStartup;
-
-                        SensorStatusChanged.Dispatch(new ExperimentSensorState(m.Experiment, m.CollectionValue,
-                            m.TransmissionValue, m.LabValue, m.Onboard, m.Available, m.ConditionsMet));
-
-                        print("Dispatch time: " + (Time.realtimeSinceStartup - dispatchTimerStart).ToString("F5") +
-                              " for " + m.Experiment.id);
-                    }
+                        DispatchChangedSignal(m);
                 }
 
                 //print("Time used: " + (Time.realtimeSinceStartup - start).ToString("F5") + " sec for " + Sensors.Count +
@@ -54,6 +65,18 @@ namespace ScienceAlert.VesselContext.Experiments
             }
         }
 
+
+
+        private void DispatchChangedSignal(ExperimentSensor sensor)
+        {
+            var dispatchTimerStart = Time.realtimeSinceStartup;
+
+            SensorStatusChanged.Dispatch(new ExperimentSensorState(sensor.Experiment, sensor.CollectionValue,
+                sensor.TransmissionValue, sensor.LabValue, sensor.Onboard, sensor.Available, sensor.ConditionsMet));
+
+            print("Dispatch time: " + (Time.realtimeSinceStartup - dispatchTimerStart).ToString("F5") +
+                  " for " + sensor.Experiment.id);
+        }
 
         private void ShutdownDueToError()
         {

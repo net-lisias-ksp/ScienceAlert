@@ -74,6 +74,7 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalCloseExperimentListEntryPopup>().ToSingleton();
 
             injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
+            injectionBinder.Bind<SignalTriggerSensorStatusUpdate>().ToSingleton();
 
             injectionBinder.Bind<ExperimentListEntryFactory>().ToSingleton();
 
@@ -105,11 +106,13 @@ namespace ScienceAlert.VesselContext
         {
             commandBinder.Bind<SignalStart>()
                 .InSequence()
+                .To<CommandBindExperimentRuleTypes>()
                 .To<CommandConfigureGameEvents>()
-                .To<CommandCreateVesselGui>()
-                .To<CommandDispatchLoadGuiSettingsSignal>()
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
+                .To<CommandCreateVesselGui>()
+                .To<CommandDispatchLoadGuiSettingsSignal>()
+                .To<CommandTriggerInitialSensorUpdates>()
                 .Once();
 
             //commandBinder.Bind<SignalExperimentSensorStatusChanged>()
@@ -125,6 +128,7 @@ namespace ScienceAlert.VesselContext
 
             commandBinder.Bind<SignalCriticalShutdown>()
                 .To<CommandCriticalShutdown>().Once();
+
         }
 
 

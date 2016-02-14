@@ -53,6 +53,8 @@
     <Compile Include="Game\KspUrlConfig.cs" />
     <Compile Include="ITemporaryBindingInstanceFactory.cs" />
     <Compile Include="TemporaryBindingInstanceFactory.cs" />
+    <Compile Include="VesselContext\CommandBindExperimentRuleTypes.cs" />
+    <Compile Include="VesselContext\CommandDispatchContextCompleteSignal.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CommandCreateSensorDefinitions.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeConfigNodeObjectGraphBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Rules\IConfigNodeObjectGraphBuilder.cs" />
@@ -134,6 +136,7 @@
     <Compile Include="VesselContext\Gui\CommandDispatchLoadGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchSaveGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\ExperimentSensorState.cs" />
+    <Compile Include="VesselContext\Gui\CommandTriggerInitialSensorUpdates.cs" />
     <Compile Include="VesselContext\Gui\ExperimentListPopupMediator.cs" />
     <Compile Include="VesselContext\Gui\ExperimentPopupMediator.cs" />
     <Compile Include="VesselContext\Gui\ExperimentPopupView.cs" />
@@ -142,7 +145,6 @@
     <Compile Include="VesselContext\Gui\Signals.cs" />
     <Compile Include="VesselContext\Gui\VesselDebugMediator.cs" />
     <Compile Include="VesselContext\Gui\VesselDebugView.cs" />
-    <Compile Include="ScenarioConfiguration.cs" />
     <Compile Include="Core\AssemblyNotFoundException.cs" />
     <Compile Include="Core\BootstrapCore.cs" />
     <Compile Include="Core\GetObjectFieldsIncludingBaseTypes.cs" />

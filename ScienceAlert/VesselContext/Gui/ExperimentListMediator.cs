@@ -25,6 +25,8 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalLoadGuiSettings LoadSignal { get; set; }
         [Inject] public SignalSaveGuiSettings SaveSignal { get; set; }
 
+        [Inject] public SignalExperimentSensorStatusChanged SensorChangedSignal { get; set; }
+
         private ExperimentListView _view;
 
 
@@ -40,16 +42,7 @@ namespace ScienceAlert.VesselContext.Gui
             LoadSignal.AddListener(OnLoad);
             SaveSignal.AddListener(OnSave);
 
-            // Temp!
-            Log.Warning("Using Temp code to initialize experiment list");
-            ResearchAndDevelopment.GetExperimentIDs().Select(ResearchAndDevelopment.GetExperiment)
-                .ToList()
-                .ForEach(experiment =>
-                    View.SetExperimentStatus(new ExperimentSensorState(experiment,
-                        UnityEngine.Random.Range(0f, 100f),
-                        UnityEngine.Random.Range(0f, 100f),
-                        UnityEngine.Random.Range(0f, 100f),
-                        true, true, false)));
+            SensorChangedSignal.AddListener(OnSensorStateChanged);
         }
 
 
@@ -62,6 +55,8 @@ namespace ScienceAlert.VesselContext.Gui
 
             View.LockToggle.RemoveListener(OnLockToggle);
             View.Close.RemoveListener(OnClose);
+
+            SensorChangedSignal.RemoveListener(OnSensorStateChanged);
         }
 
 
@@ -134,5 +129,12 @@ namespace ScienceAlert.VesselContext.Gui
         {
             View.Visible = tf;
         }
+
+
+        private void OnSensorStateChanged(ExperimentSensorState experimentSensorState)
+        {
+            View.SetExperimentStatus(experimentSensorState);
+        }
+
     }
 }

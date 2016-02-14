@@ -7,4 +7,14 @@ namespace ScienceAlert.VesselContext
     public class SignalExperimentSensorStatusChanged : Signal<ExperimentSensorState>
     {
     }
+
+    public class SignalTriggerSensorStatusUpdate : Signal<ScienceExperiment>
+    {
+    }
+
+
+    //public class SignalContextComplete : Signal
+    //{
+        
+    //}
 }

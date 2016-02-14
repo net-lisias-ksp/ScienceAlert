@@ -122,22 +122,6 @@ namespace ScienceAlert.VesselContext.Gui
 
         private void DrawExperimentList()
         {
-            //var experimentEnumerator = _experimentStatuses.GetEnumerator(); // avoid Using... because Mono boxes iterator creating extra garbage
-            //_popupOpenFlag = false; 
-            
-            //try
-            //{
-            //    while (experimentEnumerator.MoveNext())
-            //    {
-            //        var item = experimentEnumerator.Current.Value;
-            //        DrawExperimentStatus(item);
-            //    }
-            //}
-            //finally
-            //{
-            //    experimentEnumerator.Dispose();
-            //}
-
             foreach (var kvp in _experimentStatuses)
                 DrawExperimentStatus(kvp.Value);
         }
