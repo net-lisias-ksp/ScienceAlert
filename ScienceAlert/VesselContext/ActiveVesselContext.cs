@@ -4,7 +4,6 @@ using ReeperCommon.Extensions;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
-using ScienceAlert.VesselContext.Experiments.Rules;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -44,11 +43,7 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
 
-            injectionBinder.Bind<ITemporaryBindingInstanceFactory>().To<TemporaryBindingInstanceFactory>().ToSingleton();
-
-            injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton();
-            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
-            injectionBinder.Bind<IScienceUtil>().To<KspScienceUtil>().ToSingleton();
+ 
 
             // note to self: see how these are NOT cross context? That's because each ContextView
             // has its own GameEventView. This is done to avoid having to do any extra bookkeeping (of
@@ -57,13 +52,12 @@ namespace ScienceAlert.VesselContext
             // If we were to register these to cross context signals, those publishers might keep objects
             // designed for the current active vessel alive and away from the GC even when the rest of the
             // context was destroyed
-            injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
-            injectionBinder.Bind<SignalVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselChanged>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
+
+            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalCrewOnEva>().ToSingleton();
             injectionBinder.Bind<SignalCrewTransferred>().ToSingleton();
-            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
-            injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
-            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
             injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
             injectionBinder.Bind<SignalScienceReceived>().ToSingleton();
 
@@ -82,15 +76,11 @@ namespace ScienceAlert.VesselContext
                 .ToMediator<ExperimentListMediator>()
                 .ToMediator<ExperimentListPopupMediator>();
 
-            var gameFactory = injectionBinder.GetInstance<IGameFactory>();
+            injectionBinder.Bind<ITemporaryBindingFactory>().To<TemporaryBindingFactory>().ToSingleton();
+            injectionBinder.Bind<IGameFactory>().Bind<KspFactory>().To<KspFactory>().ToSingleton();
 
-            injectionBinder
-                .Bind<IVessel>()
-                .Bind<ICelestialBodyProvider>()
-                .Bind<IExperimentSituationProvider>()
-                .Bind<IExperimentBiomeProvider>()
-                .Bind<IScienceContainerCollectionProvider>()
-                .To(gameFactory.Create(FlightGlobals.ActiveVessel));
+            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
+            injectionBinder.Bind<IScienceUtil>().To<KspScienceUtil>().ToSingleton();
 
             injectionBinder.Bind<IScienceSubjectProvider>()
                 .To<KspScienceSubjectProvider>().ToSingleton();
@@ -108,6 +98,7 @@ namespace ScienceAlert.VesselContext
                 .InSequence()
                 .To<CommandBindExperimentRuleTypes>()
                 .To<CommandConfigureGameEvents>()
+                .To<CommandCreateVesselBindings>()
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
                 .To<CommandCreateVesselGui>()
@@ -115,8 +106,8 @@ namespace ScienceAlert.VesselContext
                 .To<CommandTriggerInitialSensorUpdates>()
                 .Once();
 
-            //commandBinder.Bind<SignalExperimentSensorStatusChanged>()
-            //    .To<CommandLogSensorStatusUpdate>()
+            commandBinder.Bind<SignalExperimentSensorStatusChanged>()
+                .To<CommandLogSensorStatusUpdate>();
             //    .Pooled();
  
             commandBinder.Bind<SignalContextDestruction>()

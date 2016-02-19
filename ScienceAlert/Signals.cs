@@ -17,16 +17,22 @@ namespace ScienceAlert
 
 
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class SignalVesselChanged : Signal<IVessel>
+    public class SignalActiveVesselChanged : Signal
     {
     }
 
 
-// ReSharper disable once ClassNeverInstantiated.Global
-    public class SignalVesselModified : Signal<IVessel>
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class SignalActiveVesselModified : Signal
     {
     }
 
+
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class SignalActiveVesselDestroyed : Signal
+    {
+    }
+ 
 
     public class SignalCrewOnEva : Signal<GameEvents.FromToAction<IPart, IPart>>
     {
@@ -40,24 +46,14 @@ namespace ScienceAlert
     }
 
 
-// ReSharper disable once ClassNeverInstantiated.Global
-    public class SignalActiveVesselModified : Signal
-    {
-    }
 
 
 
 
-// ReSharper disable once ClassNeverInstantiated.Global
-    public class SignalVesselDestroyed : Signal<IVessel>
-    {
-    }
 
 
-// ReSharper disable once ClassNeverInstantiated.Global
-    public class SignalActiveVesselDestroyed : Signal
-    {
-    }
+
+
 
 
 // ReSharper disable once UnusedMember.Global

@@ -23,12 +23,12 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
             Vessel = vessel;
             _moduleMatchesExperiment = IsModuleForOurExperiment;
 
-            Vessel.Modified += VesselOnModified;
-            VesselOnModified();
+            Vessel.Rescanned += VesselOnRescanned;
+            VesselOnRescanned();
         }
 
 
-        private void VesselOnModified()
+        private void VesselOnRescanned()
         {
             ExperimentModules = Vessel.ScienceExperimentModules
                 .Where(_moduleMatchesExperiment)

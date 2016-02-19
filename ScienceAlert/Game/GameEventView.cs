@@ -8,9 +8,9 @@ namespace ScienceAlert.Game
 // ReSharper disable once ClassNeverInstantiated.Global
     public class GameEventView : View
     {
-        internal readonly Signal<Vessel> VesselModified = new Signal<Vessel>();
-        internal readonly Signal<Vessel> VesselChanged = new Signal<Vessel>();
-        internal readonly Signal<Vessel> VesselDestroyed = new Signal<Vessel>();
+        internal readonly Signal ActiveVesselModified = new Signal();
+        internal readonly Signal ActiveVesselChanged = new Signal();
+        internal readonly Signal ActiveVesselDestroyed = new Signal();
         internal readonly Signal<GameEvents.FromToAction<Part, Part>> CrewOnEva = new Signal<GameEvents.FromToAction<Part, Part>>();
         internal readonly Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>> CrewTransferred = new Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>>();
         internal readonly Signal<GameScenes> GameSceneLoadRequested = new Signal<GameScenes>();
@@ -45,32 +45,43 @@ namespace ScienceAlert.Game
         }
 
 
-        private void OnVesselChange(Vessel data)
+        private static bool IsActiveVessel(Vessel v)
         {
-            VesselChanged.Dispatch(data);
+            return ReferenceEquals(FlightGlobals.ActiveVessel, v);
+        }
+
+
+        private void OnVesselChange(Vessel data)
+        {    
+            ActiveVesselChanged.Dispatch();
         }
 
 
         private void OnVesselDestroy(Vessel data)
         {
-            VesselDestroyed.Dispatch(data);
+            if (IsActiveVessel(data))
+                ActiveVesselDestroyed.Dispatch();
         }
 
 
         private void OnVesselModified(Vessel data)
         {
-            VesselModified.Dispatch(data);
+            if (IsActiveVessel(data))
+                ActiveVesselModified.Dispatch();
         }
 
 
         private void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, Part> data)
         {
-            throw new NotImplementedException();
+            Log.TraceMessage();
+            Log.Error("This method not implemented");
         }
+
 
         private void OnCrewOnEva(GameEvents.FromToAction<Part, Part> data)
         {
-            throw new NotImplementedException();
+            Log.TraceMessage();
+            Log.Error("This method not implemented");
         }
 
 

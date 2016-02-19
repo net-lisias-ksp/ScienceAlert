@@ -12,14 +12,14 @@ namespace ScienceAlert.Game
         [Inject] public GameEventView View { get; set; }
         [Inject] public IGameFactory GameFactory { get; set; }
 
-        [Inject] public SignalVesselChanged VesselChangedSignal { get; set; }
-        [Inject] public SignalVesselModified VesselModifiedSignal { get; set; }
+        [Inject] public SignalActiveVesselChanged VesselChangedSignal { get; set; }
         [Inject] public SignalActiveVesselModified ActiveVesselModifiedSignal { get; set; }
+        [Inject] public SignalActiveVesselDestroyed ActiveVesselDestroyedSignal { get; set; }
+
         [Inject] public SignalCrewOnEva CrewOnEvaSignal { get; set; }
         [Inject] public SignalCrewTransferred CrewTransferredSignal { get; set; }
 
-        [Inject] public SignalVesselDestroyed VesselDestroyedSignal { get; set; }
-        [Inject] public SignalActiveVesselDestroyed ActiveVesselDestroyedSignal { get; set; }
+ 
         [Inject] public SignalGameSceneLoadRequested GameSceneLoadRequestedSignal { get; set; }
         [Inject] public SignalScienceReceived ScienceReceivedSignal { get; set; }
 
@@ -29,9 +29,9 @@ namespace ScienceAlert.Game
         public override void OnRegister()
         {
             base.OnRegister();
-            View.VesselChanged.AddListener(OnVesselChanged);
-            View.VesselModified.AddListener(OnVesselModified);
-            View.VesselDestroyed.AddListener(OnVesselDestroyed);
+            View.ActiveVesselChanged.AddListener(OnActiveVesselChanged);
+            View.ActiveVesselModified.AddListener(OnActiveVesselModified);
+            View.ActiveVesselDestroyed.AddListener(OnActiveVesselDestroyed);
             View.GameSceneLoadRequested.AddListener(OnGameSceneLoadRequested);
             View.ScienceReceived.AddListener(OnScienceReceived);
             View.CrewOnEva.AddListener(OnCrewOnEva);
@@ -44,9 +44,9 @@ namespace ScienceAlert.Game
 
         public override void OnRemove()
         {
-            View.VesselChanged.RemoveListener(OnVesselChanged);
-            View.VesselModified.RemoveListener(OnVesselModified);
-            View.VesselDestroyed.RemoveListener(OnVesselDestroyed);
+            View.ActiveVesselChanged.RemoveListener(OnActiveVesselChanged);
+            View.ActiveVesselModified.RemoveListener(OnActiveVesselModified);
+            View.ActiveVesselDestroyed.RemoveListener(OnActiveVesselDestroyed);
             View.GameSceneLoadRequested.RemoveListener(OnGameSceneLoadRequested);
             View.ScienceReceived.RemoveListener(OnScienceReceived);
             View.CrewOnEva.RemoveListener(OnCrewOnEva);
@@ -77,40 +77,26 @@ namespace ScienceAlert.Game
         }
 
 
-        private void OnVesselChanged(Vessel data)
+        private void OnActiveVesselChanged()
         {
-            Log.Debug("GameEventMediator.OnVesselChanged");
+            Log.Debug("GameEventMediator.OnActiveVesselChanged");
 
-            TryAction(() => VesselChangedSignal.Dispatch(GameFactory.Create(data)));
+            TryAction(() => VesselChangedSignal.Dispatch());
         }
 
 
 
-        private void OnVesselModified(Vessel data)
+        private void OnActiveVesselModified()
         {
-            Log.Debug("GameEventMediator.OnVesselModified");
-
-            TryAction(() => VesselModifiedSignal.Dispatch(GameFactory.Create(data)));
-
-            if (IsActiveVessel(data))
-            {
-                Log.Debug("GameEventMediator.OnVesselModified - dispatching active vessel modified signal");
-                TryAction(() => ActiveVesselModifiedSignal.Dispatch());
-            }
+            Log.Debug("GameEventMediator.OnActiveVesselModified - dispatching active vessel modified signal");
+            TryAction(() => ActiveVesselModifiedSignal.Dispatch());
         }
 
 
-        private void OnVesselDestroyed(Vessel data)
+        private void OnActiveVesselDestroyed()
         {
-            Log.Debug("GameEventMediator.OnVesselDestroyed");
-
-            TryAction(() => VesselDestroyedSignal.Dispatch(GameFactory.Create(data)));
-
-            if (IsActiveVessel(data))
-            {
-                Log.Debug("GameEventMediator.OnVesselDestroyed - dispatching active vessel destroyed signal");
-                TryAction(() => ActiveVesselDestroyedSignal.Dispatch());
-            }
+            Log.Debug("GameEventMediator.OnActiveVesselDestroyed - dispatching active vessel destroyed signal");
+            TryAction(() => ActiveVesselDestroyedSignal.Dispatch());
         }
 
 
@@ -162,12 +148,6 @@ namespace ScienceAlert.Game
         private void OnGameUpdateTick()
         {
             GameTickSignal.Dispatch(); // wrapper not necessary because this isn't a GameEvent supplied by the game
-        }
-
-
-        private static bool IsActiveVessel(Vessel data)
-        {
-            return ReferenceEquals(data, FlightGlobals.ActiveVessel);
         }
     }
 }

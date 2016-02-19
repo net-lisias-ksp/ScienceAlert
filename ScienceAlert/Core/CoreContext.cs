@@ -38,22 +38,24 @@ namespace ScienceAlert.Core
         {
             base.mapBindings();
 
-            injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
-            injectionBinder.Bind<SignalVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselChanged>().ToSingleton();
+
             injectionBinder.Bind<SignalCrewOnEva>().ToSingleton();
             injectionBinder.Bind<SignalCrewTransferred>().ToSingleton();
-            injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
-            injectionBinder.Bind<SignalVesselDestroyed>().ToSingleton();
-            injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
+
             injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
             injectionBinder.Bind<SignalScienceReceived>().ToSingleton();
 
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
-            injectionBinder.Bind<ITemporaryBindingInstanceFactory>().To<TemporaryBindingInstanceFactory>().ToSingleton();
+            injectionBinder.Bind<ITemporaryBindingFactory>().To<TemporaryBindingFactory>().ToSingleton();
+
 
             injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton();
+
             injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
 
             MapCrossContextBindings();
@@ -170,11 +172,11 @@ namespace ScienceAlert.Core
                 .To<CommandCriticalShutdown>();
 
 
-            commandBinder.Bind<SignalVesselDestroyed>()
+            commandBinder.Bind<SignalActiveVesselDestroyed>()
                 .To<CommandDestroyActiveVesselContext>();
 
 
-            commandBinder.Bind<SignalVesselChanged>()
+            commandBinder.Bind<SignalActiveVesselChanged>()
                 .InSequence()
                 .To<CommandDestroyActiveVesselContext>()
                 .To<CommandCreateActiveVesselContextBootstrapper>();
@@ -401,7 +403,7 @@ namespace ScienceAlert.Core
         }
 
 
-        private IConfigNodeObjectGraphBuilder<IRuleFactory> CreateRuleFactoryBuilder(ITemporaryBindingInstanceFactory temporaryBinder)
+        private IConfigNodeObjectGraphBuilder<IRuleFactory> CreateRuleFactoryBuilder(ITemporaryBindingFactory temporaryBinder)
         {
             // Get all Types that implement IExperimentRule and create builders which will construct factories to produce them 
             // I know that sounds insane but this way we can do all the processing of ConfigNodes up front and use those
@@ -438,14 +440,26 @@ namespace ScienceAlert.Core
 
             var builder = new CompositeConfigNodeObjectGraphBuilder<IRuleFactory>(
                 // we'll prefer explicit builders first
-                explicitFactoryBuilders.Select(explicitFactoryType => (IConfigNodeObjectGraphBuilder<IRuleFactory>)temporaryBinder.Create(explicitFactoryType))
+                explicitFactoryBuilders.Select(explicitFactoryType =>
+                {
+                    using (var binding = temporaryBinder.Create(explicitFactoryType))
+                    {
+                        return (IConfigNodeObjectGraphBuilder<IRuleFactory>) binding.GetInstance();
+                    }
+                })
 
                 // then we'll use our generic rule factory builder to handle any unprocessed requests after that
                 .Union(
                     experimentRuleTypes
                         .Select(concreteRuleType => typeof(RuleFactoryBuilder<>).MakeGenericType(concreteRuleType))
                         .Select(
-                            builderType => (IConfigNodeObjectGraphBuilder<IRuleFactory>)temporaryBinder.Create(builderType)))
+                            builderType =>
+                            {
+                                using (var binding = temporaryBinder.Create(builderType))
+                                {
+                                    return (IConfigNodeObjectGraphBuilder<IRuleFactory>)binding.GetInstance();
+                                }
+                            }))
 
                 // add ability to AND rules together
                 .Union(new [] { (IConfigNodeObjectGraphBuilder<IRuleFactory>)(new CompositeAndRule.CompositeAndRuleFactoryBuilder()) }));
@@ -458,7 +472,7 @@ namespace ScienceAlert.Core
         private void ConfigureSensorDefinitionFactory()
         {
             var experiments = injectionBinder.GetInstance<IEnumerable<ScienceExperiment>>();
-            var ruleFactoryBuilder = CreateRuleFactoryBuilder(injectionBinder.GetInstance<ITemporaryBindingInstanceFactory>());
+            var ruleFactoryBuilder = CreateRuleFactoryBuilder(injectionBinder.GetInstance<ITemporaryBindingFactory>());
             var gameDatabase = injectionBinder.GetInstance<IGameDatabase>();
 
             var sensorDefinitionFactory = SensorDefinitionFactory.Factory.Create(experiments, ruleFactoryBuilder, gameDatabase);

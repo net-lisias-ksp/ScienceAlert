@@ -6,7 +6,7 @@ namespace ScienceAlert.Game
 {
     public class KspVessel :  IVessel
     {
-        public event Callback Modified = delegate { };
+        public event Callback Rescanned = delegate { };
 
         private readonly IGameFactory _factory;
         private readonly Vessel _vessel;
@@ -33,46 +33,24 @@ namespace ScienceAlert.Game
 
             _factory = factory;
             _vessel = vessel;
+
+            Log.Warning("KspVessel created");
+        }
+
+        ~KspVessel()
+        {
+            Log.Warning("KspVessel finalized");
         }
 
 
-        public override int GetHashCode()
+        public void OnVesselModified()
         {
-            return _vessel.GetHashCode();
-        }
-
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is KspVessel)) return false;
-
-            var other = obj as KspVessel;
-
-            return ReferenceEquals(_vessel, other._vessel);
-        }
-
-
-        public void OnVesselModified(IVessel data)
-        {
-            if (!data.Equals(this))
-            {
-                Log.Debug("Modified vessel " + data.VesselName + " does not match ours of " + VesselName);
-                return;
-            }
-            Log.Debug("Updating KspVessel due to matching modified event");
-
             Rescan();
         }
 
 
         public void OnCrewOnEva(GameEvents.FromToAction<IPart, IPart> data)
         {
-            if (!data.from.Vessel.Equals(this) && !data.to.Vessel.Equals(this))
-            {
-                Log.Debug("Crew change not related to our vessel of " + VesselName);
-                return;
-            }
-
             Log.Debug("Updating KspVessel crew due to matching OnCrewOnEva event");
             Rescan();
         }
@@ -80,12 +58,6 @@ namespace ScienceAlert.Game
 
         public void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, IPart> data)
         {
-            if (!data.from.Vessel.Equals(this) && !data.to.Vessel.Equals(this))
-            {
-                Log.Debug("Crew transfer not related to our vessel of " + VesselName);
-                return;
-            }
-
             Log.Debug("Updating KspVessel crew due to matching OnCrewTransferred event");
             Rescan();
         }
@@ -101,7 +73,7 @@ namespace ScienceAlert.Game
             ScanForScienceTransmitters();
             ScanForScienceLabs();
 
-            Modified();
+            Rescanned();
         }
 
 

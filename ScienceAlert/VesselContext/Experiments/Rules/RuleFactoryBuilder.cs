@@ -6,15 +6,15 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     public class RuleFactoryBuilder<TRuleType> : IConfigNodeObjectGraphBuilder<IRuleFactory>
     {
-        private readonly ITemporaryBindingInstanceFactory _temporaryBinder;
+        private readonly ITemporaryBindingFactory _temporaryBinder;
 
         class RuleFactory : IRuleFactory
         {
             private readonly Type _ruleType;
             private readonly ConfigNode _data;
-            private readonly ITemporaryBindingInstanceFactory _temporaryBinder;
+            private readonly ITemporaryBindingFactory _temporaryBinder;
 
-            public RuleFactory(Type ruleType, ConfigNode data, ITemporaryBindingInstanceFactory temporaryBinder)
+            public RuleFactory(Type ruleType, ConfigNode data, ITemporaryBindingFactory temporaryBinder)
             {
                 if (ruleType == null) throw new ArgumentNullException("ruleType");
                 if (data == null) throw new ArgumentNullException("data");
@@ -33,16 +33,20 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
                 if (context == null) throw new ArgumentNullException("context");
                 if (serializer == null) throw new ArgumentNullException("serializer");
 
-                var instance = (IExperimentRule) _temporaryBinder.Create(context, _ruleType);
+             
+                using (var binding = _temporaryBinder.Create(context, _ruleType))
+                {
+                    var instance = (IExperimentRule)binding.GetInstance();
 
-                serializer.LoadObjectFromConfigNode(ref instance, _data);
+                    serializer.LoadObjectFromConfigNode(ref instance, _data);
 
-                return instance;
+                    return instance;
+                }
             }
         }
 
 
-        public RuleFactoryBuilder(ITemporaryBindingInstanceFactory temporaryBinder)
+        public RuleFactoryBuilder(ITemporaryBindingFactory temporaryBinder)
         {
             if (temporaryBinder == null) throw new ArgumentNullException("temporaryBinder");
             _temporaryBinder = temporaryBinder;

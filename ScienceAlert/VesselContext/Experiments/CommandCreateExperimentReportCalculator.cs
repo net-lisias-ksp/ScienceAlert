@@ -25,7 +25,7 @@ namespace ScienceAlert.VesselContext.Experiments
                 .To<ExperimentReportValueCalculator>()
                 .ToSingleton()
                 .With(binding => injectionBinder.GetInstance<ExperimentReportValueCalculator>())
-                .Do(calc => _activeVessel.Modified += calc.OnActiveVesselModified)
+                .Do(calc => _activeVessel.Rescanned += calc.OnActiveVesselModified)
                 .Do(calc => calc.OnActiveVesselModified());
 
             Log.Verbose("Created " + typeof (ExperimentReportValueCalculator).Name);

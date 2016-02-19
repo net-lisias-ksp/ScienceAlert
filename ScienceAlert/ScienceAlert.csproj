@@ -51,9 +51,11 @@
     <Compile Include="Game\IUrlConfig.cs" />
     <Compile Include="Game\KspGameDatabase.cs" />
     <Compile Include="Game\KspUrlConfig.cs" />
-    <Compile Include="ITemporaryBindingInstanceFactory.cs" />
-    <Compile Include="TemporaryBindingInstanceFactory.cs" />
+    <Compile Include="ITemporaryBindingFactory.cs" />
+    <Compile Include="TemporaryBinding.cs" />
+    <Compile Include="TemporaryBindingFactory.cs" />
     <Compile Include="VesselContext\CommandBindExperimentRuleTypes.cs" />
+    <Compile Include="VesselContext\CommandCreateVesselBindings.cs" />
     <Compile Include="VesselContext\CommandDispatchContextCompleteSignal.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CommandCreateSensorDefinitions.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeConfigNodeObjectGraphBuilder.cs" />

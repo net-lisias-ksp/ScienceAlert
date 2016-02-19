@@ -28,6 +28,8 @@ namespace ScienceAlert.Core
 
         public override void Execute()
         {
+            Log.Verbose("Destroying active vessel context");
+
             _coreContext.GetComponentInChildren<BootstrapActiveVesselContext>()
                 .With(bvc => bvc.context as ActiveVesselContext)
                 .If(vc => vc.injectionBinder.GetInstance<IVessel>().Equals(_destroyedVessel))

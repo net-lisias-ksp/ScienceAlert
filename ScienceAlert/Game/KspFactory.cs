@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ScienceAlert.Game
 {
@@ -7,38 +8,60 @@ namespace ScienceAlert.Game
 // ReSharper disable once ClassNeverInstantiated.Global
     public class KspFactory : IGameFactory
     {
-        private readonly SignalVesselModified _modifiedSignal;
-        private readonly SignalCrewOnEva _evaSignal;
-        private readonly SignalCrewTransferred _transferredSignal;
+        //private readonly SignalCrewOnEva _evaSignal;
+        //private readonly SignalCrewTransferred _transferredSignal;
 
-        public KspFactory(
-            SignalVesselModified modifiedSignal,
-            SignalCrewOnEva evaSignal,
-            SignalCrewTransferred transferredSignal)
-        {
-            if (modifiedSignal == null) throw new ArgumentNullException("modifiedSignal");
-            if (evaSignal == null) throw new ArgumentNullException("evaSignal");
-            if (transferredSignal == null) throw new ArgumentNullException("transferredSignal");
-            _modifiedSignal = modifiedSignal;
-            _evaSignal = evaSignal;
-            _transferredSignal = transferredSignal;
-        }
+        //private readonly Dictionary<Vessel, KspVessel> _vesselDictionary = new Dictionary<Vessel, KspVessel>();
+ 
+        //public KspFactory(
+        //    SignalCrewOnEva evaSignal,
+        //    SignalCrewTransferred transferredSignal)
+        //{
+        //    if (evaSignal == null) throw new ArgumentNullException("evaSignal");
+        //    if (transferredSignal == null) throw new ArgumentNullException("transferredSignal");
+
+        //    _evaSignal = evaSignal;
+        //    _transferredSignal = transferredSignal;
+        //}
 
 
-        public IVessel Create(Vessel vessel)
-        {
-            if (vessel == null) throw new ArgumentNullException("vessel");
+        //public void OnVesselDestroyed(IVessel vessel)
+        //{
+        //    KspVessel kspVessel;
 
-            var v = new KspVessel(this, vessel);
+        //    if (!_vesselDictionary.TryGetValue(vessel, out kspVessel))
+        //        return;
 
-            _modifiedSignal.AddListener(v.OnVesselModified);
-            _evaSignal.AddListener(v.OnCrewOnEva);
-            _transferredSignal.AddListener(v.OnCrewTransferred);
+        //    _vesselDictionary.Remove(vessel);
 
-            v.Rescan();
+        //    _evaSignal.RemoveListener(kspVessel.OnCrewOnEva);
+        //    _transferredSignal.RemoveListener(kspVessel.OnCrewTransferred);
+        //}
 
-            return v;
-        }
+
+        //private IVessel GetOrCreateVessel(Vessel v)
+        //{
+        //    KspVessel vessel;
+
+        //    if (_vesselDictionary.TryGetValue(v, out vessel)) return vessel;
+
+        //    vessel = new KspVessel(this, v);
+        //    _vesselDictionary.Add(v, vessel);
+
+        //    _modifiedSignal.AddListener(vessel.OnVesselModified);
+        //    _evaSignal.AddListener(vessel.OnCrewOnEva);
+        //    _transferredSignal.AddListener(vessel.OnCrewTransferred);
+
+        //    vessel.Rescan();
+
+        //    return vessel;
+        //}
+
+
+        //public IVessel Create(Vessel vessel)
+        //{
+        //    return GetOrCreateVessel(vessel);
+        //}
 
 
         public IModuleScienceExperiment Create(ModuleScienceExperiment mse)
@@ -53,7 +76,7 @@ namespace ScienceAlert.Game
         {
             if (part == null) throw new ArgumentNullException("Part");
 
-            return new KspPart(part, Create(part.vessel));
+            return new KspPart(part);
         }
 
 

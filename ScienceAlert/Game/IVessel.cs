@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
+
 namespace ScienceAlert.Game
 {
     public interface IVessel : IScienceContainerCollectionProvider,
@@ -10,9 +11,7 @@ namespace ScienceAlert.Game
                                 IScienceExperimentModuleCollectionProvider,
                                 IScienceLabCollectionProvider
     {
-        event Callback Modified;
-
-        void Rescan();
+        event Callback Rescanned;
 
         ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew { get; }
 
@@ -22,6 +21,7 @@ namespace ScienceAlert.Game
 
         double Latitude { get; }
         double Longitude { get; }
+
         bool Landed { get; }
         bool SplashedDown { get; }
     }
