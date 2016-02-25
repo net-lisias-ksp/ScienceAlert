@@ -13,8 +13,7 @@ namespace ScienceAlert.VesselContext
     }
 
 
-    //public class SignalContextComplete : Signal
-    //{
-        
-    //}
+    public class SignalDeployExperiment : Signal<ScienceExperiment>
+    {
+    }
 }

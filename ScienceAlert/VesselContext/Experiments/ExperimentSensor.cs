@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Linq;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments.Rules;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
-    public class ExperimentSensor
+    public class ExperimentSensor : IExperimentSensor
     {
-        public readonly ScienceExperiment Experiment;
         private readonly IScienceSubjectProvider _scienceSubjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
         private readonly IExperimentRule _onboardRule;
@@ -50,6 +48,7 @@ namespace ScienceAlert.VesselContext.Experiments
         public bool Available { get; private set; }             // is at least one module available for deployment? (availability rule check)
         public bool ConditionsMet { get; private set; }              // Can the related experiment actually be run (runnable rule check)
 
+        public ScienceExperiment Experiment { get; private set; }
 
         public void ClearChangedFlag()
         {

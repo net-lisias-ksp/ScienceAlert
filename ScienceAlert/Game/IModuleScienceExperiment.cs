@@ -1,4 +1,7 @@
-﻿namespace ScienceAlert.Game
+﻿using System.Collections.Generic;
+using ReeperCommon.Containers;
+
+namespace ScienceAlert.Game
 {
     public interface IModuleScienceExperiment
     {
@@ -11,5 +14,10 @@
 
         bool CanBeDeployed { get; }
         float TransmissionMultiplier { get; }
+
+        Maybe<int[]> FxIndices { get; }
+
+
+        void Deploy();
     }
 }

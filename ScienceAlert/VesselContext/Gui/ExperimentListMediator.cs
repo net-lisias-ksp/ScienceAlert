@@ -2,6 +2,7 @@
 using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
+using ReeperCommon.Logging;
 using ReeperCommon.Serialization;
 using strange.extensions.mediation.impl;
 
@@ -26,6 +27,7 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalSaveGuiSettings SaveSignal { get; set; }
 
         [Inject] public SignalExperimentSensorStatusChanged SensorChangedSignal { get; set; }
+        [Inject] public SignalDeployExperiment DeployExperimentSignal { get; set; }
 
         private ExperimentListView _view;
 
@@ -38,6 +40,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             View.LockToggle.AddListener(OnLockToggle);
             View.Close.AddListener(OnClose);
+            View.DeployExperiment.AddListener(OnDeployExperiment);
 
             LoadSignal.AddListener(OnLoad);
             SaveSignal.AddListener(OnSave);
@@ -55,6 +58,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             View.LockToggle.RemoveListener(OnLockToggle);
             View.Close.RemoveListener(OnClose);
+            View.DeployExperiment.RemoveListener(OnDeployExperiment);
 
             SensorChangedSignal.RemoveListener(OnSensorStateChanged);
         }
@@ -130,6 +134,11 @@ namespace ScienceAlert.VesselContext.Gui
             View.Visible = tf;
         }
 
+
+        private void OnDeployExperiment(ScienceExperiment experiment)
+        {
+            DeployExperimentSignal.Dispatch(experiment);
+        }
 
         private void OnSensorStateChanged(ExperimentSensorState experimentSensorState)
         {

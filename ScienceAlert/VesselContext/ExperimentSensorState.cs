@@ -87,7 +87,7 @@ namespace ScienceAlert.VesselContext
             sb.Append(typeof (ExperimentSensorState).Name);
             sb.Append("[");
             sb.Append(Experiment.id);
-            sb.Append("]");
+            sb.Append("] ");
             sb.AppendFormat("Onboard: {0}, Available: {1}, ConditionsMet: {2}, Collection: {3}, Transmission: {4}, Lab: {5}", Onboard,
                 Available, ConditionsMet, CollectionValue, TransmissionValue, LabValue);
 

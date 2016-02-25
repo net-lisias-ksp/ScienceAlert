@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ReeperCommon.Containers;
+using ReeperCommon.Logging;
 using ReeperCommon.Serialization;
 using strange.extensions.injector;
 using strange.extensions.mediation.impl;

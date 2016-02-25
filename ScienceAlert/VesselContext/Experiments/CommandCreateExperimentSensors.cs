@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ReeperCommon.Logging;
 using ReeperCommon.Serialization;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
@@ -50,7 +51,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public override void Execute()
         {
-            var sensors = CreateSensors();
+            var sensors = CreateSensors().ToList();
 
             if (!sensors.Any())
             {
@@ -69,6 +70,7 @@ namespace ScienceAlert.VesselContext.Experiments
             finally
             {
                 injectionBinder.Unbind<List<ExperimentSensor>>();
+                injectionBinder.Bind<IEnumerable<IExperimentSensor>>().To(sensors.Cast<IExperimentSensor>().ToList());
             }
             
             Log.Verbose("Created experiment sensors");

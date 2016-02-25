@@ -4,6 +4,7 @@ using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.FileSystem;
+using ReeperCommon.Logging;
 using ReeperCommon.Serialization;
 
 namespace ScienceAlert.Core

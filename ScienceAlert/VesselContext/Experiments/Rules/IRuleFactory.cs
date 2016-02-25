@@ -1,10 +1,8 @@
-﻿using ReeperCommon.Serialization;
-using strange.extensions.injector.api;
+﻿using ReeperCommon.ObjectGraph;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    public interface IRuleFactory
+    public interface IRuleFactory : IConfigNodeObjectFactory<IExperimentRule>
     {
-        IExperimentRule Create(IInjectionBinder context, IConfigNodeSerializer serializer);
     }
 }

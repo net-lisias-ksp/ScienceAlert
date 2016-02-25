@@ -1,4 +1,5 @@
 ﻿using System;
+using ReeperCommon.ObjectGraph;
 using ReeperCommon.Serialization;
 using strange.extensions.injector.api;
 

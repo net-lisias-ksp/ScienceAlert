@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ScienceAlert.Game
 {
@@ -17,6 +18,12 @@ namespace ScienceAlert.Game
         public List<ProtoCrewMember> EvaCapableCrew
         {
             get { return _part.protoModuleCrew; }
+        }
+
+
+        public List<PartModule> Modules
+        {
+            get { return new List<PartModule>(_part.Modules.Cast<PartModule>()); }
         }
 
     }

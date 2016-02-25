@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using ReeperCommon.Logging;
 using UnityEngine;
 
 namespace ScienceAlert.Game

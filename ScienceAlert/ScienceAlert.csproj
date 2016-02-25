@@ -57,9 +57,13 @@
     <Compile Include="VesselContext\CommandBindExperimentRuleTypes.cs" />
     <Compile Include="VesselContext\CommandCreateVesselBindings.cs" />
     <Compile Include="VesselContext\CommandDispatchContextCompleteSignal.cs" />
+    <Compile Include="VesselContext\Experiments\CommandDeployExperiment.cs" />
+    <Compile Include="VesselContext\Experiments\Deployment\DeploymentTriggerFactory.cs" />
+    <Compile Include="VesselContext\Experiments\Deployment\IDeploymentTrigger.cs" />
+    <Compile Include="VesselContext\Experiments\Deployment\DefaultDeploymentTrigger.cs" />
+    <Compile Include="VesselContext\Experiments\IExperimentSensor.cs" />
+    <Compile Include="VesselContext\Experiments\LowestTransmissionMultiplierDeploymentStrategy.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CommandCreateSensorDefinitions.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\CompositeConfigNodeObjectGraphBuilder.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\IConfigNodeObjectGraphBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Rules\ISensorDefinitionFactory.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleExperimentIsAvailableWhileVesselSituation.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleExperimentUsageRequirementCheck.cs" />
@@ -95,7 +99,6 @@
     <Compile Include="Game\KspScienceLabModule.cs" />
     <Compile Include="Game\KspScienceSubject.cs" />
     <Compile Include="Game\KspScienceUtil.cs" />
-    <Compile Include="Log.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateExperimentReportCalculator.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateExperimentSensors.cs" />
     <Compile Include="VesselContext\CommandLogSensorStatusUpdate.cs" />

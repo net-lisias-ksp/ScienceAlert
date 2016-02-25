@@ -5,6 +5,7 @@ namespace ScienceAlert.VesselContext.Gui
 {
     public struct ExperimentListEntry
     {
+        public ScienceExperiment Experiment { get; set; }
         public string ExperimentTitle { get; private set; }
         public bool DeployButtonEnabled { get; private set; }
         public bool DisplayInExperimentList { get; private set; }
@@ -16,6 +17,7 @@ namespace ScienceAlert.VesselContext.Gui
         public bool LabAlert { get; private set; }
 
         public ExperimentListEntry(
+            ScienceExperiment experiment,
             string experimentTitle,
             bool deployButtonEnabled,
             bool displayInExperimentList,
@@ -26,6 +28,9 @@ namespace ScienceAlert.VesselContext.Gui
             float labValue,
             bool labAlert) : this()
         {
+            if (experiment == null) throw new ArgumentNullException("experiment");
+
+            Experiment = experiment;
             ExperimentTitle = experimentTitle;
             DeployButtonEnabled = deployButtonEnabled;
             DisplayInExperimentList = displayInExperimentList;

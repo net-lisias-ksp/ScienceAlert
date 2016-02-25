@@ -1,4 +1,5 @@
-﻿using strange.extensions.command.impl;
+﻿using ReeperCommon.Logging;
+using strange.extensions.command.impl;
 
 namespace ScienceAlert.VesselContext
 {

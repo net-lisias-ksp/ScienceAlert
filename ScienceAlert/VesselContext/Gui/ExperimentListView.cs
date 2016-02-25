@@ -11,8 +11,8 @@ namespace ScienceAlert.VesselContext.Gui
 // ReSharper disable once ClassNeverInstantiated.Global
     public class ExperimentListView : StrangeView
     {
-        private static readonly GUILayoutOption[] DefaultLayoutOptions = new GUILayoutOption[0]; // Used to avoid allocation of empty GUILayoutOption arrays in GUILayout calls
-        private static readonly GUILayoutOption[] ExperimentButtonOptions = {GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false)};
+        private readonly GUILayoutOption[] _defaultLayoutOptions = new GUILayoutOption[0]; // Used to avoid allocation of empty GUILayoutOption arrays in GUILayout calls
+        private readonly GUILayoutOption[] _experimentButtonOptions = {GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false)};
         
         
 
@@ -34,6 +34,7 @@ namespace ScienceAlert.VesselContext.Gui
         internal readonly Signal LockToggle = new Signal();
         internal readonly Signal<ExperimentListEntry, ExperimentPopupType, Vector2> ExperimentPopup = new Signal<ExperimentListEntry, ExperimentPopupType, Vector2>();
         internal readonly Signal CloseExperimentPopup = new Signal();
+        internal readonly Signal<ScienceExperiment> DeployExperiment = new Signal<ScienceExperiment>();
 
         private BasicTitleBarButton _lockButton;
         private bool _popupOpenFlag = false;
@@ -101,13 +102,13 @@ namespace ScienceAlert.VesselContext.Gui
 
         protected override void DrawWindow()
         {
-            GUILayout.BeginHorizontal(DefaultLayoutOptions);
+            GUILayout.BeginHorizontal(_defaultLayoutOptions);
             GUILayout.FlexibleSpace();
-            GUILayout.Label("Experiments", DefaultLayoutOptions);
+            GUILayout.Label("Experiments", _defaultLayoutOptions);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginScrollView(Vector2.zero, false, true, DefaultLayoutOptions);
+            GUILayout.BeginScrollView(Vector2.zero, false, true, _defaultLayoutOptions);
             {
                 DrawExperimentList();
             }
@@ -137,7 +138,7 @@ namespace ScienceAlert.VesselContext.Gui
             GUIStyle toggleStyle,
             ExperimentPopupType popupType)
         {
-            GUILayout.Toggle(value, content, toggleStyle, DefaultLayoutOptions);
+            GUILayout.Toggle(value, content, toggleStyle, _defaultLayoutOptions);
 
             if (Event.current.type != EventType.Repaint) return;
 
@@ -152,18 +153,20 @@ namespace ScienceAlert.VesselContext.Gui
             if (!display.DisplayInExperimentList) return;
 
             
-            GUILayout.BeginHorizontal(DefaultLayoutOptions);
+            GUILayout.BeginHorizontal(_defaultLayoutOptions);
             {
                 GUI.enabled = display.DeployButtonEnabled;
-                GUILayout.Button(display.ExperimentTitle, ExperimentButtonOptions);
+                if (GUILayout.Button(display.ExperimentTitle, _experimentButtonOptions))
+                    DeployExperiment.Dispatch(display.Experiment);
                 GUI.enabled = true;
 
-                GUILayout.Toggle(display.CollectionAlert, string.Empty, ExperimentAlertToggleStyle, DefaultLayoutOptions);
-                GUILayout.Toggle(display.TransmissionAlert, string.Empty, ExperimentAlertToggleStyle, DefaultLayoutOptions);
+                GUILayout.Toggle(display.CollectionAlert, string.Empty, ExperimentAlertToggleStyle, _defaultLayoutOptions);
+                GUILayout.Toggle(display.TransmissionAlert, string.Empty, ExperimentAlertToggleStyle, _defaultLayoutOptions);
                 DrawAlertToggle(display, display.LabAlert, string.Empty, ExperimentAlertToggleStyle, ExperimentPopupType.Lab);
             }
             GUILayout.EndHorizontal();
         }
+
 
 
         private void SpawnOrUpdatePopup(ExperimentListEntry entry, ExperimentPopupType popupType, Vector2 relativeMousePosition)

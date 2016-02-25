@@ -1,4 +1,5 @@
 ﻿using System;
+using ReeperCommon.Logging;
 using strange.extensions.command.impl;
 
 namespace ScienceAlert.VesselContext.Gui

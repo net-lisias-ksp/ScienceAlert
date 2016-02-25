@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
+using ReeperCommon.Logging;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments

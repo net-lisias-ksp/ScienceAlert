@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ReeperCommon.ObjectGraph;
 using ReeperCommon.Serialization;
 using strange.extensions.injector.api;
 

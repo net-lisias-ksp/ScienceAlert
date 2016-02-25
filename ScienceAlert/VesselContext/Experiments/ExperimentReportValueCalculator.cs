@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ReeperCommon.Logging;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
 using UnityEngine;
@@ -19,9 +20,6 @@ namespace ScienceAlert.VesselContext.Experiments
 
         private Dictionary<ScienceExperiment, ScienceModuleList> _experimentModules =
             new Dictionary<ScienceExperiment, ScienceModuleList>();
-
-        //[Inject]
-        //public IEnumerable<ScienceExperiment> Experiments { get; set; }
 
         public ExperimentReportValueCalculator(
             IEnumerable<ScienceExperiment> experiments,

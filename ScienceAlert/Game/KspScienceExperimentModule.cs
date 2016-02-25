@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ReeperCommon.Containers;
 
 namespace ScienceAlert.Game
@@ -48,6 +50,20 @@ namespace ScienceAlert.Game
         public float TransmissionMultiplier
         {
             get { return _mse.xmitDataScalar; }
+        }
+
+        public Maybe<int[]> FxIndices
+        {
+            get
+            {
+                return _mse.fxModuleIndices == null ? Maybe<int[]>.None : _mse.fxModuleIndices.ToMaybe();
+            }
+        }
+
+
+        public void Deploy()
+        {
+            _mse.DeployExperiment();
         }
     }
 }

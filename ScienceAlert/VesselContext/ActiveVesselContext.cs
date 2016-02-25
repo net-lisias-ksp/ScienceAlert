@@ -1,6 +1,7 @@
 ﻿using System;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
+using ReeperCommon.Logging;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
@@ -69,6 +70,7 @@ namespace ScienceAlert.VesselContext
 
             injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
             injectionBinder.Bind<SignalTriggerSensorStatusUpdate>().ToSingleton();
+            injectionBinder.Bind<SignalDeployExperiment>().ToSingleton();
 
             injectionBinder.Bind<ExperimentListEntryFactory>().ToSingleton();
 
@@ -109,7 +111,10 @@ namespace ScienceAlert.VesselContext
             commandBinder.Bind<SignalExperimentSensorStatusChanged>()
                 .To<CommandLogSensorStatusUpdate>();
             //    .Pooled();
- 
+
+            commandBinder.Bind<SignalDeployExperiment>()
+                .To<CommandDeployExperiment>();
+
             commandBinder.Bind<SignalContextDestruction>()
                 .To<CommandDispatchSaveGuiSettingsSignal>()
                 .Once();

@@ -8,6 +8,7 @@
             var canBeDeployed = sensorState.Onboard && sensorState.Available && sensorState.ConditionsMet;
 
             return new ExperimentListEntry(
+                sensorState.Experiment,
                 sensorState.Experiment.experimentTitle,
                 canBeDeployed,                              // deploy button enabled?
                 true,                                       // display in experiment list?

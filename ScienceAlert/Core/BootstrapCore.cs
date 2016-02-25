@@ -1,5 +1,6 @@
 ﻿using System;
 using ReeperCommon.Containers;
+using ReeperCommon.Logging;
 using strange.extensions.context.impl;
 
 namespace ScienceAlert.Core
