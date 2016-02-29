@@ -11,9 +11,9 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         protected readonly IVessel Vessel;
         protected List<IModuleScienceExperiment> ExperimentModules;
 
-        private Func<IModuleScienceExperiment, bool> _moduleMatchesExperiment;
- 
-        public ScienceExperimentModuleTracker(
+        private readonly Func<IModuleScienceExperiment, bool> _moduleMatchesExperiment;
+
+        protected ScienceExperimentModuleTracker(
             ScienceExperiment experiment,
             IVessel vessel)
         {

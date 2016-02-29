@@ -21,19 +21,19 @@ namespace ScienceAlert.VesselContext.Experiments
         [Inject] public SignalCriticalShutdown CriticalFail { get; set; }
 
 
-        public void OnStatusUpdateRequested(ScienceExperiment scienceExperiment)
-        {
-            if (scienceExperiment == null) throw new ArgumentNullException("scienceExperiment");
+        //public void OnStatusUpdateRequested(ScienceExperiment scienceExperiment)
+        //{
+        //    if (scienceExperiment == null) throw new ArgumentNullException("scienceExperiment");
 
-            Log.TraceMessage();
+        //    Log.TraceMessage();
 
-            var relatedSensor = Sensors.FirstOrDefault(s => s.Experiment.id == scienceExperiment.id).ToMaybe();
+        //    var relatedSensor = Sensors.FirstOrDefault(s => s.Experiment.id == scienceExperiment.id).ToMaybe();
 
-            if (!relatedSensor.Any())
-                throw new ArgumentException("No matching sensor for " + scienceExperiment.id, "scienceExperiment");
+        //    if (!relatedSensor.Any())
+        //        throw new ArgumentException("No matching sensor for " + scienceExperiment.id, "scienceExperiment");
 
-            DispatchChangedSignal(relatedSensor.Value);
-        }
+        //    DispatchChangedSignal(relatedSensor.Value);
+        //}
 
 
 // ReSharper disable once UnusedMember.Local
@@ -86,7 +86,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
             Log.Warning("Attempting to shut down ScienceAlert");
 
-            CriticalFail.Dispatch(); // relatively high chance of failure; if something is wrong with either context, another exception will be thrown but we're hosed already
+            CriticalFail.Do(s => s.Dispatch()); // relatively high chance of failure; if something is wrong with either context, another exception will be thrown but we're hosed already
         }
     }
 }

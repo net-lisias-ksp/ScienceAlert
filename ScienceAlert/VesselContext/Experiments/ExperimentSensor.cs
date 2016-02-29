@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
-    public class ExperimentSensor : IExperimentSensor
+    public class ExperimentSensor
     {
         private readonly IScienceSubjectProvider _scienceSubjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;

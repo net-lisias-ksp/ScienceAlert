@@ -1,79 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ReeperCommon.Containers;
+using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
 using ReeperCommon.Serialization;
-using ScienceAlert.Core;
 using ScienceAlert.Game;
+using ScienceAlert.SensorDefinitions;
+using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.command.impl;
-using strange.extensions.context.api;
-using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
 // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandCreateExperimentSensors : Command
     {
-        private readonly GameObject _vesselContextView;
+        private readonly IRuleBuilderProvider _ruleBuilderProvider;
         private readonly IConfigNodeSerializer _serializer;
         private readonly IEnumerable<SensorDefinition> _sensorDefinitions;
         private readonly IScienceSubjectProvider _subjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
-        private readonly SignalTriggerSensorStatusUpdate _triggerSignal;
-        private readonly SignalCriticalShutdown _seriousProblemSignal;
+        private readonly ITemporaryBindingFactory _temporaryBindingFactory;
+        private readonly SignalCriticalShutdown _failSignal;
 
         public CommandCreateExperimentSensors(
-            [Name(ContextKeys.CONTEXT_VIEW)] GameObject vesselContextView,
+            IRuleBuilderProvider ruleBuilderProvider,
             IConfigNodeSerializer serializer,
             IEnumerable<SensorDefinition> sensorDefinitions,
             IScienceSubjectProvider subjectProvider,
             IExperimentReportValueCalculator reportCalculator,
-            SignalTriggerSensorStatusUpdate triggerSignal,
-            SignalCriticalShutdown seriousProblemSignal)
+            ITemporaryBindingFactory temporaryBindingFactory,
+            SignalCriticalShutdown failSignal)
         {
-            if (vesselContextView == null) throw new ArgumentNullException("vesselContextView");
+            if (ruleBuilderProvider == null) throw new ArgumentNullException("ruleBuilderProvider");
             if (serializer == null) throw new ArgumentNullException("serializer");
             if (sensorDefinitions == null) throw new ArgumentNullException("sensorDefinitions");
             if (subjectProvider == null) throw new ArgumentNullException("subjectProvider");
             if (reportCalculator == null) throw new ArgumentNullException("reportCalculator");
-            if (triggerSignal == null) throw new ArgumentNullException("triggerSignal");
-            if (seriousProblemSignal == null) throw new ArgumentNullException("seriousProblemSignal");
+            if (temporaryBindingFactory == null) throw new ArgumentNullException("temporaryBindingFactory");
+            if (failSignal == null) throw new ArgumentNullException("failSignal");
 
-            _vesselContextView = vesselContextView;
+            _ruleBuilderProvider = ruleBuilderProvider;
             _serializer = serializer;
             _sensorDefinitions = sensorDefinitions;
             _subjectProvider = subjectProvider;
             _reportCalculator = reportCalculator;
-            _triggerSignal = triggerSignal;
-            _seriousProblemSignal = seriousProblemSignal;
+            _temporaryBindingFactory = temporaryBindingFactory;
+            _failSignal = failSignal;
         }
 
 
         public override void Execute()
         {
-            var sensors = CreateSensors().ToList();
+            Log.TraceMessage();
 
-            if (!sensors.Any())
-            {
-                Log.Error("Failed to create any experiment sensors -- something is wrong");
-                _seriousProblemSignal.Dispatch();
-                Fail();
-                return;
-            }
-
+            var sensors = new List<ExperimentSensor>();
 
             try
             {
-                injectionBinder.Bind<List<ExperimentSensor>>().To(sensors);
-                CreateExperimentSensorUpdater();
+                sensors = CreateSensors().ToList();
+
+                if (!sensors.Any())
+                {
+                    Log.Error(
+                        "Failed to create any experiment sensors -- something is wrong. ScienceAlert cannot work as expected");
+                    _failSignal.Dispatch();
+                    Fail();
+                    return;
+                }
             }
             finally
             {
-                injectionBinder.Unbind<List<ExperimentSensor>>();
-                injectionBinder.Bind<IEnumerable<IExperimentSensor>>().To(sensors.Cast<IExperimentSensor>().ToList());
-            }
-            
-            Log.Verbose("Created experiment sensors");
+                injectionBinder
+                    .Bind<IEnumerable<ExperimentSensor>>()
+                    .Bind<List<ExperimentSensor>>()
+                        .To(sensors.Cast<ExperimentSensor>().ToList());
+
+                Log.Verbose("Created " + sensors.Count + " experiment sensors");
+            }    
         }
 
 
@@ -81,22 +85,14 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             var sensors = new List<ExperimentSensor>();
 
-            
+
             foreach (var sensorDefinition in _sensorDefinitions)
             {
                 try
                 {
                     injectionBinder.Bind<ScienceExperiment>().To(sensorDefinition.Experiment);
 
-                    var sensor = new ExperimentSensor(
-                        sensorDefinition.Experiment,
-                        _subjectProvider,
-                        _reportCalculator,
-                        sensorDefinition.OnboardRuleFactory.Create(injectionBinder, _serializer),
-                        sensorDefinition.AvailabilityRuleFactory.Create(injectionBinder, _serializer),
-                        sensorDefinition.ConditionRuleFactory.Create(injectionBinder, _serializer));
-
-                    sensors.Add(sensor);
+                    sensors.Add(CreateSensor(sensorDefinition));
                 }
                 catch (Exception e)
                 {
@@ -113,13 +109,28 @@ namespace ScienceAlert.VesselContext.Experiments
             return sensors;
         }
 
-        private void CreateExperimentSensorUpdater()
+
+        private ExperimentSensor CreateSensor(SensorDefinition definition)
         {
-            var updater = _vesselContextView.AddComponent<ExperimentSensorUpdater>();
+            if (definition == null) throw new ArgumentNullException("definition");
 
-            injectionBinder.injector.Inject(updater, false);
+            return new ExperimentSensor(definition.Experiment,
+                _subjectProvider,
+                _reportCalculator,
+                CreateRule(definition.OnboardRuleDefinition),
+                CreateRule(definition.AvailabilityRuleDefinition),
+                CreateRule(definition.ConditionRuleDefinition));
+        }
 
-            _triggerSignal.AddListener(updater.OnStatusUpdateRequested);
+
+        private IExperimentRule CreateRule(ConfigNode ruleConfig)
+        {
+            var ruleBuilder = _ruleBuilderProvider.GetBuilder(ruleConfig);
+
+            if (!ruleBuilder.Any())
+                throw new ArgumentException("No builder for " + ruleConfig.ToSafeString() + " available");
+
+            return ruleBuilder.Value.With(b => b.Build(ruleConfig, _ruleBuilderProvider, _temporaryBindingFactory));
         }
     }
 }

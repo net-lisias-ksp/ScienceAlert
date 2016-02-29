@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
@@ -21,11 +22,15 @@ namespace ScienceAlert.Core
 
         public override void Execute()
         {
-            Log.Warning("ScienceAlert shutting down due to error.");
-            Log.Warning("context view: " + _coreContextView.name);
-            _coreContextView.PrintComponents(new DebugLog("ContextView components"));
+            Log.Warning("ScienceAlert shutting down due to unrecoverable error.");
+            PopupDialog.SpawnPopupDialog("ScienceAlert shutting down",
+                "Something has gone wrong! Check the log for details", "Ok",
+                true, HighLogic.Skin);
+
+            _coreContextView.transform.root.gameObject.PrintComponents(new DebugLog("ContextView components"));
 
             _coreContextView.Do(UnityEngine.Object.Destroy);
+            Assembly.GetExecutingAssembly().DisablePlugin();
         }
     }
 }

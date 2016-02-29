@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.FileSystem;
 using ReeperCommon.FileSystem.Providers;
 using ReeperCommon.Logging;
-using ReeperCommon.ObjectGraph;
 using ReeperCommon.Repositories;
 using ReeperCommon.Serialization;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Game;
 using ScienceAlert.Gui;
-using ScienceAlert.VesselContext.Experiments;
+using ScienceAlert.SensorDefinitions;
 using ScienceAlert.VesselContext.Experiments.Rules;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -133,7 +130,7 @@ namespace ScienceAlert.Core
             ConfigureResourceRepository();
             ConfigureSerializer();
             ConfigureExperiments();
-            ConfigureSensorDefinitionFactory();
+
 
             injectionBinder.Bind<SignalCriticalShutdown>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
@@ -144,6 +141,12 @@ namespace ScienceAlert.Core
         {
             commandBinder.Bind<SignalScenarioModuleLoad>()
                 .InSequence()
+                .To<CommandConfigureSensorDefinitionBuilder>()
+                .To<CommandCreateSensorDefinitions>()
+                .To<CommandCreateRuleBuilders>()
+                .To<CommandLoadSharedConfiguration>()
+                .To<CommandConfigureGuiSkinsAndTextures>()
+                .To<CommandConfigureGameEvents>()
                 .To<CommandCreateAppLauncherView>()
                 .To<CommandCreateActiveVesselContextBootstrapper>() // because we'll definitely have missed the initial OnVesselChanged by now
                 .Once();
@@ -155,11 +158,6 @@ namespace ScienceAlert.Core
 
             commandBinder.Bind<SignalStart>()
                 .InSequence()
-                .To<CommandStoreExperimentRuleTypes>()
-                .To<CommandCreateSensorDefinitions>()
-                .To<CommandLoadSharedConfiguration>()
-                .To<CommandConfigureGuiSkinsAndTextures>()
-                .To<CommandConfigureGameEvents>()
                 .Once();
 
 
@@ -404,87 +402,72 @@ namespace ScienceAlert.Core
         }
 
 
-        private IConfigNodeObjectGraphBuilder<IRuleFactory> CreateRuleFactoryBuilder(ITemporaryBindingFactory temporaryBinder)
-        {
-            // Get all Types that implement IExperimentRule and create builders which will construct factories to produce them 
-            // I know that sounds insane but this way we can do all the processing of ConfigNodes up front and use those
-            // factory types to bundle all the info necessary to actually create the rule in one place (data such as: ConfigNode
-            // to deserialize the concrete type that implements IExperimentRule)
-            //
-            // All of these rule factory builders can then be hidden behind this composite interface and it'll
-            // look like we have a magic IRuleFactory builder that can handle all kinds of nodes and types
 
-            var allTypes = AssemblyLoader.loadedAssemblies.SelectMany(la => la.assembly.GetTypes()).ToList();
+        //private IConfigNodeObjectBuilder<IRuleBuilder> CreateRuleFactoryBuilder(ITemporaryBindingFactory temporaryBinder)
+        //{
+        //    // Get all Types that implement IExperimentRule and create builders which will construct factories to produce them 
+        //    // I know that sounds insane but this way we can do all the processing of ConfigNodes up front and use those
+        //    // factory types to bundle all the info necessary to actually create the rule in one place (data such as: ConfigNode
+        //    // to deserialize the concrete type that implements IExperimentRule)
+        //    //
+        //    // All of these rule factory builders can then be hidden behind this composite interface and it'll
+        //    // look like we have a magic IRuleBuilder builder that can handle all kinds of nodes and types
 
-            // these types will be wrapped by RuleFactoryBuilders that will build a factory for the type
-            var experimentRuleTypes =
-                allTypes
-                    .Where(
-                        t =>
-                            !t.IsAbstract && !t.IsInterface &&
-                            t.GetInterfaces().Any(it => typeof(IExperimentRule) == it)).ToList();
+        //    var allTypes = AssemblyLoader.loadedAssemblies.SelectMany(la => la.assembly.GetTypes()).ToList();
 
-            
-
-            // these are concrete builder types for specific type(s). We'll try to handle factory construction requests
-            // through these first
-            var explicitFactoryBuilders =
-                allTypes.Where(
-                    t =>
-                        !t.IsAbstract &&
-                        t.GetInterfaces().Any(it => it == typeof(IConfigNodeObjectGraphBuilder<IRuleFactory>) && !it.IsGenericTypeDefinition && !it.IsAbstract))
-                        .Where(t => temporaryBinder.CanCreate(t))
-                        .ToList();
-
-            experimentRuleTypes.ForEach(t => Log.Debug("IExperimentRule type: " + t.FullName));
-            explicitFactoryBuilders.ForEach(bt => Log.Debug("IRuleFactory builder type: " + bt.FullName));
-
-            var builder = new CompositeConfigNodeObjectGraphBuilder<IRuleFactory>(
-                // we'll prefer explicit builders first
-                explicitFactoryBuilders.Select(explicitFactoryType =>
-                {
-                    using (var binding = temporaryBinder.Create(explicitFactoryType))
-                    {
-                        return (IConfigNodeObjectGraphBuilder<IRuleFactory>) binding.GetInstance();
-                    }
-                })
-
-                // then we'll use our generic rule factory builder to handle any unprocessed requests after that
-                .Union(
-                    experimentRuleTypes
-                        .Select(concreteRuleType => typeof(RuleFactoryBuilder<>).MakeGenericType(concreteRuleType))
-                        .Select(
-                            builderType =>
-                            {
-                                using (var binding = temporaryBinder.Create(builderType))
-                                {
-                                    return (IConfigNodeObjectGraphBuilder<IRuleFactory>)binding.GetInstance();
-                                }
-                            }))
-
-                // add ability to AND rules together
-                .Union(new [] { (IConfigNodeObjectGraphBuilder<IRuleFactory>)(new CompositeAndRule.CompositeAndRuleFactoryBuilder()) }));
+        //    // these types will be wrapped by RuleFactoryBuilders that will build a factory for the type
+        //    var experimentRuleTypes =
+        //        allTypes
+        //            .Where(
+        //                t =>
+        //                    !t.IsAbstract && !t.IsInterface &&
+        //                    t.GetInterfaces().Any(it => typeof(IExperimentRule) == it)).ToList();
 
             
-            return builder;
-        }
 
+        //    // these are concrete builder types for specific type(s). We'll try to handle factory construction requests
+        //    // through these first
+        //    var explicitFactoryBuilders =
+        //        allTypes.Where(
+        //            t =>
+        //                !t.IsAbstract &&
+        //                t.GetInterfaces().Any(it => it == typeof(IConfigNodeObjectBuilder<IRuleBuilder>) && !it.IsGenericTypeDefinition && !it.IsAbstract))
+        //                .Where(t => temporaryBinder.CanCreate(t))
+        //                .ToList();
 
-        private void ConfigureSensorDefinitionFactory()
-        {
-            var experiments = injectionBinder.GetInstance<IEnumerable<ScienceExperiment>>();
-            var ruleFactoryBuilder = CreateRuleFactoryBuilder(injectionBinder.GetInstance<ITemporaryBindingFactory>());
-            var gameDatabase = injectionBinder.GetInstance<IGameDatabase>();
+        //    experimentRuleTypes.ForEach(t => Log.Debug("IExperimentRule type: " + t.FullName));
+        //    explicitFactoryBuilders.ForEach(bt => Log.Debug("IRuleBuilder builder type: " + bt.FullName));
 
-            var sensorDefinitionFactory = SensorDefinitionFactory.Factory.Create(experiments, ruleFactoryBuilder, gameDatabase);
+        //    var builder = new CompositeObjectFromConfigNodeFactory<IRuleBuilder>(
+        //        // we'll prefer explicit builders first
+        //        explicitFactoryBuilders.Select(explicitFactoryType =>
+        //        {
+        //            using (var binding = temporaryBinder.Create(explicitFactoryType))
+        //            {
+        //                return (IConfigNodeObjectBuilder<IRuleBuilder>) binding.GetInstance();
+        //            }
+        //        })
 
-            injectionBinder.Bind<IConfigNodeObjectGraphBuilder<IRuleFactory>>()
-                .To(ruleFactoryBuilder);
+        //        // then we'll use our generic rule factory builder to handle any unprocessed requests after that
+        //        .Union(
+        //            experimentRuleTypes
+        //                .Select(concreteRuleType => typeof(RuleFactoryBuilder<>).MakeGenericType(concreteRuleType))
+        //                .Select(
+        //                    builderType =>
+        //                    {
+        //                        using (var binding = temporaryBinder.Create(builderType))
+        //                        {
+        //                            return (IConfigNodeObjectBuilder<IRuleBuilder>)binding.GetInstance();
+        //                        }
+        //                    }))
 
-            injectionBinder.Bind<IConfigNodeObjectGraphBuilder<SensorDefinition>>()
-                .Bind<ISensorDefinitionFactory>()
-                .To(sensorDefinitionFactory);
-        }
+        //        // add ability to AND rules together
+        //        .Union(new [] { (IConfigNodeObjectBuilder<IRuleBuilder>)(new CompositeAndRule.CompositeAndRuleFactoryBuilder()) }));
+
+            
+        //    return builder;
+        //}
+
 
 
         public void SignalDestruction()

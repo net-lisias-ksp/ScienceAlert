@@ -4,7 +4,6 @@ using strange.extensions.command.api;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using strange.extensions.context.impl;
-using strange.extensions.implicitBind.api;
 using UnityEngine;
 
 namespace ScienceAlert.Core

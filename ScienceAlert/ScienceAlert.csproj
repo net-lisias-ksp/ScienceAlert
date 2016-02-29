@@ -46,35 +46,37 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SensorDefinitions\CommandConfigureSensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
+    <Compile Include="SensorDefinitions\ISensorDefinitionFactory.cs" />
     <Compile Include="Game\IGameDatabase.cs" />
     <Compile Include="Game\IUrlConfig.cs" />
     <Compile Include="Game\KspGameDatabase.cs" />
     <Compile Include="Game\KspUrlConfig.cs" />
     <Compile Include="ITemporaryBindingFactory.cs" />
+    <Compile Include="IConfigNodeObjectBuilder.cs" />
     <Compile Include="TemporaryBinding.cs" />
     <Compile Include="TemporaryBindingFactory.cs" />
-    <Compile Include="VesselContext\CommandBindExperimentRuleTypes.cs" />
     <Compile Include="VesselContext\CommandCreateVesselBindings.cs" />
-    <Compile Include="VesselContext\CommandDispatchContextCompleteSignal.cs" />
+    <Compile Include="VesselContext\Experiments\CommandCreateSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\CommandDeployExperiment.cs" />
     <Compile Include="VesselContext\Experiments\Deployment\DeploymentTriggerFactory.cs" />
     <Compile Include="VesselContext\Experiments\Deployment\IDeploymentTrigger.cs" />
     <Compile Include="VesselContext\Experiments\Deployment\DefaultDeploymentTrigger.cs" />
-    <Compile Include="VesselContext\Experiments\IExperimentSensor.cs" />
     <Compile Include="VesselContext\Experiments\LowestTransmissionMultiplierDeploymentStrategy.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\CommandCreateSensorDefinitions.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\ISensorDefinitionFactory.cs" />
+    <Compile Include="SensorDefinitions\CommandCreateSensorDefinitions.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\CommandCreateRuleBuilders.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\CompositeAndRuleBuilder.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\IRuleBuilderProvider.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RuleBuilderProvider.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleExperimentIsAvailableWhileVesselSituation.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleExperimentUsageRequirementCheck.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\RuleFactoryBuilder.cs" />
-    <Compile Include="VesselContext\Experiments\SensorDefinitionFactory.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\StandardRuleBuilder.cs" />
+    <Compile Include="SensorDefinitions\SensorDefinitionBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeAndRule.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\IRuleFactory.cs" />
-    <Compile Include="VesselContext\Experiments\Rules\TypeNotHandledByFactoryException.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\IRuleBuilder.cs" />
     <Compile Include="Core\CommandDestroyActiveVesselContext.cs" />
     <Compile Include="Core\CommandCriticalShutdown.cs" />
-    <Compile Include="Core\CommandStoreExperimentRuleTypes.cs" />
     <Compile Include="Core\DuplicateScienceExperimentException.cs" />
     <Compile Include="Core\CommandLoadSharedConfiguration.cs" />
     <Compile Include="Core\CommandSaveSharedConfiguration.cs" />
@@ -107,7 +109,7 @@
     <Compile Include="VesselContext\Experiments\ExperimentSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentReportValueCalculator.cs" />
     <Compile Include="Game\KspScienceSubjectProvider.cs" />
-    <Compile Include="VesselContext\Experiments\SensorDefinition.cs" />
+    <Compile Include="SensorDefinitions\SensorDefinition.cs" />
     <Compile Include="VesselContext\Experiments\Rules\TestRule.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensor.cs" />
     <Compile Include="Game\ICelestialBodyProvider.cs" />
@@ -122,8 +124,6 @@
     <Compile Include="VesselContext\Experiments\Rules\RuleVesselIsControllable.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleVesselIsCrewed.cs" />
     <Compile Include="VesselContext\BootstrapActiveVesselContext.cs" />
-    <Compile Include="Core\IPopupDialogSpawner.cs" />
-    <Compile Include="Core\PopupDialogSpawner.cs" />
     <Compile Include="Game\IVessel.cs" />
     <Compile Include="Game\KspVessel.cs" />
     <Compile Include="Game\CommandConfigureGameEvents.cs" />
@@ -137,7 +137,6 @@
     <Compile Include="SharedConfiguration.cs" />
     <Compile Include="ISharedConfigurationFilePathProvider.cs" />
     <Compile Include="Gui\old\InvalidConfigNodeException.cs" />
-    <Compile Include="VesselContext\Experiments\SensorFactory.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchLoadGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchSaveGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\ExperimentSensorState.cs" />

@@ -5,6 +5,7 @@ using ReeperCommon.Logging;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
+using ScienceAlert.VesselContext.Experiments.Rules;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -68,8 +69,9 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalUpdateExperimentListEntryPopup>().ToSingleton();
             injectionBinder.Bind<SignalCloseExperimentListEntryPopup>().ToSingleton();
 
+            injectionBinder.Bind<SignalCriticalShutdown>().ToSingleton();
+
             injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
-            injectionBinder.Bind<SignalTriggerSensorStatusUpdate>().ToSingleton();
             injectionBinder.Bind<SignalDeployExperiment>().ToSingleton();
 
             injectionBinder.Bind<ExperimentListEntryFactory>().ToSingleton();
@@ -98,14 +100,14 @@ namespace ScienceAlert.VesselContext
         {
             commandBinder.Bind<SignalStart>()
                 .InSequence()
-                .To<CommandBindExperimentRuleTypes>()
                 .To<CommandConfigureGameEvents>()
                 .To<CommandCreateVesselBindings>()
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandDispatchLoadGuiSettingsSignal>()
-                .To<CommandTriggerInitialSensorUpdates>()
+                //.To<CommandTriggerInitialSensorUpdates>()
+                .To<CommandCreateSensorUpdater>()
                 .Once();
 
             commandBinder.Bind<SignalExperimentSensorStatusChanged>()

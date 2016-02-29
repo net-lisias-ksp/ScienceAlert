@@ -8,9 +8,9 @@ namespace ScienceAlert.VesselContext
     {
     }
 
-    public class SignalTriggerSensorStatusUpdate : Signal<ScienceExperiment>
-    {
-    }
+    //public class SignalTriggerSensorStatusUpdate : Signal<ScienceExperiment>
+    //{
+    //}
 
 
     public class SignalDeployExperiment : Signal<ScienceExperiment>

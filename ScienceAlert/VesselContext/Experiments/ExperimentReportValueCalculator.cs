@@ -129,7 +129,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
                 return modulesForExperiment.Any() ? modulesForExperiment.First().TransmissionMultiplier : 0f;
             }
-            catch (KeyNotFoundException knf)
+            catch (KeyNotFoundException)
             {
                 // something is really hosed here
                 foreach (var exp in _experimentModules)

@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ReeperCommon.ObjectGraph;
 using ScienceAlert.Game;
 using strange.extensions.command.impl;
 
-namespace ScienceAlert.VesselContext.Experiments.Rules
+namespace ScienceAlert.SensorDefinitions
 {
+// ReSharper disable once ClassNeverInstantiated.Global
     public class CommandCreateSensorDefinitions : Command
     {
         private const string SensorDefinitionNodeName = "SA_SENSOR_DEFINITION";
 
         private readonly IGameDatabase _gameDatabase;
-        private readonly IConfigNodeObjectGraphBuilder<SensorDefinition> _sensorDefinitionBuilder;
+        private readonly IConfigNodeObjectBuilder<SensorDefinition> _sensorDefinitionBuilder;
         private readonly ISensorDefinitionFactory _factory;
         private readonly IEnumerable<ScienceExperiment> _experiments;
 
 
         public CommandCreateSensorDefinitions(
-            IGameDatabase gameDatabase,
-            IConfigNodeObjectGraphBuilder<SensorDefinition> sensorDefinitionBuilder,
+            IGameDatabase gameDatabase, IConfigNodeObjectBuilder<SensorDefinition> sensorDefinitionBuilder,
             ISensorDefinitionFactory factory,
             IEnumerable<ScienceExperiment> experiments)
         {
@@ -39,6 +37,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 
         public override void Execute()
         {
+            Log.TraceMessage();
             Log.Verbose("Creating sensor definitions");
 
             var customDefinitions = CreateCustomDefinitions();
@@ -46,6 +45,8 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
                 CreateDefaultDefinitions(_experiments.Where(e => customDefinitions.All(cd => cd.Experiment.id != e.id)));
 
             var allDefinitions = customDefinitions.Union(defaultDefinitions).ToList();
+
+            Log.Verbose("Created " + allDefinitions.Count + " sensor definitions");
 
             injectionBinder.Bind<IEnumerable<SensorDefinition>>()
                 .To(allDefinitions).CrossContext();
@@ -74,14 +75,15 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         {
             if (experiments == null) throw new ArgumentNullException("experiments");
 
-            var defaultDefinitions = experiments.Select(e => _factory.Create(e)).ToList();
+            var defaultDefinitions = experiments.Select(e => _factory.CreateDefault(e)).ToList();
 
             defaultDefinitions.ForEach(sd => Log.Verbose("Using default definition for: " + sd.Experiment.id));
 
             return defaultDefinitions;
         }
 
-        private void LogUnhandledConfigs(IEnumerable<IUrlConfig> configs)
+
+        private static void LogUnhandledConfigs(IEnumerable<IUrlConfig> configs)
         {
             foreach (var c in configs)
                 Log.Verbose("Sensor definition skipped: " + c.Url);
