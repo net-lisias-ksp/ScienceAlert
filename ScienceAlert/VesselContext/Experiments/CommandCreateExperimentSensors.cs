@@ -15,7 +15,7 @@ namespace ScienceAlert.VesselContext.Experiments
 // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandCreateExperimentSensors : Command
     {
-        private readonly IRuleBuilderProvider _ruleBuilderProvider;
+        private readonly IRuleBuilder _ruleBuilder;
         private readonly IConfigNodeSerializer _serializer;
         private readonly IEnumerable<SensorDefinition> _sensorDefinitions;
         private readonly IScienceSubjectProvider _subjectProvider;
@@ -24,7 +24,7 @@ namespace ScienceAlert.VesselContext.Experiments
         private readonly SignalCriticalShutdown _failSignal;
 
         public CommandCreateExperimentSensors(
-            IRuleBuilderProvider ruleBuilderProvider,
+            IRuleBuilder ruleBuilder,
             IConfigNodeSerializer serializer,
             IEnumerable<SensorDefinition> sensorDefinitions,
             IScienceSubjectProvider subjectProvider,
@@ -32,7 +32,7 @@ namespace ScienceAlert.VesselContext.Experiments
             ITemporaryBindingFactory temporaryBindingFactory,
             SignalCriticalShutdown failSignal)
         {
-            if (ruleBuilderProvider == null) throw new ArgumentNullException("ruleBuilderProvider");
+            if (ruleBuilder == null) throw new ArgumentNullException("ruleBuilder");
             if (serializer == null) throw new ArgumentNullException("serializer");
             if (sensorDefinitions == null) throw new ArgumentNullException("sensorDefinitions");
             if (subjectProvider == null) throw new ArgumentNullException("subjectProvider");
@@ -40,7 +40,7 @@ namespace ScienceAlert.VesselContext.Experiments
             if (temporaryBindingFactory == null) throw new ArgumentNullException("temporaryBindingFactory");
             if (failSignal == null) throw new ArgumentNullException("failSignal");
 
-            _ruleBuilderProvider = ruleBuilderProvider;
+            _ruleBuilder = ruleBuilder;
             _serializer = serializer;
             _sensorDefinitions = sensorDefinitions;
             _subjectProvider = subjectProvider;
@@ -74,7 +74,7 @@ namespace ScienceAlert.VesselContext.Experiments
                 injectionBinder
                     .Bind<IEnumerable<ExperimentSensor>>()
                     .Bind<List<ExperimentSensor>>()
-                        .To(sensors.Cast<ExperimentSensor>().ToList());
+                        .To(sensors.ToList());
 
                 Log.Verbose("Created " + sensors.Count + " experiment sensors");
             }    
@@ -125,12 +125,13 @@ namespace ScienceAlert.VesselContext.Experiments
 
         private IExperimentRule CreateRule(ConfigNode ruleConfig)
         {
-            var ruleBuilder = _ruleBuilderProvider.GetBuilder(ruleConfig);
+            if (ruleConfig == null) throw new ArgumentNullException("ruleConfig");
 
-            if (!ruleBuilder.Any())
-                throw new ArgumentException("No builder for " + ruleConfig.ToSafeString() + " available");
+            if (!_ruleBuilder.CanHandle(ruleConfig))
+                throw new ArgumentException("No builder for " + ruleConfig.ToSafeString());
 
-            return ruleBuilder.Value.With(b => b.Build(ruleConfig, _ruleBuilderProvider, _temporaryBindingFactory));
+
+            return _ruleBuilder.With(b => b.Build(ruleConfig, _ruleBuilder, _temporaryBindingFactory));
         }
     }
 }

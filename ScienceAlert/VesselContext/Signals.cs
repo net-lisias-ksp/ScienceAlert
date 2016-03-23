@@ -8,12 +8,13 @@ namespace ScienceAlert.VesselContext
     {
     }
 
-    //public class SignalTriggerSensorStatusUpdate : Signal<ScienceExperiment>
-    //{
-    //}
-
 
     public class SignalDeployExperiment : Signal<ScienceExperiment>
     {
+    }
+
+    public class SignalDeployExperimentFinished : Signal<ScienceExperiment, bool /* successfully? */>
+    {
+        
     }
 }

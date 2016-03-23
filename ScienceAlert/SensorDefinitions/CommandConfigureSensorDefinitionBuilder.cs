@@ -15,6 +15,7 @@ namespace ScienceAlert.SensorDefinitions
         private const string DefaultOnboardRuleNodeName = "SA_DEFAULT_ONBOARD_RULE";
         private const string DefaultAvailabilityRuleNodeName = "SA_DEFAULT_AVAILABILITY_RULE";
         private const string DefaultConditionRuleNodeName = "SA_DEFAULT_CONDITION_RULE";
+        private const string DefaultExperimentTriggerNodeName = "SA_DEFAULT_EXPERIMENT_TRIGGER";
 
         private readonly IEnumerable<ScienceExperiment> _experiments;
         private readonly IGameDatabase _gameDatabase;
@@ -63,10 +64,10 @@ namespace ScienceAlert.SensorDefinitions
             var defaultOnboardRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultOnboardRuleNodeName));
             var defaultAvailabilityRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultAvailabilityRuleNodeName));
             var defaultConditionRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultConditionRuleNodeName));
-
+            var defaultTriggerConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultExperimentTriggerNodeName));
 
             var builder = new SensorDefinitionBuilder(_experiments, defaultOnboardRuleConfig,
-                defaultAvailabilityRuleConfig, defaultConditionRuleConfig);
+                defaultAvailabilityRuleConfig, defaultConditionRuleConfig, defaultTriggerConfig);
 
             injectionBinder
                 .Bind<IConfigNodeObjectBuilder<SensorDefinition>>()

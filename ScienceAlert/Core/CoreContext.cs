@@ -143,7 +143,7 @@ namespace ScienceAlert.Core
                 .InSequence()
                 .To<CommandConfigureSensorDefinitionBuilder>()
                 .To<CommandCreateSensorDefinitions>()
-                .To<CommandCreateRuleBuilders>()
+                .To<CommandCreateObjectFromConfigNodeBuilders>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
@@ -279,8 +279,7 @@ namespace ScienceAlert.Core
                     new ResourceIdentifierAdapter(StripExtensionFromId, new ResourceFromGameDatabase()),
 
                     // then look at physical file system. These work on a list of items cached
-                    // by GameDatabase rather than working directly with the disk (unless a resource 
-                    // is accessed from here, of course)
+                    // by GameDatabase rather directly searching the disk
                     new ResourceFromDirectory(injectionBinder.GetInstance<IDirectory>()),
 
                     // finally search embedded resource
@@ -374,7 +373,7 @@ namespace ScienceAlert.Core
                 var ids = ResearchAndDevelopment.GetExperimentIDs();
 
                 if (!ids.Any())
-                    throw new Exception("No ScienceExperiment definitions found -- something is wrong in your install!");
+                    throw new InvalidOperationException("No ScienceExperiment definitions found -- something is wrong in your install!");
 
                 return ids.Select(ResearchAndDevelopment.GetExperiment).ToList();
             }

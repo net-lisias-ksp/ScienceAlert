@@ -6,6 +6,7 @@ using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Rules;
+using ScienceAlert.VesselContext.Experiments.Trigger;
 using ScienceAlert.VesselContext.Gui;
 using strange.extensions.context.api;
 using UnityEngine;
@@ -73,6 +74,7 @@ namespace ScienceAlert.VesselContext
 
             injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
             injectionBinder.Bind<SignalDeployExperiment>().ToSingleton();
+            injectionBinder.Bind<SignalDeployExperimentFinished>().ToSingleton();
 
             injectionBinder.Bind<ExperimentListEntryFactory>().ToSingleton();
 
@@ -89,6 +91,8 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<IScienceSubjectProvider>()
                 .To<KspScienceSubjectProvider>().ToSingleton();
 
+            injectionBinder.Bind<TriggerActivator>().ToSingleton();
+
             SetupCommandBindings();
 
             injectionBinder.ReflectAll();
@@ -104,6 +108,8 @@ namespace ScienceAlert.VesselContext
                 .To<CommandCreateVesselBindings>()
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
+                .To<CommandCreateExperimentTriggers>()
+                .To<CommandCreateExperimentTriggerActivator>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandDispatchLoadGuiSettingsSignal>()
                 //.To<CommandTriggerInitialSensorUpdates>()

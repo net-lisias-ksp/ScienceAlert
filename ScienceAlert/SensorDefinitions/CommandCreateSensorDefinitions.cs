@@ -48,8 +48,11 @@ namespace ScienceAlert.SensorDefinitions
 
             Log.Verbose("Created " + allDefinitions.Count + " sensor definitions");
 
-            injectionBinder.Bind<IEnumerable<SensorDefinition>>()
-                .To(allDefinitions).CrossContext();
+            injectionBinder
+                .Bind<IEnumerable<SensorDefinition>>()
+                .Bind<IEnumerable<ITriggerDefinitionProvider>>()
+                .Bind<IEnumerable<IRuleDefinitionProvider>>()
+                    .To(allDefinitions).CrossContext();
         }
 
 

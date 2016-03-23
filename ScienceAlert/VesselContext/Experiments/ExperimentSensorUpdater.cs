@@ -21,27 +21,12 @@ namespace ScienceAlert.VesselContext.Experiments
         [Inject] public SignalCriticalShutdown CriticalFail { get; set; }
 
 
-        //public void OnStatusUpdateRequested(ScienceExperiment scienceExperiment)
-        //{
-        //    if (scienceExperiment == null) throw new ArgumentNullException("scienceExperiment");
-
-        //    Log.TraceMessage();
-
-        //    var relatedSensor = Sensors.FirstOrDefault(s => s.Experiment.id == scienceExperiment.id).ToMaybe();
-
-        //    if (!relatedSensor.Any())
-        //        throw new ArgumentException("No matching sensor for " + scienceExperiment.id, "scienceExperiment");
-
-        //    DispatchChangedSignal(relatedSensor.Value);
-        //}
-
-
 // ReSharper disable once UnusedMember.Local
         private void Update()
         {
             try
             {
-                //var start = Time.realtimeSinceStartup;
+                var start = Time.realtimeSinceStartup;
 
                 // todo: split across several frames
                 foreach (var m in Sensors)
@@ -55,8 +40,8 @@ namespace ScienceAlert.VesselContext.Experiments
                         DispatchChangedSignal(m);
                 }
 
-                //print("Time used: " + (Time.realtimeSinceStartup - start).ToString("F5") + " sec for " + Sensors.Count +
-                //      " sensors");
+                print("Time used: " + ((Time.realtimeSinceStartup - start) * 1000f).ToString("F2") + " ms for " + Sensors.Count +
+                      " sensors");
             }
             catch (Exception e)
             {

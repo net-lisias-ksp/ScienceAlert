@@ -13,6 +13,7 @@ namespace ScienceAlert.SensorDefinitions
         private readonly ConfigNode _defaultOnboardRule;
         private readonly ConfigNode _defaultAvailabilityRule;
         private readonly ConfigNode _defaultConditionRule;
+        private readonly ConfigNode _defaultTrigger;
 
         private readonly ScienceExperiment[] _experiments;
 
@@ -23,23 +24,26 @@ namespace ScienceAlert.SensorDefinitions
         public const string OnboardRuleNodeName = "ONBOARD_RULE";
         public const string AvailabilityRuleNodeName = "AVAILABILITY_RULE";
         public const string ConditionRuleNodeName = "CONDITION_RULE";
-
+        public const string DeployTriggerNodeName = "TRIGGER";
 
         public SensorDefinitionBuilder(
             IEnumerable<ScienceExperiment> experiments,
             ConfigNode defaultOnboardRule,
             ConfigNode defaultAvailabilityRule,
-            ConfigNode defaultConditionRule)
+            ConfigNode defaultConditionRule,
+            ConfigNode defaultTrigger)
         {
             if (experiments == null) throw new ArgumentNullException("experiments");
             if (defaultOnboardRule == null) throw new ArgumentNullException("defaultOnboardRule");
             if (defaultAvailabilityRule == null)
                 throw new ArgumentNullException("defaultAvailabilityRule");
             if (defaultConditionRule == null) throw new ArgumentNullException("defaultConditionRule");
+            if (defaultTrigger == null) throw new ArgumentNullException("defaultTrigger");
 
             _defaultOnboardRule = defaultOnboardRule;
             _defaultAvailabilityRule = defaultAvailabilityRule;
             _defaultConditionRule = defaultConditionRule;
+            _defaultTrigger = defaultTrigger;
             _experiments = experiments.ToArray();
         }
 
@@ -90,14 +94,19 @@ namespace ScienceAlert.SensorDefinitions
                 experiment.Value,
                 GetConfig(config, OnboardRuleNodeName).Or(_defaultOnboardRule).CreateCopy(), // note: copies used to guarantee that factories building from them don't make unintended changes
                 GetConfig(config, AvailabilityRuleNodeName).Or(_defaultAvailabilityRule).CreateCopy(),
-                GetConfig(config, ConditionRuleNodeName).Or(_defaultConditionRule).CreateCopy());
+                GetConfig(config, ConditionRuleNodeName).Or(_defaultConditionRule).CreateCopy(),
+                GetConfig(config, DeployTriggerNodeName).Or(_defaultTrigger).CreateCopy());
         }
 
 
         public SensorDefinition CreateDefault(ScienceExperiment experiment)
         {
-            return new SensorDefinition(experiment, _defaultOnboardRule, _defaultAvailabilityRule,
-                _defaultAvailabilityRule);
+            return new SensorDefinition(
+                experiment, 
+                _defaultOnboardRule.CreateCopy(), 
+                _defaultAvailabilityRule.CreateCopy(),
+                _defaultAvailabilityRule.CreateCopy(),
+                _defaultTrigger.CreateCopy());
         }
 
 

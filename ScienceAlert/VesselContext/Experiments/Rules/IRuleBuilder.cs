@@ -1,6 +1,7 @@
-﻿namespace ScienceAlert.VesselContext.Experiments.Rules
+namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    public interface IRuleBuilder : IConfigNodeObjectBuilder<IExperimentRule, IRuleBuilderProvider, ITemporaryBindingFactory>
+    // just a marker to make finding the right builder a little easier when injecting
+    public interface IRuleBuilder : IConfigNodeObjectBuilder<IExperimentRule, IRuleBuilder, ITemporaryBindingFactory>
     {
     }
 }
