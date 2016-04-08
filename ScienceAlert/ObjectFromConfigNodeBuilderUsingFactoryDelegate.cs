@@ -4,15 +4,15 @@ using ReeperCommon.Extensions;
 
 namespace ScienceAlert
 {
-    class DelegateFactoryBuilder<TReturnType, TParam1, TParam2> : IConfigNodeObjectBuilder<TReturnType, TParam1, TParam2>
+    class ObjectFromConfigNodeBuilderUsingFactoryDelegate<TReturnType, TParam1, TParam2, TParam3> : IConfigNodeObjectBuilder<TReturnType, TParam1, TParam2, TParam3>
     {
         private readonly FactoryDelegate _factoryFunc;
 
-        public delegate TReturnType FactoryDelegate(ConfigNode config, TParam1 param1, TParam2 param2);
+        public delegate TReturnType FactoryDelegate(ConfigNode config, TParam1 param1, TParam2 param2, TParam3 param3);
 
         private readonly string[] _handledConfigNames;
 
-        public DelegateFactoryBuilder(FactoryDelegate factoryFunc,
+        public ObjectFromConfigNodeBuilderUsingFactoryDelegate(FactoryDelegate factoryFunc,
             params string[] handledConfigNames)
         {
             if (factoryFunc == null) throw new ArgumentNullException("factoryFunc");
@@ -24,13 +24,13 @@ namespace ScienceAlert
         }
 
 
-        public TReturnType Build(ConfigNode config, TParam1 parameter, TParam2 parameter2)
+        public TReturnType Build(ConfigNode config, TParam1 parameter, TParam2 parameter2, TParam3 parameter3)
         {
             if (!CanHandle(config))
                 throw new ArgumentException("This builder cannot handle " + config.ToSafeString());
 
             // ReSharper disable once EventExceptionNotDocumented
-            return _factoryFunc(config, parameter, parameter2);
+            return _factoryFunc(config, parameter, parameter2, parameter3);
         }
 
 

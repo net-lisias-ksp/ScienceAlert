@@ -10,13 +10,13 @@ using ReeperCommon.FileSystem.Providers;
 using ReeperCommon.Logging;
 using ReeperCommon.Repositories;
 using ReeperCommon.Serialization;
+using strange.extensions.context.api;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Game;
 using ScienceAlert.Gui;
 using ScienceAlert.SensorDefinitions;
-using ScienceAlert.VesselContext.Experiments.Rules;
-using strange.extensions.context.api;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ScienceAlert.Core
 {
@@ -143,7 +143,7 @@ namespace ScienceAlert.Core
                 .InSequence()
                 .To<CommandConfigureSensorDefinitionBuilder>()
                 .To<CommandCreateSensorDefinitions>()
-                .To<CommandCreateObjectFromConfigNodeBuilders>()
+                .To<CommandConfigureRuleBuilders>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
@@ -197,7 +197,7 @@ namespace ScienceAlert.Core
             {
                 Log.Error("Exception while launching core context: " + e);
                 Log.Error("ScienceAlert must shut down");
-                UnityEngine.Object.Destroy(contextView as GameObject);
+                Object.Destroy(contextView as GameObject);
 #if !DEBUG
                 Assembly.GetExecutingAssembly().DisablePlugin();
 #endif

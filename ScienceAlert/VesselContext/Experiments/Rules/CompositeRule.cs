@@ -2,6 +2,7 @@
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
+    [ExcludeFromConventionalRegistration]
     class CompositeRule : IExperimentRule
     {
         private readonly Func<IExperimentRule[], bool> _comparisonFunc;

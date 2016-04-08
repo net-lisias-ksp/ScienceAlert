@@ -6,6 +6,7 @@ using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
 using ReeperCommon.Serialization;
+using strange.extensions.injector.api;
 
 namespace ScienceAlert
 {
@@ -72,9 +73,9 @@ namespace ScienceAlert
     // derived classes that build a family of objects (such as the rule builder: it would need a build method with
     // a signature of IExperimentRule Build(ConfigNode, TParameterType, ItemporaryBindingFactory) and hide the existing
     // ConcreteRuleType Build(etc)
-    public class DefaultObjectFromConfigNodeBuilder<TConcreteType, TObjectReturnType, TParameterType> : 
+    public class DefaultObjectFromConfigNodeBuilder<TConcreteType, TObjectReturnType, TParameterType1, TParameterType2> : 
         DefaultObjectFromConfigNodeBuilder<TConcreteType>,
-        IConfigNodeObjectBuilder<TObjectReturnType, TParameterType, ITemporaryBindingFactory> 
+        IConfigNodeObjectBuilder<TObjectReturnType, TParameterType1, TParameterType2, ITemporaryBindingFactory> 
     {
         public DefaultObjectFromConfigNodeBuilder(IConfigNodeSerializer serializer) : base(serializer)
         {
@@ -88,12 +89,12 @@ namespace ScienceAlert
 
         public override string ToString()
         {
-            return typeof(DefaultObjectFromConfigNodeBuilder<TConcreteType, TObjectReturnType, TParameterType>).Name + "[ " + typeof(TConcreteType).Name + "]";
+            return typeof(DefaultObjectFromConfigNodeBuilder<TConcreteType, TObjectReturnType, TParameterType1, TParameterType2>).Name + "[ " + typeof(TConcreteType).Name + "]";
         }
 
 
         // note to self: default object builder doesn't allow inner types
-        public virtual TObjectReturnType Build(ConfigNode config, TParameterType unused, ITemporaryBindingFactory bindingFactory)
+        public virtual TObjectReturnType Build(ConfigNode config, TParameterType1 unused, TParameterType2 unused2, ITemporaryBindingFactory bindingFactory)
         {
             if (config == null) throw new ArgumentNullException("config");
             if (bindingFactory == null) throw new ArgumentNullException("bindingFactory");

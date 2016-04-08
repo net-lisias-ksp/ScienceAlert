@@ -35,19 +35,33 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPCore">
+      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\KSPCore.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPUtil">
+      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\KSPUtil.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuilderCannotHandleConfigNodeException.cs" />
+    <Compile Include="CommandConfigureObjectFromConfigNodeBuilders.cs" />
+    <Compile Include="ExcludeFromConventionalRegistrationAttribute.cs" />
     <Compile Include="SensorDefinitions\CommandConfigureSensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
     <Compile Include="SensorDefinitions\IRuleDefinitionProvider.cs" />
@@ -67,8 +81,11 @@
     <Compile Include="CompositeBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeRule.cs" />
     <Compile Include="VesselContext\Experiments\Rules\CompositeRuleBuilder.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\CustomBuilder.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\DelegateRuleBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Rules\IRuleBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Rules\GenericRuleBuilder.cs" />
+    <Compile Include="VesselContext\Experiments\Trigger\CompositeTriggerBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\CommandCreateExperimentTriggerActivator.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\CommandCreateExperimentTriggers.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\DeploymentTriggerFactory.cs" />
@@ -76,8 +93,8 @@
     <Compile Include="VesselContext\Experiments\Trigger\DefaultDeploymentTrigger.cs" />
     <Compile Include="VesselContext\Experiments\LowestTransmissionMultiplierDeploymentStrategy.cs" />
     <Compile Include="SensorDefinitions\CommandCreateSensorDefinitions.cs" />
-    <Compile Include="CommandCreateObjectFromConfigNodeBuilders.cs" />
-    <Compile Include="DelegateFactoryBuilder.cs" />
+    <Compile Include="CommandConfigureRuleBuilders.cs" />
+    <Compile Include="ObjectFromConfigNodeBuilderUsingFactoryDelegate.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleExperimentIsAvailableWhileVesselSituation.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleExperimentUsageRequirementCheck.cs" />
     <Compile Include="DefaultObjectFromConfigNodeBuilder.cs" />

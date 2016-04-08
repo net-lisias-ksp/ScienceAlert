@@ -12,17 +12,21 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
     class CommandCreateExperimentTriggers : Command
     {
         private readonly IEnumerable<SensorDefinition> _definitions;
-        private readonly IConfigNodeObjectBuilder<ExperimentTrigger> _triggerBuilder;
+        private readonly ITriggerBuilder _triggerBuilder;
+        private readonly ITemporaryBindingFactory _bindingFactory;
         private static bool _loggedInvalidTriggers = false;
 
         public CommandCreateExperimentTriggers(
             IEnumerable<SensorDefinition> definitions, 
-            IConfigNodeObjectBuilder<ExperimentTrigger> triggerBuilder)
+            ITriggerBuilder triggerBuilder,
+            ITemporaryBindingFactory bindingFactory)
         {
             if (definitions == null) throw new ArgumentNullException("definitions");
             if (triggerBuilder == null) throw new ArgumentNullException("triggerBuilder");
+            if (bindingFactory == null) throw new ArgumentNullException("bindingFactory");
             _definitions = definitions;
             _triggerBuilder = triggerBuilder;
+            _bindingFactory = bindingFactory;
         }
 
 
@@ -75,7 +79,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
         private ExperimentTrigger CreateTrigger(SensorDefinition definition)
         {
-            return _triggerBuilder.Build(definition.TriggerDefinition);
+            return _triggerBuilder.Build(definition.TriggerDefinition, _triggerBuilder, _bindingFactory);
         }
     }
 }
