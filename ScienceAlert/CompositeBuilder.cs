@@ -6,7 +6,7 @@ using ReeperCommon.Extensions;
 
 namespace ScienceAlert
 {
-    [ExcludeFromConventionalRegistration]
+    [DoNotAutoRegister]
     public class CompositeBuilder<TResultingObject, TParamType1, TParamType2, TParamType3> : 
         IConfigNodeObjectBuilder<TResultingObject, TParamType1, TParamType2, TParamType3>
     {

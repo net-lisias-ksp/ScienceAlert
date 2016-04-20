@@ -8,7 +8,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     class CustomBuilder : IRuleBuilder
     {
-        public IExperimentRule Build(ConfigNode config, IRuleBuilder parameter, IInjectionBinder, ITemporaryBindingFactory parameter2)
+        public IExperimentRule Build(ConfigNode config, IRuleBuilder parameter, IInjectionBinder binder, ITemporaryBindingFactory parameter2)
         {
             throw new NotImplementedException();
         }

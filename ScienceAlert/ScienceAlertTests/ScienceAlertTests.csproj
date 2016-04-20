@@ -46,6 +46,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="KSPAssets">
+      <HintPath>..\..\..\..\Kerbal Space Program\KSP_Data\Managed\KSPAssets.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPCore">
+      <HintPath>..\..\..\..\Kerbal Space Program\KSP_Data\Managed\KSPCore.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPUtil">
+      <HintPath>..\..\..\..\Kerbal Space Program\KSP_Data\Managed\KSPUtil.dll</HintPath>
+    </Reference>
     <Reference Include="NSubstitute">
       <HintPath>..\packages\NSubstitute.1.4.3.0\lib\NET40\NSubstitute.dll</HintPath>
     </Reference>
@@ -62,6 +71,9 @@
     <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\Kerbal Space Program\KSP_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="xunit">
       <HintPath>..\packages\xunit.1.8.0.1549\lib\xunit.dll</HintPath>

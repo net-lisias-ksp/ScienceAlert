@@ -2,6 +2,7 @@
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using strange.extensions.context.impl;
+using UnityEngine;
 
 namespace ScienceAlert.Core
 {
@@ -34,9 +35,9 @@ namespace ScienceAlert.Core
                     });
 #endif
 
-                PopupDialog.SpawnPopupDialog("ScienceAlert unhandled exception",
+                PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), "ScienceAlert unhandled exception",
                     "Encountered an unhandled exception!  See the log for details.\n\nScienceAlert has been disabled.", "Okay",
-                    false, HighLogic.Skin);
+                    false, HighLogic.UISkin);
 
                 Destroy(gameObject);
             }

@@ -131,7 +131,7 @@ namespace ScienceAlert.VesselContext.Experiments
                 throw new ArgumentException("No builder for " + ruleConfig.ToSafeString());
 
 
-            return _ruleBuilder.With(b => b.Build(ruleConfig, _ruleBuilder, _temporaryBindingFactory));
+            return _ruleBuilder.With(b => b.Build(ruleConfig, _ruleBuilder, injectionBinder, _temporaryBindingFactory));
         }
     }
 }

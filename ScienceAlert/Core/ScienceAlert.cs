@@ -86,9 +86,9 @@ namespace ScienceAlert.Core
         {
             Debug.LogError("ScienceAlert failed to initialize due to: " + message);
 
-            PopupDialog.SpawnPopupDialog("Initialization Failure",
+            PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), "Initialization Failure",
                 "ScienceAlert failed to initialize properly. It has been disabled.\nSee the log for details.", "OK",
-                true, HighLogic.Skin);
+                true, HighLogic.UISkin);
 
             Assembly.GetExecutingAssembly().DisablePlugin();
         }

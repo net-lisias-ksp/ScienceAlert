@@ -3,7 +3,7 @@ using strange.extensions.injector.api;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    [ExcludeFromConventionalRegistration]
+    [DoNotAutoRegister]
     public class CompositeRuleBuilder : CompositeBuilder<IExperimentRule, IRuleBuilder, IInjectionBinder, ITemporaryBindingFactory>,
         IRuleBuilder
     {

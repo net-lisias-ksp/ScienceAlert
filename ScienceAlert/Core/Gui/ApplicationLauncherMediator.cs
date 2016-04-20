@@ -1,5 +1,6 @@
-﻿using ScienceAlert.Gui;
-using strange.extensions.injector;
+﻿using System.Collections;
+using KSP.UI.Screens;
+using ReeperCommon.AssetBundleLoading;
 using strange.extensions.mediation.impl;
 
 namespace ScienceAlert.Core.Gui
@@ -10,9 +11,7 @@ namespace ScienceAlert.Core.Gui
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
         [Inject] public ApplicationLauncherView View { get; set; }
-        //[Inject] public SignalAppButtonCreated AppButtonCreated { get; set; }
-        //[Inject] public SignalAlertPanelViewVisibilityChanged AlertPanelVisibilityChanged { get; set; }
-        //[Inject] public SignalAppButtonToggled AppButtonToggled { get; set; }
+        [Inject] public IAssetBundleAssetLoader AssetBundleLoader { get; set; }
 
         public override void OnRegister()
         {
@@ -22,7 +21,10 @@ namespace ScienceAlert.Core.Gui
 
             //AlertPanelVisibilityChanged.AddListener(OnAlertPanelVisibilityChanged);
 
-            View.SetAnimationState(ApplicationLauncherView.Animations.Spinning);
+            View.enabled = false; // prevent View from starting up while we wait on assets
+
+            StartCoroutine(LoadViewAssets());
+            //View.SetAnimationState(ApplicationLauncherView.AnimationState.Spinning);
         }
 
 
@@ -31,6 +33,19 @@ namespace ScienceAlert.Core.Gui
             base.OnRemove();
             View.Toggle.RemoveListener(OnButtonToggle);
             //AlertPanelVisibilityChanged.RemoveListener(OnAlertPanelVisibilityChanged);
+        }
+
+
+        private IEnumerator LoadViewAssets()
+        {
+            print("Loading View assets...");
+            yield return StartCoroutine(AssetBundleLoader.InjectAssetsAsync(View));
+            print("View assets loaded, waiting for AppLauncher");
+            while (ApplicationLauncher.Instance == null || !ApplicationLauncher.Ready)
+                yield return 0;
+            print("Finished waiting on AppLauncher, enabling View");
+
+            View.enabled = true;
         }
 
 

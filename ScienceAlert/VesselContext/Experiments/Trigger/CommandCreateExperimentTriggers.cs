@@ -24,6 +24,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
             if (definitions == null) throw new ArgumentNullException("definitions");
             if (triggerBuilder == null) throw new ArgumentNullException("triggerBuilder");
             if (bindingFactory == null) throw new ArgumentNullException("bindingFactory");
+
             _definitions = definitions;
             _triggerBuilder = triggerBuilder;
             _bindingFactory = bindingFactory;
@@ -79,7 +80,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
         private ExperimentTrigger CreateTrigger(SensorDefinition definition)
         {
-            return _triggerBuilder.Build(definition.TriggerDefinition, _triggerBuilder, _bindingFactory);
+            return _triggerBuilder.Build(definition.TriggerDefinition, _triggerBuilder, injectionBinder, _bindingFactory);
         }
     }
 }

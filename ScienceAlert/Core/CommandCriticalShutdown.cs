@@ -23,9 +23,9 @@ namespace ScienceAlert.Core
         public override void Execute()
         {
             Log.Warning("ScienceAlert shutting down due to unrecoverable error.");
-            PopupDialog.SpawnPopupDialog("ScienceAlert shutting down",
+            PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), "ScienceAlert shutting down",
                 "Something has gone wrong! Check the log for details", "Ok",
-                true, HighLogic.Skin);
+                true, HighLogic.UISkin);
 
             _coreContextView.transform.root.gameObject.PrintComponents(new DebugLog("ContextView components"));
 

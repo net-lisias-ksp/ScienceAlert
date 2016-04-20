@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    [ExcludeFromConventionalRegistration]
+    [DoNotAutoRegister]
     class DelegateRuleBuilder : ObjectFromConfigNodeBuilderUsingFactoryDelegate<IExperimentRule, IRuleBuilder, IInjectionBinder, ITemporaryBindingFactory>, IRuleBuilder
     {
         public DelegateRuleBuilder(FactoryDelegate factoryFunc, params string[] handledConfigNames) : base(factoryFunc, handledConfigNames)

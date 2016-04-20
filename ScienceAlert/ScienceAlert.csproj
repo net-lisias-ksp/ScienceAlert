@@ -61,7 +61,10 @@
   <ItemGroup>
     <Compile Include="BuilderCannotHandleConfigNodeException.cs" />
     <Compile Include="CommandConfigureObjectFromConfigNodeBuilders.cs" />
-    <Compile Include="ExcludeFromConventionalRegistrationAttribute.cs" />
+    <Compile Include="CouldNotCreateInstanceException.cs" />
+    <Compile Include="DependenciesCannotBeSatisfiedException.cs" />
+    <Compile Include="DoNotAutoRegister.cs" />
+    <Compile Include="ObjectFromConfigNodeBuilderTypeQueries.cs" />
     <Compile Include="SensorDefinitions\CommandConfigureSensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
     <Compile Include="SensorDefinitions\IRuleDefinitionProvider.cs" />
@@ -276,6 +279,10 @@
       <Project>{953cd566-42b5-4f0a-856d-63d059e36fc0}</Project>
       <Name>strange</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ScienceAlert.UI\ScienceAlert.UI.csproj">
+      <Project>{2cd92201-747f-44f8-8da5-d39edba90a46}</Project>
+      <Name>ScienceAlert.UI</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\btnScale.png" />
@@ -335,6 +342,7 @@ REM ----------------------------------------------------------
 echo copy dependencies to project GameData...
 call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" ReeperCommon.* /xf *.pdb
 call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" StrangeIoC.* /xf *.pdb
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" ScienceAlert.UI.* /xf *.pdb
 goto:eof
 
 
