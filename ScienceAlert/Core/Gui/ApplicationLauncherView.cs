@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using KSP.UI.Screens;
-using ReeperCommon.AssetBundleLoading;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ScienceAlert.Gui;
+using ReeperKSP.AssetBundleLoading;
 using strange.extensions.mediation.impl;
 using strange.extensions.signal.impl;
+using ScienceAlert.Gui;
 using UnityEngine;
 
 namespace ScienceAlert.Core.Gui

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using KSP.UI.Screens;
-using ReeperCommon.AssetBundleLoading;
 using strange.extensions.mediation.impl;
 
 namespace ScienceAlert.Core.Gui

@@ -3,9 +3,10 @@ using System.IO;
 using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
-using ReeperCommon.FileSystem;
 using ReeperCommon.Logging;
-using ReeperCommon.Serialization;
+using ReeperKSP.Extensions;
+using ReeperKSP.FileSystem;
+using ReeperKSP.Serialization;
 
 namespace ScienceAlert.Core
 {

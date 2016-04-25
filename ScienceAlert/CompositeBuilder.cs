@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
+using ReeperKSP.Extensions;
 
 namespace ScienceAlert
 {

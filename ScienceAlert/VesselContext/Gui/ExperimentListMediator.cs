@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Linq;
 using ReeperCommon.Containers;
-using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
-using ReeperCommon.Serialization;
+using ReeperKSP.Extensions;
+using ReeperKSP.Serialization;
 using strange.extensions.mediation.impl;
 
 namespace ScienceAlert.VesselContext.Gui

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ReeperCommon.Extensions;
+using ReeperKSP.Extensions;
 
 namespace ScienceAlert
 {

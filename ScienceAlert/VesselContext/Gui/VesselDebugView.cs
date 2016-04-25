@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using ReeperCommon.Gui.Window;
-using ReeperCommon.Gui.Window.Buttons;
-using ReeperCommon.Gui.Window.Decorators;
-using ReeperCommon.Serialization;
-using strange.extensions.implicitBind;
-using strange.extensions.injector;
+using ReeperKSP.Gui.Window;
+using ReeperKSP.Gui.Window.Buttons;
+using ReeperKSP.Gui.Window.Decorators;
+using ReeperKSP.Serialization;
 using strange.extensions.signal.impl;
 using UnityEngine;
 

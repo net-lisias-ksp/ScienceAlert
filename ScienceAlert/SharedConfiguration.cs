@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using ReeperCommon.FileSystem;
-using ReeperCommon.Serialization;
+using ReeperKSP.FileSystem;
+using ReeperKSP.Serialization;
 using ScienceAlert.Gui;
 using UnityEngine;
 

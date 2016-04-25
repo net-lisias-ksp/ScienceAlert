@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using ReeperCommon.Containers;
-using ReeperCommon.FileSystem;
 using ReeperCommon.Logging;
-using ReeperCommon.Serialization;
+using ReeperKSP.FileSystem;
+using ReeperKSP.Serialization;
 using strange.extensions.command.impl;
 
 namespace ScienceAlert.Core

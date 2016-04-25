@@ -3,6 +3,7 @@ using System.Collections;
 using System.Reflection;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
+using ReeperKSP.Extensions;
 using strange.extensions.signal.impl;
 using UnityEngine;
 

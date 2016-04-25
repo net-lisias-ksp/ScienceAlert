@@ -1,4 +1,4 @@
-using ReeperCommon.Serialization;
+using ReeperKSP.Serialization;
 using strange.extensions.injector.api;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules

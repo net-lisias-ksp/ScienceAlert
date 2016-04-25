@@ -1,12 +1,9 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using ReeperCommon.Containers;
-using ReeperCommon.Extensions;
-using ReeperCommon.Logging;
-using ReeperCommon.Serialization;
-using strange.extensions.injector.api;
+using ReeperKSP.Extensions;
+using ReeperKSP.Serialization;
 
 namespace ScienceAlert
 {

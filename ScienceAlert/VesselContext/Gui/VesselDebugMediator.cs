@@ -2,8 +2,7 @@
 using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ReeperCommon.Serialization;
-using strange.extensions.injector;
+using ReeperKSP.Serialization;
 using strange.extensions.mediation.impl;
 
 namespace ScienceAlert.VesselContext.Gui

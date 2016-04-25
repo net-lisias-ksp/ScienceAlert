@@ -275,6 +275,10 @@
       <Project>{fecfa8fc-cf80-4685-a2ba-1566e0f3c26e}</Project>
       <Name>ReeperCommon</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\ReeperKSP\ReeperKSP\ReeperKSP.csproj">
+      <Project>{13e7b9e2-7789-497f-9f94-5f4c72b2b32a}</Project>
+      <Name>ReeperKSP</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\StrangeIoC\StrangeIoC\strange.csproj">
       <Project>{953cd566-42b5-4f0a-856d-63d059e36fc0}</Project>
       <Name>strange</Name>

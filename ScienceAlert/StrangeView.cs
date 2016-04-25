@@ -1,9 +1,9 @@
 ﻿using System;
 using ReeperCommon.Extensions;
-using ReeperCommon.Gui;
-using ReeperCommon.Gui.Window;
-using ReeperCommon.Gui.Window.Decorators;
-using ReeperCommon.Serialization;
+using ReeperKSP.Gui;
+using ReeperKSP.Gui.Window;
+using ReeperKSP.Gui.Window.Decorators;
+using ReeperKSP.Serialization;
 using strange.extensions.mediation.impl;
 using UnityEngine;
 

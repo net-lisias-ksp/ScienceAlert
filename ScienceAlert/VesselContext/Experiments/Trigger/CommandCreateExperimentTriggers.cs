@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
+using ReeperKSP.Extensions;
 using ScienceAlert.SensorDefinitions;
 using strange.extensions.command.impl;
 

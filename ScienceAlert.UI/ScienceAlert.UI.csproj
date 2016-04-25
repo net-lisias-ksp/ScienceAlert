@@ -30,12 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ReeperCommon">
-      <HintPath>..\..\ReeperCommon\ReeperCommon\bin\Debug\ReeperCommon.dll</HintPath>
-    </Reference>
-    <Reference Include="StrangeIoC">
-      <HintPath>..\..\StrangeIoC\StrangeIoC\bin\Debug\StrangeIoC.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,10 +44,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CanvasCameraFixer.cs" />
+    <Compile Include="ExpandableButtonLogic.cs" />
     <Compile Include="ScienceAlertTestUiBehaviour.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj">
+      <Project>{fecfa8fc-cf80-4685-a2ba-1566e0f3c26e}</Project>
+      <Name>ReeperCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\StrangeIoC\StrangeIoC\strange.csproj">
+      <Project>{953cd566-42b5-4f0a-856d-63d059e36fc0}</Project>
+      <Name>strange</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>call "$(SolutionDir)SetEnvironment.bat"
+
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25unityproject%25\assets\ScienceAlert\UI\" $(TargetName).* /xf *.config *.pdb
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25unityproject%25\assets\ScienceAlert\UI\" ReeperCommon.* /xf *.config *.pdb
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25unityproject%25\assets\ScienceAlert\UI\" StrangeIoC.* /xf *.config *.pdb
+
+exit 0</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
