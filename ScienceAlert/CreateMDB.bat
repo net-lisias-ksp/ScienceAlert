@@ -4,7 +4,8 @@ REM Usage: [targetFileName] [destinationDirectory]
 
 echo off
 
-if "%unity%"=="" (
+if "%unitydir%"=="" (
+	echo Error while creating MDB:
 	echo ERROR: Unity path not set. Make sure SetEnvironment.bat has run and is configured correctly.
 	exit -1
 )
@@ -37,7 +38,7 @@ REM
 echo Creating MDB from "%~1"
 
 if exist %~1 (
-call "%unity%\Editor\Data\MonoBleedingEdge\bin\cli.bat" "%unity%\Editor\Data\MonoBleedingEdge\lib\mono\4.0\pdb2mdb.exe" "%~1"
+call "%unitydir%\Editor\Data\MonoBleedingEdge\bin\cli.bat" "%unitydir%\Editor\Data\MonoBleedingEdge\lib\mono\4.5\pdb2mdb.exe" "%~1"
 
 IF NOT EXIST "%~1".mdb (
 echo ERROR: failed to generate %~1.mdb
@@ -73,7 +74,7 @@ goto:eof
 
 :CheckUnity
 echo Verifying Unity directory set...
-IF NOT EXIST "%unity%\Editor\Data\MonoBleedingEdge\lib\mono\4.0\pdb2mdb.exe" (
+IF NOT EXIST "%unitydir%\Editor\Data\MonoBleedingEdge\lib\mono\4.5\pdb2mdb.exe" (
 echo ERROR: Failed to find pdb2mdb.exe; check Unity path
 exit -1
 )

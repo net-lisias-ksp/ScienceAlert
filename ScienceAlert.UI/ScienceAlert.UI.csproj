@@ -44,10 +44,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CanvasCameraFixer.cs" />
-    <Compile Include="ExpandableButtonLogic.cs" />
-    <Compile Include="ScienceAlertTestUiBehaviour.cs" />
+    <Compile Include="ExperimentWindow\ExperimentListEntryController.cs" />
+    <Compile Include="ExperimentWindow\ExperimentWindowController.cs" />
+    <Compile Include="IExperimentEntry.cs" />
+    <Compile Include="OptionsWindow\ExpandableButtonController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ManualRegistrationView.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj">
@@ -58,6 +60,9 @@
       <Project>{953cd566-42b5-4f0a-856d-63d059e36fc0}</Project>
       <Name>strange</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="AdditionalOptionsWindow\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

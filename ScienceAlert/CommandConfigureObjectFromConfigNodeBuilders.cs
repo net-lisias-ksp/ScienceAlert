@@ -2,25 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
+using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using strange.extensions.command.impl;
 
 namespace ScienceAlert
 {
-    abstract class CommandConfigureObjectFromConfigNodeBuilders<TBuilderMarkerInterface> : Command
+    abstract class CommandConfigureObjectFromConfigNodeBuilders<TBuilderMarkerInterface, TBuiltType> : Command
     {
         protected readonly ITemporaryBindingFactory TemporaryBinder;
-        private readonly ObjectFromConfigNodeBuilderTypeQueries _typeQueries;
-  
+        protected readonly Lazy<IEnumerable<Type>> AllTypesInLoadedAssemblies;
+
         protected CommandConfigureObjectFromConfigNodeBuilders(
-            ITemporaryBindingFactory temporaryBinder,
-            ObjectFromConfigNodeBuilderTypeQueries typeQueries)
+            ITemporaryBindingFactory temporaryBinder)
         {
             if (temporaryBinder == null) throw new ArgumentNullException("temporaryBinder");
-            if (typeQueries == null) throw new ArgumentNullException("typeQueries");
             TemporaryBinder = temporaryBinder;
-            _typeQueries = typeQueries;
+            AllTypesInLoadedAssemblies = new Lazy<IEnumerable<Type>>(GetAllTypesFromLoadedAssemblies);
         }
 
         public sealed override void Execute()
@@ -31,20 +31,19 @@ namespace ScienceAlert
                 Log.Warning("No builder types that implement " + typeof (TBuilderMarkerInterface) +
                             " found. This is probably bad");
 
-            BindBuildersToCrossContext(CreateBuilders(GetBuilderTypes()));
+            BindBuildersToCrossContext(CreateBuilders(builderTypes));
         }
 
 
         protected virtual void BindBuildersToCrossContext([NotNull] ReadOnlyCollection<TBuilderMarkerInterface> builders)
         {
-
             injectionBinder.Bind<ReadOnlyCollection<TBuilderMarkerInterface>>().To(builders).CrossContext();
         }
 
 
         protected virtual ReadOnlyCollection<Type> GetBuilderTypes()
         {
-            return _typeQueries.GetConcreteBuilders<TBuilderMarkerInterface>();
+            return GetConcreteBuilders();
         }
 
   
@@ -79,7 +78,7 @@ namespace ScienceAlert
         {
             if (builderType == null) throw new ArgumentNullException("builderType");
 
-            if (typeof (TBuilderMarkerInterface).IsAssignableFrom(builderType))
+            if (!typeof (TBuilderMarkerInterface).IsAssignableFrom(builderType))
                 throw new ArgumentException(builderType.FullName + " is not assignable to " +
                                             typeof (TBuilderMarkerInterface).Name);
 
@@ -96,6 +95,47 @@ namespace ScienceAlert
 
                 return constructed;
             }
+        }
+
+        protected IEnumerable<Type> GetAllTypesFromLoadedAssemblies()
+        {
+            return AssemblyLoader.loadedAssemblies
+                .SelectMany(la => la.assembly.GetTypes());
+        }
+
+        protected ReadOnlyCollection<Type> GetConcreteBuilders()
+        {
+            return GetAllTypesThatImplement<TBuilderMarkerInterface>().ToList().Where(IsConstructable).ToList().AsReadOnly();
+        }
+
+
+        protected ReadOnlyCollection<Type> GetAllTypesThatImplement<TTypeImplemented>()
+        {
+            return AllTypesInLoadedAssemblies.Value
+                .Where(t => !t.IsGenericTypeDefinition)
+                .Where(t => HasMatchingMarkerInterface(t, typeof (TTypeImplemented)))
+                .Where(IsNotExcluded)
+                .ToList()
+                .AsReadOnly();
+        }
+
+
+        protected static bool HasMatchingMarkerInterface(Type possibleBuilderType, Type markerInterface)
+        {
+            return possibleBuilderType != null && markerInterface.IsAssignableFrom(possibleBuilderType);
+        }
+
+
+        protected static bool IsConstructable(Type type)
+        {
+            return type != null && type.GetConstructors(BindingFlags.Instance | BindingFlags.Public).Any();
+        }
+
+
+        protected static bool IsNotExcluded(Type type)
+        {
+            return type != null &&
+                   !type.GetCustomAttributes(typeof(DoNotAutoRegister), false).Any();
         }
     }
 }

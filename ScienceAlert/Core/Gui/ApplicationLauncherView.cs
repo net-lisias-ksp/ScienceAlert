@@ -20,7 +20,6 @@ namespace ScienceAlert.Core.Gui
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-        [Inject] public ICoroutineRunner CoroutineRunner { get; set; }
         [Inject] public IGuiConfiguration GuiConfiguration { get; set; }
 
         internal readonly Signal<bool> Toggle = new Signal<bool>();
@@ -51,13 +50,6 @@ namespace ScienceAlert.Core.Gui
             { ButtonAnimationStates.Spinning, Animator.StringToHash("button_spin") }
         };
 
-
-
-        protected override void Start()
-        {
-            base.Start();
-            CoroutineRunner.StartCoroutine(SetupButton());
-        }
 
 
         protected override void OnDestroy()
@@ -106,12 +98,12 @@ namespace ScienceAlert.Core.Gui
         }
 
 
-        private IEnumerator SetupButton()
+        public IEnumerator SetupButton()
         {
             Log.TraceMessage();
 
             while (ApplicationLauncher.Instance == null || !ApplicationLauncher.Ready)
-                yield return 0;
+                yield return null;
 
             CheckForAnimationMismatch();
 
@@ -135,51 +127,6 @@ namespace ScienceAlert.Core.Gui
 
             ButtonCreated.Dispatch();
         }
-
-
-        //private Material CreateMaterial()
-        //{
-        //    return Shader.Find(ShaderName)
-        //        .With(s => new Material(s))
-        //        .Do(m => m.mainTexture = SpriteSheet)
-        //        .IfNull(() => { throw new ShaderNotFoundException(ShaderName); });
-        //}
-
-
-        //private PackedSprite CreateSprite(Material material)
-        //{
-        //    if (material == null) throw new ArgumentNullException("material");
-
-        //    var sprite = PackedSprite.Create("ScienceAlert.Button.Sprite", Vector3.zero);
-
-        //    sprite.SetMaterial(material);
-        //    sprite.renderer.sharedMaterial.mainTexture.filterMode = FilterMode.Point;
-        //    sprite.Setup(ButtonWidth, ButtonHeight);
-        //    sprite.SetFramerate(GuiConfiguration.Framerate);
-        //    sprite.SetAnchor(SpriteRoot.ANCHOR_METHOD.UPPER_LEFT);
-        //    sprite.gameObject.layer = LayerMask.NameToLayer(EzGuiLayerName);
-
-        //    // normal state
-        //    var normal = new UVAnimation { name = AnimationState.Unlit.ToString(), loopCycles = 0, framerate = GuiConfiguration.Framerate };
-        //    normal.BuildUVAnim(sprite.PixelCoordToUVCoord(9 * ButtonWidth, 8 * ButtonHeight), sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 1, 1, 1);
-
-        //    // animated state
-        //    var anim = new UVAnimation { name = AnimationState.Spinning.ToString(), loopCycles = -1, framerate = GuiConfiguration.Framerate };
-        //    anim.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, ButtonHeight).y), sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 100);
-
-        //    // lit but not animated state
-        //    var lit = new UVAnimation {name = AnimationState.Lit.ToString(), loopCycles = 0, framerate = GuiConfiguration.Framerate};
-        //    lit.BuildWrappedUVAnim(new Vector2(0, sprite.PixelCoordToUVCoord(0, ButtonHeight).y),
-        //        sprite.PixelSpaceToUVSpace(ButtonWidth, ButtonHeight), 1);
-
-
-        //    // add animations to button
-        //    sprite.AddAnimation(normal);
-        //    sprite.AddAnimation(anim);
-        //    sprite.AddAnimation(lit);
-
-        //    return sprite;
-        //}
 
 
         private void OnFalse()

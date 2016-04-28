@@ -1,5 +1,5 @@
 set ksp=D:\For New Computer\Kerbal Space Program\GameData\
-set unity=F:\Program Files\Unity
+set unitydir=F:\Program Files\Unity
 set unityproject=D:\For New Computer\KSPCustomMods\KSPUnityProject
 
 if not exist "%ksp%" (
@@ -7,7 +7,7 @@ if not exist "%ksp%" (
 	exit -1
 )
 
-if not exist "%unity%" (
+if not exist "%unitydir%" (
 	echo ERROR: Unity directory not correctly set. Edit SetEnvironment.bat
 	exit -2
 )
@@ -17,7 +17,7 @@ if not exist "%unityproject%" (
 	exit -4
 )
 
-if not exist "%unity%\Editor\Data\MonoBleedingEdge\bin\cli.bat" (
+if not exist "%unitydir%\Editor\Data\MonoBleedingEdge\bin\cli.bat" (
 	echo ERROR: cli.bat not found; check Unity installation
 	exit -3
 )

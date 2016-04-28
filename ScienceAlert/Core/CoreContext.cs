@@ -144,7 +144,7 @@ namespace ScienceAlert.Core
                 .InSequence()
                 .To<CommandConfigureSensorDefinitionBuilder>()
                 .To<CommandCreateSensorDefinitions>()
-                //.To<CommandConfigureRuleBuilders>()
+                .To<CommandConfigureRuleBuilders>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()

@@ -64,7 +64,6 @@
     <Compile Include="CouldNotCreateInstanceException.cs" />
     <Compile Include="DependenciesCannotBeSatisfiedException.cs" />
     <Compile Include="DoNotAutoRegister.cs" />
-    <Compile Include="ObjectFromConfigNodeBuilderTypeQueries.cs" />
     <Compile Include="SensorDefinitions\CommandConfigureSensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
     <Compile Include="SensorDefinitions\IRuleDefinitionProvider.cs" />
@@ -94,7 +93,6 @@
     <Compile Include="VesselContext\Experiments\Trigger\DeploymentTriggerFactory.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\ExperimentTrigger.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\DefaultDeploymentTrigger.cs" />
-    <Compile Include="VesselContext\Experiments\LowestTransmissionMultiplierDeploymentStrategy.cs" />
     <Compile Include="SensorDefinitions\CommandCreateSensorDefinitions.cs" />
     <Compile Include="CommandConfigureRuleBuilders.cs" />
     <Compile Include="ObjectFromConfigNodeBuilderUsingFactoryDelegate.cs" />
@@ -316,7 +314,7 @@ echo Copying dependencies
 call:CopyDependencies
 )
 
-call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" $(TargetName).* /xf *.config *.pdb
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" $(TargetName).* /xf *.config *.pdb *.mdb
 
 REM ----------------------------------------------------------
 REM Create debug symbols for ScienceAlert
@@ -345,6 +343,7 @@ REM ----------------------------------------------------------
 :CopyDependencies
 echo copy dependencies to project GameData...
 call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" ReeperCommon.* /xf *.pdb
+call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" ReeperKSP.* /xf *.pdb
 call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" StrangeIoC.* /xf *.pdb
 call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" ScienceAlert.UI.* /xf *.pdb
 goto:eof
@@ -394,7 +393,7 @@ REM ----------------------------------------------------------
 REM Solution GameData to KSP GameData
 
 echo Copying to GameData
-call "$(SolutionDir)CopyToLocation.bat" "%25ProjectGameData%25" "%25ksp%25$(ProjectName)" /E /xo
+call "$(SolutionDir)CopyToLocation.bat" "%25ProjectGameData%25" "%25ksp%25$(ProjectName)" /E /xo /xf *.mdb
 
 
 echo Files copied to GameData successfully
