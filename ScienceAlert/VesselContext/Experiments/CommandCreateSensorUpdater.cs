@@ -22,8 +22,6 @@ namespace ScienceAlert.VesselContext.Experiments
             var updater = _vesselContextView.AddComponent<ExperimentSensorUpdater>();
 
             injectionBinder.injector.Inject(updater, false);
-
-            //_triggerSignal.AddListener(updater.OnStatusUpdateRequested);
         }
     }
 }

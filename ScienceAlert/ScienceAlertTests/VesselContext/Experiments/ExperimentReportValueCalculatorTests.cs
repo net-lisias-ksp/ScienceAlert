@@ -23,7 +23,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
         static class Factory
         {
             public static ExperimentReportValueCalculator CreateSut(
-                IEnumerable<ScienceExperiment> experiments, 
+                ReadOnlyCollection<ScienceExperiment> experiments, 
                 float careerMultiplier, 
                 IQueryScienceValue valueQuery,
                 IVessel testVessel)
@@ -57,7 +57,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
         [InlineAutoData("mysteryGoo", 1f, "Kerbin", ExperimentSituations.SrfLanded, 0.9000001f, 0, 2.307693f)]  // 1 goo report, already transmitted 0.9 science points
         [InlineAutoData("mysteryGoo", 1f, "Kerbin", ExperimentSituations.SrfLanded, 0.9810001f, 0, 2.245384f)]  // 1 goo report, transmitted 0.981 points (scientist onboard)
         [InlineAutoData("mysteryGoo", 1f, "Kerbin", ExperimentSituations.SrfLanded, 0f, 2, 0.1730769f)]         // 1 goo report, no previous, 2 existing reports onboard
-        [InlineAutoData("mysteryGoo", 1f, "Kerbin", ExperimentSituations.SrfLanded, 3f, 1, 0.1597633f)]         // 1 goo report, previous data of 3f, 1 existing report
+        [InlineAutoData("mysteryGoo", 1f, "Kerbin", ExperimentSituations.SrfLanded, 3f, 1, 0.1597631f)]         // 1 goo report, previous data of 3f, 1 existing report
         [InlineAutoData("mysteryGoo", 1f, "Kerbin", ExperimentSituations.InSpaceLow, 0f, 0, 10f)]               // 1 goo report from space
         [InlineAutoData("mysteryGoo", 1f, "Kerbin", ExperimentSituations.InSpaceLow, 0f, 1, 2.307693f)]         // 1 goo report from space with 1 existing report onboard
         [InlineAutoData("mysteryGoo", 1f, "Kerbin", ExperimentSituations.SrfSplashed, 0f, 0, 4f)]
@@ -82,7 +82,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
 
             var vessel = MockVessel(bodyName, experiment, experimentSituation, 5, 5, onboardReportCount, 0, subject, 0.5f, EmptyLabIds);
 
-            var sut = Factory.CreateSut(new[] {experiment}, careerMultiplier, scienceValue, vessel);
+            var sut = Factory.CreateSut(new[] {experiment}.ToList().AsReadOnly(), careerMultiplier, scienceValue, vessel);
 
             var result = sut.CalculateCollectionValue(experiment, subject);
 
@@ -115,7 +115,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
 
             var vessel = MockVessel(bodyName, experiment, experimentSituation, 5, 5, onboardReportCount, 0, subject, xmitMultiplier, EmptyLabIds);
 
-            var sut = Factory.CreateSut(new[] { experiment }, careerMultiplier, scienceValue, vessel);
+            var sut = Factory.CreateSut(new[] { experiment }.ToList().AsReadOnly(), careerMultiplier, scienceValue, vessel);
 
            
             var result = sut.CalculateTransmissionValue(experiment, subject);
@@ -149,7 +149,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
 
             var vessel = MockVessel(bodyName, experiment, situation, 5, 5, 0, 1, subject, 1f, EmptyLabIds);
 
-            var sut = Factory.CreateSut(new[] { experiment }, careerMultiplier, scienceValue, vessel);
+            var sut = Factory.CreateSut(new[] { experiment }.ToList().AsReadOnly(), careerMultiplier, scienceValue, vessel);
 
 
             var result = sut.CalculateLabValue(experiment, subject);
@@ -183,7 +183,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
 
             var vessel = MockVessel(bodyName, experiment, situation, 5, 5, 0, 0, subject, 1f, EmptyLabIds);
 
-            var sut = Factory.CreateSut(new[] { experiment }, careerMultiplier, scienceValue, vessel);
+            var sut = Factory.CreateSut(new[] { experiment }.ToList().AsReadOnly(), careerMultiplier, scienceValue, vessel);
 
 
             var result = sut.CalculateLabValue(experiment, subject);
@@ -219,7 +219,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
 
             var vessel = MockVessel(bodyName, experiment, situation, 5, 5, 0, 1, subject, 1f, analyzedIds);
 
-            var sut = Factory.CreateSut(new[] { experiment }, careerMultiplier, scienceValue, vessel);
+            var sut = Factory.CreateSut(new[] { experiment }.ToList().AsReadOnly(), careerMultiplier, scienceValue, vessel);
 
 
             var result = sut.CalculateLabValue(experiment, subject);
@@ -255,7 +255,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
 
             var vessel = MockVessel(bodyName, experiment, situation, 5, 5, 0, 2, subject, 1f, otherIds);
 
-            var sut = Factory.CreateSut(new[] { experiment }, careerMultiplier, scienceValue, vessel);
+            var sut = Factory.CreateSut(new[] { experiment }.ToList().AsReadOnly(), careerMultiplier, scienceValue, vessel);
 
 
             var result = sut.CalculateLabValue(experiment, subject);

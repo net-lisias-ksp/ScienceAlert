@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -145,6 +146,7 @@ namespace ScienceAlert.Core
                 .To<CommandConfigureSensorDefinitionBuilder>()
                 .To<CommandCreateSensorDefinitions>()
                 .To<CommandConfigureRuleBuilders>()
+                .To<CommandConfigureTriggerBuilders>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
@@ -355,7 +357,8 @@ namespace ScienceAlert.Core
                 injectionBinder.Bind<ScienceExperiment>().To(exp).ToName(exp.id).CrossContext();
             }
 
-            injectionBinder.Bind<IEnumerable<ScienceExperiment>>().Bind<List<ScienceExperiment>>().To(experiments).CrossContext();
+            injectionBinder.Bind<List<ScienceExperiment>>().To(experiments).CrossContext();
+            injectionBinder.Bind<ReadOnlyCollection<ScienceExperiment>>().To(experiments.AsReadOnly()).CrossContext();
         }
 
 

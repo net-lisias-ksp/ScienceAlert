@@ -1,22 +1,48 @@
-﻿//using System;
+﻿using System;
+using ReeperCommon.Logging;
+using strange.extensions.promise.api;
+
+namespace ScienceAlert.VesselContext.Experiments.Trigger
+{
+    // ReSharper disable once UnusedMember.Global
+    class DefaultDeploymentTrigger : ExperimentTrigger
+    {
+        public DefaultDeploymentTrigger(ScienceExperiment experiment) : base(experiment)
+        {
+        }
+
+        public override IPromise Deploy()
+        {
+            Log.Warning("This is where the experiment would be deployed");
+
+            throw new NotImplementedException();
+        }
+
+        public override bool Busy
+        {
+            get { throw new NotImplementedException(); }
+        }
+    }
+}
+
+
+//using System;
 //using System.Collections;
 //using System.Collections.Generic;
 //using System.Linq;
 //using ReeperCommon.Containers;
-//using ReeperCommon.ObjectGraph;
-//using ScienceAlert.Game;
-//using ScienceAlert.VesselContext.Experiments.Rules;
 //using strange.extensions.injector.api;
 //using strange.extensions.promise.api;
 //using strange.extensions.promise.impl;
+//using ScienceAlert.Game;
 
-//namespace ScienceAlert.VesselContext.Experiments.Deployment
+//namespace ScienceAlert.VesselContext.Experiments.Trigger
 //{
 //    /// <summary>
 //    /// This is actually much simpler than it looks; it will deploy the first available ModuleScienceExperiment and return once 
 //    /// any related animation is complete (like mystery goo sliding open, materials bay doors opening, etc)
 //    /// </summary>
-//    public class DefaultDeploymentTrigger : IDeploymentTrigger
+//    public class DefaultDeploymentTrigger : ExperimentTrigger
 //    {
 //        private readonly IScienceUtil _scienceUtil;
 //        private readonly ICoroutineRunner _coroutineRunner;
@@ -71,7 +97,7 @@
 
 
 //        private readonly List<IScalarModule> _expectedCallbacks = new List<IScalarModule>();
- 
+
 //        private void CreateAnimationCallbacks(IModuleScienceExperiment mse)
 //        {
 //            var modulesOnPart = mse.Part.Modules;
@@ -130,7 +156,7 @@
 
 //                using (
 //                    var binding = _temporaryBindingFactory.Create(_binder,
-//                        typeof (DefaultDeploymentTrigger)))
+//                        typeof(DefaultDeploymentTrigger)))
 //                    return (DefaultDeploymentTrigger)binding.GetInstance();
 //            }
 
@@ -141,8 +167,8 @@
 
 //                var configName = config.name.ToUpperInvariant();
 
-//                return typeof (DefaultDeploymentTrigger).FullName == configName ||
-//                       typeof (DefaultDeploymentTrigger).Name == configName;
+//                return typeof(DefaultDeploymentTrigger).FullName == configName ||
+//                       typeof(DefaultDeploymentTrigger).Name == configName;
 //            }
 //        }
 //    }

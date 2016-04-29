@@ -1,7 +1,7 @@
-﻿namespace ScienceAlert.SensorDefinitions
-{
-    public interface ITriggerDefinitionProvider
-    {
-        ConfigNode TriggerDefinition { get; }
-    }
-}
+﻿//namespace ScienceAlert.SensorDefinitions
+//{
+//    public interface ITriggerDefinitionProvider
+//    {
+//        ConfigNode TriggerDefinition { get; }
+//    }
+//}

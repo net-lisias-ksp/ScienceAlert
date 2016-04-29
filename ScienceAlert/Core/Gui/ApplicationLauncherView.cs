@@ -70,31 +70,46 @@ namespace ScienceAlert.Core.Gui
                     .Select(st => st.ToString())
                     .ToArray();
 
-            var animationsWithoutStates = _buttonSprite.runtimeAnimatorController.animationClips
-                .ToDictionary(ac => ac.name, ac => Animator.StringToHash(ac.name)) // KVP<name, hash>
-                .Where(clip => _buttonAnimations.Values.All(existingHash => existingHash != clip.Value)) // where this animation isn't used at all
-                .Select(clip => clip.Key) // name of clip
-                .ToArray();
+            _buttonSprite.runtimeAnimatorController.animationClips.ToList()
+                .ForEach(c => Log.Normal("Clip name: " + c.name));
 
-            var entriesWhereHashDoesntMatchAnyClip =
-                _buttonAnimations.Where(
-                    entry =>
-                        _buttonSprite.runtimeAnimatorController.animationClips.Select(
-                            clip => Animator.StringToHash(clip.name)).All(clipHash => clipHash != entry.Value))
-                    .Select(kvp => kvp.Key.ToString())
+            try
+            {
+                var animationsWithoutStates = _buttonSprite.runtimeAnimatorController.animationClips
+                    .ToDictionary(ac => ac.name, ac => Animator.StringToHash(ac.name)) // KVP<name, hash>
+                    .Where(clip => _buttonAnimations.Values.All(existingHash => existingHash != clip.Value))
+                    // where this animation isn't used at all
+                    .Select(clip => clip.Key) // name of clip
                     .ToArray();
 
-            if (statesWithoutDefinedAnimation.Any()) // these would result in "do-nothing" animations; enum values that aren't linked to any animation and seem superfluous or unimplemented
-                Log.Warning("No corresponding button animation for following state(s): " +
-                            string.Join(",", statesWithoutDefinedAnimation));
+                var entriesWhereHashDoesntMatchAnyClip =
+                    _buttonAnimations.Where(
+                        entry =>
+                            _buttonSprite.runtimeAnimatorController.animationClips.Select(
+                                clip => Animator.StringToHash(clip.name)).All(clipHash => clipHash != entry.Value))
+                        .Select(kvp => kvp.Key.ToString())
+                        .ToArray();
 
-            if (animationsWithoutStates.Any()) // these are extra animations that we apparently aren't using -- not necessarily an error, but suspicious
-                Log.Debug(typeof (ApplicationLauncherView).Name + " does not use the following animation clip(s): " +
-                          string.Join(",", animationsWithoutStates));
+                if (statesWithoutDefinedAnimation.Any())
+                    // these would result in "do-nothing" animations; enum values that aren't linked to any animation and seem superfluous or unimplemented
+                    Log.Warning("No corresponding button animation for following state(s): " +
+                                string.Join(",", statesWithoutDefinedAnimation));
 
-            if (entriesWhereHashDoesntMatchAnyClip.Any()) // these are states that have supposedly been linked to an animation id, but the animation the id references doesn't exist so I probably fatfingered an animation name
-                Log.Error("The following " + typeof (ButtonAnimationStates).Name + " entries don't have a valid clip: " +
-                          string.Join(",", entriesWhereHashDoesntMatchAnyClip));
+                if (animationsWithoutStates.Any())
+                    // these are extra animations that we apparently aren't using -- not necessarily an error, but suspicious
+                    Log.Debug(typeof (ApplicationLauncherView).Name + " does not use the following animation clip(s): " +
+                              string.Join(",", animationsWithoutStates));
+
+                if (entriesWhereHashDoesntMatchAnyClip.Any())
+                    // these are states that have supposedly been linked to an animation id, but the animation the id references doesn't exist so I probably fatfingered an animation name
+                    Log.Error("The following " + typeof (ButtonAnimationStates).Name +
+                              " entries don't have a valid clip: " +
+                              string.Join(",", entriesWhereHashDoesntMatchAnyClip));
+            }
+            catch (Exception e)
+            {
+                Log.Warning("CheckForAnimationMismatch: failed due to " + e);
+            }
         }
 
 

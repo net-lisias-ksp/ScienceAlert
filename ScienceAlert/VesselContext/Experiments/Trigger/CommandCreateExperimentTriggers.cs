@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
@@ -10,7 +11,7 @@ using strange.extensions.command.impl;
 namespace ScienceAlert.VesselContext.Experiments.Trigger
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    class CommandCreateExperimentTriggers : Command
+    public class CommandCreateExperimentTriggers : Command
     {
         private readonly IEnumerable<SensorDefinition> _definitions;
         private readonly ITriggerBuilder _triggerBuilder;
@@ -18,7 +19,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
         private static bool _loggedInvalidTriggers = false;
 
         public CommandCreateExperimentTriggers(
-            IEnumerable<SensorDefinition> definitions, 
+            ReadOnlyCollection<SensorDefinition> definitions, 
             ITriggerBuilder triggerBuilder,
             ITemporaryBindingFactory bindingFactory)
         {
@@ -62,14 +63,18 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
             if (_loggedInvalidTriggers) return;
 
             _loggedInvalidTriggers = true;
-            Log.Debug("Logging any invalid triggers");
 
-            GetDefinitionsWithInvalidTriggerDefinitions()
-                .ToList()
-                .ForEach(
-                    sd =>
-                        Log.Error("Can't create trigger for " + sd.Experiment.id + ": " +
-                                  sd.TriggerDefinition.ToSafeString()));
+            var invalids = GetDefinitionsWithInvalidTriggerDefinitions().ToList();
+
+            if (invalids.Any())
+            {
+                Log.Debug("Logging invalid triggers");
+
+                invalids
+                    .ForEach(sd =>
+                            Log.Error("Can't create trigger for " + sd.Experiment.id + ": " +
+                                      sd.TriggerDefinition.ToSafeString()));
+            }
         }
 
 
@@ -81,7 +86,17 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
         private ExperimentTrigger CreateTrigger(SensorDefinition definition)
         {
-            return _triggerBuilder.Build(definition.TriggerDefinition, _triggerBuilder, injectionBinder, _bindingFactory);
+            try
+            {
+                injectionBinder.Bind<ScienceExperiment>().To(definition.Experiment);
+
+                return _triggerBuilder.Build(definition.TriggerDefinition, _triggerBuilder, injectionBinder,
+                    _bindingFactory);
+            }
+            finally
+            {
+                injectionBinder.Unbind<ScienceExperiment>();
+            }
         }
     }
 }

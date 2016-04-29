@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 
 namespace ScienceAlert.VesselContext.Experiments.Trigger
 {
+    // Some experiments might have custom science modules that need their own deployment logic.
+    // This object figures out which trigger to use and activates it
 // ReSharper disable once ClassNeverInstantiated.Global
     public class TriggerActivator
     {
@@ -45,13 +48,15 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
             try
             {
-                var trigger = _triggers.Single(t => t.Experiment.id == experiment.id);
+                var trigger = _triggers.SingleOrDefault(t => t.Experiment.id == experiment.id);
 
-                DeployTrigger(trigger);
+                trigger
+                    .Do(DeployTrigger)
+                    .IfNull(() => Log.Error("No trigger found that matches " + experiment.id));
             }
             catch (InvalidOperationException)
             {
-                throw new ArgumentException("No trigger found for " + experiment.id);
+                Log.Error("Multiple triggers found for " + experiment.id);
             }
         }
 
@@ -74,11 +79,12 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
             try
             {
+                _waitingOnTrigger = true;
+
                 trigger.Deploy()
                     .Then(() => FinishedDeploying(trigger.Experiment))
                     .Fail(e => DeployFailed(trigger.Experiment, e))
                     .Finally(StopWaiting);
-                _waitingOnTrigger = true;
             }
             catch (Exception)
             {

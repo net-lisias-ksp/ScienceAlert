@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.SensorDefinitions
 {
-    public class SensorDefinition : ITriggerDefinitionProvider, IRuleDefinitionProvider
+    public class SensorDefinition : /*ITriggerDefinitionProvider,*/ IRuleDefinitionProvider
     {
         public ScienceExperiment Experiment { get; private set; }
 

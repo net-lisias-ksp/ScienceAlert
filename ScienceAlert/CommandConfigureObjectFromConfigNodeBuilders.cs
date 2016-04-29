@@ -112,7 +112,7 @@ namespace ScienceAlert
         protected ReadOnlyCollection<Type> GetAllTypesThatImplement<TTypeImplemented>()
         {
             return AllTypesInLoadedAssemblies.Value
-                .Where(t => !t.IsGenericTypeDefinition)
+                .Where(t => !t.IsGenericTypeDefinition && !t.IsAbstract)
                 .Where(t => HasMatchingMarkerInterface(t, typeof (TTypeImplemented)))
                 .Where(IsNotExcluded)
                 .ToList()

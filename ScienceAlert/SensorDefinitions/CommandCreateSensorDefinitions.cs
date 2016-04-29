@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using ReeperCommon.Logging;
 using ScienceAlert.Game;
@@ -15,13 +16,14 @@ namespace ScienceAlert.SensorDefinitions
         private readonly IGameDatabase _gameDatabase;
         private readonly IConfigNodeObjectBuilder<SensorDefinition> _sensorDefinitionBuilder;
         private readonly ISensorDefinitionFactory _factory;
-        private readonly IEnumerable<ScienceExperiment> _experiments;
+        private readonly ReadOnlyCollection<ScienceExperiment> _experiments;
 
 
         public CommandCreateSensorDefinitions(
-            IGameDatabase gameDatabase, IConfigNodeObjectBuilder<SensorDefinition> sensorDefinitionBuilder,
+            IGameDatabase gameDatabase, 
+            IConfigNodeObjectBuilder<SensorDefinition> sensorDefinitionBuilder,
             ISensorDefinitionFactory factory,
-            IEnumerable<ScienceExperiment> experiments)
+            ReadOnlyCollection<ScienceExperiment> experiments)
         {
             if (gameDatabase == null) throw new ArgumentNullException("gameDatabase");
             if (sensorDefinitionBuilder == null) throw new ArgumentNullException("sensorDefinitionBuilder");
@@ -44,14 +46,14 @@ namespace ScienceAlert.SensorDefinitions
             var defaultDefinitions =
                 CreateDefaultDefinitions(_experiments.Where(e => customDefinitions.All(cd => cd.Experiment.id != e.id)));
 
-            var allDefinitions = customDefinitions.Union(defaultDefinitions).ToList();
+            var allDefinitions = customDefinitions.Union(defaultDefinitions).ToList().AsReadOnly();
 
             Log.Verbose("Created " + allDefinitions.Count + " sensor definitions");
 
             injectionBinder
-                .Bind<IEnumerable<SensorDefinition>>()
-                .Bind<IEnumerable<ITriggerDefinitionProvider>>()
-                .Bind<IEnumerable<IRuleDefinitionProvider>>()
+                .Bind<ReadOnlyCollection<SensorDefinition>>()
+                //.Bind<ReadOnlyCollection<ITriggerDefinitionProvider>>()
+                .Bind<ReadOnlyCollection<IRuleDefinitionProvider>>()
                     .To(allDefinitions).CrossContext();
         }
 

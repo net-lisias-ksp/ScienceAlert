@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
@@ -17,7 +18,7 @@ namespace ScienceAlert.VesselContext.Experiments
     {
         private readonly IRuleBuilder _ruleBuilder;
         private readonly IConfigNodeSerializer _serializer;
-        private readonly IEnumerable<SensorDefinition> _sensorDefinitions;
+        private readonly ReadOnlyCollection<SensorDefinition> _sensorDefinitions;
         private readonly IScienceSubjectProvider _subjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
         private readonly ITemporaryBindingFactory _temporaryBindingFactory;
@@ -26,7 +27,7 @@ namespace ScienceAlert.VesselContext.Experiments
         public CommandCreateExperimentSensors(
             IRuleBuilder ruleBuilder,
             IConfigNodeSerializer serializer,
-            IEnumerable<SensorDefinition> sensorDefinitions,
+            ReadOnlyCollection<SensorDefinition> sensorDefinitions,
             IScienceSubjectProvider subjectProvider,
             IExperimentReportValueCalculator reportCalculator,
             ITemporaryBindingFactory temporaryBindingFactory,

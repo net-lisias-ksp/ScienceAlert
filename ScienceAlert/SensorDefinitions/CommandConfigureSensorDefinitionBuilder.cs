@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
@@ -18,10 +19,10 @@ namespace ScienceAlert.SensorDefinitions
         private const string DefaultConditionRuleNodeName = "SA_DEFAULT_CONDITION_RULE";
         private const string DefaultExperimentTriggerNodeName = "SA_DEFAULT_EXPERIMENT_TRIGGER";
 
-        private readonly IEnumerable<ScienceExperiment> _experiments;
+        private readonly ReadOnlyCollection<ScienceExperiment> _experiments;
         private readonly IGameDatabase _gameDatabase;
 
-        public CommandConfigureSensorDefinitionBuilder(IEnumerable<ScienceExperiment> experiments, IGameDatabase gameDatabase)
+        public CommandConfigureSensorDefinitionBuilder(ReadOnlyCollection<ScienceExperiment> experiments, IGameDatabase gameDatabase)
         {
             if (experiments == null) throw new ArgumentNullException("experiments");
             if (gameDatabase == null) throw new ArgumentNullException("gameDatabase");

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using ReeperCommon.Logging;
 using ScienceAlert.Core;
@@ -12,7 +13,7 @@ namespace ScienceAlert.VesselContext.Experiments
 {
     public class ExperimentReportValueCalculator : IExperimentReportValueCalculator
     {
-        private readonly IEnumerable<ScienceExperiment> _experiments;
+        private readonly ReadOnlyCollection<ScienceExperiment> _experiments;
         private readonly float _careerMultiplier;
         private readonly ICelestialBody _homeWorld;
         private readonly IQueryScienceValue _scienceValueQuery;
@@ -22,7 +23,7 @@ namespace ScienceAlert.VesselContext.Experiments
             new Dictionary<ScienceExperiment, ScienceModuleList>();
 
         public ExperimentReportValueCalculator(
-            IEnumerable<ScienceExperiment> experiments,
+            ReadOnlyCollection<ScienceExperiment> experiments,
             [Name(CoreKeys.CareerScienceGainMultiplier)] float careerMultiplier,
             [Name(CoreKeys.HomeWorld)] ICelestialBody homeWorld,
             IQueryScienceValue scienceValueQuery,
