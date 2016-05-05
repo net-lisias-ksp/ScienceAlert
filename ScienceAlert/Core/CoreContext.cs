@@ -145,8 +145,8 @@ namespace ScienceAlert.Core
                 .InSequence()
                 .To<CommandConfigureSensorDefinitionBuilder>()
                 .To<CommandCreateSensorDefinitions>()
-                .To<CommandConfigureRuleBuilders>()
-                .To<CommandConfigureTriggerBuilders>()
+                .To<CommandConfigureRuleFactories>()
+                .To<CommandConfigureTriggerFactories>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
@@ -406,7 +406,7 @@ namespace ScienceAlert.Core
 
 
 
-        //private IConfigNodeObjectBuilder<IRuleBuilder> CreateRuleFactoryBuilder(ITemporaryBindingFactory temporaryBinder)
+        //private IConfigNodeObjectBuilder<IRuleFactory> CreateRuleFactoryBuilder(ITemporaryBindingFactory temporaryBinder)
         //{
         //    // Get all Types that implement IExperimentRule and create builders which will construct factories to produce them 
         //    // I know that sounds insane but this way we can do all the processing of ConfigNodes up front and use those
@@ -414,7 +414,7 @@ namespace ScienceAlert.Core
         //    // to deserialize the concrete type that implements IExperimentRule)
         //    //
         //    // All of these rule factory builders can then be hidden behind this composite interface and it'll
-        //    // look like we have a magic IRuleBuilder builder that can handle all kinds of nodes and types
+        //    // look like we have a magic IRuleFactory builder that can handle all kinds of nodes and types
 
         //    var allTypes = AssemblyLoader.loadedAssemblies.SelectMany(la => la.assembly.GetTypes()).ToList();
 
@@ -434,20 +434,20 @@ namespace ScienceAlert.Core
         //        allTypes.Where(
         //            t =>
         //                !t.IsAbstract &&
-        //                t.GetInterfaces().Any(it => it == typeof(IConfigNodeObjectBuilder<IRuleBuilder>) && !it.IsGenericTypeDefinition && !it.IsAbstract))
+        //                t.GetInterfaces().Any(it => it == typeof(IConfigNodeObjectBuilder<IRuleFactory>) && !it.IsGenericTypeDefinition && !it.IsAbstract))
         //                .Where(t => temporaryBinder.CanCreate(t))
         //                .ToList();
 
         //    experimentRuleTypes.ForEach(t => Log.Debug("IExperimentRule type: " + t.FullName));
-        //    explicitFactoryBuilders.ForEach(bt => Log.Debug("IRuleBuilder builder type: " + bt.FullName));
+        //    explicitFactoryBuilders.ForEach(bt => Log.Debug("IRuleFactory builder type: " + bt.FullName));
 
-        //    var builder = new CompositeObjectFromConfigNodeFactory<IRuleBuilder>(
+        //    var builder = new CompositeObjectFromConfigNodeFactory<IRuleFactory>(
         //        // we'll prefer explicit builders first
         //        explicitFactoryBuilders.Select(explicitFactoryType =>
         //        {
         //            using (var binding = temporaryBinder.Create(explicitFactoryType))
         //            {
-        //                return (IConfigNodeObjectBuilder<IRuleBuilder>) binding.GetInstance();
+        //                return (IConfigNodeObjectBuilder<IRuleFactory>) binding.GetInstance();
         //            }
         //        })
 
@@ -460,12 +460,12 @@ namespace ScienceAlert.Core
         //                    {
         //                        using (var binding = temporaryBinder.Create(builderType))
         //                        {
-        //                            return (IConfigNodeObjectBuilder<IRuleBuilder>)binding.GetInstance();
+        //                            return (IConfigNodeObjectBuilder<IRuleFactory>)binding.GetInstance();
         //                        }
         //                    }))
 
         //        // add ability to AND rules together
-        //        .Union(new [] { (IConfigNodeObjectBuilder<IRuleBuilder>)(new CompositeAndRule.CompositeAndRuleFactoryBuilder()) }));
+        //        .Union(new [] { (IConfigNodeObjectBuilder<IRuleFactory>)(new CompositeAndRule.CompositeAndRuleFactoryBuilder()) }));
 
             
         //    return builder;

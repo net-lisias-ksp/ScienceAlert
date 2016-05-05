@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ReeperCommon.Logging;
 using strange.extensions.injector.api;
 
 namespace ScienceAlert
@@ -42,19 +40,21 @@ namespace ScienceAlert
         public bool CanCreate(Type concreteType)
         {
             if (concreteType == null) throw new ArgumentNullException("concreteType");
-            if (concreteType.IsAbstract)
-                throw new ArgumentException(concreteType.FullName + " is abstract and cannot be created", "concreteType");
 
             var constructors = concreteType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
             var binding = _binder.GetBinding(concreteType);
 
-            Log.Verbose("Checking if CanCreate " + concreteType.Name);
+            if (concreteType.IsAbstract && binding == null)
+                throw new ArgumentException(concreteType.FullName + " is abstract and cannot be created", "concreteType");
 
             var canCreate = binding != null &&
                        constructors.Any(
-                           ci => ci.GetParameters().Select(pi => pi.ParameterType).All(CanCreate));
+                           ci => ci.GetParameters().Select(pi => pi.ParameterType).All(param =>
+                           {
+                               var haveBinding = _binder.GetBinding(param) != null;
 
-            Log.Verbose("result: " + canCreate);
+                               return haveBinding || (!param.IsAbstract && CanCreate(param));
+                           }));
 
             return canCreate;
         }

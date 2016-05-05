@@ -6,9 +6,9 @@ using strange.extensions.injector.api;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    class CustomBuilder : IRuleBuilder
+    class CustomFactory : IRuleFactory
     {
-        public IExperimentRule Build(ConfigNode config, IRuleBuilder parameter, IInjectionBinder binder, ITemporaryBindingFactory parameter2)
+        public IExperimentRule Build(ConfigNode config, IRuleFactory parameter, IInjectionBinder binder, ITemporaryBindingFactory parameter2)
         {
             throw new NotImplementedException();
         }

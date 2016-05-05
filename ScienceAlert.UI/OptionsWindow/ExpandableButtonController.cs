@@ -1,4 +1,5 @@
 ﻿using System;
+using ReeperCommon.Logging;
 using UnityEngine;
 
 namespace ScienceAlert.UI.OptionsWindow
@@ -16,9 +17,16 @@ namespace ScienceAlert.UI.OptionsWindow
         private bool _isOpen = false;
 
 
+        private void Awake()
+        {
+            Log.Debug("ExpandableButtonController.Awake");
+        }
+
         // ReSharper disable once UnusedMember.Global
         public void TogglePanel()
         {
+            Log.Debug("ExpandableButtonController.TogglePanel");
+
             _isOpen = !_isOpen;
             _animator.SetBool(_openId, _isOpen);
         }

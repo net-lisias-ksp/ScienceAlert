@@ -17,8 +17,6 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
         public override void Execute()
         {
-            Log.TraceMessage();
-
             var activator = injectionBinder.GetInstance<TriggerActivator>();
             _deploySignal.AddListener(activator.ActivateTriggerFor);
 

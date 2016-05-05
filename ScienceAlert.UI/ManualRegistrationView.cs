@@ -4,7 +4,7 @@ using strange.extensions.mediation.impl;
 namespace ScienceAlert.UI
 {
     [Serializable]
-    class ManualRegistrationView : View
+    public class ManualRegistrationView : View
     {
         public override bool autoRegisterWithContext
         {

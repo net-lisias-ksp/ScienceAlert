@@ -74,14 +74,12 @@ namespace ScienceAlert.Game
 
         private void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, Part> data)
         {
-            Log.TraceMessage();
             Log.Error("This method not implemented");
         }
 
 
         private void OnCrewOnEva(GameEvents.FromToAction<Part, Part> data)
         {
-            Log.TraceMessage();
             Log.Error("This method not implemented");
         }
 

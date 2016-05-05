@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using ReeperCommon.Containers;
@@ -16,7 +17,7 @@ namespace ScienceAlert.VesselContext.Experiments
     {
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
-        [Inject] public List<ExperimentSensor> Sensors { get; set; }
+        [Inject] public ReadOnlyCollection<ExperimentSensor> Sensors { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
 
         [Inject] public SignalCriticalShutdown CriticalFail { get; set; }
@@ -27,7 +28,7 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             try
             {
-                var start = Time.realtimeSinceStartup;
+                //var start = Time.realtimeSinceStartup;
 
                 // todo: split across several frames
                 foreach (var m in Sensors)
@@ -41,8 +42,8 @@ namespace ScienceAlert.VesselContext.Experiments
                         DispatchChangedSignal(m);
                 }
 
-                print("Time used: " + ((Time.realtimeSinceStartup - start) * 1000f).ToString("F2") + " ms for " + Sensors.Count +
-                      " sensors");
+                //print("Time used: " + ((Time.realtimeSinceStartup - start) * 1000f).ToString("F2") + " ms for " + Sensors.Count +
+                //      " sensors");
             }
             catch (Exception e)
             {

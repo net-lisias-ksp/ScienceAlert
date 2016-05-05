@@ -67,20 +67,16 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
-            injectionBinder.Bind<SignalUpdateExperimentListEntryPopup>().ToSingleton();
-            injectionBinder.Bind<SignalCloseExperimentListEntryPopup>().ToSingleton();
-
             injectionBinder.Bind<SignalCriticalShutdown>().ToSingleton();
 
             injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
             injectionBinder.Bind<SignalDeployExperiment>().ToSingleton();
             injectionBinder.Bind<SignalDeployExperimentFinished>().ToSingleton();
 
-            injectionBinder.Bind<ExperimentListEntryFactory>().ToSingleton();
 
-            mediationBinder.BindView<ExperimentListView>()
-                .ToMediator<ExperimentListMediator>()
-                .ToMediator<ExperimentListPopupMediator>();
+            //mediationBinder.BindView<ExperimentListView>()
+            //    .ToMediator<ExperimentListMediator>()
+            //    .ToMediator<ExperimentListPopupMediator>();
 
             injectionBinder.Bind<ITemporaryBindingFactory>().To<TemporaryBindingFactory>().ToSingleton();
             injectionBinder.Bind<IGameFactory>().Bind<KspFactory>().To<KspFactory>().ToSingleton();

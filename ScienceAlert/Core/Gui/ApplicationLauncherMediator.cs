@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Linq;
+using ReeperCommon.Logging;
 using ReeperKSP.AssetBundleLoading;
 using strange.extensions.mediation.impl;
 
@@ -20,7 +22,6 @@ namespace ScienceAlert.Core.Gui
             View.enabled = false; // prevent View from starting up while we wait on assets
 
             StartCoroutine(LoadViewAssets());
-            //View.SetAnimationState(ApplicationLauncherView.AnimationState.Spinning);
         }
 
 
@@ -28,15 +29,25 @@ namespace ScienceAlert.Core.Gui
         {
             base.OnRemove();
             View.Toggle.RemoveListener(OnButtonToggle);
-            //AlertPanelVisibilityChanged.RemoveListener(OnAlertPanelVisibilityChanged);
         }
 
 
         private IEnumerator LoadViewAssets()
         {
             print("Loading View assets...");
-            yield return StartCoroutine(AssetBundleAssetLoader.InjectAssetsAsyncHosted(View));
+
+            var viewAssetLoadRoutine = AssetBundleAssetLoader.InjectAssetsAsync(View, View.GetType());
+            yield return viewAssetLoadRoutine.YieldUntilComplete;
+
+            if (viewAssetLoadRoutine.Error.Any())
+            {
+                Log.Error("Failed to load ApplicationLauncher assets: " + viewAssetLoadRoutine.Error.Value);
+                yield break;
+            }
+
             print("View assets loaded, waiting for AppLauncher");
+
+
             yield return StartCoroutine(View.SetupButton());
 
             print("Finished waiting on AppLauncher, enabling View");

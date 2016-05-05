@@ -63,6 +63,12 @@ namespace ScienceAlert.Core.Gui
         // Defensive coding in case I change the name or add animations in the future
         private void CheckForAnimationMismatch()
         {
+            if (_buttonSprite == null)
+            {
+                Log.Verbose("Aborting button animation check: button sprite not loaded");
+                return;
+            }
+
             var statesWithoutDefinedAnimation =
                 Enum.GetValues(typeof (ButtonAnimationStates))
                     .Cast<ButtonAnimationStates>()
@@ -115,7 +121,11 @@ namespace ScienceAlert.Core.Gui
 
         public IEnumerator SetupButton()
         {
-            Log.TraceMessage();
+            if (_buttonSprite == null)
+            {
+                Log.Error("Cannot setup ApplicationLauncherButton because its sprite prefab is not loaded.");
+                yield break;
+            }
 
             while (ApplicationLauncher.Instance == null || !ApplicationLauncher.Ready)
                 yield return null;
@@ -132,10 +142,6 @@ namespace ScienceAlert.Core.Gui
                                                         () => { },
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                                                         _buttonSprite);
-
-            // commented to confirm this is still the cause in 1.1
-            //yield return new WaitForEndOfFrame();   // the button won't respect toggle state immediately for some reason,
-            //                                        // so a slight delay is necessary while it finishes doing whatever internal setup
 
             SetAnimationState(ButtonAnimationStates.Unlit);
             SetAnimationState(ButtonAnimationStates.Spinning); // temp to make sure it's working

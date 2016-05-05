@@ -14,29 +14,27 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
     public class CommandCreateExperimentTriggers : Command
     {
         private readonly IEnumerable<SensorDefinition> _definitions;
-        private readonly ITriggerBuilder _triggerBuilder;
+        private readonly ITriggerFactory _triggerFactory;
         private readonly ITemporaryBindingFactory _bindingFactory;
         private static bool _loggedInvalidTriggers = false;
 
         public CommandCreateExperimentTriggers(
             ReadOnlyCollection<SensorDefinition> definitions, 
-            ITriggerBuilder triggerBuilder,
+            ITriggerFactory triggerFactory,
             ITemporaryBindingFactory bindingFactory)
         {
             if (definitions == null) throw new ArgumentNullException("definitions");
-            if (triggerBuilder == null) throw new ArgumentNullException("triggerBuilder");
+            if (triggerFactory == null) throw new ArgumentNullException("triggerFactory");
             if (bindingFactory == null) throw new ArgumentNullException("bindingFactory");
 
             _definitions = definitions;
-            _triggerBuilder = triggerBuilder;
+            _triggerFactory = triggerFactory;
             _bindingFactory = bindingFactory;
         }
 
 
         public override void Execute()
         {
-            Log.TraceMessage();
-
             LogInvalidTriggers();
 
             var triggers = new List<ExperimentTrigger>();
@@ -80,7 +78,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
         private IEnumerable<SensorDefinition> GetDefinitionsWithInvalidTriggerDefinitions()
         {
-            return _definitions.Where(sd => !_triggerBuilder.CanHandle(sd.TriggerDefinition));
+            return _definitions.Where(sd => !_triggerFactory.CanHandle(sd.TriggerDefinition));
         }
 
 
@@ -90,7 +88,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
             {
                 injectionBinder.Bind<ScienceExperiment>().To(definition.Experiment);
 
-                return _triggerBuilder.Build(definition.TriggerDefinition, _triggerBuilder, injectionBinder,
+                return _triggerFactory.Build(definition.TriggerDefinition, _triggerFactory, injectionBinder,
                     _bindingFactory);
             }
             finally

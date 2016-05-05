@@ -48,6 +48,7 @@
     <Compile Include="ExperimentWindow\ExperimentWindowController.cs" />
     <Compile Include="IExperimentEntry.cs" />
     <Compile Include="OptionsWindow\ExpandableButtonController.cs" />
+    <Compile Include="OptionsWindow\OptionsWindowView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ManualRegistrationView.cs" />
   </ItemGroup>

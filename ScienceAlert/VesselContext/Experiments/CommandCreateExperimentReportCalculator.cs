@@ -6,6 +6,7 @@ using strange.extensions.command.impl;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandCreateExperimentReportCalculator : Command
     {
         private readonly IVessel _activeVessel;

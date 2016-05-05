@@ -10,7 +10,7 @@ using strange.extensions.command.impl;
 
 namespace ScienceAlert
 {
-    abstract class CommandConfigureObjectFromConfigNodeBuilders<TBuilderMarkerInterface, TBuiltType> : Command
+    abstract class CommandConfigureObjectFromConfigNodeBuilders<TBuilderMarkerInterface> : Command
     {
         protected readonly ITemporaryBindingFactory TemporaryBinder;
         protected readonly Lazy<IEnumerable<Type>> AllTypesInLoadedAssemblies;
@@ -28,8 +28,8 @@ namespace ScienceAlert
             var builderTypes = GetBuilderTypes();
 
             if (!builderTypes.Any())
-                Log.Warning("No builder types that implement " + typeof (TBuilderMarkerInterface) +
-                            " found. This is probably bad");
+                Log.Verbose("No builder types that implement " + typeof (TBuilderMarkerInterface) +
+                            " found. If there are no custom builders required, this message is harmless.");
 
             BindBuildersToCrossContext(CreateBuilders(builderTypes));
         }
@@ -97,13 +97,13 @@ namespace ScienceAlert
             }
         }
 
-        protected IEnumerable<Type> GetAllTypesFromLoadedAssemblies()
+        private IEnumerable<Type> GetAllTypesFromLoadedAssemblies()
         {
             return AssemblyLoader.loadedAssemblies
                 .SelectMany(la => la.assembly.GetTypes());
         }
 
-        protected ReadOnlyCollection<Type> GetConcreteBuilders()
+        private ReadOnlyCollection<Type> GetConcreteBuilders()
         {
             return GetAllTypesThatImplement<TBuilderMarkerInterface>().ToList().Where(IsConstructable).ToList().AsReadOnly();
         }
@@ -120,7 +120,7 @@ namespace ScienceAlert
         }
 
 
-        protected static bool HasMatchingMarkerInterface(Type possibleBuilderType, Type markerInterface)
+        private static bool HasMatchingMarkerInterface(Type possibleBuilderType, Type markerInterface)
         {
             return possibleBuilderType != null && markerInterface.IsAssignableFrom(possibleBuilderType);
         }

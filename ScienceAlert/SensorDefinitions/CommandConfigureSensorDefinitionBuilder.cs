@@ -61,8 +61,6 @@ namespace ScienceAlert.SensorDefinitions
 
         public override void Execute()
         {
-            Log.TraceMessage();
-
             var defaultOnboardRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultOnboardRuleNodeName));
             var defaultAvailabilityRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultAvailabilityRuleNodeName));
             var defaultConditionRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultConditionRuleNodeName));

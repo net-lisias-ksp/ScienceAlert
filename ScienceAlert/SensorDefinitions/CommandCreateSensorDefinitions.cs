@@ -39,7 +39,6 @@ namespace ScienceAlert.SensorDefinitions
 
         public override void Execute()
         {
-            Log.TraceMessage();
             Log.Verbose("Creating sensor definitions");
 
             var customDefinitions = CreateCustomDefinitions();
