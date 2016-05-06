@@ -1,5 +1,8 @@
 ﻿using System;
-using JetBrains.Annotations;
+using System.Collections.Generic;
+using ReeperCommon.Containers;
+using ReeperCommon.Logging;
+using strange.extensions.signal.impl;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,47 +13,88 @@ namespace ScienceAlert.UI.ExperimentWindow
     [Serializable, DisallowMultipleComponent]
     public class ExperimentWindowView : ManualRegistrationView
     {
+        [NonSerialized, HideInInspector] internal readonly Signal<string> ExperimentDeploySignal = new Signal<string>();
+        
         [SerializeField] private ExperimentListEntry _listItemPrefab;
         [SerializeField] private RectTransform _list;
 
-        //[NonSerialized, HideInInspector] internal readonly Signal<IExperimentEntry> DeployExperiment = new Signal<IExperimentEntry>();
+        //[NonSerialized, HideInInspector] internal readonly Signal<ExperimentEntryInfo> DeployExperiment = new Signal<ExperimentEntryInfo>();
+
+        [HideInInspector] private readonly Dictionary<string, ExperimentListEntry> _listEntries =
+            new Dictionary<string, ExperimentListEntry>();
  
+
         // ReSharper disable once UnusedMember.Global
-        public void AddExperimentEntry([NotNull] IExperimentEntry entry)
+        public void UpdateExperimentEntry(string identifier, ExperimentEntryInfo entryInfo, bool resort)
         {
-            if (entry == null) throw new ArgumentNullException("entry");
+            if (string.IsNullOrEmpty(identifier)) throw new ArgumentException("cannot be null or empty", "identifier");
             if (_listItemPrefab == null) throw new InvalidOperationException("Missing list item prefab");
             if (_list == null) throw new InvalidOperationException("Missing list reference");
 
+            
+            bool rebuildLayout = resort;
+
+            var target = GetListItem(identifier).Or(() =>
+            {
+                rebuildLayout = true;
+                AddNewListItem(identifier);
+                return GetListItem(identifier).Value;
+            });
+
+
+            UpdateExperimentListItem(target, entryInfo);
+
+            if (rebuildLayout) LayoutRebuilder.MarkLayoutForRebuild(_list);
+        }
+
+
+        private Maybe<ExperimentListEntry> GetListItem(string identifier)
+        {
+            ExperimentListEntry result;
+
+            return !_listEntries.TryGetValue(identifier, out result) ? Maybe<ExperimentListEntry>.None : result.ToMaybe();
+        }
+
+
+        private void AddNewListItem(string identifier)
+        {
+            if (_listEntries.ContainsKey(identifier))
+                throw new ArgumentException("List already contains an entry with identifier '" + identifier + "'",
+                    "identifier");
+
             var instance = Instantiate(_listItemPrefab);
 
-            instance.Experiment = entry;
-            //instance.Deploy.AddListener(OnDeployButtonClicked);
-
-            instance.transform.parent = _list;
+            instance.transform.SetParent(_list, false);
             instance.transform.SetAsLastSibling();
 
+            // todo: sorting
 
-            LayoutRebuilder.MarkLayoutForRebuild(_list);
+            _listEntries.Add(identifier, instance);
+
+            instance.Deploy.AddListener(() => OnExperimentButtonClicked(identifier));
         }
 
 
-        public void RemoveExperimentEntry([NotNull] IExperimentEntry entry)
+        private void OnExperimentButtonClicked(string identifier)
         {
-            if (entry == null) throw new ArgumentNullException("entry");
-            if (_list == null) throw new InvalidOperationException("Missing list reference");
-
-            throw new NotImplementedException();
+            Log.Warning("ExperimentWindowView.OnExperimentButtonClicked: " + identifier);
         }
 
 
-        //private void OnDeployButtonClicked([NotNull] IExperimentEntry entry)
-        //{
-        //    if (entry == null) throw new ArgumentNullException("entry");
+        private void UpdateExperimentListItem(ExperimentListEntry entry, ExperimentEntryInfo info)
+        {
+            entry.Enabled = info.ButtonEnabled;
+            entry.Text = info.ExperimentTitle;
+            
+            entry.CollectionValue = info.CollectionValue;
+            entry.CollectionAlertLit = info.CollectionAlertLit;
 
-        //    Log.Warning("Experiment button: " + entry.experimentID + " clicked");
+            entry.TransmissionValue = info.TransmissionValue;
+            entry.TransmissionAlertLit = info.TransmissionAlertLit;
 
-        //    DeployExperiment.Dispatch(entry);
-        //}
+            entry.LabValue = info.LabValue;
+            entry.LabAlertLit = info.LabAlertLit;
+
+        }
     }
 }

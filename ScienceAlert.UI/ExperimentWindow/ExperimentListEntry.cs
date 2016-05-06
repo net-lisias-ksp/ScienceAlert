@@ -1,5 +1,6 @@
 ﻿using System;
-using ReeperCommon.Containers;
+using System.Linq;
+using System.Reflection;
 using ReeperCommon.Logging;
 using strange.extensions.signal.impl;
 using UnityEngine;
@@ -14,25 +15,59 @@ namespace ScienceAlert.UI.ExperimentWindow
     // ReSharper disable once UnusedMember.Global
     internal class ExperimentListEntry : MonoBehaviour
     {
-        public readonly Signal<IExperimentEntry> Deploy = new Signal<IExperimentEntry>();
+        public readonly Signal Deploy = new Signal();
 
         [SerializeField] private Button _deployButton;
-        [NonSerialized, HideInInspector] public IExperimentEntry Experiment;
+        [SerializeField] private Text _text;
+        [SerializeField] private Toggle _collectionIndicatorLight;
+        [SerializeField] private Toggle _transmissionIndicatorLight;
+        [SerializeField] private Toggle _labIndicatorLight;
 
-        // ReSharper disable once UnusedMember.Global
-        public void OnDeploy()
+        private void Start()
         {
-            Experiment
-                .IfNull(() => Log.Error("No experiment set for this button controller"))
-                .Do(e => Deploy.Dispatch(e));
+            GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(type => typeof (Selectable).IsAssignableFrom(type.FieldType))
+                .Where(fi => fi.GetValue(this) == null)
+                .ToList()
+                .ForEach(nullField => Log.Error("ExperimentListEntry." + nullField.Name + " is not set"));
         }
 
 
         // ReSharper disable once UnusedMember.Global
-        public bool IsEnabled
+        public void OnDeploy()
         {
-            get { return _deployButton.interactable; }
+            Deploy.Dispatch();
+        }
+
+
+        // ReSharper disable once UnusedMember.Global
+        public bool Enabled
+        {
             set { _deployButton.interactable = value; }
+        }
+
+        public string Text
+        {
+            set { _text.text = value; }
+        }
+
+        public float CollectionValue { set; private get; }
+        public float TransmissionValue { set; private get; }
+        public float LabValue { set; private get; }
+
+        public bool CollectionAlertLit
+        {
+            set { _collectionIndicatorLight.isOn = value; }
+        }
+
+        public bool TransmissionAlertLit
+        {
+            set { _transmissionIndicatorLight.isOn = value; }
+        }
+
+        public bool LabAlertLit
+        {
+            set { _labIndicatorLight.isOn = value; }
         }
     }
 }

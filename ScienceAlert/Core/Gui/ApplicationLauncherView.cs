@@ -80,6 +80,7 @@ namespace ScienceAlert.Core.Gui
 
             try
             {
+                
                 var animationsWithoutStates = _buttonSprite.runtimeAnimatorController.animationClips
                     .ToDictionary(ac => ac.name, ac => Animator.StringToHash(ac.name)) // KVP<name, hash>
                     .Where(clip => _buttonAnimations.Values.All(existingHash => existingHash != clip.Value))

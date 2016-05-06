@@ -46,7 +46,7 @@
   <ItemGroup>
     <Compile Include="ExperimentWindow\ExperimentListEntry.cs" />
     <Compile Include="ExperimentWindow\ExperimentWindowView.cs" />
-    <Compile Include="IExperimentEntry.cs" />
+    <Compile Include="ExperimentWindow\ExperimentEntryInfo.cs" />
     <Compile Include="OptionsWindow\ExpandableButtonController.cs" />
     <Compile Include="OptionsWindow\OptionsWindowView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
