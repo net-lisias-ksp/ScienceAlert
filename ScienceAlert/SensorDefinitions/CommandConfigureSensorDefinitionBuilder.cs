@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
 using ReeperKSP.Extensions;
-using ScienceAlert.Core;
-using ScienceAlert.Game;
 using strange.extensions.command.impl;
+using ScienceAlert.Game;
 
 namespace ScienceAlert.SensorDefinitions
 {

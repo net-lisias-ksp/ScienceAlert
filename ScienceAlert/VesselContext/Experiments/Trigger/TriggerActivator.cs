@@ -9,7 +9,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
     // Some experiments might have custom science modules that need their own deployment logic.
     // This object figures out which trigger to use and activates it
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class TriggerActivator
+    class TriggerActivator
     {
         private readonly SignalDeployExperimentFinished _finishedSignal;
         private readonly ExperimentTrigger[] _triggers;

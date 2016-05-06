@@ -67,7 +67,6 @@
     <Compile Include="DoNotAutoRegister.cs" />
     <Compile Include="SensorDefinitions\CommandConfigureSensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
-    <Compile Include="SensorDefinitions\IRuleDefinitionProvider.cs" />
     <Compile Include="SensorDefinitions\ISensorDefinitionFactory.cs" />
     <Compile Include="Game\IGameDatabase.cs" />
     <Compile Include="Game\IUrlConfig.cs" />
@@ -75,7 +74,6 @@
     <Compile Include="Game\KspUrlConfig.cs" />
     <Compile Include="ITemporaryBindingFactory.cs" />
     <Compile Include="IConfigNodeObjectBuilder.cs" />
-    <Compile Include="SensorDefinitions\ITriggerDefinitionProvider.cs" />
     <Compile Include="TemporaryBinding.cs" />
     <Compile Include="TemporaryBindingFactory.cs" />
     <Compile Include="VesselContext\CommandCreateVesselBindings.cs" />
@@ -168,6 +166,7 @@
     <Compile Include="VesselContext\Gui\CommandDispatchLoadGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchSaveGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\ExperimentSensorState.cs" />
+    <Compile Include="VesselContext\Gui\ExperimentWindowMediator.cs" />
     <Compile Include="VesselContext\Gui\Old\CommandTriggerInitialSensorUpdates.cs" />
     <Compile Include="VesselContext\Gui\Old\ExperimentListPopupMediator.cs" />
     <Compile Include="VesselContext\Gui\Old\ExperimentPopupMediator.cs" />
@@ -181,8 +180,6 @@
     <Compile Include="Core\AssemblyNotFoundException.cs" />
     <Compile Include="Core\BootstrapCore.cs" />
     <Compile Include="Core\GetObjectFieldsIncludingBaseTypes.cs" />
-    <Compile Include="Core\Gui\SkinNotCreatedException.cs" />
-    <Compile Include="Core\Gui\CommandConfigureGuiSkinsAndTextures.cs" />
     <Compile Include="VesselContext\Gui\Old\ExperimentListMediator.cs" />
     <Compile Include="VesselContext\Gui\Old\ExperimentListView.cs" />
     <Compile Include="VesselContext\Gui\CommandCreateVesselGui.cs" />
@@ -191,15 +188,11 @@
     <Compile Include="Core\ScenarioModuleNotFoundException.cs" />
     <Compile Include="Core\SignalContext.cs" />
     <Compile Include="Core\Signals.cs" />
-    <Compile Include="Core\Gui\TextureNotFoundException.cs" />
     <Compile Include="Core\Gui\ApplicationLauncherMediator.cs" />
     <Compile Include="Core\Gui\ApplicationLauncherView.cs" />
     <Compile Include="Gui\IGuiConfiguration.cs" />
-    <Compile Include="GuiKeys.cs" />
-    <Compile Include="Core\Gui\ShaderNotFoundException.cs" />
     <Compile Include="VesselContext\Signals.cs" />
     <Compile Include="StrangeView.cs" />
-    <Compile Include="ICoroutineRunner.cs" />
     <Compile Include="old\ScienceAlert\API\Util.cs" />
     <Compile Include="old\ScienceAlert\Experiments\BiomeFilter.cs" />
     <Compile Include="old\ScienceAlert\Experiments\Observers\EvaReportObserver.cs" />
@@ -227,44 +220,43 @@
     <Compile Include="old\ScienceAlert\Toolbar\Wrapper\ToolbarWrapper.cs" />
     <Compile Include="old\ScienceAlert\Windows\OptionsWindow_Popups.cs" />
     <Compile Include="old\ScienceAlert\Windows\WindowEventLogic.cs" />
-    <Compile Include="CoroutineRunner.cs" />
     <Compile Include="Signals.cs" />
     <Compile Include="VesselContext\VesselContextKeys.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\flask.png" />
+    <EmbeddedResource Include="Resources\old\flask.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\sheet.png" />
+    <EmbeddedResource Include="Resources\old\sheet.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnExpand.png" />
+    <EmbeddedResource Include="Resources\old\btnExpand.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\sheet_app.png" />
+    <EmbeddedResource Include="Resources\old\sheet_app.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnOpen.png" />
-    <EmbeddedResource Include="Resources\btnSave.png" />
+    <EmbeddedResource Include="Resources\old\btnOpen.png" />
+    <EmbeddedResource Include="Resources\old\btnSave.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnReturn.png" />
+    <EmbeddedResource Include="Resources\old\btnReturn.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnDelete.png" />
+    <EmbeddedResource Include="Resources\old\btnDelete.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnRename.png" />
+    <EmbeddedResource Include="Resources\old\btnRename.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnUnlock.png" />
+    <EmbeddedResource Include="Resources\old\btnUnlock.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnClose.png" />
+    <EmbeddedResource Include="Resources\old\btnClose.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnBackground.png" />
-    <EmbeddedResource Include="Resources\btnLock.png" />
+    <EmbeddedResource Include="Resources\old\btnBackground.png" />
+    <EmbeddedResource Include="Resources\old\btnLock.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="old\ScienceAlert\Tools\" />
@@ -288,11 +280,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\btnScale.png" />
-    <EmbeddedResource Include="Resources\cursor.png" />
+    <EmbeddedResource Include="Resources\old\btnScale.png" />
+    <EmbeddedResource Include="Resources\old\cursor.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\toggle_frame.png" />
+    <EmbeddedResource Include="Resources\old\toggle_frame.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

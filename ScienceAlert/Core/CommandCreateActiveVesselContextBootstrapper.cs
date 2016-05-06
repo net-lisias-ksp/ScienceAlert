@@ -9,7 +9,7 @@ namespace ScienceAlert.Core
 {
 // ReSharper disable once UnusedMember.Global
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandCreateActiveVesselContextBootstrapper : Command
+    class CommandCreateActiveVesselContextBootstrapper : Command
     {
         private const string VesselContextGameObjectName = "VesselContextView";
 

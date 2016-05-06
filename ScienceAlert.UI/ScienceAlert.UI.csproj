@@ -44,8 +44,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExperimentWindow\ExperimentListEntryController.cs" />
-    <Compile Include="ExperimentWindow\ExperimentWindowController.cs" />
+    <Compile Include="ExperimentWindow\ExperimentListEntry.cs" />
+    <Compile Include="ExperimentWindow\ExperimentWindowView.cs" />
     <Compile Include="IExperimentEntry.cs" />
     <Compile Include="OptionsWindow\ExpandableButtonController.cs" />
     <Compile Include="OptionsWindow\OptionsWindowView.cs" />

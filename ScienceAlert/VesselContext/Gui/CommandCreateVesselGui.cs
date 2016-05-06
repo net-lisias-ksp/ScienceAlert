@@ -10,30 +10,37 @@ using ReeperKSP.AssetBundleLoading;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using strange.extensions.mediation.api;
+using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.OptionsWindow;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandCreateVesselGui : Command
+    class CommandCreateVesselGui : Command
     {
         private readonly GameObject _contextView;
         private readonly IContext _context;
-        private readonly ICoroutineRunner _coroutineRunner;
+        private readonly CoroutineHoster _coroutineRunner;
         private readonly SignalCriticalShutdown _shutdownSignal;
 
 
-        [AssetBundleAsset("assets/sciencealert/ui/sciencealertoptionswindowprefab.prefab", "sciencealert.ksp",
+        
 #pragma warning disable 649 // is not assigned to; that's fine because it will be assigned via AssetBundleAssetLoader
-            AssetBundleAssetAttribute.AssetCreationStyle.Instance)] private OptionsWindowView _optionsWindow;
+
+        [AssetBundleAsset("assets/sciencealert/ui/sciencealertoptionswindowprefab.prefab", "sciencealert.ksp")] 
+        private OptionsWindowView _optionsWindow;
+
+        [AssetBundleAsset("assets/sciencealert/ui/sciencealertexperimentwindowprefab.prefab", "sciencealert.ksp")]
+        private ExperimentWindowView _experimentWindow;
+
 #pragma warning restore 649
 
 
         public CommandCreateVesselGui(
             [NotNull, Name(ContextKeys.CONTEXT_VIEW)] GameObject contextView, 
-            [NotNull, Name(ContextKeys.CONTEXT)] IContext context, 
-            [NotNull] ICoroutineRunner coroutineRunner, 
+            [NotNull, Name(ContextKeys.CONTEXT)] IContext context,
+            [NotNull] CoroutineHoster coroutineRunner, 
             [NotNull] SignalCriticalShutdown shutdownSignal)
         {
             if (contextView == null) throw new ArgumentNullException("contextView");
@@ -76,6 +83,8 @@ namespace ScienceAlert.VesselContext.Gui
             if (createViewsRoutine.Error.Any())
             {
                 Log.Error("Failed to create views: " + createViewsRoutine.Error.Value);
+
+                _shutdownSignal.Dispatch();
                 Cancel();
                 Release();
                 yield break;
@@ -87,26 +96,30 @@ namespace ScienceAlert.VesselContext.Gui
 
         private IEnumerator CreateViews()
         {
-                var guiGo = new GameObject("VesselGuiView");
-                guiGo.transform.parent = _contextView.transform;
+            var guiGo = new GameObject("VesselGuiView");
+            guiGo.transform.parent = _contextView.transform;
 
-                injectionBinder.Bind<GameObject>().To(guiGo).ToName(VesselContextKeys.GuiContainer);
+            injectionBinder.Bind<GameObject>().To(guiGo).ToName(VesselContextKeys.GuiContainer);
 
-                var views = new [] {_optionsWindow as IView};
+            var optionsWindow = UnityEngine.Object.Instantiate(_optionsWindow);
+            var experimentWindow = UnityEngine.Object.Instantiate(_experimentWindow);
 
-                if (views.Any(view => view == null))
-                {
-                    Log.Error("One or more view prefabs failed to load.");
-                    _shutdownSignal.Dispatch();
-                }
-                else
-                {
-                    foreach (var view in views)
-                    {
-                        Log.Verbose("Adding view to active vessel context: " + view.GetType().Name);
-                        _context.AddView(view);
-                    }
-                }
+            var views = new[] { optionsWindow, (IView) experimentWindow };
+
+            if (views.Any(view => view == null))
+            {
+                optionsWindow.Do(w => UnityEngine.Object.Destroy(w.gameObject));
+                experimentWindow.Do(w => UnityEngine.Object.Destroy(w.gameObject));
+
+                throw new FailedToLoadAssetException("One or more view prefabs failed to load.");
+            }
+            foreach (var view in views)
+            {
+                Log.Verbose("Adding view to active vessel context: " + view.GetType().Name);
+                _context.AddView(view);
+            }
+
+            optionsWindow.gameObject.SetActive(false);
 
             yield return null; // wait for views to start before proceeding
         }
@@ -120,9 +133,8 @@ namespace ScienceAlert.VesselContext.Gui
             yield return loaderRoutine.YieldUntilComplete;
 
             if (loaderRoutine.Error.Any())
+                // ReSharper disable once ThrowingSystemException
                 throw loaderRoutine.Error.Value;
-
-            _optionsWindow.gameObject.PrintComponents(new DebugLog("OptionsWindowInstance"));
 
             Log.Verbose("Finished loading view assets");
         }

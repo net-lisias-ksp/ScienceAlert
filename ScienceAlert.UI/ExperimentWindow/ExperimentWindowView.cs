@@ -1,7 +1,5 @@
 ﻿using System;
 using JetBrains.Annotations;
-using ReeperCommon.Logging;
-using strange.extensions.signal.impl;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,12 +8,12 @@ using UnityEngine.UI;
 namespace ScienceAlert.UI.ExperimentWindow
 {
     [Serializable, DisallowMultipleComponent]
-    class ExperimentWindowController : ManualRegistrationView
+    public class ExperimentWindowView : ManualRegistrationView
     {
-        [SerializeField] private ExperimentListEntryController _listItemPrefab;
+        [SerializeField] private ExperimentListEntry _listItemPrefab;
         [SerializeField] private RectTransform _list;
 
-        [NonSerialized, HideInInspector] internal readonly Signal<IExperimentEntry> DeployExperiment = new Signal<IExperimentEntry>();
+        //[NonSerialized, HideInInspector] internal readonly Signal<IExperimentEntry> DeployExperiment = new Signal<IExperimentEntry>();
  
         // ReSharper disable once UnusedMember.Global
         public void AddExperimentEntry([NotNull] IExperimentEntry entry)
@@ -27,10 +25,12 @@ namespace ScienceAlert.UI.ExperimentWindow
             var instance = Instantiate(_listItemPrefab);
 
             instance.Experiment = entry;
-            instance.Deploy.AddListener(OnDeployButtonClicked);
+            //instance.Deploy.AddListener(OnDeployButtonClicked);
 
             instance.transform.parent = _list;
             instance.transform.SetAsLastSibling();
+
+
             LayoutRebuilder.MarkLayoutForRebuild(_list);
         }
 
@@ -44,13 +44,13 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
-        private void OnDeployButtonClicked([NotNull] IExperimentEntry entry)
-        {
-            if (entry == null) throw new ArgumentNullException("entry");
+        //private void OnDeployButtonClicked([NotNull] IExperimentEntry entry)
+        //{
+        //    if (entry == null) throw new ArgumentNullException("entry");
 
-            Log.Warning("Experiment button: " + entry.experimentID + " clicked");
+        //    Log.Warning("Experiment button: " + entry.experimentID + " clicked");
 
-            DeployExperiment.Dispatch(entry);
-        }
+        //    DeployExperiment.Dispatch(entry);
+        //}
     }
 }

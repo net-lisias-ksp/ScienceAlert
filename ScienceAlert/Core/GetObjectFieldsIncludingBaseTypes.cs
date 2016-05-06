@@ -6,7 +6,7 @@ using ReeperKSP.Serialization;
 
 namespace ScienceAlert.Core
 {
-    public class GetObjectFieldsIncludingBaseTypes : IGetObjectFields
+    class GetObjectFieldsIncludingBaseTypes : IGetObjectFields
     {
         public IEnumerable<FieldInfo> Get(object target)
         {

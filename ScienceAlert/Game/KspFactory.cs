@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace ScienceAlert.Game
 {
@@ -8,62 +7,6 @@ namespace ScienceAlert.Game
 // ReSharper disable once ClassNeverInstantiated.Global
     public class KspFactory : IGameFactory
     {
-        //private readonly SignalCrewOnEva _evaSignal;
-        //private readonly SignalCrewTransferred _transferredSignal;
-
-        //private readonly Dictionary<Vessel, KspVessel> _vesselDictionary = new Dictionary<Vessel, KspVessel>();
- 
-        //public KspFactory(
-        //    SignalCrewOnEva evaSignal,
-        //    SignalCrewTransferred transferredSignal)
-        //{
-        //    if (evaSignal == null) throw new ArgumentNullException("evaSignal");
-        //    if (transferredSignal == null) throw new ArgumentNullException("transferredSignal");
-
-        //    _evaSignal = evaSignal;
-        //    _transferredSignal = transferredSignal;
-        //}
-
-
-        //public void OnVesselDestroyed(IVessel vessel)
-        //{
-        //    KspVessel kspVessel;
-
-        //    if (!_vesselDictionary.TryGetValue(vessel, out kspVessel))
-        //        return;
-
-        //    _vesselDictionary.Remove(vessel);
-
-        //    _evaSignal.RemoveListener(kspVessel.OnCrewOnEva);
-        //    _transferredSignal.RemoveListener(kspVessel.OnCrewTransferred);
-        //}
-
-
-        //private IVessel GetOrCreateVessel(Vessel v)
-        //{
-        //    KspVessel vessel;
-
-        //    if (_vesselDictionary.TryGetValue(v, out vessel)) return vessel;
-
-        //    vessel = new KspVessel(this, v);
-        //    _vesselDictionary.Add(v, vessel);
-
-        //    _modifiedSignal.AddListener(vessel.OnVesselModified);
-        //    _evaSignal.AddListener(vessel.OnCrewOnEva);
-        //    _transferredSignal.AddListener(vessel.OnCrewTransferred);
-
-        //    vessel.Rescan();
-
-        //    return vessel;
-        //}
-
-
-        //public IVessel Create(Vessel vessel)
-        //{
-        //    return GetOrCreateVessel(vessel);
-        //}
-
-
         public IModuleScienceExperiment Create(ModuleScienceExperiment mse)
         {
             if (mse == null) throw new ArgumentNullException("mse");

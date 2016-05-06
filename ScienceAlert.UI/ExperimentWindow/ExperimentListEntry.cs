@@ -12,7 +12,7 @@ namespace ScienceAlert.UI.ExperimentWindow
 {
     [DisallowMultipleComponent, Serializable]
     // ReSharper disable once UnusedMember.Global
-    internal class ExperimentListEntryController : MonoBehaviour
+    internal class ExperimentListEntry : MonoBehaviour
     {
         public readonly Signal<IExperimentEntry> Deploy = new Signal<IExperimentEntry>();
 

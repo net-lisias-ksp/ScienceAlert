@@ -7,7 +7,7 @@ using ReeperKSP.Serialization;
 
 namespace ScienceAlert
 {
-    public class DefaultObjectFromConfigNodeBuilder<TObjectType> : IConfigNodeObjectBuilder<TObjectType>
+    class DefaultObjectFromConfigNodeBuilder<TObjectType> : IConfigNodeObjectBuilder<TObjectType>
     {
         protected readonly IConfigNodeSerializer Serializer;
 
@@ -70,7 +70,7 @@ namespace ScienceAlert
     // derived classes that build a family of objects (such as the rule builder: it would need a build method with
     // a signature of IExperimentRule Build(ConfigNode, TParameterType, ItemporaryBindingFactory) and hide the existing
     // ConcreteRuleType Build(etc)
-    public class DefaultObjectFromConfigNodeBuilder<TConcreteType, TObjectReturnType, TParameterType1, TParameterType2> : 
+    class DefaultObjectFromConfigNodeBuilder<TConcreteType, TObjectReturnType, TParameterType1, TParameterType2> : 
         DefaultObjectFromConfigNodeBuilder<TConcreteType>,
         IConfigNodeObjectBuilder<TObjectReturnType, TParameterType1, TParameterType2, ITemporaryBindingFactory> 
     {

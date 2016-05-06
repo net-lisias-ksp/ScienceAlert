@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon.Containers;
-using ReeperCommon.Extensions;
 using ReeperKSP.Extensions;
-using ScienceAlert.Core;
 
 namespace ScienceAlert.SensorDefinitions
 {
     // Creates a SensorDefinition given a ConfigNode that matches "SA_EXPERIMENT_RULESET"
-    public class SensorDefinitionBuilder : IConfigNodeObjectBuilder<SensorDefinition>, ISensorDefinitionFactory
+    class SensorDefinitionBuilder : IConfigNodeObjectBuilder<SensorDefinition>, ISensorDefinitionFactory
     {
         private readonly ConfigNode _defaultOnboardRule;
         private readonly ConfigNode _defaultAvailabilityRule;

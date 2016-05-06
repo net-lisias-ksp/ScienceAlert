@@ -1,6 +1,6 @@
 namespace ScienceAlert.SensorDefinitions
 {
-    public interface ISensorDefinitionFactory
+    interface ISensorDefinitionFactory
     {
         SensorDefinition CreateDefault(ScienceExperiment experiment);
     }

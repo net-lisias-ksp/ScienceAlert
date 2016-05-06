@@ -11,7 +11,7 @@ using strange.extensions.command.impl;
 namespace ScienceAlert.Core
 {
 // ReSharper disable once UnusedMember.Global
-    public class CommandLoadSharedConfiguration : Command
+    class CommandLoadSharedConfiguration : Command
     {
         protected readonly IDirectory PluginDirectory;
         protected readonly ISharedConfigurationFilePathProvider ConfigPathProviderQuery;

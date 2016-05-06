@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.Core
 {
-    public class ScenarioModuleNotFoundException : Exception
+    class ScenarioModuleNotFoundException : Exception
     {
         public ScenarioModuleNotFoundException(string name) : base("Failed to find ScenarioModule " + name)
         {

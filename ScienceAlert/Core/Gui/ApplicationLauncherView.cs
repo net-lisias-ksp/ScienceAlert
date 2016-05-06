@@ -13,9 +13,8 @@ using UnityEngine;
 
 namespace ScienceAlert.Core.Gui
 {
-    [MediatedBy(typeof(ApplicationLauncherMediator))]
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class ApplicationLauncherView : View
+    class ApplicationLauncherView : View
     {
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global

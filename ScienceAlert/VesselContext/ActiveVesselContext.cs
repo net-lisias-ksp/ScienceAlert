@@ -2,18 +2,20 @@
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
+using strange.extensions.context.api;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
+using ScienceAlert.UI.ExperimentWindow;
+using ScienceAlert.UI.OptionsWindow;
 using ScienceAlert.VesselContext.Experiments;
-using ScienceAlert.VesselContext.Experiments.Rules;
 using ScienceAlert.VesselContext.Experiments.Trigger;
 using ScienceAlert.VesselContext.Gui;
-using strange.extensions.context.api;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ScienceAlert.VesselContext
 {
-    public class ActiveVesselContext : SignalContext
+    class ActiveVesselContext : SignalContext
     {
 
         public ActiveVesselContext(MonoBehaviour view) : base(view, ContextStartupFlags.MANUAL_LAUNCH)
@@ -47,7 +49,6 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
 
  
-
             // note to self: see how these are NOT cross context? That's because each ContextView
             // has its own GameEventView. This is done to avoid having to do any extra bookkeeping (of
             // removing events we've subscribed to) in the event that a ContextView is destroyed.
@@ -77,6 +78,11 @@ namespace ScienceAlert.VesselContext
             //mediationBinder.BindView<ExperimentListView>()
             //    .ToMediator<ExperimentListMediator>()
             //    .ToMediator<ExperimentListPopupMediator>();
+            mediationBinder.BindView<OptionsWindowView>()
+                .ToMediator<OptionsWindowMediator>();
+
+            mediationBinder.BindView<ExperimentWindowView>()
+                .ToMediator<ExperimentWindowMediator>();
 
             injectionBinder.Bind<ITemporaryBindingFactory>().To<TemporaryBindingFactory>().ToSingleton();
             injectionBinder.Bind<IGameFactory>().Bind<KspFactory>().To<KspFactory>().ToSingleton();
@@ -180,7 +186,7 @@ namespace ScienceAlert.VesselContext
 
         public void DestroyContext()
         {
-            (contextView as GameObject).If(go => go != null).Do(UnityEngine.Object.Destroy);
+            (contextView as GameObject).If(go => go != null).Do(Object.Destroy);
         }
     }
 }

@@ -6,7 +6,7 @@ using strange.extensions.mediation.impl;
 
 namespace ScienceAlert.Core.Gui
 {
-    public class ApplicationLauncherMediator : Mediator
+    class ApplicationLauncherMediator : Mediator
     {
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global

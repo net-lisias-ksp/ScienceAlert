@@ -7,6 +7,7 @@ using System.Reflection;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using ReeperCommon.Repositories;
+using ReeperCommon.Utilities;
 using ReeperKSP.Extensions;
 using ReeperKSP.FileSystem;
 using ReeperKSP.FileSystem.Providers;
@@ -22,7 +23,7 @@ using Object = UnityEngine.Object;
 
 namespace ScienceAlert.Core
 {
-    public class CoreContext : SignalContext
+    class CoreContext : SignalContext
     {
         private const string ExperimentDefinitionConfigNodeName = "SCIENCE_EXPERIMENT";
         private const string ExperimentDefinitionIdValueName = "id";
@@ -104,11 +105,7 @@ namespace ScienceAlert.Core
                 .Bind<SharedConfiguration>()
                 .To<SharedConfiguration>().ToSingleton().CrossContext();
 
-
-            injectionBinder.Bind<ICoroutineRunner>()
-                .To<CoroutineRunner>()
-                .ToSingleton()
-                .CrossContext();
+            injectionBinder.Bind<CoroutineHoster>().To(CoroutineHoster.Instance).CrossContext();
 
             injectionBinder.Bind<GameObject>()
                 .To(contextView as GameObject)
@@ -127,6 +124,7 @@ namespace ScienceAlert.Core
                 .Bind<IResearchAndDevelopment>()
                 .To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
 
+            mediationBinder.BindView<ApplicationLauncherView>().ToMediator<ApplicationLauncherMediator>();
 
             ConfigureScienceAlert();
             ConfigureResourceRepository();
@@ -148,7 +146,7 @@ namespace ScienceAlert.Core
                 .To<CommandConfigureRuleFactories>()
                 .To<CommandConfigureTriggerFactories>()
                 .To<CommandLoadSharedConfiguration>()
-                .To<CommandConfigureGuiSkinsAndTextures>()
+                //.To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
                 .To<CommandCreateAppLauncherView>()
                 .To<CommandCreateActiveVesselContextBootstrapper>() // because we'll definitely have missed the initial OnVesselChanged by now

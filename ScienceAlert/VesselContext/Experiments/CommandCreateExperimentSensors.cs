@@ -5,7 +5,6 @@ using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using ReeperKSP.Extensions;
-using ReeperKSP.Serialization;
 using strange.extensions.command.impl;
 using ScienceAlert.Game;
 using ScienceAlert.SensorDefinitions;
@@ -14,7 +13,7 @@ using ScienceAlert.VesselContext.Experiments.Rules;
 namespace ScienceAlert.VesselContext.Experiments
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandCreateExperimentSensors : Command
+    class CommandCreateExperimentSensors : Command
     {
         private readonly IRuleFactory _ruleFactory;
         private readonly ReadOnlyCollection<SensorDefinition> _sensorDefinitions;

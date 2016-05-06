@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
 using ReeperKSP.Extensions;
-using ScienceAlert.SensorDefinitions;
 using strange.extensions.command.impl;
+using ScienceAlert.SensorDefinitions;
 
 namespace ScienceAlert.VesselContext.Experiments.Trigger
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandCreateExperimentTriggers : Command
+    class CommandCreateExperimentTriggers : Command
     {
         private readonly IEnumerable<SensorDefinition> _definitions;
         private readonly ITriggerFactory _triggerFactory;

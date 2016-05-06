@@ -7,7 +7,7 @@ using UnityEngine;
 namespace ScienceAlert.Core
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class BootstrapCore : ContextView
+    class BootstrapCore : ContextView
     {
 // ReSharper disable once UnusedMember.Local
         private void Awake()

@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ReeperCommon.Containers;
-using ReeperCommon.Extensions;
 using ReeperKSP.Extensions;
 
 namespace ScienceAlert
 {
     [DoNotAutoRegister]
-    public class CompositeBuilder<TResultingObject, TParamType1, TParamType2, TParamType3> : 
+    class CompositeBuilder<TResultingObject, TParamType1, TParamType2, TParamType3> : 
         IConfigNodeObjectBuilder<TResultingObject, TParamType1, TParamType2, TParamType3>
     {
         private readonly List<IConfigNodeObjectBuilder<TResultingObject, TParamType1, TParamType2, TParamType3>> _builders;

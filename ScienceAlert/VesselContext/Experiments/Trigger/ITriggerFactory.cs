@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.VesselContext.Experiments.Trigger
 {
-    public interface ITriggerFactory : IConfigNodeObjectBuilder<ExperimentTrigger, ITriggerFactory, IInjectionBinder, ITemporaryBindingFactory>
+    interface ITriggerFactory : IConfigNodeObjectBuilder<ExperimentTrigger, ITriggerFactory, IInjectionBinder, ITemporaryBindingFactory>
     {
     }
 }

@@ -13,7 +13,7 @@ namespace ScienceAlert.VesselContext.Experiments
 {
 
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class ExperimentSensorUpdater : MonoBehaviour
+    class ExperimentSensorUpdater : MonoBehaviour
     {
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global

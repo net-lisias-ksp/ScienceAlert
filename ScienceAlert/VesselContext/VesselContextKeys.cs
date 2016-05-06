@@ -1,6 +1,6 @@
 ﻿namespace ScienceAlert.VesselContext
 {
-    public enum VesselContextKeys
+    enum VesselContextKeys
     {
         ExperimentViewConfig, // ConfigNode
         VesselDebugViewConfig, // ConfigNode

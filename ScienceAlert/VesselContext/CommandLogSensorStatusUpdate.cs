@@ -4,7 +4,7 @@ using strange.extensions.command.impl;
 namespace ScienceAlert.VesselContext
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandLogSensorStatusUpdate : Command
+    class CommandLogSensorStatusUpdate : Command
     {
         private readonly ExperimentSensorState _sensorState;
 

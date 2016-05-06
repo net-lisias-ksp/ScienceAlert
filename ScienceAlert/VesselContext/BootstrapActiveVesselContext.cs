@@ -5,7 +5,7 @@ using strange.extensions.context.impl;
 
 namespace ScienceAlert.VesselContext
 {
-    public class BootstrapActiveVesselContext : ContextView
+    class BootstrapActiveVesselContext : ContextView
     {
 // ReSharper disable once UnusedMember.Local
         private void Awake()

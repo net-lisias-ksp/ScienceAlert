@@ -9,7 +9,7 @@ using strange.extensions.command.impl;
 namespace ScienceAlert.SensorDefinitions
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandCreateSensorDefinitions : Command
+    class CommandCreateSensorDefinitions : Command
     {
         private const string SensorDefinitionNodeName = "SA_SENSOR_DEFINITION";
 
@@ -51,8 +51,6 @@ namespace ScienceAlert.SensorDefinitions
 
             injectionBinder
                 .Bind<ReadOnlyCollection<SensorDefinition>>()
-                //.Bind<ReadOnlyCollection<ITriggerDefinitionProvider>>()
-                .Bind<ReadOnlyCollection<IRuleDefinitionProvider>>()
                     .To(allDefinitions).CrossContext();
         }
 

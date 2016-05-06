@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Reflection;
 using ReeperCommon.Containers;
-using ReeperCommon.Extensions;
 using ReeperKSP.Extensions;
 using strange.extensions.signal.impl;
 using UnityEngine;
@@ -14,8 +13,7 @@ namespace ScienceAlert.Core
         ScenarioCreationOptions.AddToNewCareerGames |
         ScenarioCreationOptions.AddToNewScienceSandboxGames |
         ScenarioCreationOptions.AddToExistingCareerGames |
-        ScenarioCreationOptions.AddToExistingScienceSandboxGames,
-        new [] { GameScenes.FLIGHT })]
+        ScenarioCreationOptions.AddToExistingScienceSandboxGames, GameScenes.FLIGHT)]
 // ReSharper disable once UnusedMember.Global
 // ReSharper disable once ClassNeverInstantiated.Global
     public class ScienceAlert : ScenarioModule

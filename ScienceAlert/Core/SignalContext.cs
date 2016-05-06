@@ -4,11 +4,12 @@ using strange.extensions.command.api;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using strange.extensions.context.impl;
+using ScienceAlert.UI.ExperimentWindow;
 using UnityEngine;
 
 namespace ScienceAlert.Core
 {
-    public class SignalContext : MVCSContext
+    class SignalContext : MVCSContext
     {
         protected SignalContext(MonoBehaviour view, ContextStartupFlags flags)
             : base(view, flags)
@@ -20,7 +21,8 @@ namespace ScienceAlert.Core
         {
             base.mapBindings();
             implicitBinder.ScanForAnnotatedClasses(
-                new KeyValuePair<Assembly, string[]>(Assembly.GetExecutingAssembly(), new [] { "ScienceAlert" }));
+                new KeyValuePair<Assembly, string[]>(Assembly.GetExecutingAssembly(), new [] { "ScienceAlert" }),
+                new KeyValuePair<Assembly, string[]>(typeof(ExperimentWindowView).Assembly, new [] { "ScienceAlert"}));
         }
 
 

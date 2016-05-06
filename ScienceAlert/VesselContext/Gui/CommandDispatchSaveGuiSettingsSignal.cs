@@ -5,7 +5,7 @@ using strange.extensions.command.impl;
 namespace ScienceAlert.VesselContext.Gui
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandDispatchSaveGuiSettingsSignal : Command
+    class CommandDispatchSaveGuiSettingsSignal : Command
     {
         private readonly SignalSaveGuiSettings _saveSignal;
 

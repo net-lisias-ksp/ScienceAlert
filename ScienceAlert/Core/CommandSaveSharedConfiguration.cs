@@ -11,7 +11,7 @@ using ReeperKSP.Serialization;
 namespace ScienceAlert.Core
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandSaveSharedConfiguration : CommandLoadSharedConfiguration
+    class CommandSaveSharedConfiguration : CommandLoadSharedConfiguration
     {
         private readonly SignalSharedConfigurationSaving _savingSignal;
 

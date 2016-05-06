@@ -10,7 +10,7 @@ using UnityEngine;
 namespace ScienceAlert.Core
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandCriticalShutdown : Command
+    class CommandCriticalShutdown : Command
     {
         private readonly GameObject _coreContextView;
 

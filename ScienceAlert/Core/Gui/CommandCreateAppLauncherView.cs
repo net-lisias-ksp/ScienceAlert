@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections;
 using ReeperCommon.Logging;
+using ReeperCommon.Utilities;
 using strange.extensions.command.impl;
-using strange.extensions.injector;
 using UnityEngine;
 
 namespace ScienceAlert.Core.Gui
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandCreateAppLauncherView : Command
+    class CommandCreateAppLauncherView : Command
     {
         private readonly GameObject _gameContext;
-        private readonly ICoroutineRunner _coroutineRunner;
+        private readonly CoroutineHoster _coroutineRunner;
 
         public CommandCreateAppLauncherView(
             [Name(CoreKeys.CoreContextView)] GameObject gameContext,
-            ICoroutineRunner coroutineRunner)
+            CoroutineHoster coroutineRunner)
         {
             if (gameContext == null) throw new ArgumentNullException("gameContext");
             if (coroutineRunner == null) throw new ArgumentNullException("coroutineRunner");

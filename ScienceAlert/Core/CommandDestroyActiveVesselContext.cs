@@ -10,7 +10,7 @@ using UnityEngine;
 namespace ScienceAlert.Core
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandDestroyActiveVesselContext : Command
+    class CommandDestroyActiveVesselContext : Command
     {
         private readonly GameObject _coreContext;
         private readonly IVessel _destroyedVessel;
