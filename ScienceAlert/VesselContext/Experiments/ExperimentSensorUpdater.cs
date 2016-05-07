@@ -59,7 +59,7 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             var dispatchTimerStart = Time.realtimeSinceStartup;
 
-            SensorStatusChanged.Dispatch(new ExperimentSensorState(sensor.Experiment, sensor.CollectionValue,
+            SensorStatusChanged.Dispatch(new ExperimentSensorState(sensor.Experiment, sensor.CurrentSubject, sensor.CollectionValue,
                 sensor.TransmissionValue, sensor.LabValue, sensor.Onboard, sensor.Available, sensor.ConditionsMet));
 
             print("Dispatch time: " + (Time.realtimeSinceStartup - dispatchTimerStart).ToString("F5") +

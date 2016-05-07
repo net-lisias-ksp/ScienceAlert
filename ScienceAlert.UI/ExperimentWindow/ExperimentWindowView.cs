@@ -13,7 +13,7 @@ namespace ScienceAlert.UI.ExperimentWindow
     [Serializable, DisallowMultipleComponent]
     public class ExperimentWindowView : ManualRegistrationView
     {
-        [NonSerialized, HideInInspector] internal readonly Signal<string> ExperimentDeploySignal = new Signal<string>();
+        [NonSerialized, HideInInspector] public readonly Signal<string> DeployButtonClicked = new Signal<string>();
         
         [SerializeField] private ExperimentListEntry _listItemPrefab;
         [SerializeField] private RectTransform _list;
@@ -78,6 +78,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         private void OnExperimentButtonClicked(string identifier)
         {
             Log.Warning("ExperimentWindowView.OnExperimentButtonClicked: " + identifier);
+            DeployButtonClicked.Dispatch(identifier);
         }
 
 

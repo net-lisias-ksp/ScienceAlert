@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Text;
+using JetBrains.Annotations;
+using ScienceAlert.Game;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext
@@ -13,9 +15,10 @@ namespace ScienceAlert.VesselContext
         public bool Onboard { get; private set; }
         public bool Available { get; private set; }
         public bool ConditionsMet { get; private set; }
+        public IScienceSubject Subject { get; private set; }
 
         public ExperimentSensorState(
-            ScienceExperiment experiment, 
+            ScienceExperiment experiment, [NotNull] IScienceSubject subject,
             float collectionValue, 
             float transmissionValue,
             float labValue, 
@@ -24,8 +27,10 @@ namespace ScienceAlert.VesselContext
             bool conditionsMet) : this()
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
+            if (subject == null) throw new ArgumentNullException("subject");
 
             Experiment = experiment;
+            Subject = subject;
             CollectionValue = collectionValue;
             TransmissionValue = transmissionValue;
             LabValue = labValue;
@@ -75,6 +80,7 @@ namespace ScienceAlert.VesselContext
                 hash = hash * 479 + Onboard.GetHashCode();
                 hash = hash * 479 + Available.GetHashCode();
                 hash = hash * 479 + ConditionsMet.GetHashCode();
+                hash = hash * 479 + Subject.Id.GetHashCode();
 
                 return hash;
             }
@@ -88,7 +94,7 @@ namespace ScienceAlert.VesselContext
             sb.Append("[");
             sb.Append(Experiment.id);
             sb.Append("] ");
-            sb.AppendFormat("Onboard: {0}, Available: {1}, ConditionsMet: {2}, Collection: {3}, Transmission: {4}, Lab: {5}", Onboard,
+            sb.AppendFormat("Subject: {0}, Onboard: {1}, Available: {2}, ConditionsMet: {3}, Collection: {4}, Transmission: {5}, Lab: {6}", Subject.Id, Onboard,
                 Available, ConditionsMet, CollectionValue, TransmissionValue, LabValue);
 
             return sb.ToString();

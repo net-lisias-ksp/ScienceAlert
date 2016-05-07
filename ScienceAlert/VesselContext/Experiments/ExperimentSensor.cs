@@ -13,8 +13,6 @@ namespace ScienceAlert.VesselContext.Experiments
         private readonly IExperimentRule _availableRule;
         private readonly IExperimentRule _conditionRule;
 
-        private IScienceSubject _currentSubject;
-        
 
         public ExperimentSensor(
             ScienceExperiment experiment, 
@@ -47,7 +45,7 @@ namespace ScienceAlert.VesselContext.Experiments
         public bool Onboard { get; private set; }               // related module is actually onboard the vessel? (onboard rule check)
         public bool Available { get; private set; }             // is at least one module available for deployment? (availability rule check)
         public bool ConditionsMet { get; private set; }              // Can the related experiment actually be run (runnable rule check)
-
+        public IScienceSubject CurrentSubject { get; private set; }
         public ScienceExperiment Experiment { get; private set; }
 
         public void ClearChangedFlag()
@@ -58,7 +56,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public void UpdateSensorValues()
         {
-            _currentSubject = _scienceSubjectProvider.GetSubject(Experiment);
+            CurrentSubject = _scienceSubjectProvider.GetSubject(Experiment);
 
             var oldConditionsMet = ConditionsMet;
             var oldOnboard = Onboard;
@@ -92,19 +90,19 @@ namespace ScienceAlert.VesselContext.Experiments
 
         private void UpdateCollectionValue()
         {
-            CollectionValue = _reportCalculator.CalculateCollectionValue(Experiment, _currentSubject);
+            CollectionValue = _reportCalculator.CalculateCollectionValue(Experiment, CurrentSubject);
         }
 
 
         private void UpdateTransmissionValue()
         {
-            TransmissionValue = _reportCalculator.CalculateTransmissionValue(Experiment, _currentSubject);
+            TransmissionValue = _reportCalculator.CalculateTransmissionValue(Experiment, CurrentSubject);
         }
 
 
         private void UpdateLabValue()
         {
-            LabValue = _reportCalculator.CalculateLabValue(Experiment, _currentSubject);
+            LabValue = _reportCalculator.CalculateLabValue(Experiment, CurrentSubject);
         }
 
 
