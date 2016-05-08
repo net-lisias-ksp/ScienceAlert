@@ -56,7 +56,11 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public void UpdateSensorValues()
         {
+            Profiler.BeginSample("ExperimentSensor.UpdateSensorValues");
+
+            Profiler.BeginSample("ExperimentSensor.UpdateSensorValues.GetSubject");
             CurrentSubject = _scienceSubjectProvider.GetSubject(Experiment);
+            Profiler.EndSample();
 
             var oldConditionsMet = ConditionsMet;
             var oldOnboard = Onboard;
@@ -85,42 +89,56 @@ namespace ScienceAlert.VesselContext.Experiments
             HasChanged = !Mathf.Approximately(oldCollection, CollectionValue) ||
                          !Mathf.Approximately(oldTransmission, TransmissionValue) ||
                          !Mathf.Approximately(oldLab, LabValue) || oldOnboard != Onboard || oldAvailable != Available || oldConditionsMet != ConditionsMet;
+
+            Profiler.EndSample();
         }
 
 
         private void UpdateCollectionValue()
         {
+            Profiler.BeginSample("ExperimentSensor.UpdateCollectionValue");
             CollectionValue = _reportCalculator.CalculateCollectionValue(Experiment, CurrentSubject);
+            Profiler.EndSample();
         }
 
 
         private void UpdateTransmissionValue()
         {
+            Profiler.BeginSample("ExperimentSensor.UpdateTransmissionValue");
             TransmissionValue = _reportCalculator.CalculateTransmissionValue(Experiment, CurrentSubject);
+            Profiler.EndSample();
         }
 
 
         private void UpdateLabValue()
         {
+            Profiler.BeginSample("ExperimentSensor.UpdateLabValue");
             LabValue = _reportCalculator.CalculateLabValue(Experiment, CurrentSubject);
+            Profiler.EndSample();
         }
 
 
         private void UpdateOnboardValue()
         {
+            Profiler.BeginSample("ExperimentSensor.UpdateOnboardValue");
             Onboard = _onboardRule.Passes();
+            Profiler.EndSample();
         }
 
 
         private void UpdateAvailabilityValue()
         {
+            Profiler.BeginSample("ExperimentSensor.UpdateAvailabilityValue");
             Available = _availableRule.Passes();
+            Profiler.EndSample();
         }
 
 
         private void UpdateConditionValue()
         {
+            Profiler.BeginSample("ExperimentSensor.UpdateConditionValue");
             ConditionsMet = _conditionRule.Passes();
+            Profiler.EndSample();
         }
     }
 }

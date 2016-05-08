@@ -26,6 +26,8 @@ namespace ScienceAlert.VesselContext.Experiments
 // ReSharper disable once UnusedMember.Local
         private void Update()
         {
+            Profiler.BeginSample("ExperimentSensorUpdater.Update");
+
             try
             {
                 //var start = Time.realtimeSinceStartup;
@@ -50,6 +52,10 @@ namespace ScienceAlert.VesselContext.Experiments
                 Log.Error("Error while updating sensors: " + e);
 
                 ShutdownDueToError();
+            }
+            finally
+            {
+                Profiler.EndSample();
             }
         }
 

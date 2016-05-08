@@ -19,9 +19,9 @@ namespace ScienceAlert.SensorDefinitions
             ConfigNode triggerDef)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
-            if (onboardRuleDef == null) throw new ArgumentNullException("OnboardRuleFactory");
-            if (availabilityRuleDef == null) throw new ArgumentNullException("AvailabilityRuleFactory");
-            if (conditionRuleDef == null) throw new ArgumentNullException("ConditionRuleFactory");
+            if (onboardRuleDef == null) throw new ArgumentNullException("onboardRuleDef");
+            if (availabilityRuleDef == null) throw new ArgumentNullException("availabilityRuleDef");
+            if (conditionRuleDef == null) throw new ArgumentNullException("conditionRuleDef");
             if (triggerDef == null) throw new ArgumentNullException("triggerDef");
 
             Experiment = experiment;

@@ -17,13 +17,13 @@ namespace ScienceAlert.SensorDefinitions
         private readonly ScienceExperiment[] _experiments;
 
 
-        public const string ExperimentRulesetNodeName = "SA_EXPERIMENT_RULESET";
-        public const string ExperimentIdValueName = "experimentID";
+        private const string ExperimentRulesetNodeName = "SA_EXPERIMENT_RULESET";
+        private const string ExperimentIdValueName = "experimentID";
 
-        public const string OnboardRuleNodeName = "ONBOARD_RULE";
-        public const string AvailabilityRuleNodeName = "AVAILABILITY_RULE";
-        public const string ConditionRuleNodeName = "CONDITION_RULE";
-        public const string DeployTriggerNodeName = "TRIGGER";
+        private const string OnboardRuleNodeName = "ONBOARD_RULE";
+        private const string AvailabilityRuleNodeName = "AVAILABILITY_RULE";
+        private const string ConditionRuleNodeName = "CONDITION_RULE";
+        private const string DeployTriggerNodeName = "TRIGGER";
 
         public SensorDefinitionBuilder(
             IEnumerable<ScienceExperiment> experiments,
@@ -111,7 +111,7 @@ namespace ScienceAlert.SensorDefinitions
 
         public bool CanHandle(ConfigNode config)
         {
-            if (config == null) throw new ArgumentNullException("config");
+            if (config == null) return false;
 
             return config.name == ExperimentRulesetNodeName &&
                 GetExperimentId(config)
