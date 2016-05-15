@@ -34,7 +34,7 @@ namespace ScienceAlert.Game
 
 
  
-
+        // todo: this is producing too much garbage, maybe use cached subjects?
         public IScienceSubject GetSubject(ScienceExperiment experiment)
         {
             var currentSituation = _situationProvider.ExperimentSituation;

@@ -1,6 +1,12 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using KSP.UI;
+using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
+using ReeperCommon.Utilities;
 using strange.extensions.command.impl;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
@@ -36,8 +42,21 @@ namespace ScienceAlert.VesselContext.Experiments
             //    Cancel();
             //    Release();
             //}
+
+            Retain();
+            CoroutineHoster.Instance.StartCoroutine(WaitABit());
         }
 
+
+        private IEnumerator WaitABit()
+        {
+            yield return new WaitForSeconds(5f);
+
+            Log.Normal("Checking hierarchy");
+            //UIMasterController.Instance.gameObject.PrintComponents(new DebugLog("Master"));
+
+            Release();
+        }
 
         private void DeploymentFinished()
         {

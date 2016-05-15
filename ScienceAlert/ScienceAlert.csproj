@@ -308,6 +308,8 @@ call:CopyDependencies
 )
 
 call "$(SolutionDir)CopyToLocation.bat" "$(TargetDir)" "%25ProjectGameData%25" $(TargetName).* /xf *.config *.pdb *.mdb
+call "$(SolutionDir)CopyToLocation.bat" "%25unityproject%25\AssetBundles" "%25ProjectGameData%25" sciencealert.ksp
+
 
 REM ----------------------------------------------------------
 REM Create debug symbols for ScienceAlert

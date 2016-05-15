@@ -4,6 +4,5 @@
     {
         ExperimentViewConfig, // ConfigNode
         VesselDebugViewConfig, // ConfigNode
-        GuiContainer, // GameObject
     }
 }

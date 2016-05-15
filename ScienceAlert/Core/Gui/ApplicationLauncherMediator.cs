@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Linq;
 using ReeperCommon.Logging;
 using ReeperKSP.AssetBundleLoading;
@@ -58,19 +59,15 @@ namespace ScienceAlert.Core.Gui
 
         private void OnButtonCreated()
         {
+            Log.Error(GetType().Name + " button created");
             //AppButtonCreated.Dispatch();
         }
 
 
         private void OnButtonToggle(bool b)
         {
+            Log.Error(GetType().Name + " button toggled + " + b);
             //AppButtonToggled.Dispatch(b);
         }
-
-
-        //private void OnAlertPanelVisibilityChanged(bool tf)
-        //{
-        //    View.SetToggleState(tf);
-        //}
     }
 }

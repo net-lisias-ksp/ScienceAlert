@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq;
 using JetBrains.Annotations;
+using KSP.UI;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
@@ -96,30 +97,34 @@ namespace ScienceAlert.VesselContext.Gui
 
         private IEnumerator CreateViews()
         {
-            var guiGo = new GameObject("VesselGuiView");
-            guiGo.transform.parent = _contextView.transform;
-
-            injectionBinder.Bind<GameObject>().To(guiGo).ToName(VesselContextKeys.GuiContainer);
-
-            var optionsWindow = UnityEngine.Object.Instantiate(_optionsWindow);
             var experimentWindow = UnityEngine.Object.Instantiate(_experimentWindow);
+            var optionsWindow = UnityEngine.Object.Instantiate(_optionsWindow);
 
-            var views = new[] { optionsWindow, (IView) experimentWindow };
-
-            if (views.Any(view => view == null))
+            if (experimentWindow == null || optionsWindow == null)
             {
-                optionsWindow.Do(w => UnityEngine.Object.Destroy(w.gameObject));
-                experimentWindow.Do(w => UnityEngine.Object.Destroy(w.gameObject));
+                experimentWindow.Do(UnityEngine.Object.Destroy);
+                optionsWindow.Do(UnityEngine.Object.Destroy);
 
                 throw new FailedToLoadAssetException("One or more view prefabs failed to load.");
             }
-            foreach (var view in views)
+
+            var dialogCanvas = UIMasterController.Instance.transform.Find("DialogCanvas")
+                .IfNull(() => Log.Warning("Failed to find expected dialog canvas on UIMasterController"))
+                .With(t => t as RectTransform);
+
+            _context.AddView(experimentWindow);
+            _context.AddView(optionsWindow);
+
+            foreach (var viewTransform in new [] { experimentWindow.transform, optionsWindow.transform }.Select(t => t as RectTransform))
             {
-                Log.Verbose("Adding view to active vessel context: " + view.GetType().Name);
-                _context.AddView(view);
+                Log.Verbose("Adding view to active vessel context: " + viewTransform.GetType().Name);
+
+                viewTransform.Do(view => view.SetParent(dialogCanvas, false)).Do(view => view.SetAsLastSibling());
             }
 
             optionsWindow.gameObject.SetActive(false);
+
+            //experimentWindow.transform.root.gameObject.PrintComponents(new DebugLog("ExperimentWindowDebug"));
 
             yield return null; // wait for views to start before proceeding
         }
