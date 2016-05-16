@@ -50,7 +50,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
                 }
             }
 
-            injectionBinder.Bind<IEnumerable<ExperimentTrigger>>().Bind<List<ExperimentTrigger>>().To(triggers);
+            injectionBinder.Bind<ReadOnlyCollection<ExperimentTrigger>>().To(triggers.AsReadOnly());
             Log.Verbose("Created " + triggers.Count + " ExperimentTriggers");
         }
 

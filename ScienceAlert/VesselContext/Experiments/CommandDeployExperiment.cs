@@ -1,66 +1,80 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using KSP.UI;
-using ReeperCommon.Extensions;
+using System.Collections.ObjectModel;
+using System.Linq;
+using JetBrains.Annotations;
+using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ReeperCommon.Utilities;
 using strange.extensions.command.impl;
-using UnityEngine;
+using ScienceAlert.VesselContext.Experiments.Trigger;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    class CommandDeployExperiment : Command
+    public class CommandDeployExperiment : Command
     {
         private readonly ScienceExperiment _experiment;
+        private readonly ReadOnlyCollection<ExperimentTrigger> _triggers;
+        private readonly SignalDeployExperimentFinished _finishedSignal;
 
         public CommandDeployExperiment(
-            ScienceExperiment experiment)
+            ScienceExperiment experiment, 
+            [NotNull] ReadOnlyCollection<ExperimentTrigger> triggers,
+            [NotNull] SignalDeployExperimentFinished finishedSignal)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
+            if (triggers == null) throw new ArgumentNullException("triggers");
+            if (finishedSignal == null) throw new ArgumentNullException("finishedSignal");
 
             _experiment = experiment;
+            _triggers = triggers;
+            _finishedSignal = finishedSignal;
         }
+
 
         public override void Execute()
         {
             Log.Debug("Deploying " + _experiment.id);
 
-            //var deployer = _deploymentStrategySelector.GetDeploymentStrategy(_experiment);
+            var trigger = GetDeployTriggerFor(_experiment);
 
-            //Retain();
+            if (!trigger.Any())
+            {
+                Log.Error("Could not find a trigger for " + _experiment.id);
+                Cancel();
+                return;
+            }
 
-            //try
-            //{
-            //    deployer.Deploy().Then(DeploymentFinished);
-            //}
-            //catch (Exception e)
-            //{
-            //    Log.Error("Failed to deploy " + _experiment.id + "!");
-            //    Log.Error("Exception: " + e);
-            //    Cancel();
-            //    Release();
-            //}
+            if (trigger.Value.Busy)
+            {
+                Log.Warning("Trigger is busy; aborting");
+                Cancel();
+                return;
+            }
 
             Retain();
-            CoroutineHoster.Instance.StartCoroutine(WaitABit());
+            trigger.Value.Deploy().Then(FinishedDeploying).Fail(FailedToDeploy);
         }
 
 
-        private IEnumerator WaitABit()
+        private void FailedToDeploy(Exception exception)
         {
-            yield return new WaitForSeconds(5f);
-
-            Log.Normal("Checking hierarchy");
-            //UIMasterController.Instance.gameObject.PrintComponents(new DebugLog("Master"));
-
+            Log.Error("Failed to deploy experiment: " + exception);
+            Cancel();
+            _finishedSignal.Dispatch(_experiment, false);
             Release();
         }
 
-        private void DeploymentFinished()
+        private void FinishedDeploying()
         {
+            Log.Verbose("Finished deploying experiment");
+            _finishedSignal.Dispatch(_experiment, true);
             Release();
+        }
+
+
+        private Maybe<ExperimentTrigger> GetDeployTriggerFor(ScienceExperiment experiment)
+        {
+            return _triggers.FirstOrDefault(tr => tr.Experiment.id == experiment.id).ToMaybe();
         }
     }
 }

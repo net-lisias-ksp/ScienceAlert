@@ -93,8 +93,6 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<IScienceSubjectProvider>()
                 .To<KspScienceSubjectProvider>().ToSingleton();
 
-            injectionBinder.Bind<TriggerActivator>().ToSingleton();
-
             SetupCommandBindings();
 
             injectionBinder.ReflectAll();
@@ -111,7 +109,6 @@ namespace ScienceAlert.VesselContext
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
                 .To<CommandCreateExperimentTriggers>()
-                .To<CommandCreateExperimentTriggerActivator>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandDispatchLoadGuiSettingsSignal>()
                 //.To<CommandTriggerInitialSensorUpdates>()

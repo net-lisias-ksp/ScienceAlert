@@ -53,6 +53,8 @@ namespace ScienceAlert.UI
         {
             if (!_isMouseOver || _targetsHidden) return;
 
+            if (Input.GetMouseButton(0)) return; // don't accumulate time while dragging
+
             _mousedOverTime += Time.unscaledDeltaTime;
 
             if (!(_mousedOverTime > MouseOverDelaySecs)) return;

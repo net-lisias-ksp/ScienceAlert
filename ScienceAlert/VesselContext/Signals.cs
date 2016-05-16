@@ -13,7 +13,7 @@ namespace ScienceAlert.VesselContext
     {
     }
 
-    class SignalDeployExperimentFinished : Signal<ScienceExperiment, bool /* successfully? */>
+    public class SignalDeployExperimentFinished : Signal<ScienceExperiment, bool /* successfully? */>
     {
         
     }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using ReeperCommon.Utilities;
@@ -10,6 +7,9 @@ using UnityEngine.UI;
 
 namespace ScienceAlert.UI
 {
+    // note to self: this is an idea to take a snapshot of the current scrollrect contents so that instead of flat out
+    // disabling it to avoid the terrible performance drop of dragging it, we could make a little picture and the user
+    // probably wouldn't be able to tell they weren't looking at the real thing
     [RequireComponent(typeof(RectTransform), typeof(RawImage)), DisallowMultipleComponent]
     class TestCaptureTheory : MonoBehaviour
     {

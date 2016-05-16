@@ -87,7 +87,6 @@
     <Compile Include="VesselContext\Experiments\Rules\IRuleFactory.cs" />
     <Compile Include="VesselContext\Experiments\Rules\GenericRuleFactory.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\CompositeTriggerFactory.cs" />
-    <Compile Include="VesselContext\Experiments\Trigger\CommandCreateExperimentTriggerActivator.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\CommandCreateExperimentTriggers.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\ExperimentTrigger.cs" />
     <Compile Include="SensorDefinitions\CommandCreateSensorDefinitions.cs" />
@@ -160,7 +159,6 @@
     <Compile Include="Gui\old\InvalidConfigNodeException.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\ITriggerFactory.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\DefaultDeploymentTrigger.cs" />
-    <Compile Include="VesselContext\Experiments\Trigger\TriggerActivator.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\GenericTriggerFactory.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\TriggerNotFoundException.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchLoadGuiSettingsSignal.cs" />

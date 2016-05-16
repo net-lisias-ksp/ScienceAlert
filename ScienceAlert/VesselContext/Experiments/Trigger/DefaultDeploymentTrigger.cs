@@ -25,12 +25,15 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
     // ReSharper disable once UnusedMember.Global
     class DefaultDeploymentTrigger : ExperimentTrigger
     {
+        private const float AnimationTimeout = 5.0f; // max time to spend waiting for callbacks
+
         private readonly IScienceUtil _scienceUtil;
 
         private readonly List<KeyValuePair<IScalarModule, EventData<float>.OnEvent>> _expectedCallbacks =
             new List<KeyValuePair<IScalarModule, EventData<float>.OnEvent>>();
 
-        private const float AnimationTimeout = 5.0f; // max time to spend waiting for callbacks
+        private Coroutine _waitingRoutine;
+        
 
         public DefaultDeploymentTrigger(IVessel activeVessel, ScienceExperiment experiment, [NotNull] IScienceUtil scienceUtil) : base(activeVessel, experiment)
         {
@@ -40,14 +43,11 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
         public override IPromise Deploy()
         {
-            Log.Warning("This is where the experiment would be deployed");
-
-            
             var promise = new Promise();
 
             try
             {
-                CoroutineHoster.Instance.StartCoroutine(Deploy(GetSuitableModule(), promise));
+                _waitingRoutine = CoroutineHoster.Instance.StartCoroutine(Deploy(GetSuitableModule(), promise));
             }
             catch (Exception e)
             {
@@ -91,6 +91,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
             var modulesThatSendAnimationCallbacks = mse.FxIndices.Value
                 .Select(moduleIdx => modulesOnPart[moduleIdx])
+                .Where(pm => pm != null)
                 .OfType<IScalarModule>()
                 .ToList();
 
@@ -120,7 +121,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
             while (_expectedCallbacks.Any() || Time.realtimeSinceStartup < timeout)
                 yield return null;
 
-            if (Time.realtimeSinceStartup >= timeout)
+            if (Time.realtimeSinceStartup >= timeout && _expectedCallbacks.Any())
             {
                 Log.Verbose("Timed out while waiting for animation callbacks for the following module(s):");
                 foreach (var cb in _expectedCallbacks)
