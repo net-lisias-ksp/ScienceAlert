@@ -6,6 +6,7 @@ using ReeperCommon.Logging;
 using ReeperKSP.Extensions;
 using strange.extensions.command.impl;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ScienceAlert.Core
 {
@@ -30,7 +31,7 @@ namespace ScienceAlert.Core
 
             _coreContextView.transform.root.gameObject.PrintComponents(new DebugLog("ContextView components"));
 
-            _coreContextView.Do(UnityEngine.Object.Destroy);
+            _coreContextView.Do(Object.Destroy);
             Assembly.GetExecutingAssembly().DisablePlugin();
         }
     }

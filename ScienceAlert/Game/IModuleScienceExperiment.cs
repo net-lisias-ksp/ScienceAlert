@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ReeperCommon.Containers;
+﻿using ReeperCommon.Containers;
 
 namespace ScienceAlert.Game
 {

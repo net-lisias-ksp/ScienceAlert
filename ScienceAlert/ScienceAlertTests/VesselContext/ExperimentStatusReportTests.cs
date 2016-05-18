@@ -1,5 +1,4 @@
-﻿using System;
-using Ploeh.AutoFixture.Xunit;
+﻿using Ploeh.AutoFixture.Xunit;
 using ScienceAlert.VesselContext;
 using Xunit;
 using Xunit.Extensions;

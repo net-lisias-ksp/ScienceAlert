@@ -10,10 +10,10 @@ using ReeperCommon.Utilities;
 using ReeperKSP.AssetBundleLoading;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
-using strange.extensions.mediation.api;
 using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.OptionsWindow;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ScienceAlert.VesselContext.Gui
 {
@@ -97,13 +97,13 @@ namespace ScienceAlert.VesselContext.Gui
 
         private IEnumerator CreateViews()
         {
-            var experimentWindow = UnityEngine.Object.Instantiate(_experimentWindow);
-            var optionsWindow = UnityEngine.Object.Instantiate(_optionsWindow);
+            var experimentWindow = Object.Instantiate(_experimentWindow);
+            var optionsWindow = Object.Instantiate(_optionsWindow);
 
             if (experimentWindow == null || optionsWindow == null)
             {
-                experimentWindow.Do(UnityEngine.Object.Destroy);
-                optionsWindow.Do(UnityEngine.Object.Destroy);
+                experimentWindow.Do(Object.Destroy);
+                optionsWindow.Do(Object.Destroy);
 
                 throw new FailedToLoadAssetException("One or more view prefabs failed to load.");
             }

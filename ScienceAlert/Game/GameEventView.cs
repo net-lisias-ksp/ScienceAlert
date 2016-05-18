@@ -1,5 +1,4 @@
-﻿using System;
-using ReeperCommon.Logging;
+﻿using ReeperCommon.Logging;
 using strange.extensions.mediation.impl;
 using strange.extensions.signal.impl;
 

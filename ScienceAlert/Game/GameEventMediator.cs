@@ -1,7 +1,6 @@
 ﻿using System;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ScienceAlert.Core;
 using strange.extensions.mediation.impl;
 
 namespace ScienceAlert.Game

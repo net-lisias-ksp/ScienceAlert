@@ -1,8 +1,8 @@
 ﻿using System;
 using ReeperCommon.Logging;
-using ScienceAlert.VesselContext;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
+using ScienceAlert.VesselContext;
 using UnityEngine;
 
 namespace ScienceAlert.Core

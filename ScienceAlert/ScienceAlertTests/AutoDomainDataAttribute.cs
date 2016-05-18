@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using NSubstitute;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Xunit;
 using ScienceAlert.VesselContext.Experiments.Rules;

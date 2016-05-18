@@ -1,8 +1,8 @@
 ﻿using System;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ScienceAlert.Game;
 using strange.extensions.command.impl;
+using ScienceAlert.Game;
 
 namespace ScienceAlert.VesselContext.Experiments
 {

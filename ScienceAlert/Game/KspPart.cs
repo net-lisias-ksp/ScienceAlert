@@ -10,7 +10,7 @@ namespace ScienceAlert.Game
 
         public KspPart(Part part)
         {
-            if (part == null) throw new ArgumentNullException("Part");
+            if (part == null) throw new ArgumentNullException("part");
 
             _part = part;
         }

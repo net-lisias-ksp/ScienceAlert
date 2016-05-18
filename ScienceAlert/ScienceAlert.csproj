@@ -160,6 +160,7 @@
     <Compile Include="VesselContext\Experiments\Trigger\ITriggerFactory.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\DefaultDeploymentTrigger.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\GenericTriggerFactory.cs" />
+    <Compile Include="VesselContext\Experiments\Trigger\NoSuitableScienceExperimentModuleFoundException.cs" />
     <Compile Include="VesselContext\Experiments\Trigger\TriggerNotFoundException.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchLoadGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchSaveGuiSettingsSignal.cs" />

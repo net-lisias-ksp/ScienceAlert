@@ -3,7 +3,6 @@ using NSubstitute;
 using Ploeh.AutoFixture.Xunit;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
-using Xunit;
 using Xunit.Extensions;
 
 namespace ScienceAlertTests.VesselContext.Experiments

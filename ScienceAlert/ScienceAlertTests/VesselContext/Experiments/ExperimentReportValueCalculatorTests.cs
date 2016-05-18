@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using NSubstitute;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Xunit;
-using ReeperCommon.Containers;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
 using ScienceAlertTests.Domain;
@@ -14,7 +12,6 @@ using ScienceAlertTests.Game;
 using UnityEngine;
 using Xunit;
 using Xunit.Extensions;
-using Object = System.Object;
 
 namespace ScienceAlertTests.VesselContext.Experiments
 {

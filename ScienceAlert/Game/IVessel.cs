@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 
-
 namespace ScienceAlert.Game
 {
     public interface IVessel : IScienceContainerCollectionProvider,
