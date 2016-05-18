@@ -6,6 +6,7 @@ namespace ScienceAlert.Game
     public interface IModuleScienceExperiment
     {
         IPart Part { get; }
+        string ModuleTypeName { get; }
 
         bool Deployed { get; }
 // ReSharper disable once InconsistentNaming

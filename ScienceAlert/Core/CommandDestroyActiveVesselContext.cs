@@ -1,29 +1,28 @@
 ﻿using System;
+using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ScienceAlert.Game;
-using ScienceAlert.VesselContext;
 using strange.extensions.command.impl;
-using strange.extensions.context.api;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace ScienceAlert.Core
 {
 // ReSharper disable once ClassNeverInstantiated.Global
     class CommandDestroyActiveVesselContext : Command
     {
-        private readonly GameObject _coreContext;
-        private readonly IVessel _destroyedVessel;
+        private readonly GameObject _vesselContext;
+        private readonly SignalCriticalShutdown _failSignal;
 
         public CommandDestroyActiveVesselContext(
-            [Name(ContextKeys.CONTEXT_VIEW)] GameObject coreContext,
-            IVessel destroyedVessel)
+            [NotNull, Name(CoreKeys.VesselContextView)] GameObject vesselContext,
+            [NotNull] SignalCriticalShutdown failSignal)
         {
-            if (coreContext == null) throw new ArgumentNullException("coreContext");
-            if (destroyedVessel == null) throw new ArgumentNullException("destroyedVessel");
+            if (vesselContext == null) throw new ArgumentNullException("vesselContext");
+            if (failSignal == null) throw new ArgumentNullException("failSignal");
 
-            _coreContext = coreContext;
-            _destroyedVessel = destroyedVessel;
+            _vesselContext = vesselContext;
+            _failSignal = failSignal;
         }
 
 
@@ -31,15 +30,19 @@ namespace ScienceAlert.Core
         {
             Log.Verbose("Destroying active vessel context");
 
-            _coreContext.GetComponentInChildren<BootstrapActiveVesselContext>()
-                .With(bvc => bvc.context as ActiveVesselContext)
-                .If(vc => vc.injectionBinder.GetInstance<IVessel>().Equals(_destroyedVessel))
-                .Do(vc =>
-                {
-                    vc.SignalDestruction(true);
-                    Log.Verbose("Destroyed vessel context");
-                })
-                .IfNull(Fail);
+            if (_vesselContext == null)
+            {
+                Log.Error("Vessel context is already null; something is wrong");
+                Fail();
+                _failSignal.Dispatch();
+                return;
+            }
+
+            injectionBinder.Unbind<GameObject>(CoreKeys.VesselContextView);
+
+            Log.Verbose("Destroying " + _vesselContext.name);
+
+            Object.Destroy(_vesselContext);
         }
     }
 }

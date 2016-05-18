@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ReeperCommon.Logging;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -28,15 +27,12 @@ namespace ScienceAlert.UI
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            print(GetType().Name + " begin drag");
             BringToFront();
             HideItems();
         }
 
         public void BringToFront()
         {
-            Log.Normal("Bringing " + transform.name + " to front");
-
             if (transform.parent != null)
                 transform.SetAsLastSibling();
         }
@@ -48,7 +44,6 @@ namespace ScienceAlert.UI
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            print(GetType().Name + " end drag");
             RestoreItems();
         }
 

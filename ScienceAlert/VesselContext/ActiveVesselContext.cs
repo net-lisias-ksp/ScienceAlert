@@ -111,13 +111,11 @@ namespace ScienceAlert.VesselContext
                 .To<CommandCreateExperimentTriggers>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandDispatchLoadGuiSettingsSignal>()
-                //.To<CommandTriggerInitialSensorUpdates>()
                 .To<CommandCreateSensorUpdater>()
                 .Once();
 
             commandBinder.Bind<SignalExperimentSensorStatusChanged>()
                 .To<CommandLogSensorStatusUpdate>();
-            //    .Pooled();
 
             commandBinder.Bind<SignalDeployExperiment>()
                 .To<CommandDeployExperiment>();
@@ -152,6 +150,8 @@ namespace ScienceAlert.VesselContext
             }
         }
 
+
+
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
         {
             throw new NotImplementedException();
@@ -161,7 +161,6 @@ namespace ScienceAlert.VesselContext
         public void SignalDestruction(bool destroyContextGo)
         {
             Log.Verbose("Signaling ActiveVesselContext destruction");
-
 
 
             try

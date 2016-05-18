@@ -27,6 +27,11 @@ namespace ScienceAlert.Game
             get { return _part.Value; }
         }
 
+        public string ModuleTypeName
+        {
+            get { return string.IsNullOrEmpty(_mse.moduleName) ? _mse.GetType().Name : _mse.moduleName; }
+        }
+
         public bool Deployed
         {
             get { return _mse.Deployed; }

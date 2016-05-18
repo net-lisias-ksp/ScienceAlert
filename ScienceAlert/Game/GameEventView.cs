@@ -53,7 +53,8 @@ namespace ScienceAlert.Game
 
 
         private void OnVesselChange(Vessel data)
-        {    
+        {
+            Log.Debug("OnVesselChange");
             ActiveVesselChanged.Dispatch();
         }
 
@@ -61,14 +62,22 @@ namespace ScienceAlert.Game
         private void OnVesselDestroy(Vessel data)
         {
             if (IsActiveVessel(data))
+            {
+                Log.Debug("OnVesselDestroy.Active");
                 ActiveVesselDestroyed.Dispatch();
+            }
+            else Log.Debug("OnVesselDestroy.Nonactive");
         }
 
 
         private void OnVesselModified(Vessel data)
         {
             if (IsActiveVessel(data))
+            {
                 ActiveVesselModified.Dispatch();
+                Log.Debug("OnVesselModified.Active");
+            }
+            else Log.Debug("OnVesselModified.Nonactive");
         }
 
 

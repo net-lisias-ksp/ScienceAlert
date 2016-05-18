@@ -18,8 +18,6 @@ namespace ScienceAlert.UI.ExperimentWindow
         [SerializeField] private ExperimentListEntry _listItemPrefab;
         [SerializeField] private RectTransform _list;
 
-        //[NonSerialized, HideInInspector] internal readonly Signal<ExperimentEntryInfo> DeployExperiment = new Signal<ExperimentEntryInfo>();
-
         [HideInInspector] private readonly Dictionary<string, ExperimentListEntry> _listEntries =
             new Dictionary<string, ExperimentListEntry>();
  
@@ -77,13 +75,14 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         private void OnExperimentButtonClicked(string identifier)
         {
-            Log.Warning("ExperimentWindowView.OnExperimentButtonClicked: " + identifier);
+            Log.Debug("ExperimentWindowView.OnExperimentButtonClicked: " + identifier);
             DeployButtonClicked.Dispatch(identifier);
         }
 
 
-        private void UpdateExperimentListItem(ExperimentListEntry entry, ExperimentEntryInfo info)
+        private static void UpdateExperimentListItem(ExperimentListEntry entry, ExperimentEntryInfo info)
         {
+            
             entry.Enabled = info.ButtonEnabled;
             entry.Text = info.ExperimentTitle;
             
@@ -96,6 +95,7 @@ namespace ScienceAlert.UI.ExperimentWindow
             entry.LabValue = info.LabValue;
             entry.LabAlertLit = info.LabAlertLit;
 
+            entry.gameObject.SetActive(info.ButtonDisplayed);
         }
     }
 }

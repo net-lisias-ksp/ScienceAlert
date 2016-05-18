@@ -32,14 +32,12 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
         private readonly List<KeyValuePair<IScalarModule, EventData<float>.OnEvent>> _expectedCallbacks =
             new List<KeyValuePair<IScalarModule, EventData<float>.OnEvent>>();
 
-        private Coroutine _waitingRoutine;
-        
-
         public DefaultDeploymentTrigger(IVessel activeVessel, ScienceExperiment experiment, [NotNull] IScienceUtil scienceUtil) : base(activeVessel, experiment)
         {
             if (scienceUtil == null) throw new ArgumentNullException("scienceUtil");
             _scienceUtil = scienceUtil;
         }
+
 
         public override IPromise Deploy()
         {
@@ -47,7 +45,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
             try
             {
-                _waitingRoutine = CoroutineHoster.Instance.StartCoroutine(Deploy(GetSuitableModule(), promise));
+                CoroutineHoster.Instance.StartCoroutine(Deploy(GetSuitableModule(), promise));
             }
             catch (Exception e)
             {
@@ -56,6 +54,7 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
             return promise;
         }
+
 
         protected virtual IModuleScienceExperiment GetSuitableModule()
         {
@@ -75,10 +74,16 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
             {
                 CreateAnimationCallbacks(selectedModule);
 
-                Log.Debug("Waiting on " + _expectedCallbacks.Count +
-                          " animation callbacks before deployment is complete");
-                yield return CoroutineHoster.Instance.StartCoroutine(WaitForAnimationCallbacksToFinish(promise));
-                Log.Debug("Finished waiting on animation callbacks");
+                if (_expectedCallbacks.Any())
+                {
+                    Log.Debug("Waiting on " + _expectedCallbacks.Count +
+                              " animation callbacks before deployment is complete");
+                    yield return CoroutineHoster.Instance.StartCoroutine(WaitForAnimationCallbacksToFinish(promise));
+                    Log.Debug("Finished waiting on animation callbacks");
+                }
+                else
+                    Log.Verbose(selectedModule.ModuleTypeName + " for " + selectedModule.ExperimentID +
+                                " appears to have animation Fx but no animation callbacks were created");
             }
             
             promise.Dispatch(); 
@@ -87,6 +92,8 @@ namespace ScienceAlert.VesselContext.Experiments.Trigger
 
         private void CreateAnimationCallbacks(IModuleScienceExperiment mse)
         {
+            Log.Debug("Creating animation callbacks for " + mse.ModuleTypeName);
+
             var modulesOnPart = mse.Part.Modules;
 
             var modulesThatSendAnimationCallbacks = mse.FxIndices.Value

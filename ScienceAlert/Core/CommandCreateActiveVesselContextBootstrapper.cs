@@ -32,9 +32,15 @@ namespace ScienceAlert.Core
                 return;
             }
 
-            var vesselContextGo = new GameObject(VesselContextGameObjectName, typeof (BootstrapActiveVesselContext));
+            Log.Verbose("Creating vessel context for " + FlightGlobals.ActiveVessel.vesselName);
+
+            var vesselContextGo = new GameObject(VesselContextGameObjectName + "." + FlightGlobals.ActiveVessel.vesselName, typeof (BootstrapActiveVesselContext));
             vesselContextGo.transform.parent = _primaryContext.transform;
 
+            if (injectionBinder.GetBinding<GameObject>(CoreKeys.VesselContextView) != null)
+                injectionBinder.Unbind<GameObject>(CoreKeys.VesselContextView);
+
+            injectionBinder.Bind<GameObject>().To(vesselContextGo).ToName(CoreKeys.VesselContextView);
 
             Log.Verbose("Created vessel context bootstrapper");
         }

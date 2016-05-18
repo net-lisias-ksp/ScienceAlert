@@ -168,7 +168,7 @@ namespace ScienceAlert.Core
                 .Once();
 
 
-            injectionBinder.Bind<SignalCriticalShutdown>()
+            commandBinder.Bind<SignalCriticalShutdown>()
                 .To<CommandCriticalShutdown>();
 
 
@@ -480,7 +480,7 @@ namespace ScienceAlert.Core
             catch (Exception e)
             {
                 // just swallow it, something went wrong with binding configuration and there's nothing to be done
-                Log.Error("Error while signalling destruction: " + e);
+                Log.Error("Error while signaling destruction: " + e);
             }
         }
     }
