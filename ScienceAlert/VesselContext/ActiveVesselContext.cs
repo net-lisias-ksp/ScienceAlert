@@ -106,6 +106,7 @@ namespace ScienceAlert.VesselContext
                 .InSequence()
                 .To<CommandConfigureGameEvents>()
                 .To<CommandCreateVesselBindings>()
+                .To<CommandLoadSounds>()
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
                 .To<CommandCreateExperimentTriggers>()

@@ -16,7 +16,6 @@ using ReeperKSP.Serialization;
 using strange.extensions.context.api;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Game;
-using ScienceAlert.Gui;
 using ScienceAlert.SensorDefinitions;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -100,7 +99,6 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<Assembly>().To(assembly).CrossContext();
 
             injectionBinder
-                .Bind<IGuiConfiguration>()
                 .Bind<ISharedConfigurationFilePathProvider>()
                 .Bind<SharedConfiguration>()
                 .To<SharedConfiguration>().ToSingleton().CrossContext();

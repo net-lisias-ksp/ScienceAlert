@@ -8,7 +8,6 @@ using ReeperCommon.Logging;
 using ReeperKSP.AssetBundleLoading;
 using strange.extensions.mediation.impl;
 using strange.extensions.signal.impl;
-using ScienceAlert.Gui;
 using UnityEngine;
 
 namespace ScienceAlert.Core.Gui
@@ -18,8 +17,6 @@ namespace ScienceAlert.Core.Gui
     {
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
-
-        [Inject] public IGuiConfiguration GuiConfiguration { get; set; }
 
         internal readonly Signal<bool> Toggle = new Signal<bool>();
         internal readonly Signal ButtonCreated = new Signal();

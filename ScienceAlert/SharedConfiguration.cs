@@ -2,7 +2,6 @@
 using System.IO;
 using ReeperKSP.FileSystem;
 using ReeperKSP.Serialization;
-using ScienceAlert.Gui;
 using UnityEngine;
 
 namespace ScienceAlert
@@ -11,7 +10,7 @@ namespace ScienceAlert
     /// Shared configuration between all saves
     /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class SharedConfiguration : IGuiConfiguration, ISharedConfigurationFilePathProvider
+    public class SharedConfiguration : ISharedConfigurationFilePathProvider
     {
         public const string NodeName = "ScienceAlertSharedConfiguration";
         public const string Filename = "ScienceAlert.cfg";

@@ -4,5 +4,7 @@
     {
         ExperimentViewConfig, // ConfigNode
         VesselDebugViewConfig, // ConfigNode
+
+        AlertSound
     }
 }
