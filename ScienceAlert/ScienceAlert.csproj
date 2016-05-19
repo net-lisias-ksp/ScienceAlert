@@ -65,6 +65,8 @@
     <Compile Include="CouldNotCreateInstanceException.cs" />
     <Compile Include="DependenciesCannotBeSatisfiedException.cs" />
     <Compile Include="DoNotAutoRegister.cs" />
+    <Compile Include="CriticalShutdownEventRunner.cs" />
+    <Compile Include="ICriticalShutdownEvent.cs" />
     <Compile Include="SensorDefinitions\CommandConfigureSensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
     <Compile Include="SensorDefinitions\ISensorDefinitionFactory.cs" />
@@ -77,7 +79,7 @@
     <Compile Include="TemporaryBinding.cs" />
     <Compile Include="TemporaryBindingFactory.cs" />
     <Compile Include="VesselContext\CommandCreateVesselBindings.cs" />
-    <Compile Include="VesselContext\CommandLoadSounds.cs" />
+    <Compile Include="Core\CommandLoadSounds.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\CommandDeployExperiment.cs" />
     <Compile Include="CompositeBuilder.cs" />
@@ -98,7 +100,7 @@
     <Compile Include="DefaultObjectFromConfigNodeBuilder.cs" />
     <Compile Include="SensorDefinitions\SensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandDestroyActiveVesselContext.cs" />
-    <Compile Include="Core\CommandCriticalShutdown.cs" />
+    <Compile Include="Core\CommandConfigureCriticalShutdown.cs" />
     <Compile Include="Core\DuplicateScienceExperimentException.cs" />
     <Compile Include="Core\CommandLoadSharedConfiguration.cs" />
     <Compile Include="Core\CommandSaveSharedConfiguration.cs" />
@@ -150,7 +152,7 @@
     <Compile Include="Game\CommandConfigureGameEvents.cs" />
     <Compile Include="Game\GameEventMediator.cs" />
     <Compile Include="Game\GameEventView.cs" />
-    <Compile Include="Core\CoreKeys.cs" />
+    <Compile Include="Core\CoreContextKeys.cs" />
     <Compile Include="VesselContext\ActiveVesselContext.cs" />
     <Compile Include="SharedConfiguration.cs" />
     <Compile Include="ISharedConfigurationFilePathProvider.cs" />

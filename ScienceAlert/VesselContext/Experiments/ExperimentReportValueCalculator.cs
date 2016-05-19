@@ -24,8 +24,8 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public ExperimentReportValueCalculator(
             ReadOnlyCollection<ScienceExperiment> experiments,
-            [Name(CoreKeys.CareerScienceGainMultiplier)] float careerMultiplier,
-            [Name(CoreKeys.HomeWorld)] ICelestialBody homeWorld,
+            [Name(CoreContextKeys.CareerScienceGainMultiplier)] float careerMultiplier,
+            [Name(CoreContextKeys.HomeWorld)] ICelestialBody homeWorld,
             IQueryScienceValue scienceValueQuery,
             IVessel activeVessel)
         {

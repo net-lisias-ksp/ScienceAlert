@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Reflection;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ReeperKSP.Extensions;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
@@ -17,7 +15,7 @@ namespace ScienceAlert.VesselContext.Experiments
         [Inject] public ReadOnlyCollection<ExperimentSensor> Sensors { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
 
-        [Inject] public SignalCriticalShutdown CriticalFail { get; set; }
+        [Inject] public ICriticalShutdownEvent CriticalFail { get; set; }
 
 
 // ReSharper disable once UnusedMember.Local
@@ -72,11 +70,10 @@ namespace ScienceAlert.VesselContext.Experiments
         private void ShutdownDueToError()
         {
             enabled = false;
-            Assembly.GetExecutingAssembly().DisablePlugin();
 
-            Log.Warning("Attempting to shut down ScienceAlert");
+            Log.Warning("Attempting to shut down ScienceAlert because something went wrong while updating sensors and it will probably spam the log if we attempt to continue");
 
-            CriticalFail.Do(s => s.Dispatch()); // relatively high chance of failure; if something is wrong with either context, another exception will be thrown but we're hosed already
+            CriticalFail.Do(s => s.Dispatch()); 
         }
     }
 }

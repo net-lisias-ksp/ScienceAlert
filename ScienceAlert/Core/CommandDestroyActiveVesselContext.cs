@@ -11,11 +11,11 @@ namespace ScienceAlert.Core
     class CommandDestroyActiveVesselContext : Command
     {
         private readonly GameObject _vesselContext;
-        private readonly SignalCriticalShutdown _failSignal;
+        private readonly ICriticalShutdownEvent _failSignal;
 
         public CommandDestroyActiveVesselContext(
-            [NotNull, Name(CoreKeys.VesselContextView)] GameObject vesselContext,
-            [NotNull] SignalCriticalShutdown failSignal)
+            [NotNull, Name(CoreContextKeys.VesselContextView)] GameObject vesselContext,
+            [NotNull] ICriticalShutdownEvent failSignal)
         {
             if (vesselContext == null) throw new ArgumentNullException("vesselContext");
             if (failSignal == null) throw new ArgumentNullException("failSignal");
@@ -37,7 +37,7 @@ namespace ScienceAlert.Core
                 return;
             }
 
-            injectionBinder.Unbind<GameObject>(CoreKeys.VesselContextView);
+            injectionBinder.Unbind<GameObject>(CoreContextKeys.VesselContextView);
 
             Log.Verbose("Destroying " + _vesselContext.name);
 

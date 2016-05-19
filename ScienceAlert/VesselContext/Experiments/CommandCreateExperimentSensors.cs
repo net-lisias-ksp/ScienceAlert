@@ -20,7 +20,7 @@ namespace ScienceAlert.VesselContext.Experiments
         private readonly IScienceSubjectProvider _subjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
         private readonly ITemporaryBindingFactory _temporaryBindingFactory;
-        private readonly SignalCriticalShutdown _failSignal;
+        private readonly ICriticalShutdownEvent _failSignal;
 
         public CommandCreateExperimentSensors(
             IRuleFactory ruleFactory,
@@ -28,7 +28,7 @@ namespace ScienceAlert.VesselContext.Experiments
             IScienceSubjectProvider subjectProvider,
             IExperimentReportValueCalculator reportCalculator,
             ITemporaryBindingFactory temporaryBindingFactory,
-            SignalCriticalShutdown failSignal)
+            ICriticalShutdownEvent failSignal)
         {
             if (ruleFactory == null) throw new ArgumentNullException("ruleFactory");
             if (sensorDefinitions == null) throw new ArgumentNullException("sensorDefinitions");

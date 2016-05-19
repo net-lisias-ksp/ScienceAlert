@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using JetBrains.Annotations;
+using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using ReeperCommon.Utilities;
 using strange.extensions.command.impl;
@@ -14,7 +16,7 @@ namespace ScienceAlert.Core.Gui
         private readonly CoroutineHoster _coroutineRunner;
 
         public CommandCreateAppLauncherView(
-            [Name(CoreKeys.CoreContextView)] GameObject gameContext,
+            [Name(CoreContextKeys.CoreContextView)] GameObject gameContext,
             CoroutineHoster coroutineRunner)
         {
             if (gameContext == null) throw new ArgumentNullException("gameContext");
@@ -36,6 +38,9 @@ namespace ScienceAlert.Core.Gui
         {
             Log.Debug("Creating ApplicationLauncher view");
             _gameContext.AddComponent<ApplicationLauncherView>();
+
+            // note to self: no critical shutdown subscriber here, since the view is attached to the core context GO and so will be
+            // destroyed by the core context handler if something happens
 
             yield return 0; // wait for view to start
 

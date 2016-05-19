@@ -17,6 +17,7 @@ using strange.extensions.context.api;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Game;
 using ScienceAlert.SensorDefinitions;
+using ScienceAlert.VesselContext;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -58,6 +59,7 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
 
+
             MapCrossContextBindings();
             SetupCommandBindings();
 
@@ -73,8 +75,10 @@ namespace ScienceAlert.Core
 #else 
                 new NormalLog("ScienceAlert");
 #endif
+            var shutdownRunner = new CriticalShutdownEventRunner();
 
             injectionBinder.Bind<ILog>().To(Log.Instance).CrossContext();
+            injectionBinder.Bind<ICriticalShutdownEvent>().To(shutdownRunner).CrossContext();
 
             injectionBinder.Bind<SignalScenarioModuleLoad>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalScenarioModuleSave>().ToSingleton().CrossContext();
@@ -94,28 +98,33 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<IDirectory>().To(us.Directory).CrossContext();
             injectionBinder.Bind<IDirectory>()
                 .To(injectionBinder.GetInstance<IFileSystemFactory>().GameData)
-                .ToName(CoreKeys.GameData)
+                .ToName(CoreContextKeys.GameData)
                 .CrossContext();
             injectionBinder.Bind<Assembly>().To(assembly).CrossContext();
 
+  
             injectionBinder
                 .Bind<ISharedConfigurationFilePathProvider>()
                 .Bind<SharedConfiguration>()
                 .To<SharedConfiguration>().ToSingleton().CrossContext();
 
+            injectionBinder.Bind<ConfigNode>()
+                .To(injectionBinder.GetInstance<SharedConfiguration>().SoundConfig)
+                .ToName(CoreContextKeys.SoundConfig);
+
             injectionBinder.Bind<CoroutineHoster>().To(CoroutineHoster.Instance).CrossContext();
 
             injectionBinder.Bind<GameObject>()
                 .To(contextView as GameObject)
-                .ToName(CoreKeys.CoreContextView)
+                .ToName(CoreContextKeys.CoreContextView)
                 .CrossContext();
 
             injectionBinder.Bind<float>()
                 .ToValue(HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier)
-                .ToName(CoreKeys.CareerScienceGainMultiplier)
+                .ToName(CoreContextKeys.CareerScienceGainMultiplier)
                 .CrossContext();
 
-            injectionBinder.Bind<ICelestialBody>().To(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CoreKeys.HomeWorld).CrossContext();
+            injectionBinder.Bind<ICelestialBody>().To(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CoreContextKeys.HomeWorld).CrossContext();
 
             injectionBinder
                 .Bind<IQueryScienceValue>()
@@ -129,8 +138,6 @@ namespace ScienceAlert.Core
             ConfigureSerializer();
             ConfigureExperiments();
 
-
-            injectionBinder.Bind<SignalCriticalShutdown>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
         }
 
@@ -139,12 +146,13 @@ namespace ScienceAlert.Core
         {
             commandBinder.Bind<SignalScenarioModuleLoad>()
                 .InSequence()
+                .To<CommandConfigureCriticalShutdown>()
+                .To<CommandLoadSounds>()
                 .To<CommandConfigureSensorDefinitionBuilder>()
                 .To<CommandCreateSensorDefinitions>()
                 .To<CommandConfigureRuleFactories>()
                 .To<CommandConfigureTriggerFactories>()
                 .To<CommandLoadSharedConfiguration>()
-                //.To<CommandConfigureGuiSkinsAndTextures>()
                 .To<CommandConfigureGameEvents>()
                 .To<CommandCreateAppLauncherView>()
                 .To<CommandCreateActiveVesselContextBootstrapper>() // because we'll definitely have missed the initial OnVesselChanged by now
@@ -164,10 +172,6 @@ namespace ScienceAlert.Core
                 .InSequence()
                 .To<CommandSaveSharedConfiguration>()
                 .Once();
-
-
-            commandBinder.Bind<SignalCriticalShutdown>()
-                .To<CommandCriticalShutdown>();
 
 
             commandBinder.Bind<SignalActiveVesselDestroyed>()
@@ -399,74 +403,6 @@ namespace ScienceAlert.Core
                 throw;
             }
         }
-
-
-
-        //private IConfigNodeObjectBuilder<IRuleFactory> CreateRuleFactoryBuilder(ITemporaryBindingFactory temporaryBinder)
-        //{
-        //    // Get all Types that implement IExperimentRule and create builders which will construct factories to produce them 
-        //    // I know that sounds insane but this way we can do all the processing of ConfigNodes up front and use those
-        //    // factory types to bundle all the info necessary to actually create the rule in one place (data such as: ConfigNode
-        //    // to deserialize the concrete type that implements IExperimentRule)
-        //    //
-        //    // All of these rule factory builders can then be hidden behind this composite interface and it'll
-        //    // look like we have a magic IRuleFactory builder that can handle all kinds of nodes and types
-
-        //    var allTypes = AssemblyLoader.loadedAssemblies.SelectMany(la => la.assembly.GetTypes()).ToList();
-
-        //    // these types will be wrapped by RuleFactoryBuilders that will build a factory for the type
-        //    var experimentRuleTypes =
-        //        allTypes
-        //            .Where(
-        //                t =>
-        //                    !t.IsAbstract && !t.IsInterface &&
-        //                    t.GetInterfaces().Any(it => typeof(IExperimentRule) == it)).ToList();
-
-            
-
-        //    // these are concrete builder types for specific type(s). We'll try to handle factory construction requests
-        //    // through these first
-        //    var explicitFactoryBuilders =
-        //        allTypes.Where(
-        //            t =>
-        //                !t.IsAbstract &&
-        //                t.GetInterfaces().Any(it => it == typeof(IConfigNodeObjectBuilder<IRuleFactory>) && !it.IsGenericTypeDefinition && !it.IsAbstract))
-        //                .Where(t => temporaryBinder.CanCreate(t))
-        //                .ToList();
-
-        //    experimentRuleTypes.ForEach(t => Log.Debug("IExperimentRule type: " + t.FullName));
-        //    explicitFactoryBuilders.ForEach(bt => Log.Debug("IRuleFactory builder type: " + bt.FullName));
-
-        //    var builder = new CompositeObjectFromConfigNodeFactory<IRuleFactory>(
-        //        // we'll prefer explicit builders first
-        //        explicitFactoryBuilders.Select(explicitFactoryType =>
-        //        {
-        //            using (var binding = temporaryBinder.Create(explicitFactoryType))
-        //            {
-        //                return (IConfigNodeObjectBuilder<IRuleFactory>) binding.GetInstance();
-        //            }
-        //        })
-
-        //        // then we'll use our generic rule factory builder to handle any unprocessed requests after that
-        //        .Union(
-        //            experimentRuleTypes
-        //                .Select(concreteRuleType => typeof(RuleFactoryBuilder<>).MakeGenericType(concreteRuleType))
-        //                .Select(
-        //                    builderType =>
-        //                    {
-        //                        using (var binding = temporaryBinder.Create(builderType))
-        //                        {
-        //                            return (IConfigNodeObjectBuilder<IRuleFactory>)binding.GetInstance();
-        //                        }
-        //                    }))
-
-        //        // add ability to AND rules together
-        //        .Union(new [] { (IConfigNodeObjectBuilder<IRuleFactory>)(new CompositeAndRule.CompositeAndRuleFactoryBuilder()) }));
-
-            
-        //    return builder;
-        //}
-
 
 
         public void SignalDestruction()

@@ -23,7 +23,7 @@ namespace ScienceAlert.VesselContext.Gui
         private readonly GameObject _contextView;
         private readonly IContext _context;
         private readonly CoroutineHoster _coroutineRunner;
-        private readonly SignalCriticalShutdown _shutdownSignal;
+        private readonly ICriticalShutdownEvent _criticalShutdownSignal;
 
 
         
@@ -41,18 +41,18 @@ namespace ScienceAlert.VesselContext.Gui
         public CommandCreateVesselGui(
             [NotNull, Name(ContextKeys.CONTEXT_VIEW)] GameObject contextView, 
             [NotNull, Name(ContextKeys.CONTEXT)] IContext context,
-            [NotNull] CoroutineHoster coroutineRunner, 
-            [NotNull] SignalCriticalShutdown shutdownSignal)
+            [NotNull] CoroutineHoster coroutineRunner,
+            [NotNull] ICriticalShutdownEvent criticalShutdownSignal)
         {
             if (contextView == null) throw new ArgumentNullException("contextView");
             if (context == null) throw new ArgumentNullException("context");
             if (coroutineRunner == null) throw new ArgumentNullException("coroutineRunner");
-            if (shutdownSignal == null) throw new ArgumentNullException("shutdownSignal");
+            if (criticalShutdownSignal == null) throw new ArgumentNullException("criticalShutdownSignal");
 
             _contextView = contextView;
             _context = context;
             _coroutineRunner = coroutineRunner;
-            _shutdownSignal = shutdownSignal;
+            _criticalShutdownSignal = criticalShutdownSignal;
         }
 
 
@@ -85,7 +85,7 @@ namespace ScienceAlert.VesselContext.Gui
             {
                 Log.Error("Failed to create views: " + createViewsRoutine.Error.Value);
 
-                _shutdownSignal.Dispatch();
+                _criticalShutdownSignal.Dispatch();
                 Cancel();
                 Release();
                 yield break;

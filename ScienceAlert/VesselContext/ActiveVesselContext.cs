@@ -37,13 +37,14 @@ namespace ScienceAlert.VesselContext
 
             var sharedConfig = injectionBinder.GetInstance<SharedConfiguration>();
 
-            injectionBinder.Bind<ConfigNode>()
-                .To(sharedConfig.ExperimentViewConfig)
-                .ToName(VesselContextKeys.ExperimentViewConfig);
+            //injectionBinder.Bind<ConfigNode>()
+            //    .To(sharedConfig.ExperimentViewConfig)
+            //    .ToName(VesselContextKeys.ExperimentViewConfig);
 
-            injectionBinder.Bind<ConfigNode>()
-                .To(sharedConfig.VesselDebugViewConfig)
-                .ToName(VesselContextKeys.VesselDebugViewConfig);
+            //injectionBinder.Bind<ConfigNode>()
+            //    .To(sharedConfig.VesselDebugViewConfig)
+            //    .ToName(VesselContextKeys.VesselDebugViewConfig);
+
 
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
             injectionBinder.Bind<SignalLoadGuiSettings>().ToSingleton();
@@ -68,16 +69,11 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
 
-            injectionBinder.Bind<SignalCriticalShutdown>().ToSingleton();
-
             injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
             injectionBinder.Bind<SignalDeployExperiment>().ToSingleton();
             injectionBinder.Bind<SignalDeployExperimentFinished>().ToSingleton();
 
 
-            //mediationBinder.BindView<ExperimentListView>()
-            //    .ToMediator<ExperimentListMediator>()
-            //    .ToMediator<ExperimentListPopupMediator>();
             mediationBinder.BindView<OptionsWindowView>()
                 .ToMediator<OptionsWindowMediator>();
 
@@ -106,7 +102,6 @@ namespace ScienceAlert.VesselContext
                 .InSequence()
                 .To<CommandConfigureGameEvents>()
                 .To<CommandCreateVesselBindings>()
-                .To<CommandLoadSounds>()
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
                 .To<CommandCreateExperimentTriggers>()
@@ -127,10 +122,6 @@ namespace ScienceAlert.VesselContext
 
             commandBinder.Bind<SignalSharedConfigurationSaving>()
                 .To<CommandDispatchSaveGuiSettingsSignal>();
-
-            commandBinder.Bind<SignalCriticalShutdown>()
-                .To<CommandCriticalShutdown>().Once();
-
         }
 
 

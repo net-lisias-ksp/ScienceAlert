@@ -37,10 +37,10 @@ namespace ScienceAlert.Core
             var vesselContextGo = new GameObject(VesselContextGameObjectName + "." + FlightGlobals.ActiveVessel.vesselName, typeof (BootstrapActiveVesselContext));
             vesselContextGo.transform.parent = _primaryContext.transform;
 
-            if (injectionBinder.GetBinding<GameObject>(CoreKeys.VesselContextView) != null)
-                injectionBinder.Unbind<GameObject>(CoreKeys.VesselContextView);
+            if (injectionBinder.GetBinding<GameObject>(CoreContextKeys.VesselContextView) != null)
+                injectionBinder.Unbind<GameObject>(CoreContextKeys.VesselContextView);
 
-            injectionBinder.Bind<GameObject>().To(vesselContextGo).ToName(CoreKeys.VesselContextView);
+            injectionBinder.Bind<GameObject>().To(vesselContextGo).ToName(CoreContextKeys.VesselContextView);
 
             Log.Verbose("Created vessel context bootstrapper");
         }

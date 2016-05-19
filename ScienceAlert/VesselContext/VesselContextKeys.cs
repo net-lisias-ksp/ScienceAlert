@@ -2,9 +2,9 @@
 {
     enum VesselContextKeys
     {
-        ExperimentViewConfig, // ConfigNode
-        VesselDebugViewConfig, // ConfigNode
+        //ExperimentViewConfig, // ConfigNode
+        //VesselDebugViewConfig, // ConfigNode
 
-        AlertSound
+        DestroyViewsOnCriticalShutdownSubscription, // IDisposable
     }
 }

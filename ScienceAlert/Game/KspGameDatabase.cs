@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using UnityEngine;
 
@@ -37,6 +38,14 @@ namespace ScienceAlert.Game
                 Log.Performance("KspGameDatabase.GetConfigs [ " + nodeName + "] time: " +
                                 (Time.realtimeSinceStartup - timeStart).ToString("F3"));
             }
+        }
+
+
+        public Maybe<AudioClip> GetAudioClip(string clipUrl)
+        {
+            if (string.IsNullOrEmpty(clipUrl)) throw new ArgumentException("Must specify a valid value", "clipUrl");
+
+            return GameDatabase.Instance.GetAudioClip(clipUrl).ToMaybe();
         }
     }
 }
