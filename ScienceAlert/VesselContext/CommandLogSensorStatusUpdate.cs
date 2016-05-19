@@ -6,11 +6,11 @@ namespace ScienceAlert.VesselContext
 // ReSharper disable once ClassNeverInstantiated.Global
     class CommandLogSensorStatusUpdate : Command
     {
-        private readonly ExperimentSensorState _sensorState;
+        private readonly SensorStatusChange _statusChange;
 
-        public CommandLogSensorStatusUpdate(ExperimentSensorState sensorState)
+        public CommandLogSensorStatusUpdate(SensorStatusChange statusChange)
         {
-            _sensorState = sensorState;
+            _statusChange = statusChange;
         }
 
 
@@ -23,7 +23,7 @@ namespace ScienceAlert.VesselContext
         private string GenerateSensorValueMessage()
         {
 // ReSharper disable once ImpureMethodCallOnReadonlyValueField
-            return string.Format("New values: {0}", _sensorState.ToString());
+            return string.Format("New sensor state: {0}", _statusChange.NewState);
         }
     }
 }

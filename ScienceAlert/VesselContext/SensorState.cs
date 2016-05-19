@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ScienceAlert.VesselContext
 {
-    public struct ExperimentSensorState
+    public struct SensorState
     {
         public ScienceExperiment Experiment { get; private set; }
         public float CollectionValue { get; private set; }
@@ -17,7 +17,7 @@ namespace ScienceAlert.VesselContext
         public bool ConditionsMet { get; private set; }
         public IScienceSubject Subject { get; private set; }
 
-        public ExperimentSensorState(
+        public SensorState(
             ScienceExperiment experiment, [NotNull] IScienceSubject subject,
             float collectionValue, 
             float transmissionValue,
@@ -42,12 +42,11 @@ namespace ScienceAlert.VesselContext
 
         public override bool Equals(object obj)
         {
-            if (obj == null) return false;
-            if (!(obj is ExperimentSensorState)) return false;
+            if (!(obj is SensorState)) return false;
 
             try
             {
-                var report = (ExperimentSensorState) obj;
+                var report = (SensorState) obj;
                 return Equals(report);
             }
             catch (Exception)
@@ -57,7 +56,7 @@ namespace ScienceAlert.VesselContext
         }
 
 
-        public bool Equals(ExperimentSensorState report)
+        public bool Equals(SensorState report)
         {
             return ReferenceEquals(Experiment, report.Experiment) &&
                    Mathf.Approximately(CollectionValue, report.CollectionValue) &&
@@ -90,7 +89,7 @@ namespace ScienceAlert.VesselContext
         {
             var sb = new StringBuilder();
 
-            sb.Append(typeof (ExperimentSensorState).Name);
+            sb.Append(typeof (SensorState).Name);
             sb.Append("[");
             sb.Append(Experiment.id);
             sb.Append("] ");

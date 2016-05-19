@@ -59,6 +59,7 @@ namespace ScienceAlert.VesselContext.Experiments
             Profiler.BeginSample("ExperimentSensor.UpdateSensorValues");
 
             Profiler.BeginSample("ExperimentSensor.UpdateSensorValues.GetSubject");
+            var oldSubject = CurrentSubject;
             CurrentSubject = _scienceSubjectProvider.GetSubject(Experiment);
             Profiler.EndSample();
 
@@ -88,7 +89,8 @@ namespace ScienceAlert.VesselContext.Experiments
 
             HasChanged = !Mathf.Approximately(oldCollection, CollectionValue) ||
                          !Mathf.Approximately(oldTransmission, TransmissionValue) ||
-                         !Mathf.Approximately(oldLab, LabValue) || oldOnboard != Onboard || oldAvailable != Available || oldConditionsMet != ConditionsMet;
+                         !Mathf.Approximately(oldLab, LabValue) || oldOnboard != Onboard || oldAvailable != Available || oldConditionsMet != ConditionsMet ||
+                         oldSubject.Id != CurrentSubject.Id;
 
             Profiler.EndSample();
         }

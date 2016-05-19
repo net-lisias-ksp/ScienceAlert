@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using UnityEngine;
@@ -16,6 +18,23 @@ namespace ScienceAlert.VesselContext.Experiments
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
 
         [Inject] public ICriticalShutdownEvent CriticalFail { get; set; }
+
+        private Dictionary<ExperimentSensor, SensorState> _sensorStateCache =
+            new Dictionary<ExperimentSensor, SensorState>();
+
+        private void Start()
+        {
+            _sensorStateCache = Sensors.ToDictionary(sensor => sensor,
+                sensor =>
+                {
+                    sensor.UpdateSensorValues();
+
+                    return new SensorState(sensor.Experiment, sensor.CurrentSubject, 0f, 0f, 0f, false, false, false);
+                });
+
+            foreach (var sensor in Sensors)
+                DispatchChangedSignal(sensor);
+        }
 
 
 // ReSharper disable once UnusedMember.Local
@@ -60,8 +79,14 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             var dispatchTimerStart = Time.realtimeSinceStartup;
 
-            SensorStatusChanged.Dispatch(new ExperimentSensorState(sensor.Experiment, sensor.CurrentSubject, sensor.CollectionValue,
-                sensor.TransmissionValue, sensor.LabValue, sensor.Onboard, sensor.Available, sensor.ConditionsMet));
+            var newState = new SensorState(sensor.Experiment, sensor.CurrentSubject, sensor.CollectionValue,
+                sensor.TransmissionValue, sensor.LabValue, sensor.Onboard, sensor.Available, sensor.ConditionsMet);
+
+            var oldState = _sensorStateCache[sensor];
+
+            SensorStatusChanged.Dispatch(new SensorStatusChange(newState, oldState));
+
+            _sensorStateCache[sensor] = newState;
 
             print("Dispatch time: " + (Time.realtimeSinceStartup - dispatchTimerStart).ToString("F5") +
                   " for " + sensor.Experiment.id);

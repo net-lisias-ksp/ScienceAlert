@@ -1,10 +1,9 @@
 ﻿using strange.extensions.signal.impl;
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace ScienceAlert.VesselContext
 {
-
-// ReSharper disable once ClassNeverInstantiated.Global
-    class SignalExperimentSensorStatusChanged : Signal<ExperimentSensorState>
+    class SignalExperimentSensorStatusChanged : Signal<SensorStatusChange>
     {
     }
 
@@ -13,8 +12,8 @@ namespace ScienceAlert.VesselContext
     {
     }
 
+
     public class SignalDeployExperimentFinished : Signal<ScienceExperiment, bool /* successfully? */>
-    {
-        
+    {  
     }
 }

@@ -6,11 +6,9 @@ using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using ReeperCommon.Utilities;
 using ReeperKSP.AssetBundleLoading;
-using ReeperKSP.FileSystem;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using ScienceAlert.Game;
-using ScienceAlert.VesselContext;
 using UnityEngine;
 
 namespace ScienceAlert.Core

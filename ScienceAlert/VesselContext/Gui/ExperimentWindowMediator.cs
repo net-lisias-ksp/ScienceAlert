@@ -66,26 +66,28 @@ namespace ScienceAlert.VesselContext.Gui
 
 
 
-        private void OnSensorStatusChanged(ExperimentSensorState experimentSensorState)
+        private void OnSensorStatusChanged(SensorStatusChange status)
         {
-            Log.Debug("Received status change: " + experimentSensorState);
+            var newState = status.NewState;
 
-            var exp = experimentSensorState.Experiment;
+            Log.Debug("Received status change: " + newState);
 
-            var hasExperimentalValue = Mathf.Max(experimentSensorState.CollectionValue, experimentSensorState.TransmissionValue,
-                experimentSensorState.LabValue) > MinimumThresholdForIndicators;
+            var exp = newState.Experiment;
 
-            var buttonEnabled = hasExperimentalValue && experimentSensorState.Onboard &&
-                                experimentSensorState.ConditionsMet && experimentSensorState.Available;
+            var hasExperimentalValue = Mathf.Max(newState.CollectionValue, newState.TransmissionValue,
+                newState.LabValue) > MinimumThresholdForIndicators;
+
+            var buttonEnabled = hasExperimentalValue && newState.Onboard &&
+                                newState.ConditionsMet && newState.Available;
 
             var info = new ExperimentEntryInfo(
                     /* button title */              exp.experimentTitle,
-                    /* collection value */          experimentSensorState.CollectionValue,
-                    /* light collectioni icon? */   experimentSensorState.CollectionValue > MinimumThresholdForIndicators,
-                    /* transmission value */        experimentSensorState.TransmissionValue,
-                    /* light transmission icon? */  experimentSensorState.TransmissionValue > MinimumThresholdForIndicators,
-                    /* lab value */                 experimentSensorState.LabValue,
-                    /* light lab icon? */           experimentSensorState.LabValue > MinimumThresholdForIndicators,
+                    /* collection value */          newState.CollectionValue,
+                    /* light collectioni icon? */   newState.CollectionValue > MinimumThresholdForIndicators,
+                    /* transmission value */        newState.TransmissionValue,
+                    /* light transmission icon? */  newState.TransmissionValue > MinimumThresholdForIndicators,
+                    /* lab value */                 newState.LabValue,
+                    /* light lab icon? */           newState.LabValue > MinimumThresholdForIndicators,
                     /* show in list? */             true, 
                     /* enabled? */                  buttonEnabled
                     );

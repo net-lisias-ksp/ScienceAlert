@@ -109,12 +109,16 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             if (definition == null) throw new ArgumentNullException("definition");
 
-            return new ExperimentSensor(definition.Experiment,
-                _subjectProvider,
-                _reportCalculator,
-                CreateRule(definition.OnboardRuleDefinition),
-                CreateRule(definition.AvailabilityRuleDefinition),
-                CreateRule(definition.ConditionRuleDefinition));
+            var sensor = new ExperimentSensor(definition.Experiment,
+                    _subjectProvider,
+                    _reportCalculator,
+                    CreateRule(definition.OnboardRuleDefinition),
+                    CreateRule(definition.AvailabilityRuleDefinition),
+                    CreateRule(definition.ConditionRuleDefinition));
+
+            sensor.UpdateSensorValues(); // otherwise the sensor might have an invalid subject
+
+            return sensor;
         }
 
 

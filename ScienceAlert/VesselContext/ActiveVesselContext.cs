@@ -111,7 +111,8 @@ namespace ScienceAlert.VesselContext
                 .Once();
 
             commandBinder.Bind<SignalExperimentSensorStatusChanged>()
-                .To<CommandLogSensorStatusUpdate>();
+                .To<CommandLogSensorStatusUpdate>()
+                .To<CommandPlayAlertSound>();
 
             commandBinder.Bind<SignalDeployExperiment>()
                 .To<CommandDeployExperiment>();
