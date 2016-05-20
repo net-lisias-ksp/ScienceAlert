@@ -1,12 +1,20 @@
-﻿namespace ScienceAlert.VesselContext
+﻿using System;
+using JetBrains.Annotations;
+using ScienceAlert.VesselContext.Experiments;
+
+namespace ScienceAlert.VesselContext
 {
     struct SensorStatusChange
     {
-        public SensorState NewState;
-        public SensorState OldState;
+        public readonly IExperimentSensorState NewState;
+        public readonly IExperimentSensorState OldState;
 
-        public SensorStatusChange(SensorState newState, SensorState oldState) : this()
+        public SensorStatusChange([NotNull] IExperimentSensorState newState, [NotNull] IExperimentSensorState oldState)
+            : this()
         {
+            if (newState == null) throw new ArgumentNullException("newState");
+            if (oldState == null) throw new ArgumentNullException("oldState");
+
             NewState = newState;
             OldState = oldState;
         }

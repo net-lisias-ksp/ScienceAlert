@@ -100,7 +100,6 @@
     <Compile Include="Game\KspResearchAndDevelopmentDouble.cs" />
     <Compile Include="Game\KspScienceUtilTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="VesselContext\ExperimentStatusReportTests.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentReportValueCalculatorTests.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensorTests.cs" />
     <Compile Include="VesselContext\Experiments\SensorRuleDefinitionSetProviderTests.cs" />

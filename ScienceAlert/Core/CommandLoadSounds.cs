@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
+using ReeperCommon.Repositories;
 using ReeperCommon.Utilities;
 using ReeperKSP.AssetBundleLoading;
 using strange.extensions.command.impl;
@@ -16,9 +17,10 @@ namespace ScienceAlert.Core
     class CommandLoadSounds : Command
     {
         private const string AlertSoundNodeName = "AlertSound";
+        private const float MinTimeBetweenAlertSounds = 1f;
 
         private readonly GameObject _coreContext;
-        private readonly IGameDatabase _gameDatabase;
+        private readonly IResourceRepository _resourceRepo;
         private readonly ConfigNode _config;
         private readonly ICriticalShutdownEvent _shutdownEvent;
 
@@ -32,18 +34,18 @@ namespace ScienceAlert.Core
         
 
         public CommandLoadSounds(
-            [NotNull, Name(ContextKeys.CONTEXT_VIEW)] GameObject coreContext,
-            [NotNull] IGameDatabase gameDatabase, 
+            [NotNull, Name(ContextKeys.CONTEXT_VIEW)] GameObject coreContext, 
+            [NotNull] IResourceRepository resourceRepo,
             [NotNull, Name(CoreContextKeys.SoundConfig)] ConfigNode config,
             [NotNull] ICriticalShutdownEvent shutdownEvent)
         {
             if (coreContext == null) throw new ArgumentNullException("coreContext");
-            if (gameDatabase == null) throw new ArgumentNullException("gameDatabase");
+            if (resourceRepo == null) throw new ArgumentNullException("resourceRepo");
             if (config == null) throw new ArgumentNullException("config");
             if (shutdownEvent == null) throw new ArgumentNullException("shutdownEvent");
 
             _coreContext = coreContext;
-            _gameDatabase = gameDatabase;
+            _resourceRepo = resourceRepo;
             _config = config;
             _shutdownEvent = shutdownEvent;
         }
@@ -83,7 +85,7 @@ namespace ScienceAlert.Core
 
             var alertSound = GetAlertSound().Or(_defaultAlertSound);
 
-            injectionBinder.Bind<AudioClip>().To(alertSound).ToName(CoreContextKeys.AlertSound).CrossContext();
+            injectionBinder.Bind<PlayableSound>().To(new PlayableSound(alertSound, audioSource, MinTimeBetweenAlertSounds)).ToName(CrossContextKeys.AlertSound).CrossContext();
             injectionBinder.Bind<AudioSource>().To(audioSource).CrossContext();
 
             Log.Verbose("Successfully loaded sounds");
@@ -99,7 +101,7 @@ namespace ScienceAlert.Core
 
             var soundUrl = _config.GetValue(AlertSoundNodeName);
 
-            var clip = _gameDatabase.GetAudioClip(_config.GetValue(AlertSoundNodeName));
+            var clip = _resourceRepo.GetClip(_config.GetValue(AlertSoundNodeName));
 
             if (!clip.Any())
                 Log.Warning("Could not find specified sound: " + soundUrl);

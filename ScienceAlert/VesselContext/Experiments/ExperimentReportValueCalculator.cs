@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using ReeperCommon.Logging;
-using ScienceAlert.Core;
 using ScienceAlert.Game;
 using UnityEngine;
 using ScienceModuleList = System.Collections.Generic.List<ScienceAlert.Game.IModuleScienceExperiment>;
@@ -24,8 +23,8 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public ExperimentReportValueCalculator(
             ReadOnlyCollection<ScienceExperiment> experiments,
-            [Name(CoreContextKeys.CareerScienceGainMultiplier)] float careerMultiplier,
-            [Name(CoreContextKeys.HomeWorld)] ICelestialBody homeWorld,
+            [Name(CrossContextKeys.CareerScienceGainMultiplier)] float careerMultiplier,
+            [Name(CrossContextKeys.HomeWorld)] ICelestialBody homeWorld,
             IQueryScienceValue scienceValueQuery,
             IVessel activeVessel)
         {

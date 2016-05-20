@@ -1,34 +1,32 @@
 ﻿using strange.extensions.signal.impl;
 using ScienceAlert.Game;
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace ScienceAlert
 {
-// ReSharper disable once ClassNeverInstantiated.Global
+    // sent when a context is starting (locally)
     public class SignalStart : Signal
     {
     }
 
 
-// ReSharper disable once ClassNeverInstantiated.Global
-    public class SignalContextDestruction : Signal // signal to destroy the current context
+    // sent when a signal is being destroyed
+    public class SignalContextIsBeingDestroyed : Signal 
     {
 
     }
 
 
-// ReSharper disable once ClassNeverInstantiated.Global
     public class SignalActiveVesselChanged : Signal
     {
     }
 
 
-    // ReSharper disable once ClassNeverInstantiated.Global
     public class SignalActiveVesselModified : Signal
     {
     }
 
 
-    // ReSharper disable once ClassNeverInstantiated.Global
     public class SignalActiveVesselDestroyed : Signal
     {
     }
@@ -36,33 +34,20 @@ namespace ScienceAlert
 
     public class SignalCrewOnEva : Signal<GameEvents.FromToAction<IPart, IPart>>
     {
-        
     }
 
 
     public class SignalCrewTransferred : Signal<GameEvents.HostedFromToAction<ProtoCrewMember, IPart>>
     {
-        
     }
 
 
 
-
-
-
-
-
-
-
-
-
-// ReSharper disable once UnusedMember.Global
     public class SignalGameSceneLoadRequested : Signal<GameScenes>
     {
     }
 
 
-// ReSharper disable once UnusedMember.Global
     public class SignalApplicationQuit : Signal
     {
     }
@@ -70,23 +55,21 @@ namespace ScienceAlert
 
     public class SignalScienceReceived : Signal<float, ScienceSubject, ProtoVessel, bool>
     {
-    
     }
 
 
-// ReSharper disable once ClassNeverInstantiated.Global
+    // Update tick
     public class SignalGameTick : Signal
     {
-
     }
-
 
 
     public class SignalSharedConfigurationSaving : Signal
-    {
-        
+    {  
     }
 
 
-
+    public class SignalScienceAlertIssued : Signal
+    {
+    }
 }

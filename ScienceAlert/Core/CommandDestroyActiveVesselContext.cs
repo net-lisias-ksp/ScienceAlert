@@ -14,7 +14,7 @@ namespace ScienceAlert.Core
         private readonly ICriticalShutdownEvent _failSignal;
 
         public CommandDestroyActiveVesselContext(
-            [NotNull, Name(CoreContextKeys.VesselContextView)] GameObject vesselContext,
+            [NotNull, Name(CrossContextKeys.VesselContextView)] GameObject vesselContext,
             [NotNull] ICriticalShutdownEvent failSignal)
         {
             if (vesselContext == null) throw new ArgumentNullException("vesselContext");
@@ -37,7 +37,7 @@ namespace ScienceAlert.Core
                 return;
             }
 
-            injectionBinder.Unbind<GameObject>(CoreContextKeys.VesselContextView);
+            injectionBinder.Unbind<GameObject>(CrossContextKeys.VesselContextView);
 
             Log.Verbose("Destroying " + _vesselContext.name);
 

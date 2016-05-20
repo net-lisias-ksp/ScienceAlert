@@ -3,6 +3,7 @@ using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
 using strange.extensions.context.api;
+using strange.framework.api;
 using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.UI.ExperimentWindow;
@@ -17,6 +18,8 @@ namespace ScienceAlert.VesselContext
 {
     class ActiveVesselContext : SignalContext
     {
+        private IBinding _alertBinding = null;
+        private IBinding _sharedSaveBinding = null;
 
         public ActiveVesselContext(MonoBehaviour view) : base(view, ContextStartupFlags.MANUAL_LAUNCH)
         {
@@ -111,18 +114,40 @@ namespace ScienceAlert.VesselContext
                 .Once();
 
             commandBinder.Bind<SignalExperimentSensorStatusChanged>()
+                .InSequence()
                 .To<CommandLogSensorStatusUpdate>()
-                .To<CommandPlayAlertSound>();
+                .To<CommandDispatchAlert>();
 
             commandBinder.Bind<SignalDeployExperiment>()
                 .To<CommandDeployExperiment>();
 
-            commandBinder.Bind<SignalContextDestruction>()
+            commandBinder.Bind<SignalContextIsBeingDestroyed>()
                 .To<CommandDispatchSaveGuiSettingsSignal>()
                 .Once();
 
-            commandBinder.Bind<SignalSharedConfigurationSaving>()
+            SetupCrossContextCommandBindings();
+        }
+
+
+        // Split into its own section because it's very important we UNBIND these when the context is destroyed
+        private void SetupCrossContextCommandBindings()
+        {
+
+            _sharedSaveBinding = commandBinder.Bind<SignalSharedConfigurationSaving>()
                 .To<CommandDispatchSaveGuiSettingsSignal>();
+
+            _alertBinding = commandBinder.Bind<SignalScienceAlertIssued>()
+                .To<CommandPlayAlertSound>();
+        }
+
+
+        public override void OnRemove()
+        {
+            Log.Debug("Removing ActiveVesselContext cross context bindings");
+            _sharedSaveBinding.Do(commandBinder.Unbind);
+            _alertBinding.Do(commandBinder.Unbind);
+
+            base.OnRemove();
         }
 
 
@@ -164,7 +189,7 @@ namespace ScienceAlert.VesselContext
                     return; // context bootstrapper will issue destruction signal
                 }
 
-                injectionBinder.GetInstance<SignalContextDestruction>().Do(s => s.Dispatch());
+                injectionBinder.GetInstance<SignalContextIsBeingDestroyed>().Do(s => s.Dispatch());
             }
             catch (Exception e)
             {

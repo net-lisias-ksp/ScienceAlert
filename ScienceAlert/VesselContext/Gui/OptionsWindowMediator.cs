@@ -8,7 +8,7 @@ namespace ScienceAlert.VesselContext.Gui
     class OptionsWindowMediator : Mediator
     {
         [Inject] public OptionsWindowView View { get; set; }
-        [Inject] public SignalContextDestruction ContextDestroyed { get; set; }
+        [Inject] public SignalContextIsBeingDestroyed ContextDestroyed { get; set; }
 
         public override void OnRegister()
         {

@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PlayableSound.cs" />
     <Compile Include="BuilderCannotHandleConfigNodeException.cs" />
     <Compile Include="CommandConfigureObjectFromConfigNodeBuilders.cs" />
     <Compile Include="CommandConfigureTriggerFactories.cs" />
@@ -76,11 +77,15 @@
     <Compile Include="Game\KspUrlConfig.cs" />
     <Compile Include="ITemporaryBindingFactory.cs" />
     <Compile Include="IConfigNodeObjectBuilder.cs" />
+    <Compile Include="CrossContextKeys.cs" />
     <Compile Include="TemporaryBinding.cs" />
     <Compile Include="TemporaryBindingFactory.cs" />
+    <Compile Include="VesselContext\CommandDispatchAlert.cs" />
     <Compile Include="VesselContext\CommandCreateVesselBindings.cs" />
     <Compile Include="Core\CommandLoadSounds.cs" />
     <Compile Include="VesselContext\CommandPlayAlertSound.cs" />
+    <Compile Include="VesselContext\Experiments\IExperimentSensor.cs" />
+    <Compile Include="VesselContext\Experiments\IExperimentSensorState.cs" />
     <Compile Include="VesselContext\SensorStatusChange.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\CommandDeployExperiment.cs" />
@@ -165,7 +170,6 @@
     <Compile Include="VesselContext\Experiments\Trigger\TriggerNotFoundException.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchLoadGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchSaveGuiSettingsSignal.cs" />
-    <Compile Include="VesselContext\SensorState.cs" />
     <Compile Include="VesselContext\Gui\ExperimentWindowMediator.cs" />
     <Compile Include="VesselContext\Gui\Old\CommandTriggerInitialSensorUpdates.cs" />
     <Compile Include="VesselContext\Gui\Old\ExperimentListPopupMediator.cs" />

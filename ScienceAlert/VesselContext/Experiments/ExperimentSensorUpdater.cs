@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
+using ScienceAlert.Game;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
@@ -14,23 +16,56 @@ namespace ScienceAlert.VesselContext.Experiments
     {
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
-        [Inject] public ReadOnlyCollection<ExperimentSensor> Sensors { get; set; }
+// ReSharper disable once CollectionNeverUpdated.Global
+        [Inject] public ReadOnlyCollection<IExperimentSensor> Sensors { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
-
         [Inject] public ICriticalShutdownEvent CriticalFail { get; set; }
 
-        private Dictionary<ExperimentSensor, SensorState> _sensorStateCache =
-            new Dictionary<ExperimentSensor, SensorState>();
+        private Dictionary<IExperimentSensor, IExperimentSensorState> _sensorStateCache =
+            new Dictionary<IExperimentSensor, IExperimentSensorState>(new ExperimentSensorComparer());
 
+        private class InitialSensorState : IExperimentSensorState
+        {
+            public ScienceExperiment Experiment { get; private set; }
+            public IScienceSubject Subject { get; private set; }
+
+            public float CollectionValue { get { return 0f; }}
+            public float TransmissionValue { get { return 0f; }}
+            public float LabValue { get { return 0f; }}
+            public bool Onboard { get { return false; }}
+            public bool Available { get { return false; }}
+            public bool ConditionsMet {get { return false; }}
+
+            public InitialSensorState([NotNull] ScienceExperiment experiment, [NotNull] IScienceSubject subject)
+            {
+                if (experiment == null) throw new ArgumentNullException("experiment");
+                if (subject == null) throw new ArgumentNullException("subject");
+
+                Experiment = experiment;
+                Subject = subject;
+            }
+        }
+
+
+        private class ExperimentSensorComparer : IEqualityComparer<IExperimentSensor>
+        {
+            public bool Equals(IExperimentSensor x, IExperimentSensor y)
+            {
+                return x.Experiment.id == y.Experiment.id;
+            }
+
+            public int GetHashCode(IExperimentSensor obj)
+            {
+                return obj.Experiment.GetHashCode();
+            }
+        }
+
+
+        // ReSharper disable once UnusedMember.Local
         private void Start()
         {
             _sensorStateCache = Sensors.ToDictionary(sensor => sensor,
-                sensor =>
-                {
-                    sensor.UpdateSensorValues();
-
-                    return new SensorState(sensor.Experiment, sensor.CurrentSubject, 0f, 0f, 0f, false, false, false);
-                });
+                sensor => new InitialSensorState(sensor.Experiment, sensor.Subject) as IExperimentSensorState, new ExperimentSensorComparer());
 
             foreach (var sensor in Sensors)
                 DispatchChangedSignal(sensor);
@@ -46,7 +81,7 @@ namespace ScienceAlert.VesselContext.Experiments
             {
                 //var start = Time.realtimeSinceStartup;
 
-                // todo: split across several frames
+                // todo: split across several frames?
                 foreach (var m in Sensors)
                 {
                     m.ClearChangedFlag();
@@ -75,21 +110,33 @@ namespace ScienceAlert.VesselContext.Experiments
 
 
 
-        private void DispatchChangedSignal(ExperimentSensor sensor)
+        private void DispatchChangedSignal(IExperimentSensor sensor)
         {
             var dispatchTimerStart = Time.realtimeSinceStartup;
 
-            var newState = new SensorState(sensor.Experiment, sensor.CurrentSubject, sensor.CollectionValue,
-                sensor.TransmissionValue, sensor.LabValue, sensor.Onboard, sensor.Available, sensor.ConditionsMet);
+            var newState = sensor.State;
 
-            var oldState = _sensorStateCache[sensor];
+            try
+            {
+                var oldState = _sensorStateCache[sensor];
 
-            SensorStatusChanged.Dispatch(new SensorStatusChange(newState, oldState));
+                SensorStatusChanged.Dispatch(new SensorStatusChange(newState, oldState));
 
-            _sensorStateCache[sensor] = newState;
+                _sensorStateCache[sensor] = newState;
 
-            print("Dispatch time: " + (Time.realtimeSinceStartup - dispatchTimerStart).ToString("F5") +
-                  " for " + sensor.Experiment.id);
+                print("Dispatch time: " + (Time.realtimeSinceStartup - dispatchTimerStart).ToString("F5") +
+                      " for " + sensor.Experiment.id);
+            }
+            catch (KeyNotFoundException)
+            {
+                Log.Error("Couldn't find key: " + sensor.With(s => s.Experiment).Return(e => e.id, "<null>"));
+                Log.Error("Current keys:");
+                foreach (var kvp in _sensorStateCache)
+                    Log.Error("Key: " + kvp.Key.Experiment.id);
+
+                Log.Error("Finished listing keys");
+                throw;
+            }
         }
 
         private void ShutdownDueToError()

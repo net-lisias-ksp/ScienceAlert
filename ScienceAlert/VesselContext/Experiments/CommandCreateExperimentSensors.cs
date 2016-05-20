@@ -48,13 +48,13 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public override void Execute()
         {
-            var sensors = new List<ExperimentSensor>();
+            var rawSensors = new List<ExperimentSensor>();
 
             try
             {
-                sensors = CreateSensors().ToList();
+                rawSensors = CreateSensors().ToList();
 
-                if (!sensors.Any())
+                if (!rawSensors.Any())
                 {
                     Log.Error(
                         "Failed to create any experiment sensors -- something is wrong. ScienceAlert cannot work as expected");
@@ -65,13 +65,13 @@ namespace ScienceAlert.VesselContext.Experiments
             }
             finally
             {
-                injectionBinder
-                    .Bind<IEnumerable<ExperimentSensor>>()
-                    .Bind<List<ExperimentSensor>>()
-                        .To(sensors);
-                injectionBinder.Bind<ReadOnlyCollection<ExperimentSensor>>().To(sensors.AsReadOnly());
+                var sensors = rawSensors.Cast<IExperimentSensor>().ToList();
+                var states = rawSensors.Cast<IExperimentSensorState>().ToList();
 
-                Log.Verbose("Created " + sensors.Count + " experiment sensors");
+                injectionBinder.Bind<ReadOnlyCollection<IExperimentSensor>>().To(sensors.AsReadOnly());
+                injectionBinder.Bind<ReadOnlyCollection<IExperimentSensorState>>().To(states.AsReadOnly());
+
+                Log.Verbose("Created " + rawSensors.Count + " experiment sensors");
             }    
         }
 
@@ -114,7 +114,8 @@ namespace ScienceAlert.VesselContext.Experiments
                     _reportCalculator,
                     CreateRule(definition.OnboardRuleDefinition),
                     CreateRule(definition.AvailabilityRuleDefinition),
-                    CreateRule(definition.ConditionRuleDefinition));
+                    CreateRule(definition.ConditionRuleDefinition),
+                    _subjectProvider.GetSubject(definition.Experiment));
 
             sensor.UpdateSensorValues(); // otherwise the sensor might have an invalid subject
 

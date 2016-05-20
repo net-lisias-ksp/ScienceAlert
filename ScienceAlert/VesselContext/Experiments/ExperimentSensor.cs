@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Text;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments.Rules;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
-    public class ExperimentSensor
+    public class ExperimentSensor : IExperimentSensor, IExperimentSensorState//, IEquatable<IExperimentSensor>
     {
         private readonly IScienceSubjectProvider _scienceSubjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
@@ -20,7 +21,8 @@ namespace ScienceAlert.VesselContext.Experiments
             IExperimentReportValueCalculator reportCalculator,
             IExperimentRule onboardRule,
             IExperimentRule availableRule,
-            IExperimentRule conditionRule)
+            IExperimentRule conditionRule, 
+            IScienceSubject initialSubject)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
             if (scienceSubjectProvider == null) throw new ArgumentNullException("scienceSubjectProvider");
@@ -28,6 +30,7 @@ namespace ScienceAlert.VesselContext.Experiments
             if (onboardRule == null) throw new ArgumentNullException("onboardRule");
             if (availableRule == null) throw new ArgumentNullException("availableRule");
             if (conditionRule == null) throw new ArgumentNullException("conditionRule");
+            if (initialSubject == null) throw new ArgumentNullException("initialSubject");
 
             Experiment = experiment;
             _scienceSubjectProvider = scienceSubjectProvider;
@@ -35,6 +38,7 @@ namespace ScienceAlert.VesselContext.Experiments
             _onboardRule = onboardRule;
             _availableRule = availableRule;
             _conditionRule = conditionRule;
+            Subject = initialSubject;
         }
 
 
@@ -45,12 +49,17 @@ namespace ScienceAlert.VesselContext.Experiments
         public bool Onboard { get; private set; }               // related module is actually onboard the vessel? (onboard rule check)
         public bool Available { get; private set; }             // is at least one module available for deployment? (availability rule check)
         public bool ConditionsMet { get; private set; }              // Can the related experiment actually be run (runnable rule check)
-        public IScienceSubject CurrentSubject { get; private set; }
+        public IScienceSubject Subject { get; private set; }
         public ScienceExperiment Experiment { get; private set; }
 
         public void ClearChangedFlag()
         {
             HasChanged = false;
+        }
+
+        public IExperimentSensorState State
+        {
+            get { return this; }
         }
 
 
@@ -59,8 +68,8 @@ namespace ScienceAlert.VesselContext.Experiments
             Profiler.BeginSample("ExperimentSensor.UpdateSensorValues");
 
             Profiler.BeginSample("ExperimentSensor.UpdateSensorValues.GetSubject");
-            var oldSubject = CurrentSubject;
-            CurrentSubject = _scienceSubjectProvider.GetSubject(Experiment);
+            var oldSubject = Subject;
+            Subject = _scienceSubjectProvider.GetSubject(Experiment);
             Profiler.EndSample();
 
             var oldConditionsMet = ConditionsMet;
@@ -90,7 +99,7 @@ namespace ScienceAlert.VesselContext.Experiments
             HasChanged = !Mathf.Approximately(oldCollection, CollectionValue) ||
                          !Mathf.Approximately(oldTransmission, TransmissionValue) ||
                          !Mathf.Approximately(oldLab, LabValue) || oldOnboard != Onboard || oldAvailable != Available || oldConditionsMet != ConditionsMet ||
-                         oldSubject.Id != CurrentSubject.Id;
+                         oldSubject.Id != Subject.Id;
 
             Profiler.EndSample();
         }
@@ -99,7 +108,7 @@ namespace ScienceAlert.VesselContext.Experiments
         private void UpdateCollectionValue()
         {
             Profiler.BeginSample("ExperimentSensor.UpdateCollectionValue");
-            CollectionValue = _reportCalculator.CalculateCollectionValue(Experiment, CurrentSubject);
+            CollectionValue = _reportCalculator.CalculateCollectionValue(Experiment, Subject);
             Profiler.EndSample();
         }
 
@@ -107,7 +116,7 @@ namespace ScienceAlert.VesselContext.Experiments
         private void UpdateTransmissionValue()
         {
             Profiler.BeginSample("ExperimentSensor.UpdateTransmissionValue");
-            TransmissionValue = _reportCalculator.CalculateTransmissionValue(Experiment, CurrentSubject);
+            TransmissionValue = _reportCalculator.CalculateTransmissionValue(Experiment, Subject);
             Profiler.EndSample();
         }
 
@@ -115,7 +124,7 @@ namespace ScienceAlert.VesselContext.Experiments
         private void UpdateLabValue()
         {
             Profiler.BeginSample("ExperimentSensor.UpdateLabValue");
-            LabValue = _reportCalculator.CalculateLabValue(Experiment, CurrentSubject);
+            LabValue = _reportCalculator.CalculateLabValue(Experiment, Subject);
             Profiler.EndSample();
         }
 
@@ -141,6 +150,56 @@ namespace ScienceAlert.VesselContext.Experiments
             Profiler.BeginSample("ExperimentSensor.UpdateConditionValue");
             ConditionsMet = _conditionRule.Passes();
             Profiler.EndSample();
+        }
+
+
+        public bool Equals(IExperimentSensorState report)
+        {
+            return ReferenceEquals(Experiment, report.Experiment) &&
+                   Mathf.Approximately(CollectionValue, report.CollectionValue) &&
+                   Mathf.Approximately(TransmissionValue, report.TransmissionValue) &&
+                   Mathf.Approximately(LabValue, report.LabValue) &&
+                   Onboard == report.Onboard &&
+                   Available == report.Available &&
+                   ConditionsMet == report.ConditionsMet;
+        }
+
+
+        public bool Equals(IExperimentSensor other)
+        {
+            if (other == null) return false;
+            return Experiment.id == other.Experiment.id;
+        }
+
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 137;
+
+                hash = hash * 479 + Experiment.GetHashCode();
+                hash = hash * 479 + CollectionValue.GetHashCode();
+                hash = hash * 479 + TransmissionValue.GetHashCode();
+                hash = hash * 479 + Onboard.GetHashCode();
+                hash = hash * 479 + Available.GetHashCode();
+                hash = hash * 479 + ConditionsMet.GetHashCode();
+                hash = hash * 479 + Subject.Id.GetHashCode();
+
+                return hash;
+            }
+        }
+
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder(128);
+
+            builder.AppendFormat(
+                "ExperimentSensor ({0}): Onboard {1}, Available {2}, Condition {3}, Collection {4}, Transmission {5}, Lab {6}",
+                Experiment.id, Onboard, Available, ConditionsMet, CollectionValue, TransmissionValue, LabValue);
+
+            return builder.ToString();
         }
     }
 }

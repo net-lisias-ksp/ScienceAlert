@@ -98,7 +98,7 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<IDirectory>().To(us.Directory).CrossContext();
             injectionBinder.Bind<IDirectory>()
                 .To(injectionBinder.GetInstance<IFileSystemFactory>().GameData)
-                .ToName(CoreContextKeys.GameData)
+                .ToName(CrossContextKeys.GameData)
                 .CrossContext();
             injectionBinder.Bind<Assembly>().To(assembly).CrossContext();
 
@@ -116,15 +116,15 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<GameObject>()
                 .To(contextView as GameObject)
-                .ToName(CoreContextKeys.CoreContextView)
+                .ToName(CrossContextKeys.CoreContextView)
                 .CrossContext();
 
             injectionBinder.Bind<float>()
                 .ToValue(HighLogic.CurrentGame.Parameters.Career.ScienceGainMultiplier)
-                .ToName(CoreContextKeys.CareerScienceGainMultiplier)
+                .ToName(CrossContextKeys.CareerScienceGainMultiplier)
                 .CrossContext();
 
-            injectionBinder.Bind<ICelestialBody>().To(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CoreContextKeys.HomeWorld).CrossContext();
+            injectionBinder.Bind<ICelestialBody>().To(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CrossContextKeys.HomeWorld).CrossContext();
 
             injectionBinder
                 .Bind<IQueryScienceValue>()
@@ -168,7 +168,7 @@ namespace ScienceAlert.Core
                 .Once();
 
 
-            commandBinder.Bind<SignalContextDestruction>()
+            commandBinder.Bind<SignalContextIsBeingDestroyed>()
                 .InSequence()
                 .To<CommandSaveSharedConfiguration>()
                 .Once();
@@ -183,10 +183,6 @@ namespace ScienceAlert.Core
                 .To<CommandDestroyActiveVesselContext>()
                 .To<CommandCreateActiveVesselContextBootstrapper>();
         }
-
-
-
-
 
 
         public override void Launch()
@@ -409,7 +405,7 @@ namespace ScienceAlert.Core
         {
             try
             {
-                injectionBinder.GetInstance<SignalContextDestruction>().Do(ds => ds.Dispatch());
+                injectionBinder.GetInstance<SignalContextIsBeingDestroyed>().Do(ds => ds.Dispatch());
             }
             catch (Exception e)
             {

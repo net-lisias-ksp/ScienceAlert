@@ -17,7 +17,7 @@ namespace ScienceAlert.Core
         private readonly GameObject _coreContextView;
         private readonly ICriticalShutdownEvent _criticalShutdownEvent;
 
-        public CommandConfigureCriticalShutdown([Name(CoreContextKeys.CoreContextView)] GameObject coreContextView,
+        public CommandConfigureCriticalShutdown([Name(CrossContextKeys.CoreContextView)] GameObject coreContextView,
             [NotNull] ICriticalShutdownEvent criticalShutdownEvent)
         {
             if (coreContextView == null) throw new ArgumentNullException("coreContextView");

@@ -19,7 +19,7 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public ExperimentWindowView View { get; set; }
         [Inject] public ReadOnlyCollection<ScienceExperiment> Experiments { get; set; }
 
-        [Inject] public SignalContextDestruction ContextDestroyed { get; set; }
+        [Inject] public SignalContextIsBeingDestroyed ContextDestroyed { get; set; }
 
         [Inject] public SignalDeployExperiment DeployExperiment { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
