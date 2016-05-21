@@ -6,40 +6,28 @@ using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using strange.extensions.command.impl;
 using ScienceAlert.VesselContext.Experiments.Trigger;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
 // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandDeployExperiment : Command
     {
-        private readonly ScienceExperiment _experiment;
-        private readonly ReadOnlyCollection<ExperimentTrigger> _triggers;
-        private readonly SignalDeployExperimentFinished _finishedSignal;
-
-        public CommandDeployExperiment(
-            ScienceExperiment experiment, 
-            [NotNull] ReadOnlyCollection<ExperimentTrigger> triggers,
-            [NotNull] SignalDeployExperimentFinished finishedSignal)
-        {
-            if (experiment == null) throw new ArgumentNullException("experiment");
-            if (triggers == null) throw new ArgumentNullException("triggers");
-            if (finishedSignal == null) throw new ArgumentNullException("finishedSignal");
-
-            _experiment = experiment;
-            _triggers = triggers;
-            _finishedSignal = finishedSignal;
-        }
-
+        [Inject] public ScienceExperiment Experiment { get; set; }
+        [Inject] public ReadOnlyCollection<ExperimentTrigger> Triggers { get; set; }
+        [Inject] public SignalDeployExperimentFinished FinishedSignal { get; set; }
 
         public override void Execute()
         {
-            Log.Debug("Deploying " + _experiment.id);
+            Profiler.BeginSample("CommandDeployExperiment.Execute");
 
-            var trigger = GetDeployTriggerFor(_experiment);
+            //Log.Debug("Deploying " + Experiment.id);
+
+            var trigger = GetDeployTriggerFor(Experiment);
 
             if (!trigger.Any())
             {
-                Log.Error("Could not find a trigger for " + _experiment.id);
+                Log.Error("Could not find a trigger for " + Experiment.id);
                 Cancel();
                 return;
             }
@@ -53,6 +41,8 @@ namespace ScienceAlert.VesselContext.Experiments
 
             Retain();
             trigger.Value.Deploy().Then(FinishedDeploying).Fail(FailedToDeploy);
+
+            Profiler.EndSample();
         }
 
 
@@ -60,21 +50,21 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             Log.Error("Failed to deploy experiment: " + exception);
             Cancel();
-            _finishedSignal.Dispatch(_experiment, false);
+            FinishedSignal.Dispatch(Experiment, false);
             Release();
         }
 
         private void FinishedDeploying()
         {
             Log.Verbose("Finished deploying experiment");
-            _finishedSignal.Dispatch(_experiment, true);
+            FinishedSignal.Dispatch(Experiment, true);
             Release();
         }
 
 
         private Maybe<ExperimentTrigger> GetDeployTriggerFor(ScienceExperiment experiment)
         {
-            return _triggers.FirstOrDefault(tr => tr.Experiment.id == experiment.id).ToMaybe();
+            return Triggers.FirstOrDefault(tr => tr.Experiment.id == experiment.id).ToMaybe();
         }
     }
 }

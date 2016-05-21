@@ -11,5 +11,6 @@
         HomeWorld, // ICelestialBody
 
         AlertSound, // PlayableSound
+        MinSoundDelay, // float
     }
 }

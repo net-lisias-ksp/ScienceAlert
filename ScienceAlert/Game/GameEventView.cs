@@ -27,8 +27,7 @@ namespace ScienceAlert.Game
             GameEvents.onVesselWasModified.Add(OnVesselModified);
             GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
             GameEvents.OnScienceRecieved.Add(OnScienceReceived);
-            GameEvents.onCrewOnEva.Add(OnCrewOnEva);
-            GameEvents.onCrewTransferred.Add(OnCrewTransferred);
+
         }
 
 
@@ -39,8 +38,7 @@ namespace ScienceAlert.Game
             GameEvents.onVesselWasModified.Remove(OnVesselModified);
             GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
             GameEvents.OnScienceRecieved.Remove(OnScienceReceived);
-            GameEvents.onCrewOnEva.Remove(OnCrewOnEva);
-            GameEvents.onCrewTransferred.Remove(OnCrewTransferred);
+
             base.OnDestroy();
         }
 
@@ -77,18 +75,6 @@ namespace ScienceAlert.Game
                 Log.Debug("OnVesselModified.Active");
             }
             else Log.Debug("OnVesselModified.Nonactive");
-        }
-
-
-        private void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, Part> data)
-        {
-            Log.Error("This method not implemented");
-        }
-
-
-        private void OnCrewOnEva(GameEvents.FromToAction<Part, Part> data)
-        {
-            Log.Error("This method not implemented");
         }
 
 

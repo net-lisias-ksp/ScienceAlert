@@ -66,10 +66,8 @@ namespace ScienceAlert.VesselContext.Experiments
             finally
             {
                 var sensors = rawSensors.Cast<IExperimentSensor>().ToList();
-                var states = rawSensors.Cast<IExperimentSensorState>().ToList();
 
                 injectionBinder.Bind<ReadOnlyCollection<IExperimentSensor>>().To(sensors.AsReadOnly());
-                injectionBinder.Bind<ReadOnlyCollection<IExperimentSensorState>>().To(states.AsReadOnly());
 
                 Log.Verbose("Created " + rawSensors.Count + " experiment sensors");
             }    

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using ReeperCommon.Logging;
 using ReeperKSP.AssetBundleLoading;
@@ -13,6 +14,8 @@ namespace ScienceAlert.Core.Gui
 
         [Inject] public ApplicationLauncherView View { get; set; }
 
+        [Inject] public SignalScienceAlertIssued AlertIssueSignal { get; set; }
+
         public override void OnRegister()
         {
             base.OnRegister();
@@ -21,7 +24,7 @@ namespace ScienceAlert.Core.Gui
 
             View.enabled = false; // prevent View from starting up while we wait on assets
 
-            StartCoroutine(LoadViewAssets());
+            StartCoroutine(Initialize());
         }
 
 
@@ -29,12 +32,21 @@ namespace ScienceAlert.Core.Gui
         {
             base.OnRemove();
             View.Toggle.RemoveListener(OnButtonToggle);
+            AlertIssueSignal.RemoveListener(OnAlertIssued);
+        }
+
+
+        private IEnumerator Initialize()
+        {
+            yield return StartCoroutine(LoadViewAssets());
+
+            AlertIssueSignal.AddListener(OnAlertIssued);
         }
 
 
         private IEnumerator LoadViewAssets()
         {
-            print("Loading View assets...");
+            Log.Verbose("Loading View assets...");
 
             var viewAssetLoadRoutine = AssetBundleAssetLoader.InjectAssetsAsync(View, View.GetType());
             yield return viewAssetLoadRoutine.YieldUntilComplete;
@@ -45,12 +57,12 @@ namespace ScienceAlert.Core.Gui
                 yield break;
             }
 
-            print("View assets loaded, waiting for AppLauncher");
+            Log.Verbose("View assets loaded, waiting for AppLauncher");
 
 
             yield return StartCoroutine(View.SetupButton());
 
-            print("Finished waiting on AppLauncher, enabling View");
+            Log.Verbose("Finished waiting on AppLauncher, enabling View");
 
             View.enabled = true;
         }
@@ -65,8 +77,17 @@ namespace ScienceAlert.Core.Gui
 
         private void OnButtonToggle(bool b)
         {
-            Log.Error(GetType().Name + " button toggled + " + b);
-            //AppButtonToggled.Dispatch(b);
+            View.SetToggleState(false);
+            
+            if (View.AnimationState == ApplicationLauncherView.ButtonAnimationStates.Spinning)
+                View.AnimationState = ApplicationLauncherView.ButtonAnimationStates.Lit;
+          
+        }
+
+
+        private void OnAlertIssued()
+        {
+            View.AnimationState = ApplicationLauncherView.ButtonAnimationStates.Spinning;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace ScienceAlert
 
         private float _lastTimePlayed = 0f;
 
-        public PlayableSound([NotNull] AudioClip clip, [NotNull] AudioSource source, float minimumTimeBetweenPlaysSeconds)
+        public PlayableSound([NotNull] AudioClip clip, [NotNull] AudioSource source, [Name(CrossContextKeys.MinSoundDelay)] float minimumTimeBetweenPlaysSeconds)
         {
             if (clip == null) throw new ArgumentNullException("clip");
             if (source == null) throw new ArgumentNullException("source");
@@ -29,10 +29,10 @@ namespace ScienceAlert
 
         public void Play(float volumeScale = 1f)
         {
-            Log.Verbose(GetType().Name + ".Play");   
+            //Log.Verbose(GetType().Name + ".Play");   
 
             if (_lastTimePlayed + _minimumTimeBetweenPlaysSeconds > Time.realtimeSinceStartup) return; // haven't waited long enough yet
-            Log.Verbose("Playing sound " + _clip.name);
+            //Log.Verbose("Playing sound " + _clip.name);
 
             _source.Do(s => _clip.Do(c =>
             {

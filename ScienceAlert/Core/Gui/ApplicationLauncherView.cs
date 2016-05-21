@@ -140,8 +140,7 @@ namespace ScienceAlert.Core.Gui
                                                         ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.MAPVIEW,
                                                         _buttonSprite);
 
-            SetAnimationState(ButtonAnimationStates.Unlit);
-            SetAnimationState(ButtonAnimationStates.Spinning); // temp to make sure it's working
+            AnimationState = ButtonAnimationStates.Unlit;
 
             ButtonCreated.Dispatch();
         }
@@ -167,13 +166,28 @@ namespace ScienceAlert.Core.Gui
         }
 
 
-        public void SetAnimationState(ButtonAnimationStates anim)
+        public ButtonAnimationStates AnimationState
         {
-            int animationId = 0;
+            set
+            {
+                int animationId = 0;
 
-            if (_buttonAnimations.TryGetValue(anim, out animationId))
-                _buttonSprite.Do(spr => spr.Play(animationId));
-            else throw new NotImplementedException(anim.ToString());
+                if (_buttonAnimations.TryGetValue(value, out animationId))
+                    _buttonSprite.Do(spr => spr.Play(animationId));
+                else throw new NotImplementedException(value.ToString());
+            }
+            get
+            {
+                var clips = _buttonSprite.With(a => a.GetCurrentAnimatorClipInfo(0));
+
+                var state = _buttonSprite.GetCurrentAnimatorStateInfo(0);
+
+                foreach (var possibleState in _buttonAnimations)
+                    if (possibleState.Value == state.shortNameHash)
+                        return possibleState.Key;
+
+                throw new NotImplementedException("Unrecognized button animation state!");
+            }
         }
     }
 }

@@ -87,6 +87,7 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<PlayableSound>().To(new PlayableSound(alertSound, audioSource, MinTimeBetweenAlertSounds)).ToName(CrossContextKeys.AlertSound).CrossContext();
             injectionBinder.Bind<AudioSource>().To(audioSource).CrossContext();
+            injectionBinder.Bind<float>().ToValue(1f).ToName(CrossContextKeys.MinSoundDelay).CrossContext();
 
             Log.Verbose("Successfully loaded sounds");
 

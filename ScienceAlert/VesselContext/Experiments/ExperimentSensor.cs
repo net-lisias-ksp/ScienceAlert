@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments
 {
-    public class ExperimentSensor : IExperimentSensor, IExperimentSensorState//, IEquatable<IExperimentSensor>
+    public class ExperimentSensor : IExperimentSensor
     {
         private readonly IScienceSubjectProvider _scienceSubjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
@@ -57,9 +57,13 @@ namespace ScienceAlert.VesselContext.Experiments
             HasChanged = false;
         }
 
-        public IExperimentSensorState State
+        public ExperimentSensorState State
         {
-            get { return this; }
+            get
+            {
+                return new ExperimentSensorState(Experiment, Subject, CollectionValue, TransmissionValue, LabValue,
+                    Onboard, Available, ConditionsMet);
+            }
         }
 
 
@@ -150,44 +154,6 @@ namespace ScienceAlert.VesselContext.Experiments
             Profiler.BeginSample("ExperimentSensor.UpdateConditionValue");
             ConditionsMet = _conditionRule.Passes();
             Profiler.EndSample();
-        }
-
-
-        public bool Equals(IExperimentSensorState report)
-        {
-            return ReferenceEquals(Experiment, report.Experiment) &&
-                   Mathf.Approximately(CollectionValue, report.CollectionValue) &&
-                   Mathf.Approximately(TransmissionValue, report.TransmissionValue) &&
-                   Mathf.Approximately(LabValue, report.LabValue) &&
-                   Onboard == report.Onboard &&
-                   Available == report.Available &&
-                   ConditionsMet == report.ConditionsMet;
-        }
-
-
-        public bool Equals(IExperimentSensor other)
-        {
-            if (other == null) return false;
-            return Experiment.id == other.Experiment.id;
-        }
-
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 137;
-
-                hash = hash * 479 + Experiment.GetHashCode();
-                hash = hash * 479 + CollectionValue.GetHashCode();
-                hash = hash * 479 + TransmissionValue.GetHashCode();
-                hash = hash * 479 + Onboard.GetHashCode();
-                hash = hash * 479 + Available.GetHashCode();
-                hash = hash * 479 + ConditionsMet.GetHashCode();
-                hash = hash * 479 + Subject.Id.GetHashCode();
-
-                return hash;
-            }
         }
 
 

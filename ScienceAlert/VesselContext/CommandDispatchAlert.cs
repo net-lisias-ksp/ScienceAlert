@@ -1,5 +1,6 @@
 ﻿using ReeperCommon.Logging;
 using strange.extensions.command.impl;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext
 {
@@ -10,6 +11,8 @@ namespace ScienceAlert.VesselContext
         
         public override void Execute()
         {
+            Profiler.BeginSample("CommandDispatchAlert.Execute");
+
             var newState = SensorStatus.NewState;
             var oldState = SensorStatus.OldState;
 
@@ -24,14 +27,16 @@ namespace ScienceAlert.VesselContext
 
             if (!shouldAlert)
             {
-                Log.Debug("Not alerting; new state " + newState + "; old state " + oldState);
+                //Log.Debug("Not alerting; new state " + newState + "; old state " + oldState);
                 Fail();
             }
             else
             {
-                Log.Verbose("Issuing alert for " + SensorStatus.NewState.Experiment.id);
+                //Log.Verbose("Issuing alert for " + SensorStatus.NewState.Experiment.id);
                 ScienceAlertSignal.Dispatch();
             }
+
+            Profiler.EndSample();
         }
     }
 }

@@ -21,8 +21,11 @@ namespace ScienceAlert.Core
         {
             base.mapBindings();
             implicitBinder.ScanForAnnotatedClasses(
-                new KeyValuePair<Assembly, string[]>(Assembly.GetExecutingAssembly(), new [] { "ScienceAlert" }),
-                new KeyValuePair<Assembly, string[]>(typeof(ExperimentWindowView).Assembly, new [] { "ScienceAlert"}));
+                new [] 
+                {
+                    new KeyValuePair<Assembly, string[]>(Assembly.GetExecutingAssembly(), new [] { "ScienceAlert" }),
+                    new KeyValuePair<Assembly, string[]>(typeof(ExperimentWindowView).Assembly, new [] { "ScienceAlert"})
+                });
         }
 
 

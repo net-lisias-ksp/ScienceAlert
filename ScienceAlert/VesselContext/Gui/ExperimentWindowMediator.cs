@@ -70,8 +70,6 @@ namespace ScienceAlert.VesselContext.Gui
         {
             var newState = status.NewState;
 
-            Log.Debug("Received status change: " + newState);
-
             var exp = newState.Experiment;
 
             var hasExperimentalValue = Mathf.Max(newState.CollectionValue, newState.TransmissionValue,

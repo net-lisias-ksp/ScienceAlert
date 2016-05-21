@@ -21,30 +21,30 @@ namespace ScienceAlert.VesselContext.Experiments
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
         [Inject] public ICriticalShutdownEvent CriticalFail { get; set; }
 
-        private Dictionary<IExperimentSensor, IExperimentSensorState> _sensorStateCache =
-            new Dictionary<IExperimentSensor, IExperimentSensorState>(new ExperimentSensorComparer());
+        private Dictionary<IExperimentSensor, ExperimentSensorState> _sensorStateCache =
+            new Dictionary<IExperimentSensor, ExperimentSensorState>(new ExperimentSensorComparer());
 
-        private class InitialSensorState : IExperimentSensorState
-        {
-            public ScienceExperiment Experiment { get; private set; }
-            public IScienceSubject Subject { get; private set; }
+        //private class InitialSensorState : ExperimentSensorState
+        //{
+        //    public ScienceExperiment Experiment { get; private set; }
+        //    public IScienceSubject Subject { get; private set; }
 
-            public float CollectionValue { get { return 0f; }}
-            public float TransmissionValue { get { return 0f; }}
-            public float LabValue { get { return 0f; }}
-            public bool Onboard { get { return false; }}
-            public bool Available { get { return false; }}
-            public bool ConditionsMet {get { return false; }}
+        //    public float CollectionValue { get { return 0f; }}
+        //    public float TransmissionValue { get { return 0f; }}
+        //    public float LabValue { get { return 0f; }}
+        //    public bool Onboard { get { return false; }}
+        //    public bool Available { get { return false; }}
+        //    public bool ConditionsMet {get { return false; }}
 
-            public InitialSensorState([NotNull] ScienceExperiment experiment, [NotNull] IScienceSubject subject)
-            {
-                if (experiment == null) throw new ArgumentNullException("experiment");
-                if (subject == null) throw new ArgumentNullException("subject");
+        //    public InitialSensorState([NotNull] ScienceExperiment experiment, [NotNull] IScienceSubject subject)
+        //    {
+        //        if (experiment == null) throw new ArgumentNullException("experiment");
+        //        if (subject == null) throw new ArgumentNullException("subject");
 
-                Experiment = experiment;
-                Subject = subject;
-            }
-        }
+        //        Experiment = experiment;
+        //        Subject = subject;
+        //    }
+        //}
 
 
         private class ExperimentSensorComparer : IEqualityComparer<IExperimentSensor>
@@ -65,7 +65,7 @@ namespace ScienceAlert.VesselContext.Experiments
         private void Start()
         {
             _sensorStateCache = Sensors.ToDictionary(sensor => sensor,
-                sensor => new InitialSensorState(sensor.Experiment, sensor.Subject) as IExperimentSensorState, new ExperimentSensorComparer());
+                sensor => new ExperimentSensorState(sensor.Experiment, sensor.Subject, 0f, 0f, 0f, false, false, false), new ExperimentSensorComparer());
 
             foreach (var sensor in Sensors)
                 DispatchChangedSignal(sensor);
@@ -118,11 +118,15 @@ namespace ScienceAlert.VesselContext.Experiments
 
             try
             {
+                Profiler.BeginSample("DispatchChangedSignal");
+
                 var oldState = _sensorStateCache[sensor];
 
                 SensorStatusChanged.Dispatch(new SensorStatusChange(newState, oldState));
 
                 _sensorStateCache[sensor] = newState;
+
+                Profiler.EndSample();
 
                 print("Dispatch time: " + (Time.realtimeSinceStartup - dispatchTimerStart).ToString("F5") +
                       " for " + sensor.Experiment.id);

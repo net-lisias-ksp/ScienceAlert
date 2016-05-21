@@ -139,6 +139,7 @@ namespace ScienceAlert.Core
             ConfigureExperiments();
 
             injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalScienceAlertIssued>().ToSingleton().CrossContext();
         }
 
 

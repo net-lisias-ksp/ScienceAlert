@@ -8,7 +8,7 @@ namespace ScienceAlert.VesselContext.Experiments
         void UpdateSensorValues();
         void ClearChangedFlag();
 
-        IExperimentSensorState State { get; }
+        ExperimentSensorState State { get; }
         ScienceExperiment Experiment { get; }
         IScienceSubject Subject { get; }
     }

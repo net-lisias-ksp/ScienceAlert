@@ -84,6 +84,7 @@
     <Compile Include="VesselContext\CommandCreateVesselBindings.cs" />
     <Compile Include="Core\CommandLoadSounds.cs" />
     <Compile Include="VesselContext\CommandPlayAlertSound.cs" />
+    <Compile Include="VesselContext\Experiments\ExperimentSensorState.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentSensor.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentSensorState.cs" />
     <Compile Include="VesselContext\SensorStatusChange.cs" />

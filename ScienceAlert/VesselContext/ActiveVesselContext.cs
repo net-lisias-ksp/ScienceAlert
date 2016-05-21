@@ -94,7 +94,7 @@ namespace ScienceAlert.VesselContext
 
             SetupCommandBindings();
 
-            injectionBinder.ReflectAll();
+            //injectionBinder.ReflectAll();
         }
 
 
@@ -116,10 +116,12 @@ namespace ScienceAlert.VesselContext
             commandBinder.Bind<SignalExperimentSensorStatusChanged>()
                 .InSequence()
                 .To<CommandLogSensorStatusUpdate>()
-                .To<CommandDispatchAlert>();
+                .To<CommandDispatchAlert>()
+                .Pooled();
 
             commandBinder.Bind<SignalDeployExperiment>()
-                .To<CommandDeployExperiment>();
+                .To<CommandDeployExperiment>()
+                .Pooled();
 
             commandBinder.Bind<SignalContextIsBeingDestroyed>()
                 .To<CommandDispatchSaveGuiSettingsSignal>()

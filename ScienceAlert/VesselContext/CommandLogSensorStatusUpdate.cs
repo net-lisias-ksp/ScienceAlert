@@ -1,5 +1,6 @@
 ﻿using ReeperCommon.Logging;
 using strange.extensions.command.impl;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext
 {
@@ -10,7 +11,9 @@ namespace ScienceAlert.VesselContext
 
         public override void Execute()
         {
-            Log.Verbose(GenerateSensorValueMessage);
+            Profiler.BeginSample("CommandLogSensorStatusUpdate.Execute");
+            //Log.Verbose(GenerateSensorValueMessage);
+            Profiler.EndSample();
         }
 
 

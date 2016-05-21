@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using ReeperCommon.Logging;
 using strange.extensions.command.impl;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext
 {
@@ -17,8 +18,12 @@ namespace ScienceAlert.VesselContext
 
         public override void Execute()
         {
-            Log.Verbose("Playing alert");
+            Profiler.BeginSample("CommandPlayAlertSound.Execute");
+
+            //Log.Verbose("Playing alert");
             _alertClip.Play();
+
+            Profiler.EndSample();
         }
     }
 }
