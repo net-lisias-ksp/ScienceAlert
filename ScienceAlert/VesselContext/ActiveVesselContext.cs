@@ -76,7 +76,7 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalExperimentSensorStatusChanged>().ToSingleton();
             injectionBinder.Bind<SignalDeployExperiment>().ToSingleton();
             injectionBinder.Bind<SignalDeployExperimentFinished>().ToSingleton();
-
+            injectionBinder.Bind<SignalSetTooltip>().ToSingleton();
 
             mediationBinder.BindView<OptionsWindowView>()
                 .ToMediator<OptionsWindowMediator>();
@@ -95,6 +95,8 @@ namespace ScienceAlert.VesselContext
 
             injectionBinder.Bind<IScienceSubjectProvider>()
                 .To<KspScienceSubjectProvider>().ToSingleton();
+
+            injectionBinder.Bind<ExperimentStateCache>().ToSingleton();
 
             SetupCommandBindings();
 
@@ -120,6 +122,7 @@ namespace ScienceAlert.VesselContext
             commandBinder.Bind<SignalExperimentSensorStatusChanged>()
                 .InSequence()
                 .To<CommandLogSensorStatusUpdate>()
+                .To<CommandUpdateSensorStateCache>()
                 .To<CommandDispatchAlert>()
                 .Pooled();
 

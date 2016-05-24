@@ -22,6 +22,9 @@ namespace ScienceAlert.VesselContext.Gui
 
         [Inject] public SignalContextIsBeingDestroyed ContextDestroyed { get; set; }
 
+        [Inject] public SignalSetTooltip TooltipSignal { get; set; }
+
+
         [Inject] public SignalDeployExperiment DeployExperiment { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
 
@@ -45,6 +48,7 @@ namespace ScienceAlert.VesselContext.Gui
             // view signals
             View.DeployButtonClicked.AddListener(OnDeployButtonClicked);
             View.ChangeTooltip.AddListener(OnChangeTooltip);
+
             // other signals
             SensorStatusChanged.AddListener(OnSensorStatusChanged);
             ContextDestroyed.AddOnce(OnContextDestroyed);
@@ -113,6 +117,7 @@ namespace ScienceAlert.VesselContext.Gui
         private void OnChangeTooltip(IExperimentIdentifier identifier, ExperimentWindowView.ExperimentIndicatorTooltipType type)
         {
             Log.Normal("Change tooltip: " + type);
+            TooltipSignal.Dispatch(identifier, type);
         }
 
 

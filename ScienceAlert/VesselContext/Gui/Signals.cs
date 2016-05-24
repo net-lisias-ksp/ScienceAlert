@@ -1,4 +1,6 @@
 ﻿using strange.extensions.signal.impl;
+using ScienceAlert.UI;
+using ScienceAlert.UI.ExperimentWindow;
 
 namespace ScienceAlert.VesselContext.Gui
 {
@@ -13,5 +15,10 @@ namespace ScienceAlert.VesselContext.Gui
     class SignalSaveGuiSettings : Signal
     {
 
+    }
+
+
+    class SignalSetTooltip : Signal<IExperimentIdentifier, ExperimentWindowView.ExperimentIndicatorTooltipType>
+    {
     }
 }

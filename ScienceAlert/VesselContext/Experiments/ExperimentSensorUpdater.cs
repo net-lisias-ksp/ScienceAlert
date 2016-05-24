@@ -24,29 +24,6 @@ namespace ScienceAlert.VesselContext.Experiments
         private Dictionary<IExperimentSensor, ExperimentSensorState> _sensorStateCache =
             new Dictionary<IExperimentSensor, ExperimentSensorState>(new ExperimentSensorComparer());
 
-        //private class InitialSensorState : ExperimentSensorState
-        //{
-        //    public ScienceExperiment Experiment { get; private set; }
-        //    public IScienceSubject Subject { get; private set; }
-
-        //    public float CollectionValue { get { return 0f; }}
-        //    public float TransmissionValue { get { return 0f; }}
-        //    public float LabValue { get { return 0f; }}
-        //    public bool Onboard { get { return false; }}
-        //    public bool Available { get { return false; }}
-        //    public bool ConditionsMet {get { return false; }}
-
-        //    public InitialSensorState([NotNull] ScienceExperiment experiment, [NotNull] IScienceSubject subject)
-        //    {
-        //        if (experiment == null) throw new ArgumentNullException("experiment");
-        //        if (subject == null) throw new ArgumentNullException("subject");
-
-        //        Experiment = experiment;
-        //        Subject = subject;
-        //    }
-        //}
-
-
         private class ExperimentSensorComparer : IEqualityComparer<IExperimentSensor>
         {
             public bool Equals(IExperimentSensor x, IExperimentSensor y)

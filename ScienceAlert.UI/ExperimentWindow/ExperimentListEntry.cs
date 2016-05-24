@@ -89,7 +89,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         public void MouseExitCollectionIndicator()
         {
             Log.Normal("Mouse exited collection indicator");
-            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.None);
+            CloseTooltip();
         }
 
 
@@ -103,7 +103,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         public void MouseExitTransmissionIndicator()
         {
             Log.Normal("Mouse exited transmission indicator");
-            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.None);
+            CloseTooltip();
         }
 
 
@@ -117,7 +117,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         public void MouseExitLabIndicator()
         {
             Log.Normal("Mouse exited lab indicator");
-            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.None);
+            CloseTooltip();
         }
     }
 }
