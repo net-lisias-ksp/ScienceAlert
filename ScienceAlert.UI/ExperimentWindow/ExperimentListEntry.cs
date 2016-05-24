@@ -15,7 +15,12 @@ namespace ScienceAlert.UI.ExperimentWindow
     // ReSharper disable once UnusedMember.Global
     internal class ExperimentListEntry : MonoBehaviour
     {
-        public readonly Signal Deploy = new Signal();
+        public readonly Signal<IExperimentIdentifier> Deploy = new Signal<IExperimentIdentifier>();
+
+        public readonly Signal<IExperimentIdentifier, ExperimentWindowView.ExperimentIndicatorTooltipType> MousedOverIndicator =
+            new Signal<IExperimentIdentifier, ExperimentWindowView.ExperimentIndicatorTooltipType>();
+
+        public IExperimentIdentifier Identifier;
 
         [SerializeField] private Button _deployButton;
         [SerializeField] private Text _text;
@@ -36,29 +41,26 @@ namespace ScienceAlert.UI.ExperimentWindow
         // ReSharper disable once UnusedMember.Global
         public void OnDeploy()
         {
-            Deploy.Dispatch();
+            Deploy.Dispatch(Identifier);
         }
 
 
         // ReSharper disable once UnusedMember.Global
-        public bool Enabled
-        {
-            set { _deployButton.interactable = value; }
-        }
+        public bool Enabled { set { _deployButton.interactable = value; } }
 
-        public string Text
-        {
-            set { _text.text = value; }
-        }
+
+        public string Text { set { _text.text = value; } }
 
         public float CollectionValue { set; private get; }
         public float TransmissionValue { set; private get; }
         public float LabValue { set; private get; }
 
+
         public bool CollectionAlertLit
         {
             set { _collectionIndicatorLight.isOn = value; }
         }
+
 
         public bool TransmissionAlertLit
         {
@@ -68,6 +70,54 @@ namespace ScienceAlert.UI.ExperimentWindow
         public bool LabAlertLit
         {
             set { _labIndicatorLight.isOn = value; }
+        }
+
+
+        private void CloseTooltip()
+        {
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.None);
+        }
+
+
+        public void MouseEnterCollectionIndicator()
+        {
+            Log.Normal("Mouse entered collection indicator");
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Collection);
+        }
+
+
+        public void MouseExitCollectionIndicator()
+        {
+            Log.Normal("Mouse exited collection indicator");
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.None);
+        }
+
+
+        public void MouseEnterTransmissionIndicator()
+        {
+            Log.Normal("Mouse entered transmission indicator");
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Transmission);
+        }
+
+
+        public void MouseExitTransmissionIndicator()
+        {
+            Log.Normal("Mouse exited transmission indicator");
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.None);
+        }
+
+
+        public void MouseEnterLabIndicator()
+        {
+            Log.Normal("Mouse entered lab indicator");
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Lab);
+        }
+
+
+        public void MouseExitLabIndicator()
+        {
+            Log.Normal("Mouse exited lab indicator");
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.None);
         }
     }
 }

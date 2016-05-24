@@ -12,6 +12,7 @@ using strange.extensions.command.impl;
 using strange.extensions.context.api;
 using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.OptionsWindow;
+using ScienceAlert.UI.TooltipWindow;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -20,7 +21,6 @@ namespace ScienceAlert.VesselContext.Gui
 // ReSharper disable once ClassNeverInstantiated.Global
     class CommandCreateVesselGui : Command
     {
-        private readonly GameObject _contextView;
         private readonly IContext _context;
         private readonly CoroutineHoster _coroutineRunner;
         private readonly ICriticalShutdownEvent _criticalShutdownSignal;
@@ -35,21 +35,20 @@ namespace ScienceAlert.VesselContext.Gui
         [AssetBundleAsset("assets/sciencealert/ui/sciencealertexperimentwindowprefab.prefab", "sciencealert.ksp")]
         private ExperimentWindowView _experimentWindow;
 
+        [AssetBundleAsset("assets/sciencealert/ui/sciencealertsensortooltipwindowprefab.prefab", "sciencealert.ksp")]
+        private TooltipWindowView _tooltipWindow;
 #pragma warning restore 649
 
 
         public CommandCreateVesselGui(
-            [NotNull, Name(ContextKeys.CONTEXT_VIEW)] GameObject contextView, 
             [NotNull, Name(ContextKeys.CONTEXT)] IContext context,
             [NotNull] CoroutineHoster coroutineRunner,
             [NotNull] ICriticalShutdownEvent criticalShutdownSignal)
         {
-            if (contextView == null) throw new ArgumentNullException("contextView");
             if (context == null) throw new ArgumentNullException("context");
             if (coroutineRunner == null) throw new ArgumentNullException("coroutineRunner");
             if (criticalShutdownSignal == null) throw new ArgumentNullException("criticalShutdownSignal");
 
-            _contextView = contextView;
             _context = context;
             _coroutineRunner = coroutineRunner;
             _criticalShutdownSignal = criticalShutdownSignal;
@@ -99,28 +98,35 @@ namespace ScienceAlert.VesselContext.Gui
         {
             var experimentWindow = Object.Instantiate(_experimentWindow);
             var optionsWindow = Object.Instantiate(_optionsWindow);
+            var tooltipWindow = Object.Instantiate(_tooltipWindow);
 
-            if (experimentWindow == null || optionsWindow == null)
+            if (experimentWindow == null || optionsWindow == null || tooltipWindow == null)
             {
                 experimentWindow.Do(Object.Destroy);
                 optionsWindow.Do(Object.Destroy);
+                tooltipWindow.Do(Object.Destroy);
 
                 throw new FailedToLoadAssetException("One or more view prefabs failed to load.");
             }
 
+            var mainCanvas = UIMasterController.Instance.transform.Find("MainCanvas") as RectTransform;
+
             var dialogCanvas = UIMasterController.Instance.transform.Find("DialogCanvas")
                 .IfNull(() => Log.Warning("Failed to find expected dialog canvas on UIMasterController"))
-                .With(t => t as RectTransform);
+                .Return(t => t as RectTransform, mainCanvas);
+
+            var tooltipCanvas = UIMasterController.Instance.transform.Find("TooltipCanvas")
+                .IfNull(() => Log.Warning("Failed to find expected tooltip canvas on UIMasterController"))
+                .Return(t => t as RectTransform, mainCanvas);
 
             _context.AddView(experimentWindow);
             _context.AddView(optionsWindow);
+            _context.AddView(tooltipWindow);
 
-            foreach (var viewTransform in new [] { experimentWindow.transform, optionsWindow.transform }.Select(t => t as RectTransform))
-            {
-                Log.Verbose("Adding view to active vessel context: " + viewTransform.GetType().Name);
-
+            foreach (var viewTransform in new [] { experimentWindow.transform, optionsWindow.transform}.Select(t => t as RectTransform))
                 viewTransform.Do(view => view.SetParent(dialogCanvas, false)).Do(view => view.SetAsLastSibling());
-            }
+
+            tooltipCanvas.Do(v => v.SetParent(tooltipWindow.transform as RectTransform, false));
 
             optionsWindow.gameObject.SetActive(false);
 

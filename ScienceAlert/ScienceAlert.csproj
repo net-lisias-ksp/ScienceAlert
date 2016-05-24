@@ -87,6 +87,8 @@
     <Compile Include="VesselContext\Experiments\ExperimentSensorState.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentSensor.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentSensorState.cs" />
+    <Compile Include="VesselContext\Gui\TooltipWindowMediator.cs" />
+    <Compile Include="VesselContext\KspExperimentIdentifier.cs" />
     <Compile Include="VesselContext\SensorStatusChange.cs" />
     <Compile Include="VesselContext\Experiments\CommandCreateSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\CommandDeployExperiment.cs" />

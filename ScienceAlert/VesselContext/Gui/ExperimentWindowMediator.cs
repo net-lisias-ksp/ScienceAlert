@@ -4,6 +4,7 @@ using System.Linq;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using strange.extensions.mediation.impl;
+using ScienceAlert.UI;
 using ScienceAlert.UI.ExperimentWindow;
 using UnityEngine;
 
@@ -43,7 +44,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             // view signals
             View.DeployButtonClicked.AddListener(OnDeployButtonClicked);
-
+            View.ChangeTooltip.AddListener(OnChangeTooltip);
             // other signals
             SensorStatusChanged.AddListener(OnSensorStatusChanged);
             ContextDestroyed.AddOnce(OnContextDestroyed);
@@ -56,6 +57,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             // view signals
             View.DeployButtonClicked.RemoveListener(OnDeployButtonClicked);
+            View.ChangeTooltip.RemoveListener(OnChangeTooltip);
 
             // other signals
             SensorStatusChanged.RemoveListener(OnSensorStatusChanged);
@@ -90,21 +92,27 @@ namespace ScienceAlert.VesselContext.Gui
                     /* enabled? */                  buttonEnabled
                     );
 
-            View.UpdateExperimentEntry(exp.id, info, true);
+            View.UpdateExperimentEntry(new KspExperimentIdentifier(exp), info, true);
         }
 
 
-        private void OnDeployButtonClicked(string identifier)
+        private void OnDeployButtonClicked(IExperimentIdentifier identifier)
         {
 
             Log.Warning("ExperimentWindowMediator.OnDeployButtonClicked called with " + identifier);
 
-            Experiments.FirstOrDefault(exp => exp.id == identifier)
+            Experiments.FirstOrDefault(exp => identifier.Equals(exp.id))
                 .Do(exp => DeployExperiment.Dispatch(exp))
                 .IfNull(() =>
                 {
                     throw new ArgumentException("'" + identifier + "' is an unrecognized experiment identifier"); 
                 });
+        }
+
+
+        private void OnChangeTooltip(IExperimentIdentifier identifier, ExperimentWindowView.ExperimentIndicatorTooltipType type)
+        {
+            Log.Normal("Change tooltip: " + type);
         }
 
 

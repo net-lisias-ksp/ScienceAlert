@@ -8,6 +8,7 @@ using ScienceAlert.Core;
 using ScienceAlert.Game;
 using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.OptionsWindow;
+using ScienceAlert.UI.TooltipWindow;
 using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Trigger;
 using ScienceAlert.VesselContext.Gui;
@@ -82,6 +83,9 @@ namespace ScienceAlert.VesselContext
 
             mediationBinder.BindView<ExperimentWindowView>()
                 .ToMediator<ExperimentWindowMediator>();
+
+            mediationBinder.BindView<TooltipWindowView>()
+                .ToMediator<TooltipWindowMediator>();
 
             injectionBinder.Bind<ITemporaryBindingFactory>().To<TemporaryBindingFactory>().ToSingleton();
             injectionBinder.Bind<IGameFactory>().Bind<KspFactory>().To<KspFactory>().ToSingleton();

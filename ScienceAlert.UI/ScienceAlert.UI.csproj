@@ -45,15 +45,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BringToFrontOnClickOrDrag.cs" />
+    <Compile Include="ExperimentIdentifier.cs" />
     <Compile Include="ExperimentWindow\ExperimentListEntry.cs" />
     <Compile Include="ExperimentWindow\ExperimentWindowView.cs" />
     <Compile Include="ExperimentWindow\ExperimentEntryInfo.cs" />
+    <Compile Include="ExperimentWindow\Signals.cs" />
     <Compile Include="HideTargetsOnMouseOver.cs" />
     <Compile Include="OptionsWindow\ExpandableButtonController.cs" />
     <Compile Include="OptionsWindow\OptionsWindowView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ManualRegistrationView.cs" />
     <Compile Include="TestCaptureTheory.cs" />
+    <Compile Include="TooltipWindow\TooltipWindowView.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ReeperCommon\ReeperCommon\ReeperCommon.csproj">
