@@ -1,13 +1,17 @@
 ﻿using System;
 using JetBrains.Annotations;
+using ReeperCommon.Extensions;
+using ReeperCommon.Logging;
 using strange.extensions.mediation.impl;
 using ScienceAlert.UI;
 using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.TooltipWindow;
 using ScienceAlert.VesselContext.Experiments;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace ScienceAlert.VesselContext.Gui
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     class TooltipWindowMediator : Mediator
     {
         [Inject] public TooltipWindowView View { get; set; }
@@ -39,15 +43,16 @@ namespace ScienceAlert.VesselContext.Gui
 
         private void Hide()
         {
-            View.gameObject.SetActive(false);
+            View.Visible = false;
             _currentTooltip = ExperimentWindowView.ExperimentIndicatorTooltipType.None;
         }
 
 
         private void Show()
         {
-            View.gameObject.SetActive(true);
-            View.transform.SetAsLastSibling();
+            View.Visible = true;
+
+            //View.transform.root.gameObject.PrintComponents(new DebugLog("Root"));
         }
 
 
@@ -82,9 +87,9 @@ namespace ScienceAlert.VesselContext.Gui
             {
                 case ExperimentWindowView.ExperimentIndicatorTooltipType.Collection:
                     return "Collection: " + cachedState.CollectionValue.ToString("F1");
-                    case ExperimentWindowView.ExperimentIndicatorTooltipType.Transmission:
+                case ExperimentWindowView.ExperimentIndicatorTooltipType.Transmission:
                     return "Transmission: " + cachedState.TransmissionValue.ToString("F1");
-                    case ExperimentWindowView.ExperimentIndicatorTooltipType.Lab:
+                case ExperimentWindowView.ExperimentIndicatorTooltipType.Lab:
                     return "Lab Analysis: " + cachedState.LabValue.ToString("F1");
                 default:
                     throw new NotImplementedException(type.ToString());

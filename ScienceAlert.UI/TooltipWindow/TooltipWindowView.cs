@@ -15,6 +15,17 @@ namespace ScienceAlert.UI.TooltipWindow
         private RectTransform _transform;
         private Camera _camera;
 
+        public bool Visible
+        {
+            get { return gameObject.activeInHierarchy; }
+            set
+            {
+                gameObject.SetActive(value);
+                if (value)
+                    transform.SetAsLastSibling();
+            }
+        }
+
         protected override void Start()
         {
             base.Start();

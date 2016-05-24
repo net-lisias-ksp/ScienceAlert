@@ -126,7 +126,7 @@ namespace ScienceAlert.VesselContext.Gui
             foreach (var viewTransform in new [] { experimentWindow.transform, optionsWindow.transform}.Select(t => t as RectTransform))
                 viewTransform.Do(view => view.SetParent(dialogCanvas, false)).Do(view => view.SetAsLastSibling());
 
-            tooltipCanvas.Do(v => v.SetParent(tooltipWindow.transform as RectTransform, false));
+            tooltipWindow.Do(v => v.transform.SetParent(tooltipCanvas.transform as RectTransform, false));
 
             optionsWindow.gameObject.SetActive(false);
 
