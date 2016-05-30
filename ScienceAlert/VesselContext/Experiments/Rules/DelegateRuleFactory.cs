@@ -3,7 +3,7 @@
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     [DoNotAutoRegister]
-    class DelegateRuleFactory : ObjectFromConfigNodeBuilderUsingFactoryDelegate<IExperimentRule, IRuleFactory, IInjectionBinder, ITemporaryBindingFactory>, IRuleFactory
+    class DelegateRuleFactory : ObjectFromConfigNodeBuilderUsingFactoryDelegate<ISensorRule, IRuleFactory, IInjectionBinder, ITemporaryBindingFactory>, IRuleFactory
     {
         public DelegateRuleFactory(FactoryDelegate factoryFunc, params string[] handledConfigNames) : base(factoryFunc, handledConfigNames)
         {

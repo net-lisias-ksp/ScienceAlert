@@ -5,7 +5,7 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     class CustomFactory : IRuleFactory
     {
-        public IExperimentRule Build(ConfigNode config, IRuleFactory parameter, IInjectionBinder binder, ITemporaryBindingFactory parameter2)
+        public ISensorRule Build(ConfigNode config, IRuleFactory parameter, IInjectionBinder binder, ITemporaryBindingFactory parameter2)
         {
             throw new NotImplementedException();
         }

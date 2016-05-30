@@ -14,6 +14,7 @@ using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.OptionsWindow;
 using ScienceAlert.UI.TooltipWindow;
 using UnityEngine;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace ScienceAlert.VesselContext.Gui
@@ -128,7 +129,17 @@ namespace ScienceAlert.VesselContext.Gui
 
             tooltipWindow.Do(v => v.transform.SetParent(tooltipCanvas.transform as RectTransform, false));
 
-            optionsWindow.gameObject.SetActive(false);
+            mainCanvas.Do(LayoutRebuilder.MarkLayoutForRebuild);
+            dialogCanvas.Do(LayoutRebuilder.MarkLayoutForRebuild);
+
+            //mainCanvas.GetComponentsInChildren<Canvas>().Union(new[] {mainCanvas.GetComponent<Canvas>()})
+            //    .ToList().ForEach(item =>
+            //    {
+            //        Log.Normal(item.name + " camera: " + item.worldCamera.Return(wc => wc.name, "<Not set>"));
+            //    });
+            //mainCanvas.gameObject.PrintComponents(new DebugLog("MainCanvas"));
+
+            //optionsWindow.gameObject.SetActive(false);
 
             //experimentWindow.transform.root.gameObject.PrintComponents(new DebugLog("ExperimentWindowDebug"));
 

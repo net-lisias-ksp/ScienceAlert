@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    public class RuleVesselHasModuleScienceExperiment : ScienceExperimentModuleTracker, IExperimentRule
+    public class RuleVesselHasModuleScienceExperiment : ScienceExperimentModuleTracker, ISensorRule
     {
         public RuleVesselHasModuleScienceExperiment(ScienceExperiment experiment, IVessel vessel)
             : base(experiment, vessel)

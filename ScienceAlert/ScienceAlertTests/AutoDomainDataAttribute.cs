@@ -12,8 +12,8 @@ namespace ScienceAlertTests
             : base(new Fixture().Customize(new DomainCustomization()))
         {
             //var rnd = new Random();
-            var rules = typeof (IExperimentRule).Assembly.GetTypes()
-                .Where(t => typeof (IExperimentRule).IsAssignableFrom(t) && !t.IsAbstract)
+            var rules = typeof (ISensorRule).Assembly.GetTypes()
+                .Where(t => typeof (ISensorRule).IsAssignableFrom(t) && !t.IsAbstract)
                 .ToList();
 
             //var ruleProvider = Substitute.For<IExperimentRuleTypeProvider>();

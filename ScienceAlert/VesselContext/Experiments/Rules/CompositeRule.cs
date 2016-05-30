@@ -3,12 +3,12 @@
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     [DoNotAutoRegister]
-    class CompositeRule : IExperimentRule
+    class CompositeRule : ISensorRule
     {
-        private readonly Func<IExperimentRule[], bool> _comparisonFunc;
-        protected readonly IExperimentRule[] Rules;
+        private readonly Func<ISensorRule[], bool> _comparisonFunc;
+        protected readonly ISensorRule[] Rules;
 
-        public CompositeRule(Func<IExperimentRule[], bool> comparisonFunc, params IExperimentRule[] rules)
+        public CompositeRule(Func<ISensorRule[], bool> comparisonFunc, params ISensorRule[] rules)
         {
             if (comparisonFunc == null) throw new ArgumentNullException("comparisonFunc");
             if (rules == null) throw new ArgumentNullException("rules");

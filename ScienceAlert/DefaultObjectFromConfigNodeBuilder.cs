@@ -68,7 +68,7 @@ namespace ScienceAlert
     // create an instance (using a temporary binding factory, if provided) and deserialize the object from that config
     // note: the return type argument is needed to avoid having to re-implement the Build method in any
     // derived classes that build a family of objects (such as the rule builder: it would need a build method with
-    // a signature of IExperimentRule Build(ConfigNode, TParameterType, ItemporaryBindingFactory) and hide the existing
+    // a signature of ISensorRule Build(ConfigNode, TParameterType, ItemporaryBindingFactory) and hide the existing
     // ConcreteRuleType Build(etc)
     class DefaultObjectFromConfigNodeBuilder<TConcreteType, TObjectReturnType, TParameterType1, TParameterType2> : 
         DefaultObjectFromConfigNodeBuilder<TConcreteType>,

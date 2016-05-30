@@ -121,7 +121,7 @@ namespace ScienceAlert.VesselContext.Experiments
         }
 
 
-        private IExperimentRule CreateRule(ConfigNode ruleConfig)
+        private ISensorRule CreateRule(ConfigNode ruleConfig)
         {
             if (ruleConfig == null) throw new ArgumentNullException("ruleConfig");
 

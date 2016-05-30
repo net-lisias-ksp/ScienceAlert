@@ -1,18 +1,14 @@
-﻿using ReeperCommon.Logging;
-using strange.extensions.command.impl;
-using UnityEngine;
+﻿using strange.extensions.command.impl;
 
 namespace ScienceAlert.VesselContext
 {
-    class CommandDispatchAlert : Command
+    class CommandMaybeDispatchAlert : Command
     {
         [Inject] public SensorStatusChange SensorStatus { get; set; }
         [Inject] public SignalScienceAlertIssued ScienceAlertSignal { get; set; }
         
         public override void Execute()
         {
-            Profiler.BeginSample("CommandDispatchAlert.Execute");
-
             var newState = SensorStatus.NewState;
             var oldState = SensorStatus.OldState;
 
@@ -35,8 +31,6 @@ namespace ScienceAlert.VesselContext
                 //Log.Verbose("Issuing alert for " + SensorStatus.NewState.Experiment.id);
                 ScienceAlertSignal.Dispatch();
             }
-
-            Profiler.EndSample();
         }
     }
 }

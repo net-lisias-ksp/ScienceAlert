@@ -28,26 +28,15 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalDeployExperiment DeployExperiment { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
 
+
         public override void OnRegister()
         {
             base.OnRegister();
-            Log.Warning("ExperimentWindowMediator.OnRegister");
-
-
-            // todo: catch any exceptions
-
-            //for (int i = 0; i < Experiments.Count; ++i)
-            //{
-            //    View.UpdateExperimentEntry(Experiments[i].id,
-            //        new ExperimentEntryInfo(Experiments[i].experimentTitle, Random.Range(0f, 100f), true,
-            //            Random.Range(0f, 100f), false, Random.Range(0f, 100f), true, true,
-            //            i % 2 == 0), false);
-
-            //}
 
             // view signals
             View.DeployButtonClicked.AddListener(OnDeployButtonClicked);
             View.ChangeTooltip.AddListener(OnChangeTooltip);
+            View.CloseButtonClicked.AddListener(OnCloseButtonClicked);
 
             // other signals
             SensorStatusChanged.AddListener(OnSensorStatusChanged);
@@ -57,11 +46,10 @@ namespace ScienceAlert.VesselContext.Gui
 
         public override void OnRemove()
         {
-            Log.Warning("ExperimentWindowMediator.OnUnregister");
-
             // view signals
             View.DeployButtonClicked.RemoveListener(OnDeployButtonClicked);
             View.ChangeTooltip.RemoveListener(OnChangeTooltip);
+            View.CloseButtonClicked.RemoveListener(OnCloseButtonClicked);
 
             // other signals
             SensorStatusChanged.RemoveListener(OnSensorStatusChanged);
@@ -86,6 +74,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             var info = new ExperimentEntryInfo(
                     /* button title */              exp.experimentTitle,
+                    /* alerting for this exp? */    false,
                     /* collection value */          newState.CollectionValue,
                     /* light collectioni icon? */   newState.CollectionValue > MinimumThresholdForIndicators,
                     /* transmission value */        newState.TransmissionValue,
@@ -102,9 +91,6 @@ namespace ScienceAlert.VesselContext.Gui
 
         private void OnDeployButtonClicked(IExperimentIdentifier identifier)
         {
-
-            Log.Warning("ExperimentWindowMediator.OnDeployButtonClicked called with " + identifier);
-
             Experiments.FirstOrDefault(exp => identifier.Equals(exp.id))
                 .Do(exp => DeployExperiment.Dispatch(exp))
                 .IfNull(() =>
@@ -116,8 +102,13 @@ namespace ScienceAlert.VesselContext.Gui
 
         private void OnChangeTooltip(IExperimentIdentifier identifier, ExperimentWindowView.ExperimentIndicatorTooltipType type)
         {
-            Log.Normal("Change tooltip: " + type);
             TooltipSignal.Dispatch(identifier, type);
+        }
+
+
+        private void OnCloseButtonClicked()
+        {
+            View.gameObject.SetActive(false);
         }
 
 

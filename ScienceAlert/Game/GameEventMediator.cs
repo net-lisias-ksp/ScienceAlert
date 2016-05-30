@@ -28,6 +28,8 @@ namespace ScienceAlert.Game
 
         public override void OnRegister()
         {
+            Log.Warning("GameEventMediator.OnRegister");
+
             base.OnRegister();
             View.ActiveVesselChanged.AddListener(OnActiveVesselChanged);
             View.ActiveVesselModified.AddListener(OnActiveVesselModified);

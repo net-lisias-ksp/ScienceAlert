@@ -13,6 +13,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         public bool ButtonEnabled { get; private set; }
 
         // These are the indicators inside the experiment list entry
+        public bool AlertLit { get; private set; }
         public bool CollectionAlertLit { get; private set; }
         public bool TransmissionAlertLit { get; private set; }
         public bool LabAlertLit { get; private set; }
@@ -20,6 +21,7 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         public ExperimentEntryInfo(
             string title, 
+            bool alert,
             float collectionValue, 
             bool collectionAlert,
             float transmissionValue, 
@@ -35,6 +37,7 @@ namespace ScienceAlert.UI.ExperimentWindow
             if (labValue < 0f) throw new ArgumentOutOfRangeException("labValue", "must be >= 0");
 
             ExperimentTitle = title;
+            AlertLit = alert;
             CollectionValue = collectionValue;
             CollectionAlertLit = collectionAlert;
             TransmissionValue = transmissionValue;

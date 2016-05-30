@@ -10,18 +10,18 @@ namespace ScienceAlert.VesselContext.Experiments
     {
         private readonly IScienceSubjectProvider _scienceSubjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
-        private readonly IExperimentRule _onboardRule;
-        private readonly IExperimentRule _availableRule;
-        private readonly IExperimentRule _conditionRule;
+        private readonly ISensorRule _onboardRule;
+        private readonly ISensorRule _availableRule;
+        private readonly ISensorRule _conditionRule;
 
 
         public ExperimentSensor(
             ScienceExperiment experiment, 
             IScienceSubjectProvider scienceSubjectProvider,
             IExperimentReportValueCalculator reportCalculator,
-            IExperimentRule onboardRule,
-            IExperimentRule availableRule,
-            IExperimentRule conditionRule, 
+            ISensorRule onboardRule,
+            ISensorRule availableRule,
+            ISensorRule conditionRule, 
             IScienceSubject initialSubject)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");

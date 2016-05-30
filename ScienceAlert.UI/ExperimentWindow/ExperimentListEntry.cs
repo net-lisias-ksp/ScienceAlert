@@ -27,6 +27,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         [SerializeField] private Toggle _collectionIndicatorLight;
         [SerializeField] private Toggle _transmissionIndicatorLight;
         [SerializeField] private Toggle _labIndicatorLight;
+        [SerializeField] private Toggle _alertLight;
 
         private void Start()
         {
@@ -55,6 +56,11 @@ namespace ScienceAlert.UI.ExperimentWindow
         public float TransmissionValue { set; private get; }
         public float LabValue { set; private get; }
 
+        public bool AlertLit
+        {
+            set { _alertLight.isOn = value; }
+        }
+
 
         public bool CollectionAlertLit
         {
@@ -79,44 +85,58 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
+        // UnityAction
+        public void MouseEnterAlertIndicator()
+        {
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Alert);
+        }
+
+
+        // UnityAction
+        public void MouseExitAlertIndicator()
+        {
+            CloseTooltip();
+        }
+
+
+        // UnityAction
         public void MouseEnterCollectionIndicator()
         {
-            Log.Normal("Mouse entered collection indicator");
             MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Collection);
         }
 
 
+        // UnityAction
         public void MouseExitCollectionIndicator()
         {
-            Log.Normal("Mouse exited collection indicator");
             CloseTooltip();
         }
 
 
+        // UnityAction
         public void MouseEnterTransmissionIndicator()
         {
-            Log.Normal("Mouse entered transmission indicator");
             MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Transmission);
         }
 
 
+        // UnityAction
         public void MouseExitTransmissionIndicator()
         {
-            Log.Normal("Mouse exited transmission indicator");
             CloseTooltip();
         }
 
 
+        // UnityAction
         public void MouseEnterLabIndicator()
         {
-            Log.Normal("Mouse entered lab indicator");
             MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Lab);
         }
 
 
+        // UnityAction
         public void MouseExitLabIndicator()
         {
-            Log.Normal("Mouse exited lab indicator");
             CloseTooltip();
         }
     }

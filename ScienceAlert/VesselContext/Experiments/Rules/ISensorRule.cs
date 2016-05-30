@@ -1,6 +1,6 @@
 ﻿namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    public interface IExperimentRule
+    public interface ISensorRule
     {
         bool Passes();
     }

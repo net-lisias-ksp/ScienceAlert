@@ -4,10 +4,10 @@ using strange.extensions.injector.api;
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     [DoNotAutoRegister]
-    class CompositeRuleFactory : CompositeBuilder<IExperimentRule, IRuleFactory, IInjectionBinder, ITemporaryBindingFactory>,
+    class CompositeRuleFactory : CompositeBuilder<ISensorRule, IRuleFactory, IInjectionBinder, ITemporaryBindingFactory>,
         IRuleFactory
     {
-        public CompositeRuleFactory(IEnumerable<IConfigNodeObjectBuilder<IExperimentRule, IRuleFactory, IInjectionBinder, ITemporaryBindingFactory>> builders)
+        public CompositeRuleFactory(IEnumerable<IConfigNodeObjectBuilder<ISensorRule, IRuleFactory, IInjectionBinder, ITemporaryBindingFactory>> builders)
             : base(builders)
         {
         }

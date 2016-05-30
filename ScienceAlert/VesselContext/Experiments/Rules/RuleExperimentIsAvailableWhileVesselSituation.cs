@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    public class RuleExperimentIsAvailableWhileVesselSituation : ScienceExperimentModuleTracker, IExperimentRule
+    public class RuleExperimentIsAvailableWhileVesselSituation : ScienceExperimentModuleTracker, ISensorRule
     {
         public RuleExperimentIsAvailableWhileVesselSituation(ScienceExperiment experiment, IVessel vessel) : base(experiment, vessel)
         {

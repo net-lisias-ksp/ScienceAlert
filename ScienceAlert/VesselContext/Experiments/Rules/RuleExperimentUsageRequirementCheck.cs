@@ -5,7 +5,7 @@ using ScienceAlert.Game;
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     // RuleExperimentUsageRequirementCheck
-    public class RuleExperimentUsageRequirementCheck : ScienceExperimentModuleTracker, IExperimentRule
+    public class RuleExperimentUsageRequirementCheck : ScienceExperimentModuleTracker, ISensorRule
     {
         private readonly IScienceUtil _scienceUtil;
         private readonly Func<IModuleScienceExperiment, bool> _isModuleAvailable;  // keep things lean and mean by allocating the delegate upfront

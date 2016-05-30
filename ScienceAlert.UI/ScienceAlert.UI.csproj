@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BringToFrontOnClickOrDrag.cs" />
+    <Compile Include="EnableImageOnMouseOver.cs" />
     <Compile Include="ExperimentIdentifier.cs" />
     <Compile Include="ExperimentWindow\ExperimentListEntry.cs" />
     <Compile Include="ExperimentWindow\ExperimentWindowView.cs" />

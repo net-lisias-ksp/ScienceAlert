@@ -16,6 +16,7 @@ namespace ScienceAlert.UI.ExperimentWindow
     {
         public enum ExperimentIndicatorTooltipType
         {
+            Alert,
             Collection,
             Transmission,
             Lab,
@@ -26,6 +27,8 @@ namespace ScienceAlert.UI.ExperimentWindow
         [NonSerialized, HideInInspector]
         public readonly Signal<IExperimentIdentifier> DeployButtonClicked = new Signal<IExperimentIdentifier>();
 
+        [NonSerialized, HideInInspector] public readonly Signal CloseButtonClicked = new Signal();
+
         [NonSerialized, HideInInspector] public readonly Signal<IExperimentIdentifier, ExperimentIndicatorTooltipType> ChangeTooltip = 
             new Signal<IExperimentIdentifier, ExperimentIndicatorTooltipType>();
         
@@ -34,7 +37,14 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         [HideInInspector] private readonly Dictionary<IExperimentIdentifier, ExperimentListEntry> _listEntries =
             new Dictionary<IExperimentIdentifier, ExperimentListEntry>();
- 
+
+
+        protected override void Start()
+        {
+            base.Start();
+            _listItemPrefab.gameObject.SetActive(false);
+        }
+
 
         // ReSharper disable once UnusedMember.Global
         public void UpdateExperimentEntry([NotNull] IExperimentIdentifier identifier, ExperimentEntryInfo entryInfo, bool resort)
@@ -78,6 +88,7 @@ namespace ScienceAlert.UI.ExperimentWindow
 
             instance.transform.SetParent(_list, false);
             instance.transform.SetAsLastSibling();
+            instance.gameObject.SetActive(true);
 
             // todo: sorting
 
@@ -102,9 +113,15 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
+        // From UnityAction
+        public void OnCloseButtonClicked()
+        {
+            CloseButtonClicked.Dispatch();
+        }
+
+
         private static void UpdateExperimentListItem(ExperimentListEntry entry, ExperimentEntryInfo info)
         {
-            
             entry.Enabled = info.ButtonEnabled;
             entry.Text = info.ExperimentTitle;
             

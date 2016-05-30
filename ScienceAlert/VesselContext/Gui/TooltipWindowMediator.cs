@@ -16,7 +16,7 @@ namespace ScienceAlert.VesselContext.Gui
     {
         [Inject] public TooltipWindowView View { get; set; }
 
-        [Inject] public ExperimentStateCache StateCache { get; set; }
+        [Inject] public ISensorStateCache StateCache { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged StateChange { get; set; }
 
         [Inject] public SignalSetTooltip TooltipSignal { get; set; }

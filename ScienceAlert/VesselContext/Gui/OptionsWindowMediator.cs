@@ -14,12 +14,25 @@ namespace ScienceAlert.VesselContext.Gui
         {
             base.OnRegister();
 
+            // View signals
+            View.CloseButtonClicked.AddListener(OnCloseButtonClicked);
+
+            // other signals
             ContextDestroyed.AddOnce(OnContextDestroyed);
         }
 
+
         public override void OnRemove()
         {
+            View.CloseButtonClicked.RemoveListener(OnCloseButtonClicked);
+
             base.OnRemove();
+        }
+
+
+        private void OnCloseButtonClicked()
+        {
+            View.gameObject.SetActive(false);
         }
 
 

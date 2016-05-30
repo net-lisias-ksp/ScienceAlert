@@ -51,7 +51,7 @@ namespace ScienceAlert
         // this generic builder will have a lower priority than any custom builder
         private IEnumerable<IRuleFactory> CreateGenericBuilders()
         {
-            var ruleTypes = GetAllTypesThatImplement<IExperimentRule>().ToList()
+            var ruleTypes = GetAllTypesThatImplement<ISensorRule>().ToList()
                 .Where(t => t.GetConstructors(BindingFlags.Instance | BindingFlags.Public).Any())
                 .ToList();
 
@@ -79,15 +79,15 @@ namespace ScienceAlert
                         .Cast
                         <
                             IConfigNodeObjectBuilder
-                                <IExperimentRule, IRuleFactory, IInjectionBinder, ITemporaryBindingFactory>>());
+                                <ISensorRule, IRuleFactory, IInjectionBinder, ITemporaryBindingFactory>>());
 
             injectionBinder.Bind<IRuleFactory>().To(composite).CrossContext();
         }
 
 
         // Creates a rule that uses the specified logical operation as its logic
-        private static IExperimentRule CreateLogicalRule(
-            Func<IExperimentRule[], bool> logicalOperation,
+        private static ISensorRule CreateLogicalRule(
+            Func<ISensorRule[], bool> logicalOperation,
             ConfigNode config,
             IRuleFactory allFactories,
             IInjectionBinder injectionBinder,
@@ -112,13 +112,13 @@ namespace ScienceAlert
 
 
         // used in a logical rule
-        private static bool AllRulesPass(IExperimentRule[] rules)
+        private static bool AllRulesPass(ISensorRule[] rules)
         {
             return rules.All(r => r.Passes());
         }
 
         // used in a logical rule
-        private static bool AnyRulePasses(IExperimentRule[] rules)
+        private static bool AnyRulePasses(ISensorRule[] rules)
         {
             return rules.Any(r => r.Passes());
         }

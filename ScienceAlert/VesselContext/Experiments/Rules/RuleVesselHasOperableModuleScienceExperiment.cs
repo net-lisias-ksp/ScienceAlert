@@ -4,7 +4,7 @@ using ScienceAlert.Game;
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
     // ReSharper disable once UnusedMember.Global
-    public class RuleVesselHasOperableModuleScienceExperiment : ScienceExperimentModuleTracker, IExperimentRule
+    public class RuleVesselHasOperableModuleScienceExperiment : ScienceExperimentModuleTracker, ISensorRule
     {
         public RuleVesselHasOperableModuleScienceExperiment(ScienceExperiment experiment, IVessel vessel)
             : base(experiment, vessel)
