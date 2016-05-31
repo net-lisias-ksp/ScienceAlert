@@ -1,5 +1,8 @@
 ﻿using strange.extensions.signal.impl;
 using ScienceAlert.Game;
+using ScienceAlert.VesselContext;
+using ScienceAlert.VesselContext.Experiments;
+
 // ReSharper disable ClassNeverInstantiated.Global
 
 namespace ScienceAlert
@@ -69,7 +72,7 @@ namespace ScienceAlert
     }
 
 
-    public class SignalScienceAlertIssued : Signal
+    public class SignalExperimentAlertChanged : Signal<SensorStatusChange, AlertStatusChange>
     {
     }
 }

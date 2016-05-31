@@ -19,7 +19,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public override void Execute()
         {
-            var updater = _vesselContextView.AddComponent<ExperimentSensorUpdater>();
+            var updater = _vesselContextView.AddComponent<SensorUpdateAgent>();
 
             injectionBinder.injector.Inject(updater, false);
 

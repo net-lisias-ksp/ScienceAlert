@@ -14,7 +14,7 @@ namespace ScienceAlert.Core.Gui
 
         [Inject] public ApplicationLauncherView View { get; set; }
 
-        [Inject] public SignalScienceAlertIssued AlertIssueSignal { get; set; }
+        [Inject] public SignalExperimentAlertChanged AlertStatusChange { get; set; }
 
         public override void OnRegister()
         {
@@ -32,7 +32,7 @@ namespace ScienceAlert.Core.Gui
         {
             base.OnRemove();
             View.Toggle.RemoveListener(OnButtonToggle);
-            AlertIssueSignal.RemoveListener(OnAlertIssued);
+            AlertStatusChange.RemoveListener(OnAlertIssued);
         }
 
 
@@ -40,7 +40,7 @@ namespace ScienceAlert.Core.Gui
         {
             yield return StartCoroutine(LoadViewAssets());
 
-            AlertIssueSignal.AddListener(OnAlertIssued);
+            AlertStatusChange.AddListener(OnAlertIssued);
         }
 
 
@@ -85,8 +85,10 @@ namespace ScienceAlert.Core.Gui
         }
 
 
-        private void OnAlertIssued()
+        private void OnAlertIssued(SensorStatusChange sensors, AlertStatusChange status)
         {
+            if (status.CurrentStatus == ExperimentAlertStatus.None) return;
+
             View.AnimationState = ApplicationLauncherView.ButtonAnimationStates.Spinning;
         }
     }

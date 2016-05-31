@@ -11,7 +11,7 @@ using UnityEngine;
 namespace ScienceAlert.VesselContext.Experiments
 {
 // ReSharper disable once ClassNeverInstantiated.Global
-    class ExperimentSensorUpdater : MonoBehaviour, ISensorStateCache
+    class SensorUpdateAgent : MonoBehaviour, ISensorStateCache
     {
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global

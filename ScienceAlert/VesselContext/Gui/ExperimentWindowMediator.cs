@@ -62,7 +62,7 @@ namespace ScienceAlert.VesselContext.Gui
 
         private void OnSensorStatusChanged(SensorStatusChange status)
         {
-            var newState = status.NewState;
+            var newState = status.CurrentState;
 
             var exp = newState.Experiment;
 

@@ -14,7 +14,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
         public override void Execute()
         {
-            Context.GetComponent<ExperimentSensorUpdater>()
+            Context.GetComponent<SensorUpdateAgent>()
                 .Do(updater => updater.enabled = true)
                 .IfNull(() => Log.Error("Can't start sensor updater: it wasn't found in the context view"));
         }

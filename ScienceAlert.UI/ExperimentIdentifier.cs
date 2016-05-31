@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.UI
 {
-    public interface IExperimentIdentifier : IEquatable<string>
+    public interface IExperimentIdentifier : IEquatable<string>, IEquatable<IExperimentIdentifier>
     {
     }
 }

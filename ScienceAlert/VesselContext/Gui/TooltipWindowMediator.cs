@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Linq;
 using JetBrains.Annotations;
-using ReeperCommon.Extensions;
-using ReeperCommon.Logging;
 using strange.extensions.mediation.impl;
 using ScienceAlert.UI;
 using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.TooltipWindow;
 using ScienceAlert.VesselContext.Experiments;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace ScienceAlert.VesselContext.Gui
@@ -16,12 +16,20 @@ namespace ScienceAlert.VesselContext.Gui
     {
         [Inject] public TooltipWindowView View { get; set; }
 
-        [Inject] public ISensorStateCache StateCache { get; set; }
+        [Inject] public ExperimentIdentifierProvider IdentifierProvider { get; set; }
+
+        [Inject] public ISensorStateCache SensorStateCache { get; set; }
+        [Inject] public IAlertStateCache AlertStateCache { get; set; }
+
         [Inject] public SignalExperimentSensorStatusChanged StateChange { get; set; }
 
         [Inject] public SignalSetTooltip TooltipSignal { get; set; }
 
+        private ExperimentAlertStatus[] _possibleAlertStatues;
         private ExperimentWindowView.ExperimentIndicatorTooltipType _currentTooltip;
+        private string _alertTooltipText = string.Empty;
+        private ExperimentAlertStatus _alertTextStatus = ExperimentAlertStatus.None;
+
 
         public override void OnRegister()
         {
@@ -30,6 +38,9 @@ namespace ScienceAlert.VesselContext.Gui
 
             TooltipSignal.AddListener(OnTooltip);
             StateChange.AddListener(OnSensorStateChanged);
+
+            _possibleAlertStatues =
+                Enum.GetValues(typeof (ExperimentAlertStatus)).Cast<ExperimentAlertStatus>().ToArray();
         }
 
 
@@ -51,8 +62,6 @@ namespace ScienceAlert.VesselContext.Gui
         private void Show()
         {
             View.Visible = true;
-
-            //View.transform.root.gameObject.PrintComponents(new DebugLog("Root"));
         }
 
 
@@ -75,25 +84,52 @@ namespace ScienceAlert.VesselContext.Gui
         private void OnSensorStateChanged(SensorStatusChange sensorStatusChange)
         {
             if (_currentTooltip == ExperimentWindowView.ExperimentIndicatorTooltipType.None) return;
-            View.SetTooltip(GetText(new KspExperimentIdentifier(sensorStatusChange.NewState.Experiment), _currentTooltip));
+            View.SetTooltip(GetText(IdentifierProvider.Get(sensorStatusChange.CurrentState.Experiment), _currentTooltip));
         }
 
 
         private string GetText(IExperimentIdentifier identifier, ExperimentWindowView.ExperimentIndicatorTooltipType type)
         {
-            var cachedState = StateCache.GetCachedState(identifier);
+            ExperimentSensorState cachedState;
 
             switch (type)
             {
                 case ExperimentWindowView.ExperimentIndicatorTooltipType.Collection:
+                {
+                    cachedState = SensorStateCache.GetCachedState(identifier);
                     return "Collection: " + cachedState.CollectionValue.ToString("F1");
+                }
                 case ExperimentWindowView.ExperimentIndicatorTooltipType.Transmission:
+                {
+                    cachedState = SensorStateCache.GetCachedState(identifier);
                     return "Transmission: " + cachedState.TransmissionValue.ToString("F1");
+                }
                 case ExperimentWindowView.ExperimentIndicatorTooltipType.Lab:
+                {
+                    cachedState = SensorStateCache.GetCachedState(identifier);
                     return "Lab Analysis: " + cachedState.LabValue.ToString("F1");
+                }
+                case ExperimentWindowView.ExperimentIndicatorTooltipType.Alert:
+                {
+                    var alertState = AlertStateCache.GetStatus(identifier);
+
+                    // avoid doing string manipulation on every mouse over frame by seeing if we can reuse the last tooltip text
+                    if (string.IsNullOrEmpty(_alertTooltipText) || _alertTextStatus != alertState)
+                    {
+                        var activeAlerts =
+                            _possibleAlertStatues.Where(possible => (alertState & possible) != 0).Select(activeState => activeState.ToString()).ToArray();
+
+                        
+                        _alertTooltipText = "Alerts: " + (activeAlerts.Length > 0 ? string.Join(",", activeAlerts) : ExperimentAlertStatus.None.ToString());
+                        _alertTextStatus = alertState;
+                    }
+
+                    return _alertTooltipText;
+                }
                 default:
-                    throw new NotImplementedException(type.ToString());
+                    return "Unrecognized tooltip type: " + type;
             }
         }
+
     }
 }

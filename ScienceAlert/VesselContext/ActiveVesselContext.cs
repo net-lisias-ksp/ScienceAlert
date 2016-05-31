@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using ReeperCommon.Containers;
 using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
@@ -36,18 +37,6 @@ namespace ScienceAlert.VesselContext
                 Log.Error("ActiveVessel context created when no active vessel exists");
                 return;
             }
-
-
-
-            var sharedConfig = injectionBinder.GetInstance<SharedConfiguration>();
-
-            //injectionBinder.Bind<ConfigNode>()
-            //    .To(sharedConfig.ExperimentViewConfig)
-            //    .ToName(VesselContextKeys.ExperimentViewConfig);
-
-            //injectionBinder.Bind<ConfigNode>()
-            //    .To(sharedConfig.VesselDebugViewConfig)
-            //    .ToName(VesselContextKeys.VesselDebugViewConfig);
 
 
             injectionBinder.Bind<SignalSaveGuiSettings>().ToSingleton();
@@ -96,6 +85,14 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<IScienceSubjectProvider>()
                 .To<KspScienceSubjectProvider>().ToSingleton();
 
+            var stateChangeSignal = injectionBinder.GetInstance<SignalExperimentAlertChanged>();
+
+            var stateCache = new AlertStateCache(injectionBinder.GetInstance<ReadOnlyCollection<ScienceExperiment>>(),
+                injectionBinder.GetInstance<ExperimentIdentifierProvider>());
+
+            stateChangeSignal.AddListener(stateCache.OnAlertStatusChange);
+
+            injectionBinder.Bind<IAlertStateCache>().To(stateCache);
 
             SetupCommandBindings();
 
@@ -122,7 +119,7 @@ namespace ScienceAlert.VesselContext
             commandBinder.Bind<SignalExperimentSensorStatusChanged>()
                 .InSequence()
                 .To<CommandLogSensorStatusUpdate>()
-                .To<CommandMaybeDispatchAlert>()
+                .To<CommandUpdateAlertStatus>()
                 .Pooled();
 
             commandBinder.Bind<SignalDeployExperiment>()
@@ -144,7 +141,7 @@ namespace ScienceAlert.VesselContext
             _sharedSaveBinding = commandBinder.Bind<SignalSharedConfigurationSaving>()
                 .To<CommandDispatchSaveGuiSettingsSignal>();
 
-            _alertBinding = commandBinder.Bind<SignalScienceAlertIssued>()
+            _alertBinding = commandBinder.Bind<SignalExperimentAlertChanged>()
                 .To<CommandPlayAlertSound>();
         }
 

@@ -1,29 +1,27 @@
 ﻿using System;
 using JetBrains.Annotations;
-using ReeperCommon.Logging;
 using strange.extensions.command.impl;
-using UnityEngine;
 
 namespace ScienceAlert.VesselContext
 {
     class CommandPlayAlertSound : Command
     {
         private readonly PlayableSound _alertClip;
+        private readonly AlertStatusChange _alertStatusChange;
 
-        public CommandPlayAlertSound([NotNull, Name(CrossContextKeys.AlertSound)] PlayableSound alertClip)
+        public CommandPlayAlertSound([NotNull, Name(CrossContextKeys.AlertSound)] PlayableSound alertClip, AlertStatusChange alertStatusChange)
         {
             if (alertClip == null) throw new ArgumentNullException("alertClip");
             _alertClip = alertClip;
+            _alertStatusChange = alertStatusChange;
         }
 
         public override void Execute()
         {
-            Profiler.BeginSample("CommandPlayAlertSound.Execute");
+            if (_alertStatusChange.CurrentStatus == ExperimentAlertStatus.None)
+                return;
 
-            //Log.Verbose("Playing alert");
             _alertClip.Play();
-
-            Profiler.EndSample();
         }
     }
 }

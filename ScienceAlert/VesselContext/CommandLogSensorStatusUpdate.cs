@@ -20,7 +20,7 @@ namespace ScienceAlert.VesselContext
         private string GenerateSensorValueMessage()
         {
 // ReSharper disable once ImpureMethodCallOnReadonlyValueField
-            return string.Format("New sensor state: {0}", StatusChange.NewState);
+            return string.Format("New sensor state: {0}", StatusChange.CurrentState);
         }
     }
 }

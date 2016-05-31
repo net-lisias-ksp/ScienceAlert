@@ -102,6 +102,7 @@ namespace ScienceAlert.Core
                 .CrossContext();
             injectionBinder.Bind<Assembly>().To(assembly).CrossContext();
 
+            injectionBinder.Bind<ExperimentIdentifierProvider>().ToSingleton().CrossContext();
   
             injectionBinder
                 .Bind<ISharedConfigurationFilePathProvider>()
@@ -139,7 +140,7 @@ namespace ScienceAlert.Core
             ConfigureExperiments();
 
             injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
-            injectionBinder.Bind<SignalScienceAlertIssued>().ToSingleton().CrossContext();
+            injectionBinder.Bind<SignalExperimentAlertChanged>().ToSingleton().CrossContext();
         }
 
 

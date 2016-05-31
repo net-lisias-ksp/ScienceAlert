@@ -33,6 +33,11 @@ namespace ScienceAlert.VesselContext
             return Experiment.id == other;
         }
 
+        public bool Equals(IExperimentIdentifier other)
+        {
+            return other != null && other.Equals(Experiment.id);
+        }
+
         public override bool Equals(object obj)
         {
             var other = obj as KspExperimentIdentifier;

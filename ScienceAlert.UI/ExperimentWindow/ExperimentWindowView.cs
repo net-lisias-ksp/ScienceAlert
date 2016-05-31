@@ -102,7 +102,6 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         private void OnExperimentButtonClicked(IExperimentIdentifier identifier)
         {
-            Log.Debug("ExperimentWindowView.OnExperimentButtonClicked: " + identifier);
             DeployButtonClicked.Dispatch(identifier);
         }
 
