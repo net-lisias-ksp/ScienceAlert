@@ -48,7 +48,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
             throw new NotImplementedException();
             //subjectProvider.GetSubject(Arg.Any<ScienceExperiment>()).Returns(subject);
 
-            //valueCalculator.CalculateCollectionValue(Arg.Is(experiment), Arg.Is(subject))
+            //valueCalculator.CalculateRecoveryValue(Arg.Is(experiment), Arg.Is(subject))
             //    .Returns(collectionValue);
 
             //valueCalculator.CalculateTransmissionValue(Arg.Is(experiment), Arg.Is(subject))
@@ -62,7 +62,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
             //sut.ClearChangedFlag();
             //sut.UpdateSensorValues(); // initially sets values
 
-            //Assert.Equal(collectionValue, sut.CollectionValue);
+            //Assert.Equal(collectionValue, sut.RecoveryValue);
             //Assert.Equal(transmissionValue, sut.TransmissionValue);
             //Assert.Equal(labValue, sut.LabValue);
 

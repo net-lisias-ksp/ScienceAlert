@@ -5,6 +5,7 @@ using ReeperCommon.Logging;
 using strange.extensions.signal.impl;
 using UnityEngine;
 using UnityEngine.UI;
+// ReSharper disable UnusedMember.Global
 
 #pragma warning disable 649
 #pragma warning disable 169
@@ -24,7 +25,7 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         [SerializeField] private Button _deployButton;
         [SerializeField] private Text _text;
-        [SerializeField] private Toggle _collectionIndicatorLight;
+        [SerializeField] private Toggle _recoveryIndicatorLight;
         [SerializeField] private Toggle _transmissionIndicatorLight;
         [SerializeField] private Toggle _labIndicatorLight;
         [SerializeField] private Toggle _alertLight;
@@ -52,7 +53,7 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         public string Text { set { _text.text = value; } }
 
-        public float CollectionValue { set; private get; }
+        public float RecoveryValue { set; private get; }
         public float TransmissionValue { set; private get; }
         public float LabValue { set; private get; }
 
@@ -62,18 +63,18 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
-        public bool CollectionAlertLit
+        public bool RecoveryValueLit
         {
-            set { _collectionIndicatorLight.isOn = value; }
+            set { _recoveryIndicatorLight.isOn = value; }
         }
 
 
-        public bool TransmissionAlertLit
+        public bool TransmissionValueLit
         {
             set { _transmissionIndicatorLight.isOn = value; }
         }
 
-        public bool LabAlertLit
+        public bool LabValueLit
         {
             set { _labIndicatorLight.isOn = value; }
         }
@@ -100,14 +101,14 @@ namespace ScienceAlert.UI.ExperimentWindow
 
 
         // UnityAction
-        public void MouseEnterCollectionIndicator()
+        public void MouseEnterRecoveryIndicator()
         {
-            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Collection);
+            MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Recovery);
         }
 
 
         // UnityAction
-        public void MouseExitCollectionIndicator()
+        public void MouseExitRecoveryIndicator()
         {
             CloseTooltip();
         }

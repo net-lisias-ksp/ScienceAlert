@@ -17,7 +17,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         public enum ExperimentIndicatorTooltipType
         {
             Alert,
-            Collection,
+            Recovery,
             Transmission,
             Lab,
             None
@@ -124,14 +124,14 @@ namespace ScienceAlert.UI.ExperimentWindow
             entry.Enabled = info.ButtonEnabled;
             entry.Text = info.ExperimentTitle;
             
-            entry.CollectionValue = info.CollectionValue;
-            entry.CollectionAlertLit = info.CollectionAlertLit;
+            entry.RecoveryValue = info.RecoveryValue;
+            entry.RecoveryValueLit = info.RecoveryLit;
 
             entry.TransmissionValue = info.TransmissionValue;
-            entry.TransmissionAlertLit = info.TransmissionAlertLit;
+            entry.TransmissionValueLit = info.TransmissionLit;
 
             entry.LabValue = info.LabValue;
-            entry.LabAlertLit = info.LabAlertLit;
+            entry.LabValueLit = info.LabLit;
 
             entry.gameObject.SetActive(info.ButtonDisplayed);
         }

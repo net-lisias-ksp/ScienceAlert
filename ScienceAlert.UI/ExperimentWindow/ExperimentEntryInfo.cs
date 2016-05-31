@@ -5,7 +5,7 @@ namespace ScienceAlert.UI.ExperimentWindow
     public struct ExperimentEntryInfo
     {
         public string ExperimentTitle { get; private set; }
-        public float CollectionValue { get; private set; }
+        public float RecoveryValue { get; private set; }
         public float TransmissionValue { get; private set; }
         public float LabValue { get; private set; }
 
@@ -14,36 +14,36 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         // These are the indicators inside the experiment list entry
         public bool AlertLit { get; private set; }
-        public bool CollectionAlertLit { get; private set; }
-        public bool TransmissionAlertLit { get; private set; }
-        public bool LabAlertLit { get; private set; }
+        public bool RecoveryLit { get; private set; }
+        public bool TransmissionLit { get; private set; }
+        public bool LabLit { get; private set; }
 
 
         public ExperimentEntryInfo(
             string title, 
             bool alert,
-            float collectionValue, 
-            bool collectionAlert,
+            float recoveryValue, 
+            bool recoveryIndicator,
             float transmissionValue, 
-            bool transmissionAlert,
+            bool transmissionIndicator,
             float labValue,
-            bool labAlert,
+            bool labIndicator,
             bool showInList, 
             bool buttonEnabled) : this()
         {
             if (string.IsNullOrEmpty(title)) throw new ArgumentException("cannot be null or empty", "title");
-            if (collectionValue < 0f) throw new ArgumentOutOfRangeException("collectionValue", "must be >= 0");
+            if (recoveryValue < 0f) throw new ArgumentOutOfRangeException("recoveryValue", "must be >= 0");
             if (transmissionValue < 0f) throw new ArgumentOutOfRangeException("transmissionValue", "must be >= 0");
             if (labValue < 0f) throw new ArgumentOutOfRangeException("labValue", "must be >= 0");
 
             ExperimentTitle = title;
             AlertLit = alert;
-            CollectionValue = collectionValue;
-            CollectionAlertLit = collectionAlert;
+            RecoveryValue = recoveryValue;
+            RecoveryLit = recoveryIndicator;
             TransmissionValue = transmissionValue;
-            TransmissionAlertLit = transmissionAlert;
+            TransmissionLit = transmissionIndicator;
             LabValue = labValue;
-            LabAlertLit = labAlert;
+            LabLit = labIndicator;
             ButtonDisplayed = showInList;
             ButtonEnabled = buttonEnabled;
         }

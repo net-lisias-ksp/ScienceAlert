@@ -81,7 +81,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
 
             var sut = Factory.CreateSut(new[] {experiment}.ToList().AsReadOnly(), careerMultiplier, scienceValue, vessel);
 
-            var result = sut.CalculateCollectionValue(experiment, subject);
+            var result = sut.CalculateRecoveryValue(experiment, subject);
 
             Assert.True(Mathf.Approximately(expectedResult, result));
         }

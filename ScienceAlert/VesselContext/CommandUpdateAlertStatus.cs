@@ -3,6 +3,7 @@ using ScienceAlert.VesselContext.Experiments;
 
 namespace ScienceAlert.VesselContext
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     class CommandUpdateAlertStatus : Command
     {
         [Inject] public SensorStatusChange SensorStatus { get; set; }
@@ -12,9 +13,6 @@ namespace ScienceAlert.VesselContext
 
         public override void Execute()
         {
-            // todo: support transmission and lab alerts
-            // right now, only collection implemented
-
             var newState = SensorStatus.CurrentState;
             var oldState = SensorStatus.PreviousState;
             var oldAlertStatus = AlertStateCache.GetStatus(IdentifierProvider.Get(newState.Experiment));
@@ -22,18 +20,18 @@ namespace ScienceAlert.VesselContext
             var previousSubject = oldState.Subject.Id;
             var currentSubject = newState.Subject.Id;
             var canPerform = newState.Onboard && newState.Available && newState.ConditionsMet &&
-                             newState.CollectionValue > 0f;
+                             newState.RecoveryValue > 0f;
             var couldPerformLastTime = oldState.Onboard && oldState.Available && oldState.ConditionsMet &&
-                                       oldState.CollectionValue > 0f;
+                                       oldState.RecoveryValue > 0f;
             var shouldAlert = canPerform && (previousSubject != currentSubject || !couldPerformLastTime);
 
-            var collectionAlert = shouldAlert && newState.CollectionValue > 0f;
+            var recoveryAlert = shouldAlert && newState.RecoveryValue > 0f;
             var transmissionAlert = shouldAlert && newState.TransmissionValue > 0f;
             var labAlert = shouldAlert && newState.LabValue > 0f;
 
             var newAlertStatus = ExperimentAlertStatus.None;
 
-            newAlertStatus |= collectionAlert ? ExperimentAlertStatus.Collection : 0;
+            newAlertStatus |= recoveryAlert ? ExperimentAlertStatus.Recovery : 0;
             newAlertStatus |= transmissionAlert ? ExperimentAlertStatus.Transmission : 0;
             newAlertStatus |= labAlert ? ExperimentAlertStatus.Lab : 0;
 

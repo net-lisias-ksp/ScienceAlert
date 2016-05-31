@@ -94,10 +94,10 @@ namespace ScienceAlert.VesselContext.Gui
 
             switch (type)
             {
-                case ExperimentWindowView.ExperimentIndicatorTooltipType.Collection:
+                case ExperimentWindowView.ExperimentIndicatorTooltipType.Recovery:
                 {
                     cachedState = SensorStateCache.GetCachedState(identifier);
-                    return "Collection: " + cachedState.CollectionValue.ToString("F1");
+                    return "Recovery: " + cachedState.RecoveryValue.ToString("F1");
                 }
                 case ExperimentWindowView.ExperimentIndicatorTooltipType.Transmission:
                 {
@@ -120,7 +120,7 @@ namespace ScienceAlert.VesselContext.Gui
                             _possibleAlertStatues.Where(possible => (alertState & possible) != 0).Select(activeState => activeState.ToString()).ToArray();
 
                         
-                        _alertTooltipText = "Alerts: " + (activeAlerts.Length > 0 ? string.Join(",", activeAlerts) : ExperimentAlertStatus.None.ToString());
+                        _alertTooltipText = (activeAlerts.Length > 0 ? string.Join(",", activeAlerts) : ExperimentAlertStatus.None.ToString());
                         _alertTextStatus = alertState;
                     }
 

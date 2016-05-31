@@ -6,7 +6,7 @@ namespace ScienceAlert
     public enum ExperimentAlertStatus
     {
         None = 0 << 0,
-        Collection = 1 << 0,
+        Recovery = 1 << 0,
         Transmission = 1 << 1,
         Lab = 1 << 2
     }

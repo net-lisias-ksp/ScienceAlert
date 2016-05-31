@@ -66,7 +66,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             var exp = newState.Experiment;
 
-            var hasExperimentalValue = Mathf.Max(newState.CollectionValue, newState.TransmissionValue,
+            var hasExperimentalValue = Mathf.Max(newState.RecoveryValue, newState.TransmissionValue,
                 newState.LabValue) > MinimumThresholdForIndicators;
 
             var buttonEnabled = hasExperimentalValue && newState.Onboard &&
@@ -75,8 +75,8 @@ namespace ScienceAlert.VesselContext.Gui
             var info = new ExperimentEntryInfo(
                     /* button title */              exp.experimentTitle,
                     /* alerting for this exp? */    false,
-                    /* collection value */          newState.CollectionValue,
-                    /* light collectioni icon? */   newState.CollectionValue > MinimumThresholdForIndicators,
+                    /* recovery value */            newState.RecoveryValue,
+                    /* light recovery icon? */      newState.RecoveryValue > MinimumThresholdForIndicators,
                     /* transmission value */        newState.TransmissionValue,
                     /* light transmission icon? */  newState.TransmissionValue > MinimumThresholdForIndicators,
                     /* lab value */                 newState.LabValue,

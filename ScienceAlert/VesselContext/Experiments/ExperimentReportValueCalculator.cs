@@ -47,7 +47,7 @@ namespace ScienceAlert.VesselContext.Experiments
         }
 
 
-        public float CalculateCollectionValue(ScienceExperiment experiment, IScienceSubject subject)
+        public float CalculateRecoveryValue(ScienceExperiment experiment, IScienceSubject subject)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
             if (subject == null) throw new ArgumentNullException("subject");

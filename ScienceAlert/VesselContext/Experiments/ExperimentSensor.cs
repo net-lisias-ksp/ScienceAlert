@@ -42,7 +42,7 @@ namespace ScienceAlert.VesselContext.Experiments
 
 
         public bool HasChanged { get; private set; }
-        public float CollectionValue { get; private set; }
+        public float RecoveryValue { get; private set; }
         public float TransmissionValue { get; private set; }
         public float LabValue { get; private set; }
         public bool Onboard { get; private set; }               // related module is actually onboard the vessel? (onboard rule check)
@@ -60,7 +60,7 @@ namespace ScienceAlert.VesselContext.Experiments
         {
             get
             {
-                return new ExperimentSensorState(Experiment, Subject, CollectionValue, TransmissionValue, LabValue,
+                return new ExperimentSensorState(Experiment, Subject, RecoveryValue, TransmissionValue, LabValue,
                     Onboard, Available, ConditionsMet);
             }
         }
@@ -75,7 +75,7 @@ namespace ScienceAlert.VesselContext.Experiments
             var oldConditionsMet = ConditionsMet;
             var oldOnboard = Onboard;
             var oldAvailable = Available;
-            var oldCollection = CollectionValue;
+            var oldRecovery = RecoveryValue;
             var oldTransmission = TransmissionValue;
             var oldLab = LabValue;
             
@@ -86,26 +86,26 @@ namespace ScienceAlert.VesselContext.Experiments
             // The experiment isn't valid for these conditions so there's no sensible science value to calculate
             if (!ConditionsMet)
             {
-                CollectionValue = TransmissionValue = LabValue = 0f;
+                RecoveryValue = TransmissionValue = LabValue = 0f;
                 Available = false;
             }
             else
             {
-                UpdateCollectionValue();
+                UpdateRecoveryValue();
                 UpdateTransmissionValue();
                 UpdateLabValue();
             }
 
-            HasChanged = !Mathf.Approximately(oldCollection, CollectionValue) ||
+            HasChanged = !Mathf.Approximately(oldRecovery, RecoveryValue) ||
                          !Mathf.Approximately(oldTransmission, TransmissionValue) ||
                          !Mathf.Approximately(oldLab, LabValue) || oldOnboard != Onboard || oldAvailable != Available || oldConditionsMet != ConditionsMet ||
                          oldSubject.Id != Subject.Id;
         }
 
 
-        private void UpdateCollectionValue()
+        private void UpdateRecoveryValue()
         {
-            CollectionValue = _reportCalculator.CalculateCollectionValue(Experiment, Subject);
+            RecoveryValue = _reportCalculator.CalculateRecoveryValue(Experiment, Subject);
         }
 
 
@@ -144,8 +144,8 @@ namespace ScienceAlert.VesselContext.Experiments
             var builder = new StringBuilder(128);
 
             builder.AppendFormat(
-                "ExperimentSensor ({0}): Onboard {1}, Available {2}, Condition {3}, Collection {4}, Transmission {5}, Lab {6}",
-                Experiment.id, Onboard, Available, ConditionsMet, CollectionValue, TransmissionValue, LabValue);
+                "ExperimentSensor ({0}): Onboard {1}, Available {2}, Condition {3}, Recovery {4}, Transmission {5}, Lab {6}",
+                Experiment.id, Onboard, Available, ConditionsMet, RecoveryValue, TransmissionValue, LabValue);
 
             return builder.ToString();
         }
