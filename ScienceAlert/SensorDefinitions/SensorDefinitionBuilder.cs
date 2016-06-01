@@ -6,7 +6,7 @@ using ReeperKSP.Extensions;
 
 namespace ScienceAlert.SensorDefinitions
 {
-    // Creates a SensorDefinition given a ConfigNode that matches "SA_EXPERIMENT_RULESET"
+    // Creates a SensorDefinition given a ConfigNode that matches "SA_SENSOR_DEFINITION"
     class SensorDefinitionBuilder : IConfigNodeObjectBuilder<SensorDefinition>, ISensorDefinitionFactory
     {
         private readonly ConfigNode _defaultOnboardRule;
@@ -17,7 +17,7 @@ namespace ScienceAlert.SensorDefinitions
         private readonly ScienceExperiment[] _experiments;
 
 
-        private const string ExperimentRulesetNodeName = "SA_EXPERIMENT_RULESET";
+        public const string SensorDefinitionNodeName = "SA_SENSOR_DEFINITION";
         private const string ExperimentIdValueName = "experimentID";
 
         private const string OnboardRuleNodeName = "ONBOARD_RULE";
@@ -113,7 +113,7 @@ namespace ScienceAlert.SensorDefinitions
         {
             if (config == null) return false;
 
-            return config.name == ExperimentRulesetNodeName &&
+            return config.name == SensorDefinitionNodeName &&
                 GetExperimentId(config)
                     .With(GetExperiment)
                     .Any();

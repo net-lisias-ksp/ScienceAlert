@@ -4,7 +4,7 @@ using ScienceAlert.Game;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
-    // RuleExperimentUsageRequirementCheck
+    // ReSharper disable once UnusedMember.Global
     public class RuleExperimentUsageRequirementCheck : ScienceExperimentModuleTracker, ISensorRule
     {
         private readonly IScienceUtil _scienceUtil;

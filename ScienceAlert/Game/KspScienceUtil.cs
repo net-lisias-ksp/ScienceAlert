@@ -25,7 +25,7 @@ namespace ScienceAlert.Game
         public bool RequiredUsageInternalAvailable(IVessel vessel, IPart part, ExperimentUsageReqs reqs)
         {
             if (vessel == null) throw new ArgumentNullException("vessel");
-            if (part == null) throw new ArgumentNullException("Part");
+            if (part == null) throw new ArgumentNullException("part");
 
             if (reqs == ExperimentUsageReqs.Never) return false;
 

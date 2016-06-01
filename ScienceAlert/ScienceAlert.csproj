@@ -59,6 +59,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuilderConstructedTypeCannotBeAssignedToReturnTypeException.cs" />
+    <Compile Include="Game\IPartLoader.cs" />
+    <Compile Include="Game\KspPartLoader.cs" />
     <Compile Include="PlayableSound.cs" />
     <Compile Include="BuilderCannotHandleConfigNodeException.cs" />
     <Compile Include="CommandConfigureObjectFromConfigNodeBuilders.cs" />
@@ -93,6 +96,9 @@
     <Compile Include="VesselContext\Experiments\IAlertStateCache.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentSensor.cs" />
     <Compile Include="VesselContext\Experiments\ISensorStateCache.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RuleEvaPrefabInternalUsageCheck.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RulePasses.cs" />
+    <Compile Include="VesselContext\Experiments\Rules\RuleVesselIsNotEva.cs" />
     <Compile Include="VesselContext\Gui\TooltipWindowMediator.cs" />
     <Compile Include="VesselContext\KspExperimentIdentifier.cs" />
     <Compile Include="SensorStatusChange.cs" />

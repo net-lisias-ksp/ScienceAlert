@@ -2,6 +2,7 @@
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
+    // ReSharper disable once UnusedMember.Global
     public class RuleVesselHasModuleScienceExperiment : ScienceExperimentModuleTracker, ISensorRule
     {
         public RuleVesselHasModuleScienceExperiment(ScienceExperiment experiment, IVessel vessel)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using JetBrains.Annotations;
 using ReeperCommon.Logging;
 using ReeperKSP.Extensions;
 using strange.extensions.command.impl;
@@ -18,14 +19,20 @@ namespace ScienceAlert.SensorDefinitions
 
         private readonly ReadOnlyCollection<ScienceExperiment> _experiments;
         private readonly IGameDatabase _gameDatabase;
+        private readonly ICriticalShutdownEvent _shutdown;
 
-        public CommandConfigureSensorDefinitionBuilder(ReadOnlyCollection<ScienceExperiment> experiments, IGameDatabase gameDatabase)
+        public CommandConfigureSensorDefinitionBuilder(
+            ReadOnlyCollection<ScienceExperiment> experiments, 
+            IGameDatabase gameDatabase,
+            ICriticalShutdownEvent shutdown)
         {
             if (experiments == null) throw new ArgumentNullException("experiments");
             if (gameDatabase == null) throw new ArgumentNullException("gameDatabase");
+            if (shutdown == null) throw new ArgumentNullException("shutdown");
 
             _experiments = experiments;
             _gameDatabase = gameDatabase;
+            _shutdown = shutdown;
         }
 
 
@@ -44,7 +51,7 @@ namespace ScienceAlert.SensorDefinitions
         }
 
 
-        private ConfigNode GetSingleSubConfigNode(ConfigNode parent)
+        private static ConfigNode GetSingleSubConfigNode(ConfigNode parent)
         {
             if (parent == null) throw new ArgumentNullException("parent");
 
@@ -58,18 +65,29 @@ namespace ScienceAlert.SensorDefinitions
 
         public override void Execute()
         {
-            var defaultOnboardRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultOnboardRuleNodeName));
-            var defaultAvailabilityRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultAvailabilityRuleNodeName));
-            var defaultConditionRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultConditionRuleNodeName));
-            var defaultTriggerConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultExperimentTriggerNodeName));
+            try
+            {
+                var defaultOnboardRuleConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultOnboardRuleNodeName));
+                var defaultAvailabilityRuleConfig =
+                    GetSingleSubConfigNode(GetSingleConfigNode(DefaultAvailabilityRuleNodeName));
+                var defaultConditionRuleConfig =
+                    GetSingleSubConfigNode(GetSingleConfigNode(DefaultConditionRuleNodeName));
+                var defaultTriggerConfig = GetSingleSubConfigNode(GetSingleConfigNode(DefaultExperimentTriggerNodeName));
 
-            var builder = new SensorDefinitionBuilder(_experiments, defaultOnboardRuleConfig,
-                defaultAvailabilityRuleConfig, defaultConditionRuleConfig, defaultTriggerConfig);
+                var builder = new SensorDefinitionBuilder(_experiments, defaultOnboardRuleConfig,
+                    defaultAvailabilityRuleConfig, defaultConditionRuleConfig, defaultTriggerConfig);
 
-            injectionBinder
-                .Bind<IConfigNodeObjectBuilder<SensorDefinition>>()
-                .Bind<ISensorDefinitionFactory>()
-                .To(builder);
+                injectionBinder
+                    .Bind<IConfigNodeObjectBuilder<SensorDefinition>>()
+                    .Bind<ISensorDefinitionFactory>()
+                    .To(builder);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Unable to create sensor definition builder: " + e);
+                _shutdown.Dispatch();
+                Fail();
+            }
         }
     }
 }

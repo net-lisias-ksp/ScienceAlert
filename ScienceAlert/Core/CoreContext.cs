@@ -55,12 +55,17 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<ITemporaryBindingFactory>().To<TemporaryBindingFactory>().ToSingleton();
 
 
-            injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton();
-
-            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
 
 
             MapCrossContextBindings();
+
+            // Have one or more dependencies on cross context bindings
+
+            injectionBinder.Bind<ConfigNode>()
+                .To(injectionBinder.GetInstance<SharedConfiguration>().SoundConfig)
+                .ToName(CoreContextKeys.SoundConfig);
+
+
             SetupCommandBindings();
 
             injectionBinder.GetInstance<ILog>().Verbose("ScienceAlert CoreCore created successfully");
@@ -109,11 +114,14 @@ namespace ScienceAlert.Core
                 .Bind<SharedConfiguration>()
                 .To<SharedConfiguration>().ToSingleton().CrossContext();
 
-            injectionBinder.Bind<ConfigNode>()
-                .To(injectionBinder.GetInstance<SharedConfiguration>().SoundConfig)
-                .ToName(CoreContextKeys.SoundConfig);
 
             injectionBinder.Bind<CoroutineHoster>().To(CoroutineHoster.Instance).CrossContext();
+
+
+            injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton().CrossContext();
+            injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton().CrossContext();
+            injectionBinder.Bind<IPartLoader>().To<KspPartLoader>().ToSingleton().CrossContext();
+
 
             injectionBinder.Bind<GameObject>()
                 .To(contextView as GameObject)

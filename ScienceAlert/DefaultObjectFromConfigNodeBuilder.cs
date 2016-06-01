@@ -55,15 +55,6 @@ namespace ScienceAlert
         }
     }
 
-    class BuilderConstructedTypeCannotBeAssignedToReturnTypeException : Exception
-    {
-        public BuilderConstructedTypeCannotBeAssignedToReturnTypeException(Type builderType, Type returnType)
-            : base(builderType.FullName + " cannot be assigned to return type " + returnType.FullName)
-        {
-            
-        }
-    }
-
     // This builder is very simple: given a ConfigNode with a name that matches the Type name,
     // create an instance (using a temporary binding factory, if provided) and deserialize the object from that config
     // note: the return type argument is needed to avoid having to re-implement the Build method in any

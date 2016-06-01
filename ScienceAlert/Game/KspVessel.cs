@@ -208,5 +208,10 @@ namespace ScienceAlert.Game
                     : Vessel.GetLandedAtString(_vessel.landedAt);
             }
         }
+
+        public bool isEVA
+        {
+            get { return _vessel.isEVA; }
+        } 
     }
 }

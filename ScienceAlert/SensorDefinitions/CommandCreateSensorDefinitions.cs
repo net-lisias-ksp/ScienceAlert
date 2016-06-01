@@ -11,8 +11,6 @@ namespace ScienceAlert.SensorDefinitions
 // ReSharper disable once ClassNeverInstantiated.Global
     class CommandCreateSensorDefinitions : Command
     {
-        private const string SensorDefinitionNodeName = "SA_SENSOR_DEFINITION";
-
         private readonly IGameDatabase _gameDatabase;
         private readonly IConfigNodeObjectBuilder<SensorDefinition> _sensorDefinitionBuilder;
         private readonly ISensorDefinitionFactory _factory;
@@ -57,17 +55,32 @@ namespace ScienceAlert.SensorDefinitions
 
         private IEnumerable<SensorDefinition> CreateCustomDefinitions()
         {
-            var allDefinitionConfigs = _gameDatabase.GetConfigs(SensorDefinitionNodeName).ToList();
+            var allDefinitionConfigs = _gameDatabase.GetConfigs(SensorDefinitionBuilder.SensorDefinitionNodeName).ToList();
+            var validConfigs = allDefinitionConfigs.Where(uc => _sensorDefinitionBuilder.CanHandle(uc.Config)).ToList();
 
-            LogUnhandledConfigs(allDefinitionConfigs
-                .Where(uc => !_sensorDefinitionBuilder.CanHandle(uc.Config)));
+            LogUnhandledConfigs(allDefinitionConfigs.Except(validConfigs));
 
-            var customDefinitions = 
-                allDefinitionConfigs.Where(uc => _sensorDefinitionBuilder.CanHandle(uc.Config))
-                    .Select(uc => _sensorDefinitionBuilder.Build(uc.Config))
-                    .ToList();
+            var customDefinitions = new List<SensorDefinition>();
 
-            customDefinitions.ForEach(cd => Log.Verbose("Using custom definition for: " + cd.Experiment.id));
+            foreach (var urlConfig in validConfigs)
+            {
+                Log.Debug("Building custom definition from " + urlConfig.Url);
+
+                try
+                {
+                    var definition = _sensorDefinitionBuilder.Build(urlConfig.Config);
+
+                    if (definition == null)
+                        throw new InvalidOperationException("Sensor definition builder returned a null definition!");
+
+                    Log.Verbose("Using custom definition for " + definition.Experiment.id + " from " + urlConfig.Url);
+                    customDefinitions.Add(definition);
+                }
+                catch (Exception e)
+                {
+                    Log.Error("Error while creating " + urlConfig.Url + ": " + e);
+                }
+            }
 
             return customDefinitions;
         }

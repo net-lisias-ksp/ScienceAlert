@@ -1,5 +1,6 @@
 using System;
 using strange.extensions.injector.api;
+using strange.extensions.injector.impl;
 
 namespace ScienceAlert
 {
@@ -39,7 +40,14 @@ namespace ScienceAlert
 
         public object GetInstance()
         {
-            return _binder.GetInstance(BoundType);
+            try
+            {
+                return _binder.GetInstance(BoundType);
+            }
+            catch (InjectionException ie)
+            {
+                throw new ArgumentException("Exception while injecting temporary binding of " + BoundType.FullName, ie);
+            }
         }
     }
 }

@@ -23,5 +23,7 @@ namespace ScienceAlert.Game
 
         bool Landed { get; }
         bool SplashedDown { get; }
+
+        bool isEVA { get; }
     }
 }

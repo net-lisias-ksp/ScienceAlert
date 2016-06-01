@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace ScienceAlert.Game
 {
@@ -13,6 +14,11 @@ namespace ScienceAlert.Game
             if (part == null) throw new ArgumentNullException("part");
 
             _part = part;
+        }
+
+        public GameObject gameObject
+        {
+            get { return _part.gameObject; }
         }
 
         public List<ProtoCrewMember> EvaCapableCrew
