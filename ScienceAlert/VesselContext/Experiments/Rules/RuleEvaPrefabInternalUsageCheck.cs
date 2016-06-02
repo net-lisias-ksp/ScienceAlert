@@ -69,7 +69,6 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
         [PostConstruct]
         public void Setup()
         {
-            Log.Warning(GetType().Name + " postconstruction");
             OnCrewModified();
         }
 

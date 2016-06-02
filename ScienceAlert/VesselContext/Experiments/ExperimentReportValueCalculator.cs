@@ -107,14 +107,30 @@ namespace ScienceAlert.VesselContext.Experiments
         }
 
 
+
+        private static int CountReportsMatchingSubjectId(ScienceData[] data, string subjectId)
+        {
+            int counter = 0;
+
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach (var d in data)
+                if (d.subjectID == subjectId) ++counter;
+
+            return counter;
+        }
+
         private int GetOnboardReportsMatching(IScienceSubject subject)
         {
             int matches = 0;
+            var containers = _activeVessel.Containers;
 
-// ReSharper disable once LoopCanBeConvertedToQuery
-            foreach (var container in _activeVessel.Containers)
-                if (container.GetScienceCount() > 0) // this to avoid a bug I've once seen in a mod that implements IScienceDataContainer where GetData() returned { null } instead of empty set
-                    matches += container.GetData().Count(sd => sd.subjectID == subject.Id);
+            // this is a performance-critical and often-used method so avoid creating ANY garbage
+            for (int idx = 0; idx < containers.Count; ++idx)
+            {
+                var container = containers[idx];
+                if (container.GetScienceCount() > 0)
+                    matches += CountReportsMatchingSubjectId(container.GetData(), subject.Id);
+            }
 
             return matches;
         }
@@ -129,13 +145,13 @@ namespace ScienceAlert.VesselContext.Experiments
 
                 return modulesForExperiment.Any() ? modulesForExperiment.First().TransmissionMultiplier : 0f;
             }
-            catch (KeyNotFoundException)
+            catch (KeyNotFoundException knf)
             {
                 // something is really hosed here
                 foreach (var exp in _experimentModules)
                     Log.Error("Known experiment type: " + exp.Key.id);
 
-                throw new MissingExperimentException(experiment);
+                throw new MissingExperimentException(experiment, knf);
             }
         }
 
