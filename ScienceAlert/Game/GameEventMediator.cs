@@ -24,6 +24,8 @@ namespace ScienceAlert.Game
         [Inject] public SignalCrewTransferred CrewTransferredSignal { get; set; }
         [Inject] public SignalCrewKilled CrewKilledSignal { get; set; }
 
+        [Inject] public SignalDominantBodyChanged DominantBodyChangedSignal { get; set; }
+
         [Inject] public SignalGameSceneLoadRequested GameSceneLoadRequestedSignal { get; set; }
         [Inject] public SignalScienceReceived ScienceReceivedSignal { get; set; }
 
@@ -46,7 +48,7 @@ namespace ScienceAlert.Game
             View.CrewTransferred.AddListener(OnCrewTransferred);
             View.CrewKilled.AddListener(OnCrewKilled);
             View.CrewBoardVessel.AddListener(OnCrewBoardVessel);
-            
+            View.DominantBodyChanged.AddListener(OnDominantBodyChanged);
 
             View.ApplicationQuit.AddListener(OnApplicationQuit);
             View.GameUpdateTick.AddListener(OnGameUpdateTick);
@@ -68,6 +70,7 @@ namespace ScienceAlert.Game
             View.CrewTransferred.RemoveListener(OnCrewTransferred);
             View.CrewKilled.RemoveListener(OnCrewKilled);
             View.CrewBoardVessel.RemoveListener(OnCrewBoardVessel);
+            View.DominantBodyChanged.RemoveListener(OnDominantBodyChanged);
 
             View.ApplicationQuit.RemoveListener(OnApplicationQuit);
             View.GameUpdateTick.RemoveListener(OnGameUpdateTick);
@@ -173,6 +176,14 @@ namespace ScienceAlert.Game
         private void OnActiveVesselCrewModified()
         {
             ActiveVesselCrewModifiedSignal.Dispatch();
+        }
+
+
+        private void OnDominantBodyChanged(GameEvents.FromToAction<CelestialBody, CelestialBody> data)
+        {
+            DominantBodyChangedSignal.Dispatch(
+                new GameEvents.FromToAction<ICelestialBody, ICelestialBody>(GameFactory.Create(data.from),
+                    GameFactory.Create(data.to)));
         }
 
 

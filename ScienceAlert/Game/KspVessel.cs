@@ -27,7 +27,7 @@ namespace ScienceAlert.Game
             new ReadOnlyCollection<IScienceDataTransmitter>(Enumerable.Empty<IScienceDataTransmitter>().ToList());
 
         private ReadOnlyCollection<IScienceLab> _scienceLabs = new ReadOnlyCollection<IScienceLab>(Enumerable.Empty<IScienceLab>().ToList());
- 
+
         public KspVessel(
             IGameFactory factory, 
             Vessel vessel)
@@ -37,6 +37,7 @@ namespace ScienceAlert.Game
 
             _factory = factory;
             _vessel = vessel;
+            OrbitingBody = _factory.Create(vessel.mainBody);
 
             Log.Warning("KspVessel created");
         }
@@ -57,6 +58,13 @@ namespace ScienceAlert.Game
         public void OnVesselCrewModified()
         {
             Rescan();
+        }
+
+
+        public void OnDominantBodyChanged()
+        {
+            Log.Error("Vessel.Dominant body changed to " + _vessel.mainBody.bodyName);
+            OrbitingBody = _factory.Create(_vessel.mainBody);
         }
 
         
@@ -176,10 +184,7 @@ namespace ScienceAlert.Game
             get { return _scienceLabs; }
         }
 
-        public ICelestialBody OrbitingBody
-        {
-            get { return _factory.Create(_vessel.mainBody); }
-        }
+        public ICelestialBody OrbitingBody { get; private set; }
 
         public ExperimentSituations ExperimentSituation
         {

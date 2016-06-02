@@ -12,19 +12,23 @@ namespace ScienceAlert.VesselContext
         private readonly IGameFactory _gameFactory;
         private readonly SignalActiveVesselModified _activeVesselModified;
         private readonly SignalActiveVesselCrewModified _activeVesselCrewModified;
+        private readonly SignalDominantBodyChanged _dominantBodyChanged;
 
         public CommandCreateVesselBindings(
             IGameFactory gameFactory,
             SignalActiveVesselModified activeVesselModified,
-            SignalActiveVesselCrewModified activeVesselCrewModified)
+            SignalActiveVesselCrewModified activeVesselCrewModified,
+            SignalDominantBodyChanged dominantBodyChanged)
         {
             if (gameFactory == null) throw new ArgumentNullException("gameFactory");
             if (activeVesselModified == null) throw new ArgumentNullException("activeVesselModified");
             if (activeVesselCrewModified == null) throw new ArgumentNullException("activeVesselCrewModified");
+            if (dominantBodyChanged == null) throw new ArgumentNullException("dominantBodyChanged");
 
             _gameFactory = gameFactory;
             _activeVesselModified = activeVesselModified;
             _activeVesselCrewModified = activeVesselCrewModified;
+            _dominantBodyChanged = dominantBodyChanged;
         }
 
 
@@ -34,6 +38,7 @@ namespace ScienceAlert.VesselContext
 
             _activeVesselModified.AddListener(vessel.OnVesselModified);
             _activeVesselCrewModified.AddListener(vessel.OnVesselCrewModified);
+            _dominantBodyChanged.AddListener((args) => vessel.OnDominantBodyChanged());
 
             vessel.Rescan();
 

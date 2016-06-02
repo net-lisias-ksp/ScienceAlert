@@ -50,6 +50,8 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalCrewOnEva>().ToSingleton();
             injectionBinder.Bind<SignalCrewTransferred>().ToSingleton();
 
+            injectionBinder.Bind<SignalDominantBodyChanged>().ToSingleton();
+
             injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
             injectionBinder.Bind<SignalScienceReceived>().ToSingleton();
 

@@ -21,6 +21,9 @@ namespace ScienceAlert.Game
         internal readonly Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>> CrewTransferred = new Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>>();
         internal readonly Signal<EventReport> CrewKilled = new Signal<EventReport>();
 
+        internal readonly Signal<GameEvents.FromToAction<CelestialBody, CelestialBody>> DominantBodyChanged =
+            new Signal<GameEvents.FromToAction<CelestialBody, CelestialBody>>();
+
         internal readonly Signal<GameScenes> GameSceneLoadRequested = new Signal<GameScenes>();
         internal readonly Signal<float, ScienceSubject, ProtoVessel, bool> ScienceReceived = new Signal<float, ScienceSubject, ProtoVessel, bool>();
         internal readonly Signal ApplicationQuit = new Signal();
@@ -40,6 +43,8 @@ namespace ScienceAlert.Game
             GameEvents.onCrewKilled.Add(OnCrewKilled);
             GameEvents.onCrewTransferred.Add(OnCrewTransferred);
             GameEvents.onCrewOnEva.Add(OnCrewOnEva);
+
+            GameEvents.onDominantBodyChange.Add(OnDominantBodyChanged);
         }
 
 
@@ -56,6 +61,7 @@ namespace ScienceAlert.Game
             GameEvents.onCrewTransferred.Remove(OnCrewTransferred);
             GameEvents.onCrewOnEva.Remove(OnCrewOnEva);
 
+            GameEvents.onDominantBodyChange.Remove(OnDominantBodyChanged);
             base.OnDestroy();
         }
 
@@ -144,6 +150,12 @@ namespace ScienceAlert.Game
                 ActiveVesselCrewModified.Dispatch();
 
             CrewTransferred.Dispatch(data);
+        }
+
+
+        private void OnDominantBodyChanged(GameEvents.FromToAction<CelestialBody, CelestialBody> data)
+        {
+            DominantBodyChanged.Dispatch(data);
         }
 
 

@@ -60,6 +60,10 @@ namespace ScienceAlert
     {
     }
 
+    public class SignalDominantBodyChanged : Signal<GameEvents.FromToAction<ICelestialBody, ICelestialBody>>
+    {
+    }
+
 
     public class SignalGameSceneLoadRequested : Signal<GameScenes>
     {

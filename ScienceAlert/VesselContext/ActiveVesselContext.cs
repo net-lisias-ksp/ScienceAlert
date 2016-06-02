@@ -61,6 +61,7 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<SignalCrewKilled>().ToSingleton();
             injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
             injectionBinder.Bind<SignalScienceReceived>().ToSingleton();
+            injectionBinder.Bind<SignalDominantBodyChanged>().ToSingleton();
 
             injectionBinder.Bind<SignalApplicationQuit>().ToSingleton();
             injectionBinder.Bind<SignalGameTick>().ToSingleton();
