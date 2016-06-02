@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Xunit;
-using ScienceAlert.VesselContext.Experiments.Rules;
+using ScienceAlert.VesselContext.Experiments.Sensors.Rules;
 using ScienceAlertTests.Domain;
 
 namespace ScienceAlertTests

@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using strange.extensions.command.impl;
-using ScienceAlert.VesselContext.Experiments.Trigger;
+using ScienceAlert.VesselContext.Experiments.Sensors.Trigger;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments

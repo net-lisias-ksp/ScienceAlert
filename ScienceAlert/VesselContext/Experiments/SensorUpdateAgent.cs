@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using ScienceAlert.UI;
+using ScienceAlert.VesselContext.Experiments.Sensors;
 using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments

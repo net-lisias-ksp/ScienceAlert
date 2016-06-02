@@ -7,6 +7,7 @@ using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Xunit;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments;
+using ScienceAlert.VesselContext.Experiments.Sensors;
 using ScienceAlertTests.Domain;
 using ScienceAlertTests.Game;
 using UnityEngine;

@@ -6,6 +6,7 @@ using ScienceAlert.UI;
 using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.TooltipWindow;
 using ScienceAlert.VesselContext.Experiments;
+using ScienceAlert.VesselContext.Experiments.Sensors;
 
 // ReSharper disable MemberCanBePrivate.Global
 

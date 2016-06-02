@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using ReeperCommon.Logging;
 using strange.extensions.injector.api;
-using ScienceAlert.VesselContext.Experiments.Rules;
+using ScienceAlert.VesselContext.Experiments.Sensors.Rules;
 
 namespace ScienceAlert
 {
