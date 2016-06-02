@@ -17,15 +17,17 @@ namespace ScienceAlert.VesselContext.Experiments
     {
         private readonly IRuleFactory _ruleFactory;
         private readonly ReadOnlyCollection<SensorDefinition> _sensorDefinitions;
-        private readonly IScienceSubjectProvider _subjectProvider;
+        private readonly IExistingScienceSubjectProvider _subjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
         private readonly ITemporaryBindingFactory _temporaryBindingFactory;
         private readonly ICriticalShutdownEvent _failSignal;
 
+        [Inject] public IVessel ActiveVessel { get; set; }
+
         public CommandCreateExperimentSensors(
             IRuleFactory ruleFactory,
             ReadOnlyCollection<SensorDefinition> sensorDefinitions,
-            IScienceSubjectProvider subjectProvider,
+            IExistingScienceSubjectProvider subjectProvider,
             IExperimentReportValueCalculator reportCalculator,
             ITemporaryBindingFactory temporaryBindingFactory,
             ICriticalShutdownEvent failSignal)
@@ -110,10 +112,13 @@ namespace ScienceAlert.VesselContext.Experiments
             var sensor = new ExperimentSensor(definition.Experiment,
                     _subjectProvider,
                     _reportCalculator,
+                    ActiveVessel,
+                    ActiveVessel,
+                    ActiveVessel,
                     CreateRule(definition.OnboardRuleDefinition),
                     CreateRule(definition.AvailabilityRuleDefinition),
                     CreateRule(definition.ConditionRuleDefinition),
-                    _subjectProvider.GetSubject(definition.Experiment));
+                    _subjectProvider.GetExistingSubject(definition.Experiment, ActiveVessel.ExperimentSituation, ActiveVessel.OrbitingBody, ActiveVessel.Biome));
 
             sensor.UpdateSensorValues(); // otherwise the sensor might have an invalid subject
 

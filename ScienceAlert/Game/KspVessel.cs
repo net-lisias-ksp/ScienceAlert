@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 
 namespace ScienceAlert.Game
@@ -12,6 +13,8 @@ namespace ScienceAlert.Game
         private readonly IGameFactory _factory;
         private readonly Vessel _vessel;
 
+        private ReadOnlyCollection<Part> _parts = new ReadOnlyCollection<Part>(Enumerable.Empty<Part>().ToList());
+ 
         private ReadOnlyCollection<ProtoCrewMember> _evaCapableCrew = new ReadOnlyCollection<ProtoCrewMember>(new ProtoCrewMember[] {}.ToList());
 
         private ReadOnlyCollection<IModuleScienceExperiment> _scienceModules =
@@ -38,6 +41,7 @@ namespace ScienceAlert.Game
             Log.Warning("KspVessel created");
         }
 
+
         ~KspVessel()
         {
             Log.Warning("KspVessel finalized");
@@ -50,24 +54,16 @@ namespace ScienceAlert.Game
         }
 
 
-        public void OnCrewOnEva(GameEvents.FromToAction<IPart, IPart> data)
+        public void OnVesselCrewModified()
         {
-            Log.Debug("Updating KspVessel crew due to matching OnCrewOnEva event");
             Rescan();
         }
-
-
-        public void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, IPart> data)
-        {
-            Log.Debug("Updating KspVessel crew due to matching OnCrewTransferred event");
-            Rescan();
-        }
-
 
         
 
         public void Rescan()
         {
+            ScanForParts();
             ScanForCrew();
             ScanForScienceExperimentModules();
             ScanForScienceContainers();
@@ -75,6 +71,12 @@ namespace ScienceAlert.Game
             ScanForScienceLabs();
 
             Rescanned();
+        }
+
+
+        private void ScanForParts()
+        {
+            _parts = _vessel.Return(v => v.parts.AsReadOnly(), Enumerable.Empty<Part>().ToList().AsReadOnly());
         }
 
 
@@ -129,6 +131,11 @@ namespace ScienceAlert.Game
         public ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew
         {
             get { return _evaCapableCrew; }
+        }
+
+        public ReadOnlyCollection<Part> Parts
+        {
+            get { return _parts; }
         }
 
 

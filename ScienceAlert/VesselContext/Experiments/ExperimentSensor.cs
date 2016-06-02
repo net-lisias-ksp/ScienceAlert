@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using JetBrains.Annotations;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments.Rules;
 using UnityEngine;
@@ -8,16 +9,22 @@ namespace ScienceAlert.VesselContext.Experiments
 {
     public class ExperimentSensor : IExperimentSensor
     {
-        private readonly IScienceSubjectProvider _scienceSubjectProvider;
+        private readonly IExistingScienceSubjectProvider _scienceSubjectProvider;
         private readonly IExperimentReportValueCalculator _reportCalculator;
+        private readonly IExperimentBiomeProvider _biomeProvider;
+        private readonly IExperimentSituationProvider _situationProvider;
+        private readonly ICelestialBodyProvider _bodyProvider;
         private readonly ISensorRule _onboardRule;
         private readonly ISensorRule _availableRule;
         private readonly ISensorRule _conditionRule;
 
         public ExperimentSensor(
             ScienceExperiment experiment, 
-            IScienceSubjectProvider scienceSubjectProvider,
+            IExistingScienceSubjectProvider scienceSubjectProvider,
             IExperimentReportValueCalculator reportCalculator,
+            [NotNull] IExperimentBiomeProvider biomeProvider,
+            [NotNull] IExperimentSituationProvider situationProvider,
+            [NotNull] ICelestialBodyProvider bodyProvider,
             ISensorRule onboardRule,
             ISensorRule availableRule,
             ISensorRule conditionRule, 
@@ -26,6 +33,9 @@ namespace ScienceAlert.VesselContext.Experiments
             if (experiment == null) throw new ArgumentNullException("experiment");
             if (scienceSubjectProvider == null) throw new ArgumentNullException("scienceSubjectProvider");
             if (reportCalculator == null) throw new ArgumentNullException("reportCalculator");
+            if (biomeProvider == null) throw new ArgumentNullException("biomeProvider");
+            if (situationProvider == null) throw new ArgumentNullException("situationProvider");
+            if (bodyProvider == null) throw new ArgumentNullException("bodyProvider");
             if (onboardRule == null) throw new ArgumentNullException("onboardRule");
             if (availableRule == null) throw new ArgumentNullException("availableRule");
             if (conditionRule == null) throw new ArgumentNullException("conditionRule");
@@ -34,6 +44,9 @@ namespace ScienceAlert.VesselContext.Experiments
             Experiment = experiment;
             _scienceSubjectProvider = scienceSubjectProvider;
             _reportCalculator = reportCalculator;
+            _biomeProvider = biomeProvider;
+            _situationProvider = situationProvider;
+            _bodyProvider = bodyProvider;
             _onboardRule = onboardRule;
             _availableRule = availableRule;
             _conditionRule = conditionRule;
@@ -69,8 +82,7 @@ namespace ScienceAlert.VesselContext.Experiments
         public void UpdateSensorValues()
         {
             var oldSubject = Subject;
-            Subject = _scienceSubjectProvider.GetSubject(Experiment);
-            Profiler.EndSample();
+            Subject = _scienceSubjectProvider.GetExistingSubject(Experiment, _situationProvider.ExperimentSituation, _bodyProvider.OrbitingBody, _biomeProvider.Biome);
 
             var oldConditionsMet = ConditionsMet;
             var oldOnboard = Onboard;

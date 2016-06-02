@@ -13,6 +13,7 @@ namespace ScienceAlert.Game
         event Callback Rescanned;
 
         ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew { get; }
+        ReadOnlyCollection<Part> Parts { get; }
 
         bool IsControllable { get; }
         string VesselName { get; }

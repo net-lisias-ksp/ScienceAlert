@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using strange.extensions.command.impl;
 using ScienceAlert.Game;
 
@@ -10,15 +11,20 @@ namespace ScienceAlert.VesselContext
     {
         private readonly IGameFactory _gameFactory;
         private readonly SignalActiveVesselModified _activeVesselModified;
+        private readonly SignalActiveVesselCrewModified _activeVesselCrewModified;
 
         public CommandCreateVesselBindings(
             IGameFactory gameFactory,
-            SignalActiveVesselModified activeVesselModified)
+            SignalActiveVesselModified activeVesselModified,
+            SignalActiveVesselCrewModified activeVesselCrewModified)
         {
             if (gameFactory == null) throw new ArgumentNullException("gameFactory");
             if (activeVesselModified == null) throw new ArgumentNullException("activeVesselModified");
+            if (activeVesselCrewModified == null) throw new ArgumentNullException("activeVesselCrewModified");
+
             _gameFactory = gameFactory;
             _activeVesselModified = activeVesselModified;
+            _activeVesselCrewModified = activeVesselCrewModified;
         }
 
 
@@ -27,6 +33,7 @@ namespace ScienceAlert.VesselContext
             var vessel = new KspVessel(_gameFactory, FlightGlobals.ActiveVessel);
 
             _activeVesselModified.AddListener(vessel.OnVesselModified);
+            _activeVesselCrewModified.AddListener(vessel.OnVesselCrewModified);
 
             vessel.Rescan();
 

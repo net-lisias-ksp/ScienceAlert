@@ -50,12 +50,15 @@ namespace ScienceAlert.VesselContext
             // If we were to register these to cross context signals, those publishers might keep objects
             // designed for the current active vessel alive and away from the GC even when the rest of the
             // context was destroyed
-            injectionBinder.Bind<SignalActiveVesselChanged>().ToSingleton();
+            injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
+            injectionBinder.Bind<SignalVesselModified>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
-
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
+            injectionBinder.Bind<SignalActiveVesselCrewModified>().ToSingleton();
             injectionBinder.Bind<SignalCrewOnEva>().ToSingleton();
             injectionBinder.Bind<SignalCrewTransferred>().ToSingleton();
+            injectionBinder.Bind<SignalCrewBoardVessel>().ToSingleton();
+            injectionBinder.Bind<SignalCrewKilled>().ToSingleton();
             injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
             injectionBinder.Bind<SignalScienceReceived>().ToSingleton();
 
@@ -82,8 +85,6 @@ namespace ScienceAlert.VesselContext
             injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton();
             injectionBinder.Bind<IScienceUtil>().To<KspScienceUtil>().ToSingleton();
 
-            injectionBinder.Bind<IScienceSubjectProvider>()
-                .To<KspScienceSubjectProvider>().ToSingleton();
 
             var stateChangeSignal = injectionBinder.GetInstance<SignalExperimentAlertChanged>();
 

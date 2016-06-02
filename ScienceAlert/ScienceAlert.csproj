@@ -99,6 +99,8 @@
     <Compile Include="VesselContext\Experiments\Rules\RuleEvaPrefabInternalUsageCheck.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RulePasses.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleVesselIsNotEva.cs" />
+    <Compile Include="VesselContext\Experiments\Trigger\EvaDeploymentTrigger.cs" />
+    <Compile Include="VesselContext\Experiments\Trigger\NoSuitableEvaCandidateFoundException.cs" />
     <Compile Include="VesselContext\Gui\TooltipWindowMediator.cs" />
     <Compile Include="VesselContext\KspExperimentIdentifier.cs" />
     <Compile Include="SensorStatusChange.cs" />
@@ -154,14 +156,13 @@
     <Compile Include="VesselContext\Experiments\MissingExperimentException.cs" />
     <Compile Include="VesselContext\Experiments\SensorUpdateAgent.cs" />
     <Compile Include="VesselContext\Experiments\IExperimentReportValueCalculator.cs" />
-    <Compile Include="Game\KspScienceSubjectProvider.cs" />
     <Compile Include="SensorDefinitions\SensorDefinition.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensor.cs" />
     <Compile Include="Game\ICelestialBodyProvider.cs" />
     <Compile Include="Game\IExperimentSituationProvider.cs" />
     <Compile Include="Game\IQueryScienceValue.cs" />
     <Compile Include="Game\IScienceContainerCollectionProvider.cs" />
-    <Compile Include="Game\IScienceSubjectProvider.cs" />
+    <Compile Include="Game\IExistingScienceSubjectProvider.cs" />
     <Compile Include="VesselContext\Experiments\Rules\ISensorRule.cs" />
     <Compile Include="VesselContext\Experiments\Rules\ScienceExperimentModuleTracker.cs" />
     <Compile Include="VesselContext\Experiments\Rules\RuleVesselHasModuleScienceExperiment.cs" />

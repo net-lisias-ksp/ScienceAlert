@@ -39,10 +39,14 @@ namespace ScienceAlert.Core
         {
             base.mapBindings();
 
+            injectionBinder.Bind<SignalVesselModified>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselModified>().ToSingleton();
             injectionBinder.Bind<SignalActiveVesselDestroyed>().ToSingleton();
-            injectionBinder.Bind<SignalActiveVesselChanged>().ToSingleton();
+            injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
 
+            injectionBinder.Bind<SignalActiveVesselCrewModified>().ToSingleton();
+            injectionBinder.Bind<SignalCrewBoardVessel>().ToSingleton();
+            injectionBinder.Bind<SignalCrewKilled>().ToSingleton();
             injectionBinder.Bind<SignalCrewOnEva>().ToSingleton();
             injectionBinder.Bind<SignalCrewTransferred>().ToSingleton();
 
@@ -122,7 +126,6 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton().CrossContext();
             injectionBinder.Bind<IPartLoader>().To<KspPartLoader>().ToSingleton().CrossContext();
 
-
             injectionBinder.Bind<GameObject>()
                 .To(contextView as GameObject)
                 .ToName(CrossContextKeys.CoreContextView)
@@ -138,7 +141,8 @@ namespace ScienceAlert.Core
             injectionBinder
                 .Bind<IQueryScienceValue>()
                 .Bind<IResearchAndDevelopment>()
-                .To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
+                .Bind<IExistingScienceSubjectProvider>()
+                    .To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
 
             mediationBinder.BindView<ApplicationLauncherView>().ToMediator<ApplicationLauncherMediator>();
 
@@ -188,7 +192,7 @@ namespace ScienceAlert.Core
                 .To<CommandDestroyActiveVesselContext>();
 
 
-            commandBinder.Bind<SignalActiveVesselChanged>()
+            commandBinder.Bind<SignalVesselChanged>()
                 .InSequence()
                 .To<CommandDestroyActiveVesselContext>()
                 .To<CommandCreateActiveVesselContextBootstrapper>();

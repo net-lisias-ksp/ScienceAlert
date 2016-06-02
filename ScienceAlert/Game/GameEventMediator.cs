@@ -12,14 +12,18 @@ namespace ScienceAlert.Game
         [Inject] public GameEventView View { get; set; }
         [Inject] public IGameFactory GameFactory { get; set; }
 
-        [Inject] public SignalActiveVesselChanged VesselChangedSignal { get; set; }
+        [Inject] public SignalVesselChanged VesselChangedSignal { get; set; }
+        [Inject] public SignalVesselModified VesselModifiedSignal { get; set; }
+
         [Inject] public SignalActiveVesselModified ActiveVesselModifiedSignal { get; set; }
         [Inject] public SignalActiveVesselDestroyed ActiveVesselDestroyedSignal { get; set; }
 
+        [Inject] public SignalActiveVesselCrewModified ActiveVesselCrewModifiedSignal { get; set; }
+        [Inject] public SignalCrewBoardVessel CrewBoardVesselSignal { get; set; }
         [Inject] public SignalCrewOnEva CrewOnEvaSignal { get; set; }
         [Inject] public SignalCrewTransferred CrewTransferredSignal { get; set; }
+        [Inject] public SignalCrewKilled CrewKilledSignal { get; set; }
 
- 
         [Inject] public SignalGameSceneLoadRequested GameSceneLoadRequestedSignal { get; set; }
         [Inject] public SignalScienceReceived ScienceReceivedSignal { get; set; }
 
@@ -31,28 +35,39 @@ namespace ScienceAlert.Game
             Log.Warning("GameEventMediator.OnRegister");
 
             base.OnRegister();
+            View.VesselModified.AddListener(OnVesselModified);
             View.ActiveVesselChanged.AddListener(OnActiveVesselChanged);
             View.ActiveVesselModified.AddListener(OnActiveVesselModified);
             View.ActiveVesselDestroyed.AddListener(OnActiveVesselDestroyed);
             View.GameSceneLoadRequested.AddListener(OnGameSceneLoadRequested);
             View.ScienceReceived.AddListener(OnScienceReceived);
+            View.ActiveVesselCrewModified.AddListener(OnActiveVesselCrewModified);
             View.CrewOnEva.AddListener(OnCrewOnEva);
             View.CrewTransferred.AddListener(OnCrewTransferred);
+            View.CrewKilled.AddListener(OnCrewKilled);
+            View.CrewBoardVessel.AddListener(OnCrewBoardVessel);
+            
 
             View.ApplicationQuit.AddListener(OnApplicationQuit);
             View.GameUpdateTick.AddListener(OnGameUpdateTick);
         }
 
 
+
+
         public override void OnRemove()
         {
+            View.VesselModified.RemoveListener(OnVesselModified);
             View.ActiveVesselChanged.RemoveListener(OnActiveVesselChanged);
             View.ActiveVesselModified.RemoveListener(OnActiveVesselModified);
             View.ActiveVesselDestroyed.RemoveListener(OnActiveVesselDestroyed);
             View.GameSceneLoadRequested.RemoveListener(OnGameSceneLoadRequested);
             View.ScienceReceived.RemoveListener(OnScienceReceived);
+            View.ActiveVesselCrewModified.RemoveListener(OnActiveVesselCrewModified);
             View.CrewOnEva.RemoveListener(OnCrewOnEva);
             View.CrewTransferred.RemoveListener(OnCrewTransferred);
+            View.CrewKilled.RemoveListener(OnCrewKilled);
+            View.CrewBoardVessel.RemoveListener(OnCrewBoardVessel);
 
             View.ApplicationQuit.RemoveListener(OnApplicationQuit);
             View.GameUpdateTick.RemoveListener(OnGameUpdateTick);
@@ -78,6 +93,11 @@ namespace ScienceAlert.Game
             }
         }
 
+
+        private void OnVesselModified(Vessel vessel)
+        {
+            TryAction(() => VesselModifiedSignal.Dispatch(GameFactory.Create(vessel)));
+        }
 
         private void OnActiveVesselChanged()
         {
@@ -128,15 +148,31 @@ namespace ScienceAlert.Game
 
         private void OnGameSceneLoadRequested(GameScenes data)
         {
-            Log.Debug(() => typeof(GameEventMediator).Name + ".OnGameSceneLoadRequested " + data);
             TryAction(() => GameSceneLoadRequestedSignal.Dispatch(data));
         }
 
 
         private void OnScienceReceived(float data0, ScienceSubject data1, ProtoVessel data2, bool data3)
         {
-            Log.Debug(() => typeof (GameEventMediator).Name + ".OnScienceReceived " + data0);
-            TryAction(() => ScienceReceivedSignal.Dispatch(data0, data1, data2, data3));
+            TryAction(() => ScienceReceivedSignal.Dispatch(data0, new KspScienceSubject(data1), data2, data3));
+        }
+
+
+        private void OnCrewBoardVessel(GameEvents.FromToAction<Part, Part> fromToAction)
+        {
+            CrewBoardVesselSignal.Dispatch(new GameEvents.FromToAction<IPart, IPart>(GameFactory.Create(fromToAction.from), GameFactory.Create(fromToAction.to)));
+        }
+
+
+        private void OnCrewKilled(EventReport eventReport)
+        {
+            CrewKilledSignal.Dispatch(eventReport);
+        }
+
+
+        private void OnActiveVesselCrewModified()
+        {
+            ActiveVesselCrewModifiedSignal.Dispatch();
         }
 
 

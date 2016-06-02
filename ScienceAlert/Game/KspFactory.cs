@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace ScienceAlert.Game
 {
@@ -14,10 +15,17 @@ namespace ScienceAlert.Game
             return new KspScienceExperimentModule(this, mse);
         }
 
+        public IVessel Create([NotNull] Vessel vessel)
+        {
+            if (vessel == null) throw new ArgumentNullException("vessel");
+
+            return new KspVessel(this, vessel);
+        }
+
 
         public IPart Create(Part part)
         {
-            if (part == null) throw new ArgumentNullException("Part");
+            if (part == null) throw new ArgumentNullException("part");
 
             return new KspPart(part);
         }

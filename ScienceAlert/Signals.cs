@@ -1,7 +1,5 @@
 ﻿using strange.extensions.signal.impl;
 using ScienceAlert.Game;
-using ScienceAlert.VesselContext;
-using ScienceAlert.VesselContext.Experiments;
 
 // ReSharper disable ClassNeverInstantiated.Global
 
@@ -19,8 +17,12 @@ namespace ScienceAlert
 
     }
 
+    
+    public class SignalVesselChanged : Signal
+    {
+    }
 
-    public class SignalActiveVesselChanged : Signal
+    public class SignalVesselModified : Signal<IVessel>
     {
     }
 
@@ -33,7 +35,16 @@ namespace ScienceAlert
     public class SignalActiveVesselDestroyed : Signal
     {
     }
- 
+
+    public class SignalActiveVesselCrewModified : Signal
+    {
+    }
+
+
+    public class SignalCrewBoardVessel : Signal<GameEvents.FromToAction<IPart, IPart>>
+    {
+    }
+
 
     public class SignalCrewOnEva : Signal<GameEvents.FromToAction<IPart, IPart>>
     {
@@ -44,6 +55,10 @@ namespace ScienceAlert
     {
     }
 
+
+    public class SignalCrewKilled : Signal<EventReport>
+    {
+    }
 
 
     public class SignalGameSceneLoadRequested : Signal<GameScenes>
@@ -56,7 +71,7 @@ namespace ScienceAlert
     }
 
 
-    public class SignalScienceReceived : Signal<float, ScienceSubject, ProtoVessel, bool>
+    public class SignalScienceReceived : Signal<float, IScienceSubject, ProtoVessel, bool>
     {
     }
 

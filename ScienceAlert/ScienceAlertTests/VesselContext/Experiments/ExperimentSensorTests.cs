@@ -12,7 +12,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
         [Theory, AutoDomainData]
         public void ExperimentSensor_Constructor_NullArg_Test(
             ScienceExperiment experiment, 
-            IScienceSubjectProvider subjectProvider, 
+            IExistingScienceSubjectProvider subjectProvider, 
             IExperimentReportValueCalculator reportValueCalculator)
         {
             throw new NotImplementedException();
@@ -27,18 +27,18 @@ namespace ScienceAlertTests.VesselContext.Experiments
 
 
         [Theory, AutoDomainData]
-        public void UpdateSensorValues_UsesSubjectQueryOnlyOnce_Test([Frozen] IScienceSubjectProvider subjectProvider, ExperimentSensor sut) // to make sure we aren't being wasteful
+        public void UpdateSensorValues_UsesSubjectQueryOnlyOnce_Test([Frozen] IExistingScienceSubjectProvider subjectProvider, ExperimentSensor sut) // to make sure we aren't being wasteful
         {
             sut.UpdateSensorValues();
 
-            subjectProvider.Received(1).GetSubject(Arg.Any<ScienceExperiment>());
+            subjectProvider.Received(1).GetExistingSubject(Arg.Any<ScienceExperiment>(), Arg.Any<ExperimentSituations>(), Arg.Any<ICelestialBody>(), Arg.Any<string>());
         }
 
 
         [Theory, AutoDomainData]
         public void UpdateSensorValues_DoesNotReportChanged_WhenAllCalculatedValuesSame(
             [Frozen] ScienceExperiment experiment,
-            IScienceSubjectProvider subjectProvider, 
+            IExistingScienceSubjectProvider subjectProvider, 
             IScienceSubject subject,
             IExperimentReportValueCalculator valueCalculator,
             float collectionValue,
@@ -46,7 +46,7 @@ namespace ScienceAlertTests.VesselContext.Experiments
             float labValue)
         {
             throw new NotImplementedException();
-            //subjectProvider.GetSubject(Arg.Any<ScienceExperiment>()).Returns(subject);
+            //subjectProvider.GetExistingSubject(Arg.Any<ScienceExperiment>()).Returns(subject);
 
             //valueCalculator.CalculateRecoveryValue(Arg.Is(experiment), Arg.Is(subject))
             //    .Returns(collectionValue);

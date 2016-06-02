@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ScienceAlert.Game
 {
-    public class KspResearchAndDevelopment : IQueryScienceValue, IResearchAndDevelopment
+    public class KspResearchAndDevelopment : IQueryScienceValue, IResearchAndDevelopment, IExistingScienceSubjectProvider
     {
         private readonly IGameFactory _gameFactory;
 
@@ -47,6 +47,22 @@ namespace ScienceAlert.Game
         public List<IScienceSubject> GetSubjects()
         {
             return ResearchAndDevelopment.GetSubjects().Select(sub => _gameFactory.Create(sub)).ToList();
+        }
+
+
+        // todo: this is producing too much garbage, maybe use cached subjects?
+        public IScienceSubject GetExistingSubject(ScienceExperiment experiment, ExperimentSituations situation, ICelestialBody body, string biome)
+        {
+            var currentBiome = string.Empty;
+
+            if (experiment.BiomeIsRelevantWhile(situation)) currentBiome = biome;
+
+            var newSubject = new ScienceSubject(experiment, situation, body.Body,
+                currentBiome);
+
+            var existingSubject = GetSubjects().FirstOrDefault(s => s.Id == newSubject.id);
+
+            return existingSubject ?? _gameFactory.Create(newSubject);
         }
     }
 }

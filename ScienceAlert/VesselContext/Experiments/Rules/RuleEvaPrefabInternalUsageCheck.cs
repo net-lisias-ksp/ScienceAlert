@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using ScienceAlert.Game;
+using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
@@ -13,78 +14,118 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
     /// That's fine while on EVA because we can examine those requirements directly, but to handle them properly while not on EVA
     /// we'll have to look up the prefab. In 99.9% of cases nobody will mess with them though, this is just to catch the edge cases
     /// and it's not complex anyway
+    /// 
+    /// TODO: it's possible for male and female crew to differ in this setting so at some point the EVA trigger is going to need
+    /// to be updated to choose correctly
     /// </summary>
     class RuleEvaPrefabInternalUsageCheck : ISensorRule
     {
         private const string EvaReportExperimentId = "evaReport";
 
+        private class EvaPrefab
+        {
+            public readonly ExperimentUsageReqs Requirements;
+            public readonly IPart Part;
+
+            public EvaPrefab([NotNull] IPart part, ExperimentUsageReqs usageMask)
+            {
+                if (part == null) throw new ArgumentNullException("part");
+
+                Requirements = usageMask;
+                Part = part;
+            }
+        }
+
         private readonly IVessel _vessel;
         private readonly IScienceUtil _scienceUtil;
-        private readonly IPartLoader _partLoader;
-        private readonly ICriticalShutdownEvent _missingEva;
-        private readonly Lazy<IPart> _evaPrefab;
-        private readonly Lazy<ExperimentUsageReqs> _requirements;
+
+        [Flags]
+        private enum CrewGenders
+        {
+            NoCrew = 0,
+            Male = 1 << 0,
+            Female = 1 << 1
+        }
+
+        private CrewGenders _crewGenders = CrewGenders.NoCrew;
+        private readonly Lazy<EvaPrefab> _malePrefab = new Lazy<EvaPrefab>(() => GetEvaPrefab(ProtoCrewMember.Gender.Male));
+        private readonly Lazy<EvaPrefab> _femalePrefab = new Lazy<EvaPrefab>(() => GetEvaPrefab(ProtoCrewMember.Gender.Female)); 
+
 
         public RuleEvaPrefabInternalUsageCheck(
             [NotNull] IVessel vessel, 
             [NotNull] IScienceUtil scienceUtil,
-            [NotNull] IPartLoader partLoader, 
-            [NotNull] ICriticalShutdownEvent missingEva)
+            SignalActiveVesselCrewModified crewModified)
         {
             if (vessel == null) throw new ArgumentNullException("vessel");
             if (scienceUtil == null) throw new ArgumentNullException("scienceUtil");
-            if (partLoader == null) throw new ArgumentNullException("partLoader");
-            if (missingEva == null) throw new ArgumentNullException("missingEva");
 
             _vessel = vessel;
             _scienceUtil = scienceUtil;
-            _partLoader = partLoader;
-            _missingEva = missingEva;
-            _evaPrefab = new Lazy<IPart>(() => GetPrefab("kerbalEVA"));
-            _requirements = new Lazy<ExperimentUsageReqs>(GetEvaUsageReqs);
+            crewModified.AddListener(OnCrewModified);
         }
 
 
-        private IPart GetPrefab(string name)
+        [PostConstruct]
+        public void Setup()
         {
-            try
-            {
-                var prefab = _partLoader.GetPartByName(name);
-
-                if (!prefab.Any())
-                    throw new ArgumentException("No part prefab matches '" + name + "'");
-
-                return prefab.Value;
-            }
-            catch (Exception)
-            {
-                Log.Error("Could not find EVA prefab!");
-                _missingEva.Dispatch();
-
-                throw;
-            }
+            Log.Warning(GetType().Name + " postconstruction");
+            OnCrewModified();
         }
 
 
-        private ExperimentUsageReqs GetEvaUsageReqs()
+        private static ExperimentUsageReqs GetUsageReqFromPrefab([NotNull] GameObject prefab)
         {
-            try
+            if (prefab == null) throw new ArgumentNullException("prefab");
+
+            return prefab
+                .With(go => go.GetComponents<ModuleScienceExperiment>()
+                    .FirstOrDefault(mse => mse.experimentID == EvaReportExperimentId))
+                .Return(mse => (ExperimentUsageReqs)mse.usageReqMaskInternal, ExperimentUsageReqs.Never);
+        }
+
+
+        private static EvaPrefab GetEvaPrefab(ProtoCrewMember.Gender gender)
+        {
+            GameObject prefab = null;
+
+            switch (gender)
             {
-                return (ExperimentUsageReqs)
-                    _evaPrefab.Value.gameObject.GetComponents<ModuleScienceExperiment>() // can't use .Modules here, might not be initialized on the prefab
-                        .First(mse => mse.experimentID == EvaReportExperimentId)
-                        .usageReqMaskInternal;
+                case ProtoCrewMember.Gender.Male:
+                    prefab = FlightEVA.fetch.evaPrefab_generic;
+                    break;
+
+                default:
+                    prefab = FlightEVA.fetch.evaPrefab_female;
+                    break;
             }
-            catch (Exception) // no EVA report experiment found. This might be fine if another mod has intentionally removed it
+
+            return new EvaPrefab(new KspPart(Part.FromGO(prefab)), GetUsageReqFromPrefab(prefab));
+        }
+
+
+        private void OnCrewModified()
+        {
+            var crew = _vessel.EvaCapableCrew;
+
+            if (!crew.Any())
             {
-                return ExperimentUsageReqs.Never;
+                _crewGenders = CrewGenders.NoCrew;
+                return;
             }
+
+            _crewGenders |= (crew.Any(pcm => pcm.gender == ProtoCrewMember.Gender.Male) ? CrewGenders.Male : 0);
+            _crewGenders |= (crew.Any(pcm => pcm.gender == ProtoCrewMember.Gender.Female) ? CrewGenders.Female : 0);
         }
 
 
         public bool Passes()
         {
-            return _scienceUtil.RequiredUsageInternalAvailable(_vessel, _evaPrefab.Value, _requirements.Value);
+            if ((_crewGenders & CrewGenders.Male) != 0)
+                return _scienceUtil.RequiredUsageInternalAvailable(_vessel, _malePrefab.Value.Part,
+                    _malePrefab.Value.Requirements);
+            return _scienceUtil.RequiredUsageInternalAvailable(_vessel, _femalePrefab.Value.Part,
+                _femalePrefab.Value.Requirements);
         }
     }
 }

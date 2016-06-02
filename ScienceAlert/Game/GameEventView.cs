@@ -1,4 +1,6 @@
-﻿using ReeperCommon.Logging;
+﻿using System;
+using ReeperCommon.Containers;
+using ReeperCommon.Logging;
 using strange.extensions.mediation.impl;
 using strange.extensions.signal.impl;
 
@@ -11,8 +13,14 @@ namespace ScienceAlert.Game
         internal readonly Signal ActiveVesselModified = new Signal();
         internal readonly Signal ActiveVesselChanged = new Signal();
         internal readonly Signal ActiveVesselDestroyed = new Signal();
+        internal readonly Signal ActiveVesselCrewModified = new Signal();
+
+        internal readonly Signal<Vessel> VesselModified = new Signal<Vessel>();
+        internal readonly Signal<GameEvents.FromToAction<Part, Part>> CrewBoardVessel = new Signal<GameEvents.FromToAction<Part, Part>>();
         internal readonly Signal<GameEvents.FromToAction<Part, Part>> CrewOnEva = new Signal<GameEvents.FromToAction<Part, Part>>();
         internal readonly Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>> CrewTransferred = new Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>>();
+        internal readonly Signal<EventReport> CrewKilled = new Signal<EventReport>();
+
         internal readonly Signal<GameScenes> GameSceneLoadRequested = new Signal<GameScenes>();
         internal readonly Signal<float, ScienceSubject, ProtoVessel, bool> ScienceReceived = new Signal<float, ScienceSubject, ProtoVessel, bool>();
         internal readonly Signal ApplicationQuit = new Signal();
@@ -28,6 +36,10 @@ namespace ScienceAlert.Game
             GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
             GameEvents.OnScienceRecieved.Add(OnScienceReceived);
 
+            GameEvents.onCrewBoardVessel.Add(OnCrewBoardVessel);
+            GameEvents.onCrewKilled.Add(OnCrewKilled);
+            GameEvents.onCrewTransferred.Add(OnCrewTransferred);
+            GameEvents.onCrewOnEva.Add(OnCrewOnEva);
         }
 
 
@@ -39,19 +51,23 @@ namespace ScienceAlert.Game
             GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
             GameEvents.OnScienceRecieved.Remove(OnScienceReceived);
 
+            GameEvents.onCrewBoardVessel.Remove(OnCrewBoardVessel);
+            GameEvents.onCrewKilled.Remove(OnCrewKilled);
+            GameEvents.onCrewTransferred.Remove(OnCrewTransferred);
+            GameEvents.onCrewOnEva.Remove(OnCrewOnEva);
+
             base.OnDestroy();
         }
 
 
         private static bool IsActiveVessel(Vessel v)
         {
-            return ReferenceEquals(FlightGlobals.ActiveVessel, v);
+            return v != null && ReferenceEquals(FlightGlobals.ActiveVessel, v);
         }
 
 
         private void OnVesselChange(Vessel data)
         {
-            Log.Debug("OnVesselChange");
             ActiveVesselChanged.Dispatch();
         }
 
@@ -70,11 +86,9 @@ namespace ScienceAlert.Game
         private void OnVesselModified(Vessel data)
         {
             if (IsActiveVessel(data))
-            {
                 ActiveVesselModified.Dispatch();
-                Log.Debug("OnVesselModified.Active");
-            }
-            else Log.Debug("OnVesselModified.Nonactive");
+
+            VesselModified.Dispatch(data);
         }
 
 
@@ -94,6 +108,42 @@ namespace ScienceAlert.Game
         private void OnScienceReceived(float data0, ScienceSubject data1, ProtoVessel data2, bool data3)
         {
             ScienceReceived.Dispatch(data0, data1, data2, data3);
+        }
+
+
+        private void OnCrewBoardVessel(GameEvents.FromToAction<Part, Part> data)
+        {
+            if (IsActiveVessel(data.from.With(f => f.vessel)) || IsActiveVessel(data.to.With(t => t.vessel)))
+                ActiveVesselCrewModified.Dispatch();
+
+            CrewBoardVessel.Dispatch(data);
+        }
+
+
+        private void OnCrewKilled(EventReport data)
+        {
+            if (IsActiveVessel(data.origin.With(o => o.vessel)))
+                ActiveVesselCrewModified.Dispatch();
+
+            CrewKilled.Dispatch(data);
+        }
+
+
+        private void OnCrewOnEva(GameEvents.FromToAction<Part, Part> data)
+        {
+            if (IsActiveVessel(data.from.With(f => f.vessel)) || IsActiveVessel(data.to.With(t => t.vessel)))
+                ActiveVesselCrewModified.Dispatch();
+
+            CrewOnEva.Dispatch(data);
+        }
+
+
+        private void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, Part> data)
+        {
+            if (IsActiveVessel(data.from.With(f => f.vessel)) || IsActiveVessel(data.to.With(t => t.vessel)))
+                ActiveVesselCrewModified.Dispatch();
+
+            CrewTransferred.Dispatch(data);
         }
 
 

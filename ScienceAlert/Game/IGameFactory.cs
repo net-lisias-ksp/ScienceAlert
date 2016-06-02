@@ -3,6 +3,7 @@
     public interface IGameFactory
     {
         IModuleScienceExperiment Create(ModuleScienceExperiment mse);
+        IVessel Create(Vessel vessel);
         IPart Create(Part part);
         IScienceSubject Create(ScienceSubject subject);
         ICelestialBody Create(CelestialBody body);
