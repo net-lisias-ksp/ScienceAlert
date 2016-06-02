@@ -4,6 +4,6 @@ namespace ScienceAlert.Game
 {
     public interface IResearchAndDevelopment
     {
-        List<IScienceSubject> GetSubjects();
+        List<IScienceSubject> Subjects { get; }
     }
 }

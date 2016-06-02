@@ -12,6 +12,21 @@ namespace ScienceAlert.Game
         {
             if (gameFactory == null) throw new ArgumentNullException("gameFactory");
             _gameFactory = gameFactory;
+            Subjects = Enumerable.Empty<IScienceSubject>().ToList();
+        }
+
+
+        [PostConstruct]
+        public void RefreshKnownSubjects()
+        {
+            Subjects = ResearchAndDevelopment.GetSubjects().Select(sub => _gameFactory.Create(sub)).ToList();
+        }
+
+
+        // Parameters don't really matter, all we care about is the science subject list might've changed
+        public void OnScienceReceived(float data1, IScienceSubject data2, ProtoVessel pv, bool b)
+        {
+            RefreshKnownSubjects();
         }
 
 
@@ -44,10 +59,7 @@ namespace ScienceAlert.Game
         }
 
 
-        public List<IScienceSubject> GetSubjects()
-        {
-            return ResearchAndDevelopment.GetSubjects().Select(sub => _gameFactory.Create(sub)).ToList();
-        }
+        public List<IScienceSubject> Subjects { get; private set; }
 
 
         // todo: this is producing too much garbage, maybe use cached subjects?
@@ -60,9 +72,11 @@ namespace ScienceAlert.Game
             var newSubject = new ScienceSubject(experiment, situation, body.Body,
                 currentBiome);
 
-            var existingSubject = GetSubjects().FirstOrDefault(s => s.Id == newSubject.id);
+            foreach (var subject in Subjects)
+                if (subject.Id == newSubject.id)
+                    return subject;
 
-            return existingSubject ?? _gameFactory.Create(newSubject);
+            return _gameFactory.Create(newSubject);
         }
     }
 }

@@ -140,11 +140,15 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<ICelestialBody>().To(new KspCelestialBody(FlightGlobals.GetHomeBody())).ToName(CrossContextKeys.HomeWorld).CrossContext();
 
+            var kspRnd = new KspResearchAndDevelopment(injectionBinder.GetInstance<IGameFactory>());
+            injectionBinder.GetInstance<SignalScienceReceived>().Do(signal => signal.AddListener(kspRnd.OnScienceReceived));
+            kspRnd.RefreshKnownSubjects();
+
             injectionBinder
                 .Bind<IQueryScienceValue>()
                 .Bind<IResearchAndDevelopment>()
                 .Bind<IExistingScienceSubjectProvider>()
-                    .To<KspResearchAndDevelopment>().ToSingleton().CrossContext();
+                    .To(kspRnd).CrossContext();
 
             mediationBinder.BindView<ApplicationLauncherView>().ToMediator<ApplicationLauncherMediator>();
 
