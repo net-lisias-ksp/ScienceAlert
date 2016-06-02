@@ -114,13 +114,21 @@ namespace ScienceAlert
         // used in a logical rule
         private static bool AllRulesPass(ISensorRule[] rules)
         {
-            return rules.All(r => r.Passes());
+            foreach (var rule in rules)
+                if (!rule.Passes())
+                    return false;
+            return true;
+            //return rules.All(r => r.Passes());
         }
 
         // used in a logical rule
         private static bool AnyRulePasses(ISensorRule[] rules)
         {
-            return rules.Any(r => r.Passes());
+            foreach (var rule in rules)
+                if (rule.Passes())
+                    return true;
+            return false;
+            //return rules.Any(r => r.Passes());
         }
     }
 }

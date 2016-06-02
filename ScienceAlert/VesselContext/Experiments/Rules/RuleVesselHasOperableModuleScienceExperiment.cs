@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using ScienceAlert.Game;
+﻿using ScienceAlert.Game;
 
 namespace ScienceAlert.VesselContext.Experiments.Rules
 {
@@ -14,7 +13,11 @@ namespace ScienceAlert.VesselContext.Experiments.Rules
 
         public bool Passes()
         {
-            return ExperimentModules.Any(mse => !mse.Deployed);
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach (var module in ExperimentModules)
+                if (!module.Deployed)
+                    return true;
+            return false;
         }
     }
 }
