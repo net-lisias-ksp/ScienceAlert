@@ -5,11 +5,11 @@ using ReeperCommon.Containers;
 using ReeperKSP.Extensions;
 using strange.extensions.signal.impl;
 using UnityEngine;
+// ReSharper disable BitwiseOperatorOnEnumWithoutFlags
 
 namespace ScienceAlert.Core
 {
     [KSPScenario(
-        // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
         ScenarioCreationOptions.AddToNewCareerGames |
         ScenarioCreationOptions.AddToNewScienceSandboxGames |
         ScenarioCreationOptions.AddToExistingCareerGames |
@@ -39,6 +39,7 @@ namespace ScienceAlert.Core
             {
                 SaveSignal.Do(s => s.Dispatch(node));
             }
+                // ReSharper disable once CatchAllClause
             catch (Exception e)
             {
                 Debug.LogError("ScienceAlert failed to save due to: " + e);

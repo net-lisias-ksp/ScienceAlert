@@ -12,7 +12,6 @@ using ScienceAlert.UI.OptionsWindow;
 using ScienceAlert.UI.TooltipWindow;
 using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Sensors;
-using ScienceAlert.VesselContext.Experiments.Sensors.Trigger;
 using ScienceAlert.VesselContext.Gui;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -112,7 +111,7 @@ namespace ScienceAlert.VesselContext
                 .To<CommandCreateVesselBindings>()
                 .To<CommandCreateExperimentReportCalculator>()
                 .To<CommandCreateExperimentSensors>()
-                .To<CommandCreateExperimentTriggers>()
+                //.To<CommandCreateExperimentTriggers>()
                 .To<CommandCreateSensorUpdater>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandDispatchLoadGuiSettingsSignal>()
@@ -126,7 +125,7 @@ namespace ScienceAlert.VesselContext
                 .Pooled();
 
             commandBinder.Bind<SignalDeployExperiment>()
-                .To<CommandDeployExperiment>()
+                //.To<CommandDeployExperiment>()
                 .Pooled();
 
             commandBinder.Bind<SignalContextIsBeingDestroyed>()
@@ -140,7 +139,6 @@ namespace ScienceAlert.VesselContext
         // Split into its own section because it's very important we UNBIND these when the context is destroyed
         private void SetupCrossContextCommandBindings()
         {
-
             _sharedSaveBinding = commandBinder.Bind<SignalSharedConfigurationSaving>()
                 .To<CommandDispatchSaveGuiSettingsSignal>();
 

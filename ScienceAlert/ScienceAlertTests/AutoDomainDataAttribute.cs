@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using Ploeh.AutoFixture;
+﻿using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.Xunit;
-using ScienceAlert.VesselContext.Experiments.Sensors.Rules;
 using ScienceAlertTests.Domain;
 
 namespace ScienceAlertTests
@@ -11,32 +9,25 @@ namespace ScienceAlertTests
         public AutoDomainDataAttribute()
             : base(new Fixture().Customize(new DomainCustomization()))
         {
-            //var rnd = new Random();
-            var rules = typeof (ISensorRule).Assembly.GetTypes()
-                .Where(t => typeof (ISensorRule).IsAssignableFrom(t) && !t.IsAbstract)
-                .ToList();
-
-            //var ruleProvider = Substitute.For<IExperimentRuleTypeProvider>();
-            //ruleProvider.Get()
-            //    .Returns(
-            //        typeof (IExperimentRule).Assembly.GetTypes()
-            //            .Where(t => typeof (IExperimentRule).IsAssignableFrom(t) && !t.IsAbstract));
+            //var rules = typeof(ISensorRule).Assembly.GetTypes()
+            //    .Where(t => typeof(ISensorRule).IsAssignableFrom(t) && !t.IsAbstract)
+            //    .ToList();
 
             Fixture.Register(() => new ConfigNode("root"));
-            Fixture.Register(() => rules);
-            Fixture.Register(() => new ProtoCrewMember(ProtoCrewMember.KerbalType.Crew) {name = "Test Kerman"});
-            
-            Fixture.Register(() => 
+            //Fixture.Register(() => rules);
+            Fixture.Register(() => new ProtoCrewMember(ProtoCrewMember.KerbalType.Crew) { name = "Test Kerman" });
+
+            Fixture.Register(() =>
                 new ScienceExperiment
                 {
-                    baseValue = 0f, 
+                    baseValue = 0f,
                     biomeMask = 0,
-                    dataScale = 0f, 
-                    experimentTitle = "Experiment Title", 
-                    id = "scienceExperiment", 
+                    dataScale = 0f,
+                    experimentTitle = "Experiment Title",
+                    id = "scienceExperiment",
                     requireAtmosphere = false,
                     requiredExperimentLevel = 0f,
-                    scienceCap = 100f, 
+                    scienceCap = 100f,
                     situationMask = 0
                 });
 
@@ -44,5 +35,5 @@ namespace ScienceAlertTests
             Fixture.Register(() => new ScienceSubjectFactory());
         }
     }
-    
+
 }

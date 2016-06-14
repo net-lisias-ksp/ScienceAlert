@@ -10,7 +10,8 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
         private readonly IScienceUtil _scienceUtil;
         private readonly Func<IModuleScienceExperiment, bool> _isModuleAvailable;  // keep things lean and mean by allocating the delegate upfront
 
-        public RuleExperimentUsageRequirementCheck(IScienceUtil scienceUtil, ScienceExperiment experiment, IVessel vessel) : base(experiment, vessel)
+        public RuleExperimentUsageRequirementCheck(IScienceUtil scienceUtil, ScienceExperiment experiment, IVessel vessel)
+            : base(experiment, vessel)
         {
             if (scienceUtil == null) throw new ArgumentNullException("scienceUtil");
 

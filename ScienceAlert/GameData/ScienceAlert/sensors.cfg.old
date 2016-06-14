@@ -1,0 +1,180 @@
+// ScienceAlert sensor definitions
+//
+// These tell SA about any special restrictions or allowances an experiment might have. For stock
+// experiments it's largely unnecessary, but mod experiments might have unusual requirements
+// (only useful on a particular planet, has a special condition, etc) that don't quite fit into
+// the stock scheme
+
+
+
+
+SA_SENSOR_DEFINITION_DISABLED
+{
+	experimentID = mysteryGoo
+	
+	// This rule will tell SA when an experiment is onboard (but not necessarily runnable)
+	ONBOARD_RULE
+	{
+		ALL_OF
+		{
+			RuleVesselHasModuleScienceExperiment
+			{
+			}
+		}
+	}
+	
+	// Tells SA whether an experiment can actually be performed (for example, can't use an experiment that requires
+	// atmosphere on the Mun so all related info (collection, transmission, lab) data will be zeroed out
+	//
+	// Note to self: ExperimentUsageRequirementCheck isn't part of the condition because it's actually specified on a 
+	// per-module basis rather than a hard requirement defined by ScienceDefs
+	CONDITION_RULE
+	{
+		RuleExperimentIsAvailableDuringVesselSituation
+		{
+		}
+	}
+	
+	// Tells SA when a module can be used for deploying this experiment
+	AVAILABILITY_RULE
+	{
+		ALL_OF
+		{
+			RuleVesselIsControllable
+			{
+			}
+			RuleVesselHasOperableModuleScienceExperiment
+			{
+			}
+			RuleExperimentIsAvailableDuringVesselSituation
+			{
+			}
+			RuleExperimentUsageRequirementCheck
+			{
+			}
+		}
+	}
+}
+
+
+// Used by the filter that decides whether the experiment list will display a button for the experiment
+SA_DEFAULT_ONBOARD_RULE
+{
+	RuleVesselHasModuleScienceExperiment
+	{
+	}
+}
+
+// Used to determine whether we could actually deploy the experiment module, right now. The condition rule will
+// override this value when in invalid conditions
+SA_DEFAULT_AVAILABILITY_RULE
+{
+	ALL
+	{
+		RuleVesselIsControllable
+		{
+		}
+		RuleExperimentIsAvailableWhileVesselSituation
+		{
+		}
+		RuleVesselHasOperableModuleScienceExperiment
+		{
+		}
+	}
+}
+
+// Used to determine if the experiment is possible. For stock experiments, this is generally checked by the usage bitmasks
+// and requireAtmosphere but mod experiments might require specialized rules not possible with the stock system
+SA_DEFAULT_CONDITION_RULE
+{
+	ALL
+	{
+		RuleExperimentIsAvailableWhileVesselSituation
+		{
+		}
+		RuleExperimentUsageRequirementCheck
+		{
+		}
+	}
+}
+
+SA_DEFAULT_EXPERIMENT_TRIGGER
+{
+	DefaultDeploymentTrigger
+	{
+	}
+}
+
+
+
+//------------------------------------------------------------------------------
+// evaReport
+//------------------------------------------------------------------------------
+SA_SENSOR_DEFINITION
+{
+	experimentID = evaReport
+	
+	ONBOARD_RULE
+	{
+		ANY
+		{
+			RuleVesselHasModuleScienceExperiment
+			{
+			}
+			RuleVesselIsCrewed
+			{
+			}
+		}
+	}
+	AVAILABILITY_RULE
+	{
+		ANY
+		{
+			RuleVesselHasOperableModuleScienceExperiment
+			{
+			}
+			
+			ALL
+			{
+				RuleVesselIsCrewed
+				{
+				}
+				RuleVesselIsNotEva
+				{
+				}
+			}
+		}
+	}
+	CONDITION_RULE
+	{
+		ALL
+		{
+			RuleExperimentIsAvailableWhileVesselSituation
+			{
+			}
+			
+			ANY
+			{
+				ALL
+				{
+					RuleVesselIsNotEva
+					{
+					}
+					RuleEvaPrefabInternalUsageCheck
+					{
+					}
+				}
+				
+				RuleExperimentUsageRequirementCheck
+				{
+				}
+			}
+		}
+	}
+	TRIGGER
+	{
+		EvaDeploymentTrigger
+		{
+		}
+	}
+}

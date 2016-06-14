@@ -132,17 +132,6 @@ namespace ScienceAlert.VesselContext.Gui
             mainCanvas.Do(LayoutRebuilder.MarkLayoutForRebuild);
             dialogCanvas.Do(LayoutRebuilder.MarkLayoutForRebuild);
 
-            //mainCanvas.GetComponentsInChildren<Canvas>().Union(new[] {mainCanvas.GetComponent<Canvas>()})
-            //    .ToList().ForEach(item =>
-            //    {
-            //        Log.Normal(item.name + " camera: " + item.worldCamera.Return(wc => wc.name, "<Not set>"));
-            //    });
-            //mainCanvas.gameObject.PrintComponents(new DebugLog("MainCanvas"));
-
-            //optionsWindow.gameObject.SetActive(false);
-
-            //experimentWindow.transform.root.gameObject.PrintComponents(new DebugLog("ExperimentWindowDebug"));
-
             yield return null; // wait for views to start before proceeding
         }
 

@@ -79,11 +79,21 @@ namespace ScienceAlert.VesselContext.Experiments
         // ReSharper disable once UnusedMember.Local
         private void Start()
         {
-            _sensorStateCache = Sensors.ToDictionary(sensor => new StateCacheKey(sensor),
-                sensor => new ExperimentSensorState(sensor.Experiment, sensor.Subject, 0f, 0f, 0f, false, false, false));
+            try
+            {
+                _sensorStateCache = Sensors.ToDictionary(sensor => new StateCacheKey(sensor),
+                    sensor =>
+                        new ExperimentSensorState(sensor.Experiment, sensor.Subject, 0f, 0f, 0f, false, false, false));
 
-            foreach (var sensor in Sensors)
-                DispatchChangedSignal(sensor);
+                foreach (var sensor in Sensors)
+                    DispatchChangedSignal(sensor);
+            }
+            catch (Exception e)
+            {
+                Log.Error("Exception while starting " + GetType().Name + ": " + e);
+                enabled = false;
+                CriticalFail.Dispatch();
+            }
         }
 
 

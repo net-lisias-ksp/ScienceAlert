@@ -14,10 +14,13 @@ using ReeperKSP.FileSystem.Providers;
 using ReeperKSP.Repositories;
 using ReeperKSP.Serialization;
 using strange.extensions.context.api;
+using strange.extensions.injector.api;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Game;
-using ScienceAlert.SensorDefinitions;
 using ScienceAlert.VesselContext;
+using ScienceAlert.VesselContext.Experiments;
+using ScienceAlert.VesselContext.Experiments.Sensors;
+using ScienceAlert.VesselContext.Experiments.Sensors.Rules;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -94,6 +97,7 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalScenarioModuleLoad>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalScenarioModuleSave>().ToSingleton().CrossContext();
 
+            injectionBinder.Bind<string>().To("SA_EXPERIMENT_CONFIGURATION").ToName(CoreContextKeys.ExperimentConfigurationNodeName).CrossContext();
 
             injectionBinder.Bind<IUrlDirProvider>().To<KSPGameDataUrlDirProvider>().ToSingleton().CrossContext();
             injectionBinder.Bind<IUrlDir>().To(new KSPUrlDir(injectionBinder.GetInstance<IUrlDirProvider>().Get())).CrossContext();
@@ -155,6 +159,7 @@ namespace ScienceAlert.Core
             ConfigureScienceAlert();
             ConfigureResourceRepository();
             ConfigureSerializer();
+            ConfigureRuleTypes();
             ConfigureExperiments();
 
             injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
@@ -168,10 +173,15 @@ namespace ScienceAlert.Core
                 .InSequence()
                 .To<CommandConfigureCriticalShutdown>()
                 .To<CommandLoadSounds>()
-                .To<CommandConfigureSensorDefinitionBuilder>()
-                .To<CommandCreateSensorDefinitions>()
-                .To<CommandConfigureRuleFactories>()
-                .To<CommandConfigureTriggerFactories>()
+                .To<CommandLoadDefaultRuleConfigs>()
+                .To<CommandCreateBuilderComposite<
+                    IObjectFromConfigNodeBuilder<ExperimentConfiguration, ConfigNode, IInjectionBinder>, 
+                    CompositeObjectFromConfigNodeBuilder<ExperimentConfiguration, ConfigNode, IInjectionBinder>>
+                    >()
+                .To<CommandCreateBuilderComposite<IObjectFromConfigNodeBuilder<ISensorRule, ConfigNode, IInjectionBinder>, CompositeObjectFromConfigNodeBuilder<ISensorRule, ConfigNode, IInjectionBinder>>>()
+                .To<CommandCreateBuilderComposite<IObjectFromConfigNodeBuilder<IExperimentSensor, ExperimentConfiguration, IInjectionBinder>, CompositeObjectFromConfigNodeBuilder<IExperimentSensor, ExperimentConfiguration, IInjectionBinder>>>()
+                .To<CommandCreateBuilderComposite<IObjectFromConfigNodeBuilder<IExperimentTrigger, ExperimentConfiguration, IInjectionBinder>, CompositeObjectFromConfigNodeBuilder<IExperimentTrigger, ExperimentConfiguration, IInjectionBinder>>>()
+                .To<CommandCreateExperimentConfigurations>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGameEvents>()
                 .To<CommandCreateAppLauncherView>()
@@ -373,13 +383,12 @@ namespace ScienceAlert.Core
                 injectionBinder.Bind<ScienceExperiment>().To(exp).ToName(exp.id).CrossContext();
             }
 
-            injectionBinder.Bind<List<ScienceExperiment>>().To(experiments).CrossContext();
             injectionBinder.Bind<ReadOnlyCollection<ScienceExperiment>>().To(experiments.AsReadOnly()).CrossContext();
         }
 
 
-        // Why is this bit off on its down? If the player has duplicate ScienceDefs and we're the first one to try
-        // and access R&D (initializing it), the dictionary it tries to create internally will throw an exception.
+        // If the player has duplicate ScienceDefs and we try to
+        // access R&D, the dictionary it tries to create internally will throw an exception.
         // If we're looking for this, we can better inform the player and even determine which ConfigNode(s) at which
         // location(s) are the issue
 // ReSharper disable once ReturnTypeCanBeEnumerable.Local
@@ -413,11 +422,25 @@ namespace ScienceAlert.Core
                           " for the same experiment found! You need to fix your installation.");
 
                 foreach (var problem in problemConfigs)
-                    Debug.LogWarning(getExperimentId(problem.config).Value + " definition found at " +
+                    Debug.LogWarning(getExperimentId(problem.config).Return(s => s, "<experimentID not defined>") + " definition found at " +
                                      problem.url);
 
                 throw;
             }
+        }
+
+
+        private void ConfigureRuleTypes()
+        {
+            var sensorTypes = AssemblyLoader.loadedAssemblies.SelectMany(la => la.assembly.GetTypes())
+                .Where(ty => ty.GetInterfaces().Any(i => i == typeof (ISensorRule)))
+                .ToList()
+                .AsReadOnly();
+
+            injectionBinder.Bind<ReadOnlyCollection<Type>>()
+                .To(sensorTypes)
+                .ToName(CrossContextKeys.SensorRuleTypes)
+                .CrossContext();
         }
 
 

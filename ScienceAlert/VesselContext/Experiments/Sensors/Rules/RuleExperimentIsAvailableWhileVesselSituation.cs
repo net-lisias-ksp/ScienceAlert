@@ -5,7 +5,8 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
     // ReSharper disable once UnusedMember.Global
     public class RuleExperimentIsAvailableWhileVesselSituation : ScienceExperimentModuleTracker, ISensorRule
     {
-        public RuleExperimentIsAvailableWhileVesselSituation(ScienceExperiment experiment, IVessel vessel) : base(experiment, vessel)
+        public RuleExperimentIsAvailableWhileVesselSituation(ScienceExperiment experiment, IVessel vessel)
+            : base(experiment, vessel)
         {
 
         }

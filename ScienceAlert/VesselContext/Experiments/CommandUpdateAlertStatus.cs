@@ -1,4 +1,6 @@
 ﻿using strange.extensions.command.impl;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace ScienceAlert.VesselContext.Experiments
 {

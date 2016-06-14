@@ -2,7 +2,7 @@
 {
     public enum CoreContextKeys
     {
-
+        ExperimentConfigurationNodeName, // string
 
         CoreContextShutdownEventSubscription, // IDisposable
 

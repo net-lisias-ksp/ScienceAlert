@@ -9,9 +9,7 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
     {
         protected readonly ScienceExperiment Experiment;
         protected readonly IVessel Vessel;
-        protected List<IModuleScienceExperiment> ExperimentModules;
-
-        private readonly Func<IModuleScienceExperiment, bool> _moduleMatchesExperiment;
+        protected readonly List<IModuleScienceExperiment> ExperimentModules = new List<IModuleScienceExperiment>();
 
         protected ScienceExperimentModuleTracker(
             ScienceExperiment experiment,
@@ -19,9 +17,9 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
             if (vessel == null) throw new ArgumentNullException("vessel");
+
             Experiment = experiment;
             Vessel = vessel;
-            _moduleMatchesExperiment = IsModuleForOurExperiment;
 
             Vessel.Rescanned += VesselOnRescanned;
             VesselOnRescanned();
@@ -30,9 +28,11 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
 
         private void VesselOnRescanned()
         {
-            ExperimentModules = Vessel.ScienceExperimentModules
-                .Where(_moduleMatchesExperiment)
-                .ToList();
+            ExperimentModules.Clear();
+
+            foreach (var m in Vessel.ScienceExperimentModules)
+                if (IsModuleForOurExperiment(m))
+                    ExperimentModules.Add(m);
         }
 
 

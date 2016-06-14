@@ -12,5 +12,11 @@
 
         AlertSound, // PlayableSound
         MinSoundDelay, // float
+
+        DefaultOnboardRule, // ConfigNode
+        DefaultAvailabilityRule, // ConfigNode
+        DefaultConditionRule, // ConfigNode
+
+        SensorRuleTypes, // ReadOnlyCollection<Type>
     }
 }

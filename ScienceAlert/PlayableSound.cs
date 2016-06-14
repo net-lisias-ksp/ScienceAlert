@@ -1,7 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
 using ReeperCommon.Containers;
-using ReeperCommon.Logging;
 using UnityEngine;
 
 namespace ScienceAlert
@@ -29,10 +28,7 @@ namespace ScienceAlert
 
         public void Play(float volumeScale = 1f)
         {
-            //Log.Verbose(GetType().Name + ".Play");   
-
             if (_lastTimePlayed + _minimumTimeBetweenPlaysSeconds > Time.realtimeSinceStartup) return; // haven't waited long enough yet
-            //Log.Verbose("Playing sound " + _clip.name);
 
             _source.Do(s => _clip.Do(c =>
             {

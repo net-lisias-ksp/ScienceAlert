@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
+using ReeperCommon.Containers;
 using strange.extensions.injector.api;
 
 namespace ScienceAlert
@@ -23,17 +25,50 @@ namespace ScienceAlert
         }
 
 
+        public ITemporaryBinding Create(Type key, object value)
+        {
+            return Create(_binder, key, value);
+        }
+
+
+        public ITemporaryBinding Create(Type key, object value, object name)
+        {
+            return Create(_binder, key, value, name);
+        }
+
+
         public ITemporaryBinding Create(IInjectionBinder binder, Type type)
         {
-            if (binder == null) throw new ArgumentNullException("binder");
-            if (type == null) throw new ArgumentNullException("type");
+            return Create(binder, type, type);
+        }
 
-            bool alreadyHasBinding = binder.GetBinding(type) != null;
+
+        public ITemporaryBinding Create(IInjectionBinder binder, Type key, object value)
+        {
+            if (binder == null) throw new ArgumentNullException("binder");
+            if (key == null) throw new ArgumentNullException("key");
+
+            bool alreadyHasBinding = binder.GetBinding(key) != null;
 
             if (!alreadyHasBinding)
-                binder.Bind(type).To(type);
+                binder.Bind(key).To(value);
 
-            return new TemporaryBinding(binder, type, !alreadyHasBinding);
+            return new TemporaryBinding(binder, key, value, !alreadyHasBinding);
+        }
+
+
+        public ITemporaryBinding Create([NotNull] IInjectionBinder binder, [NotNull] Type key, [CanBeNull] object value, [NotNull] object name)
+        {
+            if (binder == null) throw new ArgumentNullException("binder");
+            if (key == null) throw new ArgumentNullException("key");
+            if (name == null) throw new ArgumentNullException("name");
+
+            bool alreadyHasBinding = binder.GetBinding(key, name) != null;
+
+            if (!alreadyHasBinding)
+                binder.Bind(key).To(value).ToName(name);
+
+            return new TemporaryBinding(binder, key, value, Maybe<object>.With(name), !alreadyHasBinding);
         }
 
 

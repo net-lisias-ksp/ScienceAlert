@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using ReeperCommon.Containers;
+using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
 using strange.extensions.command.impl;
 
@@ -134,8 +135,9 @@ namespace ScienceAlert
 
         protected static bool IsNotExcluded(Type type)
         {
-            return type != null &&
-                   !type.GetCustomAttributes(typeof(DoNotAutoRegister), false).Any();
+            //return type != null &&
+            //       !type.GetCustomAttributes(typeof(DoNotAutoRegister), false).Any();
+            return type != null && !type.GetAttribute<DoNotAutoRegister>().Any();
         }
     }
 }
