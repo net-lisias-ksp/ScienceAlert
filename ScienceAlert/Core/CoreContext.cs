@@ -21,6 +21,7 @@ using ScienceAlert.VesselContext;
 using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Sensors;
 using ScienceAlert.VesselContext.Experiments.Sensors.Rules;
+using ScienceAlert.VesselContext.Experiments.Triggers;
 using UnityEngine;
 using Object = UnityEngine.Object;
 

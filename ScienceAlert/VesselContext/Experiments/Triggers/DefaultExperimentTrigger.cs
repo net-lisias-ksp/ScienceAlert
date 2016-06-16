@@ -1,4 +1,111 @@
-﻿//using System;
+﻿using System;
+using System.Collections;
+using System.Linq;
+using System.Reflection;
+using JetBrains.Annotations;
+using ReeperCommon.Containers;
+using ReeperCommon.Logging;
+using ReeperCommon.Utilities;
+using strange.extensions.promise.api;
+using strange.extensions.promise.impl;
+using ScienceAlert.Game;
+
+namespace ScienceAlert.VesselContext.Experiments.Triggers
+{
+    public class DefaultExperimentTrigger : IExperimentTrigger
+    {
+        private readonly ScienceExperiment _experiment;
+        private readonly IVessel _activeVessel;
+        private readonly IScienceUtil _scienceUtil;
+        private Maybe<IPromise> _unfulfilledPromise = Maybe<IPromise>.None;
+
+        public class TriggerIsBusyException : Exception
+        {
+            public TriggerIsBusyException(ScienceExperiment experiment)
+                : base("Experiment trigger for " + experiment.id + " is busy")
+            {
+                
+            }
+        }
+
+        public class NoAvailableScienceModuleException : Exception
+        {
+            public NoAvailableScienceModuleException(ScienceExperiment experiment)
+                : base("Could not find a suitable science module to deploy " + experiment.id + " with.")
+            {
+                
+            }
+        }
+        public DefaultExperimentTrigger([NotNull] ScienceExperiment experiment, [NotNull] IVessel activeVessel,
+            [NotNull] IScienceUtil scienceUtil)
+        {
+            if (experiment == null) throw new ArgumentNullException("experiment");
+            if (activeVessel == null) throw new ArgumentNullException("activeVessel");
+            if (scienceUtil == null) throw new ArgumentNullException("scienceUtil");
+            _experiment = experiment;
+            _activeVessel = activeVessel;
+            _scienceUtil = scienceUtil;
+        }
+
+        public IPromise Deploy()
+        {
+            var promise = new Promise();
+
+            if (IsBusy)
+            {
+                promise.ReportFail(new TriggerIsBusyException(_experiment));
+                return promise;
+            }
+
+            _unfulfilledPromise = Maybe<IPromise>.With(promise);
+
+            var module = GetSuitableModule();
+
+            if (!module.HasValue)
+            {
+                promise.ReportFail(new NoAvailableScienceModuleException(_experiment));
+            } else CoroutineHoster.Instance.StartCoroutine(DeployExperiment(module.Value));
+
+            return promise;
+        }
+
+
+        private Maybe<IModuleScienceExperiment> GetSuitableModule()
+        {
+            // todo: more intelligent selection criteria? xmit scalar etc
+            return _activeVessel.ScienceExperimentModules
+                .Where(mse => mse.ExperimentID == _experiment.id)
+                .Where(mse => mse.CanBeDeployed)
+                .FirstOrDefault(mse => _scienceUtil.RequiredUsageInternalAvailable(_activeVessel, mse.Part,
+                    mse.InternalUsageRequirements))
+                .ToMaybe();
+        }
+
+
+        public bool IsBusy
+        {
+            get { return _unfulfilledPromise.HasValue && _unfulfilledPromise.Value.State == BasePromise.PromiseState.Pending; }
+        }
+
+
+        private IEnumerator DeployExperiment(IModuleScienceExperiment module)
+        {
+            if (module == null || !module.CanBeDeployed)
+            {
+                _unfulfilledPromise.Do(
+                    p => p.ReportFail(new ArgumentException("specified module cannot be deployed", "module")));
+                _unfulfilledPromise = Maybe<IPromise>.None;
+                yield break;
+            }
+            module.Deploy();
+            _unfulfilledPromise.Do(p => p.Dispatch());
+            _unfulfilledPromise = Maybe<IPromise>.None;
+        }
+    }
+}
+
+
+//using System;
 //using System.Collections;
 //using System.Collections.Generic;
 //using System.Linq;
@@ -10,6 +117,7 @@
 //using strange.extensions.promise.impl;
 //using ScienceAlert.Game;
 //using UnityEngine;
+
 
 //namespace ScienceAlert.VesselContext.Experiments.Sensors.Trigger
 //{
@@ -76,7 +184,7 @@
 //                    Log.Verbose(selectedModule.ModuleTypeName + " for " + selectedModule.ExperimentID +
 //                                " appears to have animation Fx but no animation callbacks were created");
 //            }
-            
+
 //            promise.Dispatch(); 
 //        }
 

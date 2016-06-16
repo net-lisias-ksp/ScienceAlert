@@ -8,6 +8,7 @@ namespace ScienceAlert.VesselContext
     /// <summary>
     /// To avoid generating garbage 
     /// </summary>
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class ExperimentIdentifierProvider
     {
         private readonly Dictionary<string, IExperimentIdentifier> _identifiers =

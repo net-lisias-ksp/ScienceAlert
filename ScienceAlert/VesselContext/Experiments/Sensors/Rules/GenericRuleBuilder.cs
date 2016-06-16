@@ -5,19 +5,10 @@ using System.Linq;
 using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ReeperKSP.Extensions;
 using strange.extensions.injector.api;
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
 {
-    public class UnrecognizedRuleException : Exception
-    {
-        public UnrecognizedRuleException(string typeName) : base("Unrecognized rule: " + typeName)
-        {
-            
-        }
-    }
-
     /// <summary>
     /// Will try to build any rule by satisfying its needs with dependency injection. Custom rules might
     /// need to provide their own builder

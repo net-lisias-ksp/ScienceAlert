@@ -10,7 +10,7 @@ namespace ScienceAlert
 {
     class CriticalShutdownEventRunner : ICriticalShutdownEvent
     {
-        private static readonly List<Action> _subscribers = new List<Action>();
+        private static readonly List<Action> Subscribers = new List<Action>();
         private static Coroutine _shutdownRoutine;
 
         private class ShutdownEventSubscription : IDisposable
@@ -46,7 +46,7 @@ namespace ScienceAlert
         {
             if (action == null) throw new ArgumentNullException("action");
 
-            _subscribers.Add(action);
+            Subscribers.Add(action);
 
             return new ShutdownEventSubscription(this, action);
         }
@@ -56,7 +56,7 @@ namespace ScienceAlert
         {
             if (action == null) throw new ArgumentNullException("action");
 
-            _subscribers.Remove(action);
+            Subscribers.Remove(action);
         }
 
 
@@ -71,7 +71,7 @@ namespace ScienceAlert
         {
             yield return new WaitForEndOfFrame();
 
-            foreach (var item in _subscribers)
+            foreach (var item in Subscribers)
             {
                 try
                 {
@@ -83,7 +83,7 @@ namespace ScienceAlert
                 }
             }
 
-            _subscribers.Clear();
+            Subscribers.Clear();
             _shutdownRoutine = null;
         }
     }

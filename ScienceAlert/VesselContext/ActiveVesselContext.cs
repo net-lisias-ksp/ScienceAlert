@@ -12,6 +12,7 @@ using ScienceAlert.UI.OptionsWindow;
 using ScienceAlert.UI.TooltipWindow;
 using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Sensors;
+using ScienceAlert.VesselContext.Experiments.Triggers;
 using ScienceAlert.VesselContext.Gui;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -110,8 +111,8 @@ namespace ScienceAlert.VesselContext
                 .To<CommandConfigureGameEvents>()
                 .To<CommandCreateVesselBindings>()
                 .To<CommandCreateExperimentReportCalculator>()
+                .To<CommandCreateExperimentTriggers>()
                 .To<CommandCreateExperimentSensors>()
-                //.To<CommandCreateExperimentTriggers>()
                 .To<CommandCreateSensorUpdater>()
                 .To<CommandCreateVesselGui>()
                 .To<CommandDispatchLoadGuiSettingsSignal>()
@@ -125,7 +126,7 @@ namespace ScienceAlert.VesselContext
                 .Pooled();
 
             commandBinder.Bind<SignalDeployExperiment>()
-                //.To<CommandDeployExperiment>()
+                .To<CommandDeployExperiment>()
                 .Pooled();
 
             commandBinder.Bind<SignalContextIsBeingDestroyed>()
@@ -172,13 +173,6 @@ namespace ScienceAlert.VesselContext
                 Log.Error("Error while launching ActiveVesselContext: " + e);
                 SignalDestruction(true);
             }
-        }
-
-
-
-        private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
-        {
-            throw new NotImplementedException();
         }
 
 

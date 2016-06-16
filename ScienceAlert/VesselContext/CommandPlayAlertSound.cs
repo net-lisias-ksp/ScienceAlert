@@ -4,6 +4,7 @@ using strange.extensions.command.impl;
 
 namespace ScienceAlert.VesselContext
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     class CommandPlayAlertSound : Command
     {
         private readonly PlayableSound _alertClip;

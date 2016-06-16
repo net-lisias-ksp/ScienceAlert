@@ -59,7 +59,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuilderConstructedTypeCannotBeAssignedToReturnTypeException.cs" />
     <Compile Include="Core\CommandLoadDefaultRuleConfigs.cs" />
     <Compile Include="Core\CommandCreateExperimentConfigurations.cs" />
     <Compile Include="Core\CommandCreateBuilderComposite.cs" />
@@ -76,14 +75,9 @@
     <Compile Include="Game\KspPartLoader.cs" />
     <Compile Include="PlayableSound.cs" />
     <Compile Include="BuilderCannotHandleConfigNodeException.cs" />
-    <Compile Include="CommandConfigureObjectFromConfigNodeBuilders.cs" />
-    <Compile Include="CommandConfigureTriggerFactories.cs" />
     <Compile Include="CouldNotCreateInstanceException.cs" />
-    <Compile Include="DependenciesCannotBeSatisfiedException.cs" />
-    <Compile Include="DoNotAutoRegister.cs" />
     <Compile Include="CriticalShutdownEventRunner.cs" />
     <Compile Include="ICriticalShutdownEvent.cs" />
-    <Compile Include="ExperimentConfigurations\Old\CommandConfigureSensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandCreateActiveVesselContextBootstrapper.cs" />
     <Compile Include="Game\IGameDatabase.cs" />
     <Compile Include="Game\IUrlConfig.cs" />
@@ -101,8 +95,7 @@
     <Compile Include="VesselContext\ExperimentIdentifierProvider.cs" />
     <Compile Include="VesselContext\Experiments\AlertStateCache.cs" />
     <Compile Include="AlertStatusChange.cs" />
-    <Compile Include="VesselContext\Experiments\DefaultExperimentTrigger.cs" />
-    <Compile Include="VesselContext\Experiments\IExperimentTrigger.cs" />
+    <Compile Include="VesselContext\Experiments\Triggers\DefaultExperimentTrigger.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\CommandStartSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentIdentifierComparer.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentSensorState.cs" />
@@ -113,22 +106,18 @@
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleEvaPrefabInternalUsageCheck.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RulePasses.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleVesselIsNotEva.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\EvaDeploymentTrigger.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\NoSuitableEvaCandidateFoundException.cs" />
+    <Compile Include="VesselContext\Experiments\Triggers\EvaDeploymentTrigger.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleKeys.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\Rules\UnrecognizedRuleException.cs" />
+    <Compile Include="VesselContext\Experiments\Triggers\CommandCreateExperimentTriggers.cs" />
+    <Compile Include="VesselContext\Experiments\Triggers\IExperimentTrigger.cs" />
     <Compile Include="VesselContext\Gui\TooltipWindowMediator.cs" />
     <Compile Include="VesselContext\KspExperimentIdentifier.cs" />
     <Compile Include="SensorStatusChange.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\CommandCreateSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\CommandDeployExperiment.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\CompositeTriggerFactory.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\CommandCreateExperimentTriggers.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\ExperimentTrigger.cs" />
-    <Compile Include="ExperimentConfigurations\Old\CommandCreateSensorDefinitions.cs" />
-    <Compile Include="CommandConfigureRuleFactories.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleExperimentIsAvailableWhileVesselSituation.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleExperimentUsageRequirementCheck.cs" />
-    <Compile Include="ExperimentConfigurations\Old\SensorDefinitionBuilder.cs" />
     <Compile Include="Core\CommandDestroyActiveVesselContext.cs" />
     <Compile Include="Core\CommandConfigureCriticalShutdown.cs" />
     <Compile Include="Core\DuplicateScienceExperimentException.cs" />
@@ -183,11 +172,6 @@
     <Compile Include="VesselContext\ActiveVesselContext.cs" />
     <Compile Include="SharedConfiguration.cs" />
     <Compile Include="ISharedConfigurationFilePathProvider.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\ITriggerFactory.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\DefaultDeploymentTrigger.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\GenericTriggerFactory.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\NoSuitableScienceExperimentModuleFoundException.cs" />
-    <Compile Include="VesselContext\Experiments\SensorsOld\Trigger\TriggerNotFoundException.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchLoadGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\Gui\CommandDispatchSaveGuiSettingsSignal.cs" />
     <Compile Include="VesselContext\Gui\ExperimentWindowMediator.cs" />
