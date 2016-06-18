@@ -2,17 +2,24 @@
 
 namespace ScienceAlert.Game
 {
+    public interface ICrewContainer
+    {
+        ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew { get; }
+        ReadOnlyCollection<ProtoCrewMember> AllCrew { get; }
+        bool HasScientist { get; }
+    }
+
     public interface IVessel : IScienceContainerCollectionProvider,
                                 ICelestialBodyProvider,
                                 IExperimentSituationProvider,
                                 IExperimentBiomeProvider,
                                 IScienceDataTransmitterCollectionProvider,
                                 IScienceExperimentModuleCollectionProvider,
-                                IScienceLabCollectionProvider
+                                IScienceLabCollectionProvider,
+                                ICrewContainer
     {
         event Callback Rescanned;
 
-        ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew { get; }
         ReadOnlyCollection<Part> Parts { get; }
 
         bool IsControllable { get; }

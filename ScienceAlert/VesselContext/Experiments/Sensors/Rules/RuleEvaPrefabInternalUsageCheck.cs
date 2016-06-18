@@ -1,129 +1,204 @@
-﻿//using System;
-//using System.Linq;
-//using JetBrains.Annotations;
-//using ReeperCommon.Containers;
-//using ScienceAlert.Game;
-//using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Experience;
+using JetBrains.Annotations;
+using ReeperCommon.Containers;
+using ScienceAlert.Game;
+using UnityEngine;
 
-//namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
-//{
-//    /// <summary>
-//    /// It's technically possible for a ConfigNode patch or another mod to change the internal usage requirements for EVA reports
-//    /// (for example, only allowing scientists or whatever to do them).
-//    /// That's fine while on EVA because we can examine those requirements directly, but to handle them properly while not on EVA
-//    /// we'll have to look up the prefab. In 99.9% of cases nobody will mess with them though, this is just to catch the edge cases
-//    /// and it's not complex anyway
-//    /// 
-//    /// TODO: it's possible for male and female crew to differ in this setting so at some point the EVA trigger is going to need
-//    /// to be updated to choose correctly
-//    /// </summary>
-//    class RuleEvaPrefabInternalUsageCheck : ISensorRule
-//    {
-//        private const string EvaReportExperimentId = "evaReport";
+namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
+{
+    /// <summary>
+    /// Special version of the experiment usage check that examines the EVA prefabs for internal usage reqs
+    /// if the Vessel itself isn't an EVA. 
+    /// 
+    /// Why this is needed is best explained with an example. Consider we have some experiment performed while on EVA
+    /// that has a certain restriction. Let's say that taking surface samples is now restricted to scientists only. The
+    /// sensors for this experiment have been configured such that it's considered to be available even when not controlling
+    /// an EVA'ing scientist. If the player is inside a ship (which does NOT have the ModuleScienceExperiment for surface samples),
+    /// how can we tell if the usage requirements have been met? They're defined by a specific MSE which the ship doesn't have. 
+    /// 
+    /// We'll have to look at the EVA prefabs. But then, we also don't know which crewmember will go out on EVA. What if the vessel
+    /// has crew, but none of them are scientists? That only matters if we need one, but if we do need one we'll have to create a 
+    /// fake one because the EVA part doesn't actually exist, and then you can see how quickly a specific rule to handle such
+    /// an edge case becomes necessary
+    /// </summary>
+    class RuleEvaPrefabInternalUsageCheck : RuleExperimentUsageRequirementCheck
+    {
+        // ExperienceTrait uses .TypeName or its Config.Title to identify the trait. I don't want to create my own
+        // Scientist : ExperienceTrait because that might break something if somebody tries to identify possible ExerienceTraits
+        // using reflection while SA is installed.
+        //
+        // Instead, I'll create a fake one that mimics the real thing by abusing the way ExperienceTrait will use the the title
+        // of its Config rather than the Type.Name if its Type is ExperienceTrait (plain underived version)
+        private struct FakeExperienceTraitConfig
+        {
+            [Persistent (name = "name")] public string _name;
+            [Persistent (name = "title")] public string _title;
 
-//        private class EvaPrefab
-//        {
-//            public readonly ExperimentUsageReqs Requirements;
-//            public readonly IPart Part;
+            public static ExperienceTraitConfig Create(string desiredTitle)
+            {
+                return
+                    ExperienceTraitConfig.Create(
+                        ConfigNode.CreateConfigFromObject(new FakeExperienceTraitConfig
+                        {
+                            _name = "UnusedButRequiredOrExceptionGetsThrown",
+                            _title = desiredTitle
+                        }));
+            }
+        }
 
-//            public EvaPrefab([NotNull] IPart part, ExperimentUsageReqs usageMask)
-//            {
-//                if (part == null) throw new ArgumentNullException("part");
-
-//                Requirements = usageMask;
-//                Part = part;
-//            }
-//        }
-
-//        private readonly IVessel _vessel;
-//        private readonly IScienceUtil _scienceUtil;
-
-//        [Flags]
-//        private enum CrewGenders
-//        {
-//            NoCrew = 0,
-//            Male = 1 << 0,
-//            Female = 1 << 1
-//        }
-
-//        private CrewGenders _crewGenders = CrewGenders.NoCrew;
-//        private readonly Lazy<EvaPrefab> _malePrefab = new Lazy<EvaPrefab>(() => GetEvaPrefab(ProtoCrewMember.Gender.Male));
-//        private readonly Lazy<EvaPrefab> _femalePrefab = new Lazy<EvaPrefab>(() => GetEvaPrefab(ProtoCrewMember.Gender.Female)); 
-
-
-//        public RuleEvaPrefabInternalUsageCheck(
-//            [NotNull] IVessel vessel, 
-//            [NotNull] IScienceUtil scienceUtil,
-//            SignalActiveVesselCrewModified crewModified)
-//        {
-//            if (vessel == null) throw new ArgumentNullException("vessel");
-//            if (scienceUtil == null) throw new ArgumentNullException("scienceUtil");
-
-//            _vessel = vessel;
-//            _scienceUtil = scienceUtil;
-//            crewModified.AddListener(OnCrewModified);
-//        }
+        private class PrefabScienceModule : IModuleScienceExperiment
+        {
+            public PrefabScienceModule(ExperimentUsageReqs internalUsageMask)
+            {
+                InternalUsageRequirements = internalUsageMask;
+            }
 
 
-//        [PostConstruct]
-//        public void Setup()
-//        {
-//            OnCrewModified();
-//        }
+            public ExperimentUsageReqs InternalUsageRequirements { get; private set; }
+
+            #region parts we don't need
+
+            public IPart Part
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public string ModuleTypeName
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool Deployed
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public string ExperimentID
+            {
+                get { throw new NotImplementedException(); }
+            }
 
 
-//        private static ExperimentUsageReqs GetUsageReqFromPrefab([NotNull] GameObject prefab)
-//        {
-//            if (prefab == null) throw new ArgumentNullException("prefab");
+            public bool CanBeDeployed
+            {
+                get { throw new NotImplementedException(); }
+            }
 
-//            return prefab
-//                .With(go => go.GetComponents<ModuleScienceExperiment>()
-//                    .FirstOrDefault(mse => mse.experimentID == EvaReportExperimentId))
-//                .Return(mse => (ExperimentUsageReqs)mse.usageReqMaskInternal, ExperimentUsageReqs.Never);
-//        }
+            public float TransmissionMultiplier
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public Maybe<int[]> FxIndices
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public void Deploy()
+            {
+                throw new NotImplementedException();
+            }
+            #endregion
+        }
+
+        private class EvaPrefabPart : IPart
+        {
+            private readonly ReadOnlyCollection<IModuleScienceExperiment> _experimentModules;
+
+            private readonly ReadOnlyCollection<ProtoCrewMember> _crewList = new List<ProtoCrewMember>
+            {
+                new ProtoCrewMember(ProtoCrewMember.KerbalType.Crew)
+            }.AsReadOnly();
+
+            private bool _containsScientist = false;
+
+            public GameObject gameObject
+            {
+                get { return null; }
+            }
+
+            public ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew
+            {
+                get { return _crewList; }
+            }
+
+            public ReadOnlyCollection<PartModule> Modules
+            {
+                get { throw new System.NotImplementedException(); }
+            }
+
+            public EvaPrefabPart([NotNull] ReadOnlyCollection<IModuleScienceExperiment> experimentModules)
+            {
+                if (experimentModules == null) throw new ArgumentNullException("experimentModules");
+                _experimentModules = experimentModules;
+            }
 
 
-//        private static EvaPrefab GetEvaPrefab(ProtoCrewMember.Gender gender)
-//        {
-//            GameObject prefab = null;
+            private void SetupFakeCrewMemberTrait(bool isScientist)
+            {
+                var cfg =
+                    FakeExperienceTraitConfig.Create(isScientist ? CrewTraitNames.ScientistTypeName : "NotAScientist");
 
-//            switch (gender)
-//            {
-//                case ProtoCrewMember.Gender.Male:
-//                    prefab = FlightEVA.fetch.evaPrefab_generic;
-//                    break;
-
-//                default:
-//                    prefab = FlightEVA.fetch.evaPrefab_female;
-//                    break;
-//            }
-
-//            return new EvaPrefab(new KspPart(Part.FromGO(prefab)), GetUsageReqFromPrefab(prefab));
-//        }
+                _crewList.First().experienceTrait = ExperienceTrait.Create(typeof (ExperienceTrait), cfg, _crewList.First());
+                _containsScientist = isScientist;
+            }
 
 
-//        private void OnCrewModified()
-//        {
-//            var crew = _vessel.EvaCapableCrew;
+            public bool ContainsUsableExperimentModule([NotNull] IVessel activeVessel, [NotNull] IScienceUtil util)
+            {
+                if (activeVessel == null) throw new ArgumentNullException("activeVessel");
+                if (util == null) throw new ArgumentNullException("util");
 
-//            if (!crew.Any())
-//            {
-//                _crewGenders = CrewGenders.NoCrew;
-//                return;
-//            }
+                if (activeVessel.HasScientist != _containsScientist)
+                    SetupFakeCrewMemberTrait(activeVessel.HasScientist);
 
-//            _crewGenders |= (crew.Any(pcm => pcm.gender == ProtoCrewMember.Gender.Male) ? CrewGenders.Male : 0);
-//            _crewGenders |= (crew.Any(pcm => pcm.gender == ProtoCrewMember.Gender.Female) ? CrewGenders.Female : 0);
-//        }
+                // ReSharper disable once LoopCanBeConvertedToQuery
+                foreach (var exp in _experimentModules)
+                    if (util.RequiredUsageInternalAvailable(activeVessel, this, exp.InternalUsageRequirements))
+                        return true;
+                return false;
+            }
+        }
 
 
-//        public bool Passes()
-//        {
-//            if ((_crewGenders & CrewGenders.Male) != 0)
-//                return _scienceUtil.RequiredUsageInternalAvailable(_vessel, _malePrefab.Value.Part,
-//                    _malePrefab.Value.Requirements);
-//            return _scienceUtil.RequiredUsageInternalAvailable(_vessel, _femalePrefab.Value.Part,
-//                _femalePrefab.Value.Requirements);
-//        }
-//    }
-//}
+        private readonly Lazy<EvaPrefabPart> _maleEvaPrefab;
+        private readonly Lazy<EvaPrefabPart> _femaleEvaPrefab;
+ 
+        public RuleEvaPrefabInternalUsageCheck(IScienceUtil scienceUtil, ScienceExperiment experiment, IVessel vessel) : base(scienceUtil, experiment, vessel)
+        {
+            _maleEvaPrefab = new Lazy<EvaPrefabPart>(() => CreateEvaPrefabPseudoPart(FlightEVA.fetch.evaPrefab_generic));
+            _femaleEvaPrefab = new Lazy<EvaPrefabPart>(() => CreateEvaPrefabPseudoPart(FlightEVA.fetch.evaPrefab_female));
+        }
+
+        private EvaPrefabPart CreateEvaPrefabPseudoPart(GameObject prefab)
+        {
+            return new EvaPrefabPart(prefab.GetComponents<ModuleScienceExperiment>()
+                        .Where(mse => mse.experimentID.Equals(Experiment.id, StringComparison.Ordinal))
+                        .Select(mse => (IModuleScienceExperiment)new PrefabScienceModule((ExperimentUsageReqs)mse.usageReqMaskInternal))
+                        .ToList()
+                        .AsReadOnly());
+        }
+
+
+
+        public override bool Passes()
+        {
+            if (Vessel.isEVA)
+                return base.Passes();
+
+            if (Vessel.EvaCapableCrew.Any(pcm => pcm.gender == ProtoCrewMember.Gender.Male))
+                if (_maleEvaPrefab.Value.ContainsUsableExperimentModule(Vessel, ScienceUtil))
+                    return true;
+
+            if (Vessel.EvaCapableCrew.Any(pcm => pcm.gender == ProtoCrewMember.Gender.Female))
+                if (_femaleEvaPrefab.Value.ContainsUsableExperimentModule(Vessel, ScienceUtil))
+                    return true;
+
+            return false;
+        }
+    }
+}

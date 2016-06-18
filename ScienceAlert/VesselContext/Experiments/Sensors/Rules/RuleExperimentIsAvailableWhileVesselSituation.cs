@@ -2,6 +2,9 @@
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
 {
+    ///
+    /// Checks biome and situationi masks for given experiment
+    /// 
     // ReSharper disable once UnusedMember.Global
     public class RuleExperimentIsAvailableWhileVesselSituation : ScienceExperimentModuleTracker, ISensorRule
     {

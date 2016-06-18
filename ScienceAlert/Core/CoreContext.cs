@@ -18,7 +18,6 @@ using strange.extensions.injector.api;
 using ScienceAlert.Core.Gui;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext;
-using ScienceAlert.VesselContext.Experiments;
 using ScienceAlert.VesselContext.Experiments.Sensors;
 using ScienceAlert.VesselContext.Experiments.Sensors.Rules;
 using ScienceAlert.VesselContext.Experiments.Triggers;

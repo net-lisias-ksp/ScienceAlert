@@ -1,4 +1,6 @@
 ﻿using strange.extensions.command.impl;
+using UnityEngine;
+
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
@@ -24,7 +26,11 @@ namespace ScienceAlert.VesselContext.Experiments
                              newState.RecoveryValue > 0f;
             var couldPerformLastTime = oldState.Onboard && oldState.Available && oldState.ConditionsMet &&
                                        oldState.RecoveryValue > 0f;
-            var shouldAlert = canPerform && (previousSubject != currentSubject || !couldPerformLastTime);
+            var valuesChanged = !Mathf.Approximately(oldState.RecoveryValue, newState.RecoveryValue) ||
+                                !Mathf.Approximately(oldState.TransmissionValue, newState.TransmissionValue) ||
+                                !Mathf.Approximately(oldState.LabValue, newState.LabValue);
+
+            var shouldAlert = canPerform && (valuesChanged || (previousSubject != currentSubject || !couldPerformLastTime));
 
             var recoveryAlert = shouldAlert && newState.RecoveryValue > 0f;
             var transmissionAlert = shouldAlert && newState.TransmissionValue > 0f;

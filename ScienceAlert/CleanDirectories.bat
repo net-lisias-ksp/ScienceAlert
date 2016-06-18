@@ -2,7 +2,7 @@ REM Post-Build script that cleans up binaries (dll, mdb, reeper, reloadable) in 
 REM
 REM Usage [directory]... 
 
-set TargetExtensions=dll,mdb,reeper,reloadable,pdb
+set TargetExtensions=dll,mdb,reeper,reloadable,pdb,patched
 echo Cleaning solution GameData...
 
 :NextParameter
@@ -42,7 +42,7 @@ if not exist "%~1" goto:eof
 
 cd %1
 for %%f in (*.%~2) DO (
-echo deleting %%f
+echo deleting %%f in %1
 del %%f
 )
 

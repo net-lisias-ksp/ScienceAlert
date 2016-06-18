@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace ScienceAlert.Game
@@ -7,7 +8,7 @@ namespace ScienceAlert.Game
     {
         GameObject gameObject { get; }
 
-        List<ProtoCrewMember> EvaCapableCrew { get; } // must be a list to prevent unnecessary garbage or extra logic since Part exposes this directly
-        List<PartModule> Modules { get; }
+        ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew { get; } // must be a list to prevent unnecessary garbage or extra logic since Part exposes this directly
+        ReadOnlyCollection<PartModule> Modules { get; }
     }
 }

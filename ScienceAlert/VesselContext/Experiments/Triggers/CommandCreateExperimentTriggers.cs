@@ -153,8 +153,7 @@ namespace ScienceAlert.VesselContext.Experiments.Triggers
             try
             {
                 return AssemblyLoader.loadedAssemblies.SelectMany(la => la.assembly.GetTypes())
-                    .Where(t => t.GetInterface<IExperimentTrigger>().Any())
-                    .Where(t => !t.IsAbstract)
+                    .Where(t => !t.IsAbstract && t.HasInterface<IExperimentTrigger>())
                     .ToList()
                     .AsReadOnly();
             }

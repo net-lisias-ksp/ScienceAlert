@@ -4,10 +4,13 @@ using ScienceAlert.Game;
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
 {
+    ///
+    /// Makes sure any internal usage requirements are met
+    /// 
     // ReSharper disable once UnusedMember.Global
     public class RuleExperimentUsageRequirementCheck : ScienceExperimentModuleTracker, ISensorRule
     {
-        private readonly IScienceUtil _scienceUtil;
+        protected readonly IScienceUtil ScienceUtil;
         private readonly Func<IModuleScienceExperiment, bool> _isModuleAvailable;  // keep things lean and mean by allocating the delegate upfront
 
         public RuleExperimentUsageRequirementCheck(IScienceUtil scienceUtil, ScienceExperiment experiment, IVessel vessel)
@@ -16,17 +19,17 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
             if (scienceUtil == null) throw new ArgumentNullException("scienceUtil");
 
             _isModuleAvailable = IsModuleAvailable;
-            _scienceUtil = scienceUtil;
+            ScienceUtil = scienceUtil;
         }
 
-        public bool Passes()
+        public virtual bool Passes()
         {
             return ExperimentModules.Any(_isModuleAvailable);
         }
 
         private bool IsModuleAvailable(IModuleScienceExperiment mse)
         {
-            return _scienceUtil.RequiredUsageInternalAvailable(Vessel, mse.Part, mse.InternalUsageRequirements);
+            return ScienceUtil.RequiredUsageInternalAvailable(Vessel, mse.Part, mse.InternalUsageRequirements);
         }
     }
 }

@@ -14,8 +14,11 @@ namespace ScienceAlert.Game
         private readonly Vessel _vessel;
 
         private ReadOnlyCollection<Part> _parts = new ReadOnlyCollection<Part>(Enumerable.Empty<Part>().ToList());
- 
-        private ReadOnlyCollection<ProtoCrewMember> _evaCapableCrew = new ReadOnlyCollection<ProtoCrewMember>(new ProtoCrewMember[] {}.ToList());
+
+        private ReadOnlyCollection<ProtoCrewMember> _allCrew =
+            new ReadOnlyCollection<ProtoCrewMember>(Enumerable.Empty<ProtoCrewMember>().ToList());
+
+        private ReadOnlyCollection<ProtoCrewMember> _evaCapableCrew = new ReadOnlyCollection<ProtoCrewMember>(Enumerable.Empty<ProtoCrewMember>().ToList());
 
         private ReadOnlyCollection<IModuleScienceExperiment> _scienceModules =
             new ReadOnlyCollection<IModuleScienceExperiment>(Enumerable.Empty<IModuleScienceExperiment>().ToList());
@@ -90,10 +93,16 @@ namespace ScienceAlert.Game
 
         private void ScanForCrew()
         {
-            _evaCapableCrew = new ReadOnlyCollection<ProtoCrewMember>(
-                _vessel.Parts.SelectMany(p => p.protoModuleCrew)
+            var crewList =
+                _vessel.parts.SelectMany(p => p.protoModuleCrew).ToList();
+
+
+            _evaCapableCrew = crewList
                     .Where(pcm => pcm.type != ProtoCrewMember.KerbalType.Tourist)
-                    .ToList());
+                    .ToList().AsReadOnly();
+            _allCrew = crewList.AsReadOnly();
+
+            HasScientist = _evaCapableCrew.Any(pcm => pcm.experienceTrait.TypeName.Equals(CrewTraitNames.ScientistTypeName, StringComparison.Ordinal));
         }
 
 
@@ -140,6 +149,14 @@ namespace ScienceAlert.Game
         {
             get { return _evaCapableCrew; }
         }
+
+        public ReadOnlyCollection<ProtoCrewMember> AllCrew
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool HasScientist { get; private set; }
+
 
         public ReadOnlyCollection<Part> Parts
         {

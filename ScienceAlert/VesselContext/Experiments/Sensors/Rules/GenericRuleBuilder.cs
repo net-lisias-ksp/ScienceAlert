@@ -5,6 +5,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
+using ReeperKSP.Extensions;
 using strange.extensions.injector.api;
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
@@ -89,6 +90,8 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
         {
             var logicalOperator = GetLogicalRuleDelegateFor(config);
 
+            Log.Warning("For " + config.name + ", " + logicalOperator.Method.Name + " will be used with " + subRules.Count + " subRules");
+
             return new LogicalDelegateRule(logicalOperator, subRules.ToArray());
         }
 
@@ -97,11 +100,11 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
         {
             if (_namesMatchingOrRule.Any(
                     orRuleName => orRuleName.Equals(config.name, StringComparison.OrdinalIgnoreCase)))
-                return LogicalAnd;
+                return LogicalOr;
 
             if (_namesMatchingAndRule.Any(
                 andRuleName => andRuleName.Equals(config.name, StringComparison.OrdinalIgnoreCase)))
-                return LogicalOr;
+                return LogicalAnd;
 
             throw new ArgumentException("Unrecognized logical rule: " + config.name, "config"); // shouldn't be possible but just in case
         }

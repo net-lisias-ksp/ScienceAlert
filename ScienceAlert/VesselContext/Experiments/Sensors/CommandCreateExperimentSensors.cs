@@ -36,6 +36,10 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors
 
             foreach (var config in _configurations)
             {
+                // TEMP!!!
+                if (config.Experiment.id != "evaReport") continue;
+                Log.Warning("Only creating sensor for EVA report");
+
                 var sensor = CreateSensor(config);
                 if (sensor.Any())
                     sensors.Add(sensor.Value);

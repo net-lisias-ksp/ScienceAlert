@@ -17,9 +17,6 @@ namespace ScienceAlert.Game
 // ReSharper disable once ClassNeverInstantiated.Global
     public class KspScienceUtil : IScienceUtil
     {
-        public const string ScientistTypeName = "Scientist";
-
-
         // Note: this doesn't use ksp's version of this method because it generates extra garbage appending
         // strings that we don't need
         public bool RequiredUsageInternalAvailable(IVessel vessel, IPart part, ExperimentUsageReqs reqs)
@@ -45,14 +42,14 @@ namespace ScienceAlert.Game
 
             if (reqs.IsFlagSet(ExperimentUsageReqs.CrewInPart))
             {
-                if (part.EvaCapableCrew.All(c => c.experienceTrait.With(t => t.TypeName) != ScientistTypeName))
+                if (part.EvaCapableCrew.All(c => c.experienceTrait.With(t => t.TypeName) != CrewTraitNames.ScientistTypeName))
                     return false;
             } 
             else
             {
                 if (reqs.IsFlagSet(ExperimentUsageReqs.CrewInVessel))
                     return false;
-                if (vessel.EvaCapableCrew.All(c => c.experienceTrait.With(t => t.TypeName) != ScientistTypeName))
+                if (vessel.EvaCapableCrew.All(c => c.experienceTrait.With(t => t.TypeName) != CrewTraitNames.ScientistTypeName))
                     return false;
             }
 

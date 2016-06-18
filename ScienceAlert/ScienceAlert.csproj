@@ -64,6 +64,7 @@
     <Compile Include="Core\CommandCreateBuilderComposite.cs" />
     <Compile Include="CompositeObjectFromConfigNodeBuilder.cs" />
     <Compile Include="Core\DefaultExperimentConfigurationBuilder.cs" />
+    <Compile Include="Game\CrewTraitNames.cs" />
     <Compile Include="VesselContext\Experiments\DefaultConfigNotFoundException.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\DefaultExperimentSensorBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\EvaExperimentSensorBuilder.cs" />
@@ -95,6 +96,8 @@
     <Compile Include="VesselContext\ExperimentIdentifierProvider.cs" />
     <Compile Include="VesselContext\Experiments\AlertStateCache.cs" />
     <Compile Include="AlertStatusChange.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleAlwaysPasses.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleEvaPossibilityCheck.cs" />
     <Compile Include="VesselContext\Experiments\Triggers\DefaultExperimentTrigger.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\CommandStartSensorUpdater.cs" />
     <Compile Include="VesselContext\Experiments\ExperimentIdentifierComparer.cs" />
@@ -104,13 +107,15 @@
     <Compile Include="VesselContext\Experiments\Sensors\IExperimentSensor.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\ISensorStateCache.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleEvaPrefabInternalUsageCheck.cs" />
-    <Compile Include="VesselContext\Experiments\Sensors\Rules\RulePasses.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleVesselIsNotEva.cs" />
     <Compile Include="VesselContext\Experiments\Triggers\EvaDeploymentTrigger.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleKeys.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\UnrecognizedRuleException.cs" />
     <Compile Include="VesselContext\Experiments\Triggers\CommandCreateExperimentTriggers.cs" />
     <Compile Include="VesselContext\Experiments\Triggers\IExperimentTrigger.cs" />
+    <Compile Include="VesselContext\Experiments\Triggers\NoAvailableScienceModuleException.cs" />
+    <Compile Include="VesselContext\Experiments\Triggers\NoSuitableEvaCandidateFoundException.cs" />
+    <Compile Include="VesselContext\Experiments\Triggers\TriggerIsBusyException.cs" />
     <Compile Include="VesselContext\Gui\TooltipWindowMediator.cs" />
     <Compile Include="VesselContext\KspExperimentIdentifier.cs" />
     <Compile Include="SensorStatusChange.cs" />
@@ -161,7 +166,7 @@
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleVesselHasModuleScienceExperiment.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleVesselHasOperableModuleScienceExperiment.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleVesselIsControllable.cs" />
-    <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleVesselIsCrewed.cs" />
+    <Compile Include="VesselContext\Experiments\Sensors\Rules\RuleVesselIsCrewedNonTourists.cs" />
     <Compile Include="VesselContext\BootstrapActiveVesselContext.cs" />
     <Compile Include="Game\IVessel.cs" />
     <Compile Include="Game\KspVessel.cs" />
@@ -384,7 +389,7 @@ REM ----------------------------------------------------------
 REM Solution GameData to KSP GameData
 
 echo Copying to GameData
-call "$(SolutionDir)CopyToLocation.bat" "%25ProjectGameData%25" "%25ksp%25$(ProjectName)" /E /xo /xf *.mdb
+call "$(SolutionDir)CopyToLocation.bat" "%25ProjectGameData%25" "%25ksp%25$(ProjectName)" /E /xo
 
 
 echo Files copied to GameData successfully
@@ -394,8 +399,11 @@ REM return with no error; robocopy success will set ERRORLEVEL nonzero which wil
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>call "$(SolutionDir)SetEnvironment.bat"
-call "$(SolutionDir)CleanDirectories.bat" "$(ProjectDir)GameData\$(ProjectName)" "%25ksp%25\$(ProjectName)"</PreBuildEvent>
+    <PreBuildEvent>echo Setting environment for KSP
+call "$(SolutionDir)SetEnvironment.bat"
+echo Cleaning directories
+call "$(SolutionDir)CleanDirectories.bat" "$(ProjectDir)GameData\$(ProjectName)" "%25ksp%25\$(ProjectName)"
+echo Finished cleaning directories</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 
@@ -21,16 +22,21 @@ namespace ScienceAlert.Game
             get { return _part.gameObject; }
         }
 
-        public List<ProtoCrewMember> EvaCapableCrew
+        public ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew
         {
-            get { return _part.protoModuleCrew; }
+            get
+            {
+                return _part.protoModuleCrew
+                    .Where(pcm => pcm.type == ProtoCrewMember.KerbalType.Crew)
+                    .ToList()
+                    .AsReadOnly();
+            }
         }
 
 
-        public List<PartModule> Modules
+        public ReadOnlyCollection<PartModule> Modules
         {
-            get { return new List<PartModule>(_part.Modules.Cast<PartModule>()); }
+            get { return new List<PartModule>(_part.Modules.Cast<PartModule>()).ToList().AsReadOnly(); }
         }
-
     }
 }

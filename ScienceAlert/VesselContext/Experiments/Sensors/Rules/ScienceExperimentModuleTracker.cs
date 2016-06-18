@@ -5,6 +5,9 @@ using ScienceAlert.Game;
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
 {
+    /// <summary>
+    /// Used as a base for objects that need to keep track of science modules for a particular experiment
+    /// </summary>
     public abstract class ScienceExperimentModuleTracker
     {
         protected readonly ScienceExperiment Experiment;

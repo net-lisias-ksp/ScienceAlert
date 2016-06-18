@@ -68,7 +68,7 @@ namespace ScienceAlert.Core
             }
 
 
-            yield return 0;
+            yield return null;
 
 
             try

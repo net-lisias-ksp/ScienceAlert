@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using JetBrains.Annotations;
 using ScienceAlert.Game;
 
@@ -39,6 +40,18 @@ namespace ScienceAlert.VesselContext.Experiments
             Onboard = onboard;
             Available = available;
             ConditionsMet = conditionsMet;
+        }
+
+
+        public override string ToString()
+        {
+            var builder = new StringBuilder(100);
+
+            builder.AppendFormat(
+                "ExperimentSensorState: R {0}, T {1}, L {2}, Onboard {3}, Available {4}, Conditions {5}, Subject {6}",
+                RecoveryValue, TransmissionValue, LabValue, Onboard, Available, ConditionsMet, Subject.Id);
+
+            return builder.ToString();
         }
     }
 }

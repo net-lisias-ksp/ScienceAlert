@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using JetBrains.Annotations;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
@@ -7,6 +9,7 @@ using ReeperKSP.Extensions;
 using strange.extensions.injector.api;
 using ScienceAlert.Game;
 using ScienceAlert.VesselContext.Experiments.Sensors.Rules;
+using Debug = UnityEngine.Debug;
 
 namespace ScienceAlert.VesselContext.Experiments.Sensors
 {
@@ -95,43 +98,46 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors
 
             using (_tempBinding.Create(binder, typeof (ScienceExperiment), config.Experiment))
             {
-
-                var onboardRule = GetRuleConfig(config.SensorDefinition, OnboardNodeName)
-                    .With(c => CreateRule(c, binder))
-                    .Or(() => CreateDefaultRule(_defaultOnboardConfig, binder));
-
-                var availabilityRule = GetRuleConfig(config.SensorDefinition, AvailabilityNodeName)
-                    .With(c => CreateRule(c, binder))
-                    .Or(() => CreateDefaultRule(_defaultAvailabilityConfig, binder));
-
-                var conditionRule = GetRuleConfig(config.SensorDefinition, ConditionNodeName)
-                    .With(c => CreateRule(c, binder))
-                    .Or(() => CreateDefaultRule(_defaultConditionConfig, binder));
+                var defaultSensorConfigNode =
+                    config.SensorDefinition.With(sd => sd.GetNodeEx(typeof(DefaultExperimentSensor).Name));
 
                 // Since we can handle any config, it's probably a good idea to mention if we're creating
                 // this default sensor when the ConfigNode actually specifies a different one but its builder
                 // wasn't found for some reason
-                if (config.SensorDefinition.Any())
+                if (config.SensorDefinition.HasValue && !defaultSensorConfigNode.HasValue)
                 {
                     if (config.SensorDefinition.Value.CountNodes > 1)
                         Log.Warning("Multiple unexpected subnodes inside " +
                                     config.SensorDefinition.Value.ToSafeString());
 
-                    config.SensorDefinition.Value.nodes
+                    Log.Warning(config.SensorDefinition.Value.nodes
                         .Cast<ConfigNode>()
                         .FirstOrDefault()
-                        .With(n => n.name)
-                        .If(
-                            nodeName =>
-                                !String.Equals(typeof (DefaultExperimentSensor).Name, nodeName,
-                                    StringComparison.InvariantCultureIgnoreCase))
-                        .Do(
-                            nodeName =>
+                        .Return(n => n.name, "<unspecified>")
+                        .Do(nodeName =>
                                 Log.Warning(typeof (DefaultExperimentSensor).Name +
                                             " is being constructed because no builder that can handle " + nodeName +
-                                            " was found"));
+                                            " was found")));
                 }
 
+                var onboardRule = GetRuleConfig(defaultSensorConfigNode, OnboardNodeName)
+                    .Do(ruleNode => WarnUserIfUnhandledRuleNode(ruleNode, binder, config.Experiment.id, OnboardNodeName))
+                    .With(c => CreateRule(c, binder))
+                    .Or(() => CreateDefaultRule(_defaultOnboardConfig, binder));
+
+                var availabilityRule = GetRuleConfig(defaultSensorConfigNode, AvailabilityNodeName)
+                    .With(c => CreateRule(c, binder))
+                    .Or(() => CreateDefaultRule(_defaultAvailabilityConfig, binder));
+
+                var conditionRule = GetRuleConfig(defaultSensorConfigNode, ConditionNodeName)
+                    .With(c => CreateRule(c, binder))
+                    .Or(() => CreateDefaultRule(_defaultConditionConfig, binder));
+
+                // Warn about unused nodes because I just wasted 5 minutes discovering I wrote AVAILABLE instead of AVAILABILITY in the
+                // sensor definition
+                defaultSensorConfigNode.Do(n => WarnAboutUnusedNodes(n, config.Experiment.id));
+
+                    
                 using (_tempBinding.Create(binder, typeof (ISensorRule), onboardRule, RuleKeys.Onboard))
                 using (_tempBinding.Create(binder, typeof (ISensorRule), availabilityRule, RuleKeys.Availability))
                 using (_tempBinding.Create(binder, typeof (ISensorRule), conditionRule, RuleKeys.Condition))
@@ -159,7 +165,9 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors
         private Maybe<ISensorRule> CreateRule([NotNull] ConfigNode ruleConfig, IInjectionBinder binder)
         {
             if (ruleConfig == null) throw new ArgumentNullException("ruleConfig");
-            
+
+            Log.Warning("Creating rule: " + ruleConfig.ToSafeString());
+
             return !_ruleBuilder.CanHandle(ruleConfig, binder) ? Maybe<ISensorRule>.None : _ruleBuilder.Build(ruleConfig, binder).ToMaybe();
         }
 
@@ -170,14 +178,54 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors
         }
 
 
+        private void WarnUserIfUnhandledRuleNode(
+            Maybe<ConfigNode> ruleNode, 
+            IInjectionBinder binder,
+            string experimentId, 
+            string whichRule)
+        {
+            if (ruleNode.HasValue && !_ruleBuilder.CanHandle(ruleNode.Value, binder))
+                Log.Warning("Experiment " + experimentId + " " + whichRule +
+                            " definition contains unsupported sensor rule type");
+        }
+
+        private static void WarnAboutUnusedNodes([NotNull] ConfigNode config, [NotNull] string experimentId)
+        {
+            if (config == null) throw new ArgumentNullException("config");
+            if (experimentId == null) throw new ArgumentNullException("experimentId");
+
+            // We use ONBOARD, AVAILABILITY, and CONDITION
+
+            var unusedNodes = config.nodes
+                                .Cast<ConfigNode>()
+                                .Where(cn => new[] { OnboardNodeName, AvailabilityNodeName, ConditionNodeName }
+                                                .All(ruleNodeName => !ruleNodeName.Equals(cn.name, StringComparison.Ordinal)));
+
+                foreach (var n in unusedNodes)
+                    Log.Warning("Unused node in sensor definition for " + experimentId + ": " + n.name);
+        }
+
+
         private static Maybe<ConfigNode> GetRuleConfig(Maybe<ConfigNode> config, string nodeName)
         {
-            if (!config.Any())
-                return Maybe<ConfigNode>.None;
-            
+            if (!config.HasValue) return Maybe<ConfigNode>.None;
+
             var node = config.Value.GetNodeEx(nodeName);
 
-            return node.Any() && node.Value.HasData ? node : Maybe<ConfigNode>.None;
+            // NODENAME
+            // {
+            //
+            // }
+
+            if (!node.HasValue || node.Value.CountNodes == 0) return Maybe<ConfigNode>.None;
+
+            if (node.Value.CountNodes == 1) return Maybe<ConfigNode>.With(node.Value.nodes[0]);
+
+            var compositeConfig = new ConfigNode("ALL");
+            foreach (ConfigNode subNode in node.Value.nodes)
+                compositeConfig.AddNode(subNode);
+
+            return Maybe<ConfigNode>.With(compositeConfig);
         }
     }
 

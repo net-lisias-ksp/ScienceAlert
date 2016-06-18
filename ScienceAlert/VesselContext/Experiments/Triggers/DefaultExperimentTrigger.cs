@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using System.Reflection;
 using JetBrains.Annotations;
 using ReeperCommon.Containers;
-using ReeperCommon.Logging;
 using ReeperCommon.Utilities;
 using strange.extensions.promise.api;
 using strange.extensions.promise.impl;
@@ -14,56 +12,43 @@ namespace ScienceAlert.VesselContext.Experiments.Triggers
 {
     public class DefaultExperimentTrigger : IExperimentTrigger
     {
-        private readonly ScienceExperiment _experiment;
-        private readonly IVessel _activeVessel;
-        private readonly IScienceUtil _scienceUtil;
-        private Maybe<IPromise> _unfulfilledPromise = Maybe<IPromise>.None;
+        protected readonly ScienceExperiment Experiment;
+        protected readonly IVessel ActiveVessel;
+        protected readonly IScienceUtil ScienceUtil;
 
-        public class TriggerIsBusyException : Exception
-        {
-            public TriggerIsBusyException(ScienceExperiment experiment)
-                : base("Experiment trigger for " + experiment.id + " is busy")
-            {
-                
-            }
-        }
+        protected Maybe<IPromise> UnfulfilledPromise = Maybe<IPromise>.None;
 
-        public class NoAvailableScienceModuleException : Exception
-        {
-            public NoAvailableScienceModuleException(ScienceExperiment experiment)
-                : base("Could not find a suitable science module to deploy " + experiment.id + " with.")
-            {
-                
-            }
-        }
+
+
+
         public DefaultExperimentTrigger([NotNull] ScienceExperiment experiment, [NotNull] IVessel activeVessel,
             [NotNull] IScienceUtil scienceUtil)
         {
             if (experiment == null) throw new ArgumentNullException("experiment");
             if (activeVessel == null) throw new ArgumentNullException("activeVessel");
             if (scienceUtil == null) throw new ArgumentNullException("scienceUtil");
-            _experiment = experiment;
-            _activeVessel = activeVessel;
-            _scienceUtil = scienceUtil;
+            Experiment = experiment;
+            ActiveVessel = activeVessel;
+            ScienceUtil = scienceUtil;
         }
 
-        public IPromise Deploy()
+        public virtual IPromise Deploy()
         {
             var promise = new Promise();
 
             if (IsBusy)
             {
-                promise.ReportFail(new TriggerIsBusyException(_experiment));
+                promise.ReportFail(new TriggerIsBusyException(Experiment));
                 return promise;
             }
 
-            _unfulfilledPromise = Maybe<IPromise>.With(promise);
+            UnfulfilledPromise = Maybe<IPromise>.With(promise);
 
             var module = GetSuitableModule();
 
             if (!module.HasValue)
             {
-                promise.ReportFail(new NoAvailableScienceModuleException(_experiment));
+                promise.ReportFail(new NoAvailableScienceModuleException(Experiment));
             } else CoroutineHoster.Instance.StartCoroutine(DeployExperiment(module.Value));
 
             return promise;
@@ -73,18 +58,18 @@ namespace ScienceAlert.VesselContext.Experiments.Triggers
         private Maybe<IModuleScienceExperiment> GetSuitableModule()
         {
             // todo: more intelligent selection criteria? xmit scalar etc
-            return _activeVessel.ScienceExperimentModules
-                .Where(mse => mse.ExperimentID == _experiment.id)
+            return ActiveVessel.ScienceExperimentModules
+                .Where(mse => mse.ExperimentID == Experiment.id)
                 .Where(mse => mse.CanBeDeployed)
-                .FirstOrDefault(mse => _scienceUtil.RequiredUsageInternalAvailable(_activeVessel, mse.Part,
+                .FirstOrDefault(mse => ScienceUtil.RequiredUsageInternalAvailable(ActiveVessel, mse.Part,
                     mse.InternalUsageRequirements))
                 .ToMaybe();
         }
 
 
-        public bool IsBusy
+        public virtual bool IsBusy
         {
-            get { return _unfulfilledPromise.HasValue && _unfulfilledPromise.Value.State == BasePromise.PromiseState.Pending; }
+            get { return UnfulfilledPromise.HasValue && UnfulfilledPromise.Value.State == BasePromise.PromiseState.Pending; }
         }
 
 
@@ -92,14 +77,14 @@ namespace ScienceAlert.VesselContext.Experiments.Triggers
         {
             if (module == null || !module.CanBeDeployed)
             {
-                _unfulfilledPromise.Do(
+                UnfulfilledPromise.Do(
                     p => p.ReportFail(new ArgumentException("specified module cannot be deployed", "module")));
-                _unfulfilledPromise = Maybe<IPromise>.None;
+                UnfulfilledPromise = Maybe<IPromise>.None;
                 yield break;
             }
             module.Deploy();
-            _unfulfilledPromise.Do(p => p.Dispatch());
-            _unfulfilledPromise = Maybe<IPromise>.None;
+            UnfulfilledPromise.Do(p => p.Dispatch());
+            UnfulfilledPromise = Maybe<IPromise>.None;
         }
     }
 }
