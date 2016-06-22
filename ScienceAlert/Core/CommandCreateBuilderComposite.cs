@@ -107,6 +107,7 @@ namespace ScienceAlert.Core
                 if (composite == null)
                     throw new CouldNotCreateInstanceException(typeof (TComposite));
 
+
                 injectionBinder.Bind<TInterfaceOfCompositeAndBuilders>()
                     .To(composite)
                     .CrossContext();

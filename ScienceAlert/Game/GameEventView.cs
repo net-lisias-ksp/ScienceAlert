@@ -16,10 +16,6 @@ namespace ScienceAlert.Game
         internal readonly Signal ActiveVesselCrewModified = new Signal();
 
         internal readonly Signal<Vessel> VesselModified = new Signal<Vessel>();
-        internal readonly Signal<GameEvents.FromToAction<Part, Part>> CrewBoardVessel = new Signal<GameEvents.FromToAction<Part, Part>>();
-        internal readonly Signal<GameEvents.FromToAction<Part, Part>> CrewOnEva = new Signal<GameEvents.FromToAction<Part, Part>>();
-        internal readonly Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>> CrewTransferred = new Signal<GameEvents.HostedFromToAction<ProtoCrewMember, Part>>();
-        internal readonly Signal<EventReport> CrewKilled = new Signal<EventReport>();
 
         internal readonly Signal<GameEvents.FromToAction<CelestialBody, CelestialBody>> DominantBodyChanged =
             new Signal<GameEvents.FromToAction<CelestialBody, CelestialBody>>();
@@ -39,10 +35,7 @@ namespace ScienceAlert.Game
             GameEvents.onGameSceneLoadRequested.Add(OnGameSceneLoadRequested);
             GameEvents.OnScienceRecieved.Add(OnScienceReceived);
 
-            GameEvents.onCrewBoardVessel.Add(OnCrewBoardVessel);
-            GameEvents.onCrewKilled.Add(OnCrewKilled);
-            GameEvents.onCrewTransferred.Add(OnCrewTransferred);
-            GameEvents.onCrewOnEva.Add(OnCrewOnEva);
+            GameEvents.onVesselCrewWasModified.Add(OnVesselCrewWasModified);
 
             GameEvents.onDominantBodyChange.Add(OnDominantBodyChanged);
         }
@@ -56,10 +49,7 @@ namespace ScienceAlert.Game
             GameEvents.onGameSceneLoadRequested.Remove(OnGameSceneLoadRequested);
             GameEvents.OnScienceRecieved.Remove(OnScienceReceived);
 
-            GameEvents.onCrewBoardVessel.Remove(OnCrewBoardVessel);
-            GameEvents.onCrewKilled.Remove(OnCrewKilled);
-            GameEvents.onCrewTransferred.Remove(OnCrewTransferred);
-            GameEvents.onCrewOnEva.Remove(OnCrewOnEva);
+            GameEvents.onVesselCrewWasModified.Remove(OnVesselCrewWasModified);
 
             GameEvents.onDominantBodyChange.Remove(OnDominantBodyChanged);
             base.OnDestroy();
@@ -117,39 +107,10 @@ namespace ScienceAlert.Game
         }
 
 
-        private void OnCrewBoardVessel(GameEvents.FromToAction<Part, Part> data)
+        private void OnVesselCrewWasModified(Vessel data)
         {
-            if (IsActiveVessel(data.from.With(f => f.vessel)) || IsActiveVessel(data.to.With(t => t.vessel)))
+            if (IsActiveVessel(data))
                 ActiveVesselCrewModified.Dispatch();
-
-            CrewBoardVessel.Dispatch(data);
-        }
-
-
-        private void OnCrewKilled(EventReport data)
-        {
-            if (IsActiveVessel(data.origin.With(o => o.vessel)))
-                ActiveVesselCrewModified.Dispatch();
-
-            CrewKilled.Dispatch(data);
-        }
-
-
-        private void OnCrewOnEva(GameEvents.FromToAction<Part, Part> data)
-        {
-            if (IsActiveVessel(data.from.With(f => f.vessel)) || IsActiveVessel(data.to.With(t => t.vessel)))
-                ActiveVesselCrewModified.Dispatch();
-
-            CrewOnEva.Dispatch(data);
-        }
-
-
-        private void OnCrewTransferred(GameEvents.HostedFromToAction<ProtoCrewMember, Part> data)
-        {
-            if (IsActiveVessel(data.from.With(f => f.vessel)) || IsActiveVessel(data.to.With(t => t.vessel)))
-                ActiveVesselCrewModified.Dispatch();
-
-            CrewTransferred.Dispatch(data);
         }
 
 

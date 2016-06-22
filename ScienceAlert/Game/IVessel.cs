@@ -13,7 +13,6 @@ namespace ScienceAlert.Game
                                 ICelestialBodyProvider,
                                 IExperimentSituationProvider,
                                 IExperimentBiomeProvider,
-                                IScienceDataTransmitterCollectionProvider,
                                 IScienceExperimentModuleCollectionProvider,
                                 IScienceLabCollectionProvider,
                                 ICrewContainer

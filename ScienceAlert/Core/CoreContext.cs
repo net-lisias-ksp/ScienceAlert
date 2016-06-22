@@ -48,11 +48,6 @@ namespace ScienceAlert.Core
             injectionBinder.Bind<SignalVesselChanged>().ToSingleton();
 
             injectionBinder.Bind<SignalActiveVesselCrewModified>().ToSingleton();
-            injectionBinder.Bind<SignalCrewBoardVessel>().ToSingleton();
-            injectionBinder.Bind<SignalCrewKilled>().ToSingleton();
-            injectionBinder.Bind<SignalCrewOnEva>().ToSingleton();
-            injectionBinder.Bind<SignalCrewTransferred>().ToSingleton();
-
             injectionBinder.Bind<SignalDominantBodyChanged>().ToSingleton();
 
             injectionBinder.Bind<SignalGameSceneLoadRequested>().ToSingleton();
@@ -130,7 +125,6 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<IGameFactory>().To<KspFactory>().ToSingleton().CrossContext();
             injectionBinder.Bind<IGameDatabase>().To<KspGameDatabase>().ToSingleton().CrossContext();
-            injectionBinder.Bind<IPartLoader>().To<KspPartLoader>().ToSingleton().CrossContext();
 
             injectionBinder.Bind<GameObject>()
                 .To(contextView as GameObject)

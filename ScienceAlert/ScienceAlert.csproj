@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CommandCreateBuilderCompositeWithShorthand.cs" />
     <Compile Include="Core\CommandLoadDefaultRuleConfigs.cs" />
     <Compile Include="Core\CommandCreateExperimentConfigurations.cs" />
     <Compile Include="Core\CommandCreateBuilderComposite.cs" />
@@ -72,8 +73,6 @@
     <Compile Include="VesselContext\Experiments\Sensors\CommandCreateExperimentSensors.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\Rules\GenericRuleBuilder.cs" />
     <Compile Include="IObjectFromConfigNodeBuilder.cs" />
-    <Compile Include="Game\IPartLoader.cs" />
-    <Compile Include="Game\KspPartLoader.cs" />
     <Compile Include="PlayableSound.cs" />
     <Compile Include="BuilderCannotHandleConfigNodeException.cs" />
     <Compile Include="CouldNotCreateInstanceException.cs" />
@@ -136,7 +135,6 @@
     <Compile Include="Game\IScienceLab.cs" />
     <Compile Include="Game\IScienceLabCollectionProvider.cs" />
     <Compile Include="Game\IScienceSubject.cs" />
-    <Compile Include="Game\IScienceDataTransmitterCollectionProvider.cs" />
     <Compile Include="Game\KspCelestialBody.cs" />
     <Compile Include="Game\KspFactory.cs" />
     <Compile Include="Game\IGameFactory.cs" />

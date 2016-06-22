@@ -41,25 +41,6 @@ namespace ScienceAlert
     }
 
 
-    public class SignalCrewBoardVessel : Signal<GameEvents.FromToAction<IPart, IPart>>
-    {
-    }
-
-
-    public class SignalCrewOnEva : Signal<GameEvents.FromToAction<IPart, IPart>>
-    {
-    }
-
-
-    public class SignalCrewTransferred : Signal<GameEvents.HostedFromToAction<ProtoCrewMember, IPart>>
-    {
-    }
-
-
-    public class SignalCrewKilled : Signal<EventReport>
-    {
-    }
-
     public class SignalDominantBodyChanged : Signal<GameEvents.FromToAction<ICelestialBody, ICelestialBody>>
     {
     }

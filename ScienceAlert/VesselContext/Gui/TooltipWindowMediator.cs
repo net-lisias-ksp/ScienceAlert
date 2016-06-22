@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using JetBrains.Annotations;
+using ReeperCommon.Logging;
 using strange.extensions.mediation.impl;
 using ScienceAlert.UI;
 using ScienceAlert.UI.ExperimentWindow;
@@ -26,6 +27,8 @@ namespace ScienceAlert.VesselContext.Gui
 
         [Inject] public SignalSetTooltip TooltipSignal { get; set; }
 
+        [Inject] public SignalContextIsBeingDestroyed ContextDestroyedSignal { get; set; }
+
         private ExperimentAlertStatus[] _possibleAlertStatues;
         private ExperimentWindowView.ExperimentIndicatorTooltipType _currentTooltip;
         private string _alertTooltipText = string.Empty;
@@ -40,6 +43,7 @@ namespace ScienceAlert.VesselContext.Gui
             TooltipSignal.AddListener(OnTooltip);
             StateChange.AddListener(OnSensorStateChanged);
 
+            ContextDestroyedSignal.AddOnce(OnVesselContextDestroyed);
             _possibleAlertStatues =
                 Enum.GetValues(typeof (ExperimentAlertStatus)).Cast<ExperimentAlertStatus>().ToArray();
         }
@@ -132,5 +136,12 @@ namespace ScienceAlert.VesselContext.Gui
             }
         }
 
+
+
+        private void OnVesselContextDestroyed()
+        {
+            Log.Warning("Destroying tooltip window");
+            Destroy(gameObject);
+        }
     }
 }

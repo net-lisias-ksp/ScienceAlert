@@ -39,7 +39,7 @@ namespace ScienceAlert.VesselContext.Gui
         private void OnContextDestroyed()
         {
             Log.Verbose(GetType().Name + " destroying view");
-            View.Do(Destroy);
+            Destroy(gameObject);
         }
     }
 }

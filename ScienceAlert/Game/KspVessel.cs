@@ -36,7 +36,7 @@ namespace ScienceAlert.Game
             Vessel vessel)
         {
             if (factory == null) throw new ArgumentNullException("factory");
-            if (vessel == null) throw new ArgumentNullException("data");
+            if (vessel == null) throw new ArgumentNullException("vessel");
 
             _factory = factory;
             _vessel = vessel;
