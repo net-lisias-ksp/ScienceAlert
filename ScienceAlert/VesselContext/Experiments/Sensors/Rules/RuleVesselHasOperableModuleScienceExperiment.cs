@@ -15,7 +15,7 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
         {
             // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var module in ExperimentModules)
-                if (!module.Deployed)
+                if (!module.Deployed && module.CanBeDeployed)
                     return true;
             return false;
         }

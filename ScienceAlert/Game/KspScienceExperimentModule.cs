@@ -47,7 +47,7 @@ namespace ScienceAlert.Game
 
         public bool CanBeDeployed
         {
-            get { return !_mse.Deployed && !_mse.Inoperable; }
+            get { return !_mse.Deployed && !_mse.Inoperable && (_mse.deployableSeated || (!_part.Value.IsCommandSeat)) && (_mse.availableShielded || (!_part.Value.IsShieldedFromAirstream)); }
         }
 
         public float TransmissionMultiplier
@@ -68,5 +68,6 @@ namespace ScienceAlert.Game
         {
             _mse.DeployExperiment();
         }
+
     }
 }

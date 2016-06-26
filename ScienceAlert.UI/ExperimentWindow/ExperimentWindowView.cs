@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using ReeperCommon.Containers;
-using ReeperCommon.Logging;
 using strange.extensions.signal.impl;
 using UnityEngine;
 using UnityEngine.UI;
@@ -46,35 +44,31 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
-        // ReSharper disable once UnusedMember.Global
-        public void UpdateExperimentEntry([NotNull] IExperimentIdentifier identifier, ExperimentEntryInfo entryInfo, bool resort)
+        public void UpdateExperimentEntryAlert([NotNull] IExperimentIdentifier identifier, bool alertLit)
         {
-            if (identifier == null) throw new ArgumentNullException("identifier");
-            if (_listItemPrefab == null) throw new InvalidOperationException("Missing list item prefab");
-            if (_list == null) throw new InvalidOperationException("Missing list reference");
-
-            
-            bool rebuildLayout = resort;
-
-            var target = GetListItem(identifier).Or(() =>
-            {
-                rebuildLayout = true;
-                AddNewListItem(identifier);
-                return GetListItem(identifier).Value;
-            });
-
-
-            UpdateExperimentListItem(target, entryInfo);
-
-            if (rebuildLayout) LayoutRebuilder.MarkLayoutForRebuild(_list);
+            GetListItem(identifier).AlertLit = alertLit;
         }
 
 
-        private Maybe<ExperimentListEntry> GetListItem(IExperimentIdentifier identifier)
+        // ReSharper disable once UnusedMember.Global
+        public void UpdateExperimentEntry([NotNull] IExperimentIdentifier identifier, ExperimentEntryInfo entryInfo, bool resort)
         {
+            UpdateExperimentListItem(GetListItem(identifier), entryInfo);
+        }
+
+
+        private ExperimentListEntry GetListItem([NotNull] IExperimentIdentifier identifier)
+        {
+            if (identifier == null) throw new ArgumentNullException("identifier");
+
             ExperimentListEntry result;
 
-            return !_listEntries.TryGetValue(identifier, out result) ? Maybe<ExperimentListEntry>.None : result.ToMaybe();
+            if (_listEntries.TryGetValue(identifier, out result))
+                return result;
+
+            AddNewListItem(identifier);
+
+            return GetListItem(identifier);
         }
 
 
@@ -97,6 +91,8 @@ namespace ScienceAlert.UI.ExperimentWindow
             instance.Identifier = identifier;
             instance.Deploy.AddListener(OnExperimentButtonClicked);
             instance.MousedOverIndicator.AddListener(OnIndicatorMousedOver);
+
+            LayoutRebuilder.MarkLayoutForRebuild(_list);
         }
 
 
@@ -119,11 +115,13 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
-        private static void UpdateExperimentListItem(ExperimentListEntry entry, ExperimentEntryInfo info)
+        private static void UpdateExperimentListItem([NotNull] ExperimentListEntry entry, ExperimentEntryInfo info)
         {
+            if (entry == null) throw new ArgumentNullException("entry");
+
             entry.Enabled = info.ButtonEnabled;
             entry.Text = info.ExperimentTitle;
-            
+
             entry.RecoveryValue = info.RecoveryValue;
             entry.RecoveryValueLit = info.RecoveryLit;
 

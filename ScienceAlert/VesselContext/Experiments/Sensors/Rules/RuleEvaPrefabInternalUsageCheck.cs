@@ -131,6 +131,16 @@ namespace ScienceAlert.VesselContext.Experiments.Sensors.Rules
                 get { throw new System.NotImplementedException(); }
             }
 
+            public bool IsCommandSeat
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool IsShieldedFromAirstream
+            {
+                get { throw new NotImplementedException(); }
+            }
+
             public EvaPrefabPart([NotNull] ReadOnlyCollection<IModuleScienceExperiment> experimentModules)
             {
                 if (experimentModules == null) throw new ArgumentNullException("experimentModules");

@@ -10,5 +10,8 @@ namespace ScienceAlert.Game
 
         ReadOnlyCollection<ProtoCrewMember> EvaCapableCrew { get; } // must be a list to prevent unnecessary garbage or extra logic since Part exposes this directly
         ReadOnlyCollection<PartModule> Modules { get; }
+
+        bool IsCommandSeat { get; }
+        bool IsShieldedFromAirstream { get; }
     }
 }

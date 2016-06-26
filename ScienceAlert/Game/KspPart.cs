@@ -15,6 +15,7 @@ namespace ScienceAlert.Game
             if (part == null) throw new ArgumentNullException("part");
 
             _part = part;
+            IsCommandSeat = _part.Modules.Contains<KerbalSeat>();
         }
 
         public GameObject gameObject
@@ -37,6 +38,13 @@ namespace ScienceAlert.Game
         public ReadOnlyCollection<PartModule> Modules
         {
             get { return new List<PartModule>(_part.Modules.Cast<PartModule>()).ToList().AsReadOnly(); }
+        }
+
+        public bool IsCommandSeat { get; private set; }
+
+        public bool IsShieldedFromAirstream
+        {
+            get { return _part.ShieldedFromAirstream; }
         }
     }
 }

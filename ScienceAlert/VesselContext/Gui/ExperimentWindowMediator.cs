@@ -6,6 +6,7 @@ using ReeperCommon.Logging;
 using strange.extensions.mediation.impl;
 using ScienceAlert.UI;
 using ScienceAlert.UI.ExperimentWindow;
+using ScienceAlert.VesselContext.Experiments;
 using UnityEngine;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -19,7 +20,8 @@ namespace ScienceAlert.VesselContext.Gui
 
         [Inject] public ExperimentWindowView View { get; set; }
         [Inject] public ReadOnlyCollection<ScienceExperiment> Experiments { get; set; }
-
+        [Inject] public IAlertStateCache AlertCache { get; set; }
+        [Inject] public ExperimentIdentifierProvider IdentifierProvider { get; set; }
         [Inject] public SignalContextIsBeingDestroyed ContextDestroyed { get; set; }
 
         [Inject] public SignalSetTooltip TooltipSignal { get; set; }
@@ -27,7 +29,7 @@ namespace ScienceAlert.VesselContext.Gui
 
         [Inject] public SignalDeployExperiment DeployExperiment { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
-
+        [Inject] public SignalExperimentAlertChanged AlertStatusChanged { get; set; }
 
         public override void OnRegister()
         {
@@ -40,6 +42,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             // other signals
             SensorStatusChanged.AddListener(OnSensorStatusChanged);
+            AlertStatusChanged.AddListener(OnAlertStatusChanged);
             ContextDestroyed.AddOnce(OnContextDestroyed);
         }
 
@@ -53,6 +56,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             // other signals
             SensorStatusChanged.RemoveListener(OnSensorStatusChanged);
+            AlertStatusChanged.RemoveListener(OnAlertStatusChanged);
 
             base.OnRemove();
         }
@@ -63,8 +67,8 @@ namespace ScienceAlert.VesselContext.Gui
         private void OnSensorStatusChanged(SensorStatusChange status)
         {
             var newState = status.CurrentState;
-
             var exp = newState.Experiment;
+            var identifier = IdentifierProvider.Get(status.CurrentState.Experiment);
 
             var hasExperimentalValue = Mathf.Max(newState.RecoveryValue, newState.TransmissionValue,
                 newState.LabValue) > MinimumThresholdForIndicators;
@@ -74,7 +78,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             var info = new ExperimentEntryInfo(
                     /* button title */              exp.experimentTitle,
-                    /* alerting for this exp? */    false,
+                    /* alerting for this exp? */    AlertCache.GetStatus(identifier) != ExperimentAlertStatus.None,
                     /* recovery value */            newState.RecoveryValue,
                     /* light recovery icon? */      newState.RecoveryValue > MinimumThresholdForIndicators,
                     /* transmission value */        newState.TransmissionValue,
@@ -85,7 +89,14 @@ namespace ScienceAlert.VesselContext.Gui
                     /* enabled? */                  buttonEnabled
                     );
 
-            View.UpdateExperimentEntry(new KspExperimentIdentifier(exp), info, true);
+            View.UpdateExperimentEntry(identifier, info, true);
+        }
+
+
+        private void OnAlertStatusChanged(SensorStatusChange sensorStatus, AlertStatusChange alertStatus)
+        {
+            View.UpdateExperimentEntryAlert(IdentifierProvider.Get(sensorStatus.CurrentState.Experiment),
+                alertStatus.CurrentStatus != ExperimentAlertStatus.None);
         }
 
 
