@@ -9,7 +9,6 @@ using ReeperCommon.Utilities;
 using ReeperKSP.AssetBundleLoading;
 using strange.extensions.command.impl;
 using strange.extensions.context.api;
-using ScienceAlert.Game;
 using UnityEngine;
 
 namespace ScienceAlert.Core
@@ -86,7 +85,7 @@ namespace ScienceAlert.Core
             var alertSound = GetAlertSound().Or(_defaultAlertSound);
 
             injectionBinder.Bind<PlayableSound>().To(new PlayableSound(alertSound, audioSource, MinTimeBetweenAlertSounds)).ToName(CrossContextKeys.AlertSound).CrossContext();
-            injectionBinder.Bind<AudioSource>().To(audioSource).CrossContext();
+            injectionBinder.Bind<AudioSource>().To(audioSource).CrossContext().ToInject(false);
             injectionBinder.Bind<float>().ToValue(1f).ToName(CrossContextKeys.MinSoundDelay).CrossContext();
 
             Log.Verbose("Successfully loaded sounds");

@@ -72,7 +72,7 @@ namespace ScienceAlert.Core
 
             SetupCommandBindings();
 
-            injectionBinder.GetInstance<ILog>().Verbose("ScienceAlert CoreCore created successfully");
+            injectionBinder.GetInstance<ILog>().Verbose("ScienceAlert Core created successfully");
         }
 
 
