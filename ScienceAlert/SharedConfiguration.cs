@@ -15,9 +15,11 @@ namespace ScienceAlert
         public const string NodeName = "ScienceAlertSharedConfiguration";
         public const string FileName = "ScienceAlert.cfg";
         public const string FolderName = "PluginData";
+        public const string ExperimentWindowConfigNodeName = "ExperimentWindow";
 
         [ReeperPersistent] public float ButtonFramerate = 15f;
         [ReeperPersistent] public readonly ConfigNode SoundConfig = new ConfigNode("Sounds");
+        [ReeperPersistent] public readonly ConfigNode ExperimentWindowConfig = new ConfigNode(ExperimentWindowConfigNodeName);
 
         private const float FramerateMin = 1f;
         private const float FramerateMax = 60f;

@@ -186,7 +186,6 @@ namespace ScienceAlert.Core
             commandBinder.Bind<SignalScenarioModuleSave>()
                 .To<CommandSaveSharedConfiguration>();
 
-
             commandBinder.Bind<SignalStart>()
                 .InSequence()
                 .Once();

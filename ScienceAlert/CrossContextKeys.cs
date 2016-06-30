@@ -18,5 +18,7 @@
         DefaultConditionRule, // ConfigNode
 
         SensorRuleTypes, // ReadOnlyCollection<Type>
+
+        ExperimentWindowConfig, // ConfigNode
     }
 }

@@ -115,6 +115,7 @@
     <Compile Include="VesselContext\Experiments\Triggers\NoAvailableScienceModuleException.cs" />
     <Compile Include="VesselContext\Experiments\Triggers\NoSuitableEvaCandidateFoundException.cs" />
     <Compile Include="VesselContext\Experiments\Triggers\TriggerIsBusyException.cs" />
+    <Compile Include="VesselContext\Gui\WindowSerializationSurrogate.cs" />
     <Compile Include="VesselContext\Gui\TooltipWindowMediator.cs" />
     <Compile Include="VesselContext\KspExperimentIdentifier.cs" />
     <Compile Include="SensorStatusChange.cs" />
@@ -361,6 +362,7 @@ REM ----------------------------------------------------------
 echo Creating symbols for dependencies...
 cd "%25TargetDir%25"
 call "$(SolutionDir)CreateMdb.bat" "$(TargetDir)ReeperCommon.dll" "$(TargetDir)"
+call "$(SolutionDir)CreateMdb.bat" "$(TargetDir)ReeperKSP.dll" "$(TargetDir)"
 call "$(SolutionDir)CreateMdb.bat" "$(TargetDir)StrangeIoC.dll" "$(TargetDir)"
 goto:eof
 

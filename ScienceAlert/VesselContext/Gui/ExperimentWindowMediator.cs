@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Linq;
+using KSP.UI;
 using ReeperCommon.Containers;
+using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
+using ReeperCommon.Utilities;
+using ReeperKSP.Extensions;
+using ReeperKSP.Serialization;
 using strange.extensions.mediation.impl;
 using ScienceAlert.UI;
 using ScienceAlert.UI.ExperimentWindow;
@@ -14,6 +20,9 @@ using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
 {
+    
+
+
     class ExperimentWindowMediator : Mediator
     {
         private const float MinimumThresholdForIndicators = 0.1f; // sensor value must be at least this or we don't light the relevant indicator
@@ -23,6 +32,8 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public IAlertStateCache AlertCache { get; set; }
         [Inject] public ExperimentIdentifierProvider IdentifierProvider { get; set; }
         [Inject] public SignalContextIsBeingDestroyed ContextDestroyed { get; set; }
+        [Inject(CrossContextKeys.ExperimentWindowConfig)] public ConfigNode Configuration { get; set; }
+        [Inject] public IConfigNodeSerializer Serializer { get; set; }
 
         [Inject] public SignalSetTooltip TooltipSignal { get; set; }
 
@@ -30,6 +41,9 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalDeployExperiment DeployExperiment { get; set; }
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
         [Inject] public SignalExperimentAlertChanged AlertStatusChanged { get; set; }
+
+        [Inject] public SignalSaveGuiSettings SaveSignal { get; set; }
+        [Inject] public SignalLoadGuiSettings LoadSignal { get; set; }
 
         public override void OnRegister()
         {
@@ -43,7 +57,12 @@ namespace ScienceAlert.VesselContext.Gui
             // other signals
             SensorStatusChanged.AddListener(OnSensorStatusChanged);
             AlertStatusChanged.AddListener(OnAlertStatusChanged);
+            LoadSignal.AddListener(OnGuiLoadSignal);
+            SaveSignal.AddListener(SaveViewConfiguration);
+
             ContextDestroyed.AddOnce(OnContextDestroyed);
+
+            // load signal should be sent shortly
         }
 
 
@@ -57,11 +76,92 @@ namespace ScienceAlert.VesselContext.Gui
             // other signals
             SensorStatusChanged.RemoveListener(OnSensorStatusChanged);
             AlertStatusChanged.RemoveListener(OnAlertStatusChanged);
+            LoadSignal.RemoveListener(OnGuiLoadSignal);
+            SaveSignal.RemoveListener(SaveViewConfiguration);
 
             base.OnRemove();
         }
 
 
+        // some deserialized window positions just kicked in and might not have made it
+        // to the shared configuration (as they aren't respected until the main UI becomes visible, which when entering
+        // the scene is often AFTER the game has re-saved)
+        private void OnViewForcefullyRepositioned()
+        {
+
+        }
+
+
+        private void SaveViewConfiguration()
+        {
+            try
+            {
+                var view = View;
+                var saved = Serializer.CreateConfigNodeFromObject(view);
+
+                Configuration.ClearData();
+                ConfigNode.Merge(Configuration, saved);
+                Configuration.name = SharedConfiguration.ExperimentWindowConfigNodeName; // because Merge overwrites it for some reason
+
+                Log.Verbose("Saved experiment view configuration");
+            }
+            catch (Exception e)
+            {
+                Log.Error("Error while saving view configuration: " + e);
+            }
+        }
+
+        // when flight scene first starts, the main canvas won't be enabled which will cause anchored position
+        // to be ignored apparently. The load signal might therefore come a bit too early and we'll have to wait
+        // before setting values
+        private void OnGuiLoadSignal()
+        {
+            try
+            {
+                var view = View;
+                Serializer.LoadObjectFromConfigNode(ref view, Configuration);
+                Log.Verbose("Loading experiment view configuration");
+            }
+            catch (Exception e)
+            {
+                Log.Error("Error while loading view configuration: " + e);
+            }
+
+            //StartCoroutine(LoadViewConfig());
+        }
+
+        //private IEnumerator LoadViewConfig()
+        //{
+        //    if (!Configuration.HasData)
+        //    {
+        //        Log.Warning("No experiment view configuration data to load.");
+        //        yield break;
+        //    }
+
+        //    var canvas = (transform.parent ?? transform).GetComponentInParent<Canvas>();
+        //    var configSnapshot = Configuration.CreateCopy(); // theoretically possible that data might change in the meantime in a perfect storm of conditions
+        //                                                     // which would cause the default values to immediately overwrite the values we WERE going to use
+
+        //    if (canvas == null)
+        //        yield break;
+
+        //    Log.Warning("Snapshot: " + configSnapshot.ToSafeString());
+        //    Log.Warning("Assigned canvas: " + canvas.name + " while expecting " +
+        //                UIMasterController.Instance.mainCanvas.name);
+
+        //    yield return StartCoroutine(CallbackUtil.HoldUntil(() => canvas.enabled));
+
+        //    try
+        //    {
+        //        var view = View;
+        //        Serializer.LoadObjectFromConfigNode(ref view, configSnapshot);
+        //        Log.Verbose("Loading experiment view configuration");
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Log.Error("Error while loading view configuration: " + e);
+        //    }
+        //}
 
 
         private void OnSensorStatusChanged(SensorStatusChange status)

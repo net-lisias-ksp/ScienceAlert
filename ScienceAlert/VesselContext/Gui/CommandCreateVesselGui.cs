@@ -33,7 +33,7 @@ namespace ScienceAlert.VesselContext.Gui
         [AssetBundleAsset("assets/sciencealert/ui/sciencealertoptionswindowprefab.prefab", "sciencealert.ksp")] 
         private OptionsWindowView _optionsWindow;
 
-        [AssetBundleAsset("assets/sciencealert/ui/sciencealertexperimentwindowprefab.prefab", "sciencealert.ksp")]
+        [AssetBundleAsset("assets/sciencealert/ui/experimentwindowprefab.prefab", "sciencealert.ksp")]
         private ExperimentWindowView _experimentWindow;
 
         [AssetBundleAsset("assets/sciencealert/ui/sciencealertsensortooltipwindowprefab.prefab", "sciencealert.ksp")]
@@ -91,6 +91,8 @@ namespace ScienceAlert.VesselContext.Gui
                 yield break;
             }
 
+            Log.Debug("Views created");
+
             Release();
         }
 
@@ -110,29 +112,28 @@ namespace ScienceAlert.VesselContext.Gui
                 throw new FailedToLoadAssetException("One or more view prefabs failed to load.");
             }
 
-            var mainCanvas = UIMasterController.Instance.transform.Find("MainCanvas") as RectTransform;
-
-            var dialogCanvas = UIMasterController.Instance.transform.Find("DialogCanvas")
-                .IfNull(() => Log.Warning("Failed to find expected dialog canvas on UIMasterController"))
-                .Return(t => t as RectTransform, mainCanvas);
-
-            var tooltipCanvas = UIMasterController.Instance.transform.Find("TooltipCanvas")
-                .IfNull(() => Log.Warning("Failed to find expected tooltip canvas on UIMasterController"))
-                .Return(t => t as RectTransform, mainCanvas);
 
             _context.AddView(experimentWindow);
             _context.AddView(optionsWindow);
             _context.AddView(tooltipWindow);
+
+            var dialogCanvas = UIMasterController.Instance.dialogCanvas.transform as RectTransform;
+            var tooltipCanvas = UIMasterController.Instance.tooltipCanvas.transform as RectTransform;
+            var mainCanvas = UIMasterController.Instance.mainCanvas.transform as RectTransform;
+
+            if (dialogCanvas.IsNull())
+                throw new NullReferenceException("Dialog canvas not found");
+            if (tooltipCanvas.IsNull())
+                throw new NullReferenceException("Tooltip canvas not found");
+            if (mainCanvas.IsNull())
+                throw new NullReferenceException("Main canvas not found");
 
             foreach (var viewTransform in new [] { experimentWindow.transform, optionsWindow.transform}.Select(t => t as RectTransform))
                 viewTransform.Do(view => view.SetParent(dialogCanvas, false)).Do(view => view.SetAsLastSibling());
 
             tooltipWindow.Do(v => v.transform.SetParent(tooltipCanvas.transform as RectTransform, false));
 
-            mainCanvas.Do(LayoutRebuilder.MarkLayoutForRebuild);
-            dialogCanvas.Do(LayoutRebuilder.MarkLayoutForRebuild);
-
-            yield return null; // wait for views to start before proceeding
+            yield return null; // wait for views to start
         }
 
 
