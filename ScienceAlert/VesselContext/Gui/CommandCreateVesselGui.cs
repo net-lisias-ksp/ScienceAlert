@@ -30,7 +30,7 @@ namespace ScienceAlert.VesselContext.Gui
         
 #pragma warning disable 649 // is not assigned to; that's fine because it will be assigned via AssetBundleAssetLoader
 
-        [AssetBundleAsset("assets/sciencealert/ui/sciencealertoptionswindowprefab.prefab", "sciencealert.ksp")] 
+        [AssetBundleAsset("assets/sciencealert/ui/optionswindowprefab.prefab", "sciencealert.ksp")] 
         private OptionsWindowView _optionsWindow;
 
         [AssetBundleAsset("assets/sciencealert/ui/experimentwindowprefab.prefab", "sciencealert.ksp")]
