@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ReeperCommon.Containers;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -42,7 +43,7 @@ namespace ScienceAlert.UI
 
             if (!_targetsHidden) return;
 
-            VisibleOnMouseOver.ForEach(rt => rt.gameObject.SetActive(false));
+            VisibleOnMouseOver.ForEach(rt => rt.Do(t => t.gameObject.SetActive(false)));
             Restore(_hiddenItemsOriginalStates); // hide the mouse-over-only objects
             _targetsHidden = false;
         }
@@ -67,7 +68,7 @@ namespace ScienceAlert.UI
                 item.gameObject.SetActive(false);
             }
 
-            VisibleOnMouseOver.ForEach(rt => rt.gameObject.SetActive(true));
+            VisibleOnMouseOver.ForEach(rt => rt.Do(t => t.gameObject.SetActive(true)));
         }
 
 

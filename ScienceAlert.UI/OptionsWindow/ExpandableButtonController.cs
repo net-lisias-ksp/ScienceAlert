@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ScienceAlert.UI.OptionsWindow
@@ -7,20 +8,27 @@ namespace ScienceAlert.UI.OptionsWindow
     // ReSharper disable once UnusedMember.Global
     class ExpandableButtonController : MonoBehaviour
     {
-        [SerializeField]
-#pragma warning disable 649
-        private Animator _animator;
-#pragma warning restore 649
+        // ReSharper disable once CollectionNeverUpdated.Local
+        // ReSharper disable once FieldCanBeMadeReadOnly.Local
+        [SerializeField] private List<Transform> _itemsToActivateOnToggle = new List<Transform>();
 
-        private readonly int _openId = Animator.StringToHash("Open");
-        private bool _isOpen = false;
+        // ReSharper disable once UnusedMember.Local
+        private void Awake()
+        {
+            foreach (var item in _itemsToActivateOnToggle)
+                if (item)
+                    item.gameObject.SetActive(false);
+        }
 
 
         // ReSharper disable once UnusedMember.Global
-        public void TogglePanel()
+        public bool Expanded
         {
-            _isOpen = !_isOpen;
-            _animator.SetBool(_openId, _isOpen);
+            set
+            {
+                foreach (var item in _itemsToActivateOnToggle)
+                    if (item) item.gameObject.SetActive(value);
+            }
         }
     }
 }

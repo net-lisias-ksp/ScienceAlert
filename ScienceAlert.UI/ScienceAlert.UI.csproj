@@ -50,7 +50,6 @@
     <Compile Include="ExperimentWindow\ExperimentListEntry.cs" />
     <Compile Include="ExperimentWindow\ExperimentWindowView.cs" />
     <Compile Include="ExperimentWindow\ExperimentEntryInfo.cs" />
-    <Compile Include="ExperimentWindow\ScrollRectContentWidthUpdater.cs" />
     <Compile Include="ExperimentWindow\Signals.cs" />
     <Compile Include="HideTargetsOnMouseOver.cs" />
     <Compile Include="OptionsWindow\ExpandableButtonController.cs" />
