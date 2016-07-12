@@ -42,8 +42,15 @@ namespace ScienceAlert.VesselContext.Gui
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("must not be empty or null", "key");
 
-            var rtToSerialize =
-                target.With(tar => tar as MonoBehaviour).With(mb => mb.gameObject.GetComponent<RectTransform>());
+            var mbTarget = target as MonoBehaviour;
+
+            if (mbTarget == null)
+            {
+                Log.Warning("Cannot serialize " + type.Name + " because its MonoBehaviour has been destroyed");
+                return;
+            }
+
+            var rtToSerialize = mbTarget.GetComponent<RectTransform>();
 
             if (rtToSerialize == null)
                 throw new ArgumentException("Expected an attached RectTransform on " + type.Name);

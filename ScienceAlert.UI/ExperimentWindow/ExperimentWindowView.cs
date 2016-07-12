@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using strange.extensions.signal.impl;
 using UnityEngine;
@@ -35,7 +38,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         [SerializeField] private ExperimentListEntry _listItemPrefab;
         [SerializeField] private RectTransform _list;
 
-        [HideInInspector] private readonly Dictionary<IExperimentIdentifier, ExperimentListEntry> _listEntries =
+        private readonly Dictionary<IExperimentIdentifier, ExperimentListEntry> _listEntries =
             new Dictionary<IExperimentIdentifier, ExperimentListEntry>();
 
 

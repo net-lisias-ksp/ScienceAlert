@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using ReeperCommon.Containers;
+using ReeperCommon.Logging;
+using UnityEngine;
 using UnityEngine.UI;
 
 #pragma warning disable 649
@@ -14,6 +17,7 @@ namespace ScienceAlert.UI.TooltipWindow
 
         private RectTransform _transform;
         private Camera _camera;
+        private Canvas _canvas;
 
         public bool Visible
         {
@@ -30,9 +34,31 @@ namespace ScienceAlert.UI.TooltipWindow
         {
             base.Start();
             _transform = GetComponent<RectTransform>();
-            _camera = GetComponent<Canvas>().worldCamera;
+            FindAssociatedCamera();
         }
 
+
+        // ReSharper disable once UnusedMember.Local
+        private void OnTransformParentChanged()
+        {
+            FindAssociatedCamera();
+        }
+
+
+        private void FindAssociatedCamera()
+        {
+            _camera = null;
+            _canvas = GetComponentInParent<Canvas>().IfNull(() => Log.Error("No associated Canvas found"));
+
+            if (!_canvas) return;
+
+            // if render mode is overlay, we don't need a camera to pass to ScreenPointToLocalPointInRectangle
+            if (_canvas.renderMode == RenderMode.ScreenSpaceOverlay) return;
+
+            _camera = _canvas.worldCamera.IfNull(() => Log.Error("No worldCamera found on Canvas")).IfNull(() => _canvas = null);
+        }
+
+        
 
         public void SetTooltip(string text)
         {
@@ -43,6 +69,8 @@ namespace ScienceAlert.UI.TooltipWindow
         // ReSharper disable once UnusedMember.Local
         private void LateUpdate()
         {
+            if (!_canvas) return;
+
             FollowMouse();
         }
 
@@ -55,7 +83,7 @@ namespace ScienceAlert.UI.TooltipWindow
                     out localPoint))
                 return;
 
-            _movingPanel.anchoredPosition = localPoint;
+            _movingPanel.anchoredPosition = _transform.TransformPoint(localPoint);
         }
     }
 }

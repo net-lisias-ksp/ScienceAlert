@@ -14,7 +14,7 @@ namespace ScienceAlert.UI.ExperimentWindow
 {
     [DisallowMultipleComponent, Serializable]
     // ReSharper disable once UnusedMember.Global
-    internal class ExperimentListEntry : MonoBehaviour
+    public class ExperimentListEntry : MonoBehaviour
     {
         public readonly Signal<IExperimentIdentifier> Deploy = new Signal<IExperimentIdentifier>();
 
@@ -25,10 +25,10 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         [SerializeField] private Button _deployButton;
         [SerializeField] private Text _text;
-        [SerializeField] private Toggle _recoveryIndicatorLight;
-        [SerializeField] private Toggle _transmissionIndicatorLight;
-        [SerializeField] private Toggle _labIndicatorLight;
-        [SerializeField] private Toggle _alertLight;
+        [SerializeField] private AlertIndicatorController _recoveryIndicator;
+        [SerializeField] private AlertIndicatorController _transmissionIndicator;
+        [SerializeField] private AlertIndicatorController _labIndicator;
+        [SerializeField] private AlertIndicatorController _alertIndicator;
 
         private void Start()
         {
@@ -59,28 +59,29 @@ namespace ScienceAlert.UI.ExperimentWindow
 
         public bool AlertLit
         {
-            set { _alertLight.isOn = value; }
+            set { _alertIndicator.isOn = value; }
         }
 
 
         public bool RecoveryValueLit
         {
-            set { _recoveryIndicatorLight.isOn = value; }
+            set { _recoveryIndicator.isOn = value; }
         }
 
 
         public bool TransmissionValueLit
         {
-            set { _transmissionIndicatorLight.isOn = value; }
+            set { _transmissionIndicator.isOn = value; }
         }
 
         public bool LabValueLit
         {
-            set { _labIndicatorLight.isOn = value; }
+            set { _labIndicator.isOn = value; }
         }
 
 
-        private void CloseTooltip()
+        // UnityAction
+        public void CloseTooltip()
         {
             MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.None);
         }
@@ -94,23 +95,9 @@ namespace ScienceAlert.UI.ExperimentWindow
 
 
         // UnityAction
-        public void MouseExitAlertIndicator()
-        {
-            CloseTooltip();
-        }
-
-
-        // UnityAction
         public void MouseEnterRecoveryIndicator()
         {
             MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Recovery);
-        }
-
-
-        // UnityAction
-        public void MouseExitRecoveryIndicator()
-        {
-            CloseTooltip();
         }
 
 
@@ -122,23 +109,9 @@ namespace ScienceAlert.UI.ExperimentWindow
 
 
         // UnityAction
-        public void MouseExitTransmissionIndicator()
-        {
-            CloseTooltip();
-        }
-
-
-        // UnityAction
         public void MouseEnterLabIndicator()
         {
             MousedOverIndicator.Dispatch(Identifier, ExperimentWindowView.ExperimentIndicatorTooltipType.Lab);
-        }
-
-
-        // UnityAction
-        public void MouseExitLabIndicator()
-        {
-            CloseTooltip();
         }
     }
 }
