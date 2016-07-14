@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using ReeperCommon.Containers;
-using ReeperCommon.Logging;
 using UnityEngine;
 using UnityEngine.UI;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable ConvertToConstant.Local
 
@@ -18,26 +18,15 @@ namespace ScienceAlert.UI.OptionsWindow
         [SerializeField] private Text _textControl;
 #pragma warning restore 649
 
-        private Slider _slider;
-
         private float _currentTextValue = float.MinValue;
         private readonly StringBuilder _builder = new StringBuilder();
 
-        private void CacheSlider()
+        private void OnEnable()
         {
-            if (_slider != null) return;
-
-            _slider = GetComponent<Slider>();
-
-            if (_slider == null) Log.Error("Missing a slider component");
-
-            _slider = GetComponent<Slider>().Do(s => s.onValueChanged.AddListener(OnSliderValueChanged));
-
-            UpdateTextValue(_slider.value);
+            GetComponent<Slider>().Do(s => UpdateTextValue(s.value));
         }
 
-
-        private void UpdateTextValue(float newValue)
+        public void UpdateTextValue(float newValue)
         {
             if (_textControl == null || Mathf.Approximately(newValue, _currentTextValue)) return;
 
@@ -49,33 +38,6 @@ namespace ScienceAlert.UI.OptionsWindow
             _builder.Append(_append);
 
             _textControl.text = _builder.ToString();
-        }
-
-
-        private void OnEnable()
-        {
-            CacheSlider();
-        }
-
-        private void OnDisable()
-        {
-            _slider.Do(s => s.onValueChanged.RemoveListener(OnSliderValueChanged));
-            _slider = null;
-        }
-
-        private void OnValidate()
-        {
-            CacheSlider();
-        }
-
-        private void Start()
-        {
-            CacheSlider();
-        }
-
-        private void OnSliderValueChanged(float f)
-        {
-            UpdateTextValue(f);
         }
     }
 }
