@@ -79,6 +79,7 @@ namespace ScienceAlert.UI.TooltipWindow
         {
             Vector2 localPoint;
 
+            // note to self: this probably won't work properly for a worldspace camera
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(_transform, Input.mousePosition, _camera,
                     out localPoint))
                 return;
