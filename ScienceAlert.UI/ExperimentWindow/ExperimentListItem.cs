@@ -14,7 +14,7 @@ namespace ScienceAlert.UI.ExperimentWindow
 {
     [DisallowMultipleComponent, Serializable]
     // ReSharper disable once UnusedMember.Global
-    public class ExperimentListEntry : MonoBehaviour
+    public class ExperimentListItem : MonoBehaviour
     {
         public readonly Signal<IExperimentIdentifier> Deploy = new Signal<IExperimentIdentifier>();
 
@@ -36,7 +36,7 @@ namespace ScienceAlert.UI.ExperimentWindow
                 .Where(type => typeof (Selectable).IsAssignableFrom(type.FieldType))
                 .Where(fi => fi.GetValue(this) == null)
                 .ToList()
-                .ForEach(nullField => Log.Error("ExperimentListEntry." + nullField.Name + " is not set"));
+                .ForEach(nullField => Log.Error("ExperimentListItem." + nullField.Name + " is not set"));
         }
 
 

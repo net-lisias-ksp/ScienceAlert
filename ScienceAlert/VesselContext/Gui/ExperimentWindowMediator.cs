@@ -176,7 +176,7 @@ namespace ScienceAlert.VesselContext.Gui
             var buttonEnabled = hasExperimentalValue && newState.Onboard &&
                                 newState.ConditionsMet && newState.Available;
 
-            var info = new ExperimentEntryInfo(
+            var info = new EntryDisplayStatus(
                     /* button title */              exp.experimentTitle,
                     /* alerting for this exp? */    AlertCache.GetStatus(identifier) != ExperimentAlertStatus.None,
                     /* recovery value */            newState.RecoveryValue,

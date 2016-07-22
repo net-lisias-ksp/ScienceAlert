@@ -93,7 +93,7 @@ namespace ScienceAlert.Core
 
             builders.Sort(new PriorityComparer());
 
-            Log.Verbose("Listing builders of " + typeof (TInterfaceOfCompositeAndBuilders).Name +
+            Log.Verbose("Listing builders of " + typeof (TInterfaceOfCompositeAndBuilders).FullName +
                         " in order of priority");
             foreach (var b in builders)
                 Log.Verbose("Builder: " + b.GetType().Name);

@@ -158,6 +158,8 @@ namespace ScienceAlert.Core
 
             injectionBinder.Bind<SignalSharedConfigurationSaving>().ToSingleton().CrossContext();
             injectionBinder.Bind<SignalExperimentAlertChanged>().ToSingleton().CrossContext();
+
+            injectionBinder.Bind<LocalConfiguration>().ToSingleton().CrossContext();
         }
 
 
@@ -172,10 +174,20 @@ namespace ScienceAlert.Core
                     IObjectFromConfigNodeBuilder<ExperimentConfiguration, ConfigNode, IInjectionBinder>, 
                     CompositeObjectFromConfigNodeBuilder<ExperimentConfiguration, ConfigNode, IInjectionBinder>>
                     >()
-                .To<CommandCreateBuilderComposite<IObjectFromConfigNodeBuilder<ISensorRule, ConfigNode, IInjectionBinder>, CompositeObjectFromConfigNodeBuilder<ISensorRule, ConfigNode, IInjectionBinder>>>()
-                .To<CommandCreateBuilderComposite<IObjectFromConfigNodeBuilder<IExperimentSensor, ExperimentConfiguration, IInjectionBinder>, CompositeObjectFromConfigNodeBuilder<IExperimentSensor, ExperimentConfiguration, IInjectionBinder>>>()
-                .To<CommandCreateBuilderComposite<IObjectFromConfigNodeBuilder<IExperimentTrigger, ExperimentConfiguration, IInjectionBinder>, CompositeObjectFromConfigNodeBuilder<IExperimentTrigger, ExperimentConfiguration, IInjectionBinder>>>()
+                .To<CommandCreateBuilderComposite<
+                        IObjectFromConfigNodeBuilder<ISensorRule, ConfigNode, IInjectionBinder>, 
+                        CompositeObjectFromConfigNodeBuilder<ISensorRule, ConfigNode, IInjectionBinder>>
+                    >()
+                .To<CommandCreateBuilderComposite<
+                        IObjectFromConfigNodeBuilder<IExperimentSensor, ExperimentConfiguration, IInjectionBinder>, 
+                        CompositeObjectFromConfigNodeBuilder<IExperimentSensor, ExperimentConfiguration, IInjectionBinder>>
+                    >()
+                .To<CommandCreateBuilderComposite<
+                        IObjectFromConfigNodeBuilder<IExperimentTrigger, ExperimentConfiguration, IInjectionBinder>, 
+                        CompositeObjectFromConfigNodeBuilder<IExperimentTrigger, ExperimentConfiguration, IInjectionBinder>>
+                    >()
                 .To<CommandCreateExperimentConfigurations>()
+                .To<CommandLoadLocalConfiguration>()
                 .To<CommandLoadSharedConfiguration>()
                 .To<CommandConfigureGameEvents>()
                 .To<CommandCreateAppLauncherView>()
@@ -184,6 +196,7 @@ namespace ScienceAlert.Core
 
 
             commandBinder.Bind<SignalScenarioModuleSave>()
+                .To<CommandSaveLocalConfiguration>()
                 .To<CommandSaveSharedConfiguration>();
 
             commandBinder.Bind<SignalStart>()
@@ -338,28 +351,40 @@ namespace ScienceAlert.Core
 
             var supportedTypeQuery = new GetSurrogateSupportedTypes();
             var surrogateQuery = new GetSerializationSurrogates(supportedTypeQuery);
-            var serializableFieldQuery = new GetObjectFieldsIncludingBaseTypes();
+            var serializableFieldQuery = new GetObjectFieldsIncludingBaseTypes(); // this allows private fields that would normally not be accessible to derived classes to be included
 
+            // this selector will try to find a surrogate for the serialized type
             var standardSerializerSelector =
                 new SerializerSelector(
                     new CompositeSurrogateProvider(
-                        new GenericSurrogateProvider(surrogateQuery, supportedTypeQuery, assembliesToScanForSurrogates),
+                        new GenericSurrogateProvider(surrogateQuery, supportedTypeQuery, assembliesToScanForSurrogates), // selects open generic surrogates (so a surrogate that supports List<T> can be written once rather than require a concrete one for every type)
                         new SurrogateProvider(surrogateQuery, supportedTypeQuery, assembliesToScanForSurrogates)));
 
-
+            // this selector will look at the serialized type and if it implements its own serialization methods, it will use those first
+            // even if there's a surrogate for it
             var preferNativeSelector = new PreferNativeSerializer(standardSerializerSelector);
 
+
+            // here the two selectors are combined: use the inboard serialization methods if the type implements IReeperPersistent, otherwise
+            // try to find a surrogate
             var selectorOrder = new CompositeSerializerSelector(
                 preferNativeSelector,          // always prefer native serializer first 
                 standardSerializerSelector);   // otherwise, find any surrogate
 
 
+            // the above selectors try to choose a surrogate or native serializer for a given type, but we'll want to be
+            // also/or be able to serialize fields as well
             var includePersistentFieldsSelector = new SerializerSelectorDecorator(
                 selectorOrder,
                 s => Maybe<IConfigNodeItemSerializer>.With(new FieldSerializer(s, serializableFieldQuery)));
 
+            // finally, add yet another decorator which will call IPersistenceSave/Load on any type serialized
+            var selectorWhichCallsPersistenceMethods = new SerializerSelectorDecorator(
+                includePersistentFieldsSelector,
+                s => Maybe<IConfigNodeItemSerializer>.With(new PersistenceMethodCaller(s)));
+
             injectionBinder.Bind<IConfigNodeSerializer>()
-                .To(new ConfigNodeSerializer(includePersistentFieldsSelector))
+                .To(new ConfigNodeSerializer(selectorWhichCallsPersistenceMethods))
                 .CrossContext();
         }
 

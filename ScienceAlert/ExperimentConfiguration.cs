@@ -6,6 +6,26 @@ using ReeperCommon.Containers;
 
 namespace ScienceAlert
 {
+    //interface ITriggerDefinitionProvider
+    //{
+    //    Maybe<string> TriggerDefinition { get; }
+    //}
+
+    //interface ISensorDefinitionProvider
+    //{
+    //    Maybe<ConfigNode> SensorDefinition { get; }
+    //}
+
+    //class ExperimentSettings : 
+    //    ITriggerDefinitionProvider, 
+    //    ISensorDefinitionProvider
+    //{
+    //    public Maybe<string> TriggerDefinition { get; private set; }
+    //    public Maybe<ConfigNode> SensorDefinition { get; private set; }
+
+
+    //}
+
     public class ExperimentConfiguration 
     {
         public ScienceExperiment Experiment { get; private set; }

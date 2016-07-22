@@ -21,6 +21,7 @@ namespace ScienceAlert.UI.OptionsWindow
         private float _currentTextValue = float.MinValue;
         private readonly StringBuilder _builder = new StringBuilder();
 
+        // ReSharper disable once UnusedMember.Local
         private void OnEnable()
         {
             GetComponent<Slider>().Do(s => UpdateTextValue(s.value));

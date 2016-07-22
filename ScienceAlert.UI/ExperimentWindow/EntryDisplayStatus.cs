@@ -2,7 +2,7 @@
 
 namespace ScienceAlert.UI.ExperimentWindow
 {
-    public struct ExperimentEntryInfo
+    public struct EntryDisplayStatus
     {
         public string ExperimentTitle { get; private set; }
         public float RecoveryValue { get; private set; }
@@ -19,7 +19,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         public bool LabLit { get; private set; }
 
 
-        public ExperimentEntryInfo(
+        public EntryDisplayStatus(
             string title, 
             bool alert,
             float recoveryValue, 

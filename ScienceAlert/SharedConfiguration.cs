@@ -10,7 +10,7 @@ namespace ScienceAlert
     /// Shared configuration between all saves
     /// </summary>
 // ReSharper disable once ClassNeverInstantiated.Global
-    public class SharedConfiguration : ISharedConfigurationFilePathProvider
+    public class SharedConfiguration : ISharedConfigurationFilePathProvider // todo: separate interface for window configurations mapped to this object
     {
         public const string NodeName = "ScienceAlertSharedConfiguration";
         public const string FileName = "ScienceAlert.cfg";

@@ -48,12 +48,13 @@
     <Compile Include="EnableImageOnMouseOver.cs" />
     <Compile Include="ExperimentIdentifier.cs" />
     <Compile Include="ExperimentWindow\AlertIndicatorController.cs" />
-    <Compile Include="ExperimentWindow\ExperimentListEntry.cs" />
+    <Compile Include="ExperimentWindow\ExperimentListItem.cs" />
     <Compile Include="ExperimentWindow\ExperimentWindowView.cs" />
-    <Compile Include="ExperimentWindow\ExperimentEntryInfo.cs" />
+    <Compile Include="ExperimentWindow\EntryDisplayStatus.cs" />
     <Compile Include="ExperimentWindow\Signals.cs" />
     <Compile Include="HideTargetsOnMouseOver.cs" />
     <Compile Include="OptionsWindow\ExpandableButtonController.cs" />
+    <Compile Include="OptionsWindow\OptionsListItem.cs" />
     <Compile Include="OptionsWindow\OptionsWindowView.cs" />
     <Compile Include="OptionsWindow\MatchTextWithNumericValue.cs" />
     <Compile Include="OptionsWindow\ThresholdScaleController.cs" />

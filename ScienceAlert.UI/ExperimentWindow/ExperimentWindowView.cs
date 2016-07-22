@@ -35,11 +35,11 @@ namespace ScienceAlert.UI.ExperimentWindow
         [NonSerialized, HideInInspector] public readonly Signal<IExperimentIdentifier, ExperimentIndicatorTooltipType> ChangeTooltip = 
             new Signal<IExperimentIdentifier, ExperimentIndicatorTooltipType>();
         
-        [SerializeField] private ExperimentListEntry _listItemPrefab;
+        [SerializeField] private ExperimentListItem _listItemPrefab;
         [SerializeField] private RectTransform _list;
 
-        private readonly Dictionary<IExperimentIdentifier, ExperimentListEntry> _listEntries =
-            new Dictionary<IExperimentIdentifier, ExperimentListEntry>();
+        private readonly Dictionary<IExperimentIdentifier, ExperimentListItem> _listEntries =
+            new Dictionary<IExperimentIdentifier, ExperimentListItem>();
 
 
         protected override void Start()
@@ -56,17 +56,17 @@ namespace ScienceAlert.UI.ExperimentWindow
 
 
         // ReSharper disable once UnusedMember.Global
-        public void UpdateExperimentEntry([NotNull] IExperimentIdentifier identifier, ExperimentEntryInfo entryInfo, bool resort)
+        public void UpdateExperimentEntry([NotNull] IExperimentIdentifier identifier, EntryDisplayStatus entryDisplayStatus, bool resort)
         {
-            UpdateExperimentListItem(GetListItem(identifier), entryInfo);
+            UpdateExperimentListItem(GetListItem(identifier), entryDisplayStatus);
         }
 
 
-        private ExperimentListEntry GetListItem([NotNull] IExperimentIdentifier identifier)
+        private ExperimentListItem GetListItem([NotNull] IExperimentIdentifier identifier)
         {
             if (identifier == null) throw new ArgumentNullException("identifier");
 
-            ExperimentListEntry result;
+            ExperimentListItem result;
 
             if (_listEntries.TryGetValue(identifier, out result))
                 return result;
@@ -80,7 +80,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         private void AddNewListItem(IExperimentIdentifier identifier)
         {
             if (_listEntries.ContainsKey(identifier))
-                throw new ArgumentException("List already contains an entry with identifier '" + identifier + "'",
+                throw new ArgumentException("List already contains an item with identifier '" + identifier + "'",
                     "identifier");
 
             var instance = Instantiate(_listItemPrefab);
@@ -120,23 +120,23 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
-        private static void UpdateExperimentListItem([NotNull] ExperimentListEntry entry, ExperimentEntryInfo info)
+        private static void UpdateExperimentListItem([NotNull] ExperimentListItem item, EntryDisplayStatus displayStatus)
         {
-            if (entry == null) throw new ArgumentNullException("entry");
+            if (item == null) throw new ArgumentNullException("item");
 
-            entry.Enabled = info.ButtonEnabled;
-            entry.Text = info.ExperimentTitle;
+            item.Enabled = displayStatus.ButtonEnabled;
+            item.Text = displayStatus.ExperimentTitle;
 
-            entry.RecoveryValue = info.RecoveryValue;
-            entry.RecoveryValueLit = info.RecoveryLit;
+            item.RecoveryValue = displayStatus.RecoveryValue;
+            item.RecoveryValueLit = displayStatus.RecoveryLit;
 
-            entry.TransmissionValue = info.TransmissionValue;
-            entry.TransmissionValueLit = info.TransmissionLit;
+            item.TransmissionValue = displayStatus.TransmissionValue;
+            item.TransmissionValueLit = displayStatus.TransmissionLit;
 
-            entry.LabValue = info.LabValue;
-            entry.LabValueLit = info.LabLit;
+            item.LabValue = displayStatus.LabValue;
+            item.LabValueLit = displayStatus.LabLit;
 
-            entry.gameObject.SetActive(info.ButtonDisplayed);
+            item.gameObject.SetActive(displayStatus.ButtonDisplayed);
         }
     }
 }

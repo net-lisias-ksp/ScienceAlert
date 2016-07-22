@@ -39,6 +39,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="KSPAssets">
+      <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\KSPAssets.dll</HintPath>
+    </Reference>
     <Reference Include="KSPCore">
       <HintPath>..\..\..\Kerbal Space Program\KSP_Data\Managed\KSPCore.dll</HintPath>
     </Reference>
@@ -64,8 +67,11 @@
     <Compile Include="Core\CommandCreateExperimentConfigurations.cs" />
     <Compile Include="Core\CommandCreateBuilderComposite.cs" />
     <Compile Include="CompositeObjectFromConfigNodeBuilder.cs" />
+    <Compile Include="Core\CommandLoadLocalConfiguration.cs" />
+    <Compile Include="Core\CommandSaveLocalConfiguration.cs" />
     <Compile Include="Core\DefaultExperimentConfigurationBuilder.cs" />
     <Compile Include="Game\CrewTraitNames.cs" />
+    <Compile Include="LocalConfiguration.cs" />
     <Compile Include="VesselContext\Experiments\DefaultConfigNotFoundException.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\DefaultExperimentSensorBuilder.cs" />
     <Compile Include="VesselContext\Experiments\Sensors\EvaExperimentSensorBuilder.cs" />
