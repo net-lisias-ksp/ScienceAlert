@@ -121,6 +121,7 @@
     <Compile Include="VesselContext\Experiments\Triggers\NoAvailableScienceModuleException.cs" />
     <Compile Include="VesselContext\Experiments\Triggers\NoSuitableEvaCandidateFoundException.cs" />
     <Compile Include="VesselContext\Experiments\Triggers\TriggerIsBusyException.cs" />
+    <Compile Include="VesselContext\Gui\OptionsWindowListItemMediator.cs" />
     <Compile Include="VesselContext\Gui\WindowSerializationSurrogate.cs" />
     <Compile Include="VesselContext\Gui\TooltipWindowMediator.cs" />
     <Compile Include="VesselContext\KspExperimentIdentifier.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,11 +8,15 @@ using ReeperCommon.Events;
 using ReeperCommon.Logging;
 using ReeperKSP.Serialization;
 // ReSharper disable FieldCanBeMadeReadOnly.Local
+// ReSharper disable CollectionNeverUpdated.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace ScienceAlert
 {
-    public class LocalConfiguration : IPersistenceLoad, IPersistenceSave
+    public class LocalConfiguration : IPersistenceLoad, IPersistenceSave, IEnumerable<LocalConfiguration.ExperimentSettings>
     {
+        public const string LocalConfigurationScenarioModuleNodeName = "Configuration";
+
         public class ExperimentSettings : IPersistenceLoad, IPersistenceSave
         {
             public enum Setting
@@ -162,12 +167,14 @@ namespace ScienceAlert
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
         [ReeperPersistent] private List<ExperimentSettings> _experimentSettings = new List<ExperimentSettings>();
 
+
         public void PersistenceLoad()
         {
             Log.Warning("LocalConfiguration.PersistenceLoad");
 
-            AddDefaultSettingsForExperimentsWithoutThem();
+            GenerateDefaultSettingsForMissingExperiments();
         }
+
 
         public void PersistenceSave()
         {
@@ -176,7 +183,7 @@ namespace ScienceAlert
         }
 
 
-        private void AddDefaultSettingsForExperimentsWithoutThem()
+        public void GenerateDefaultSettingsForMissingExperiments()
         {
             var experimentsWithSettings =
                 _experimentSettings
@@ -221,6 +228,16 @@ namespace ScienceAlert
                     ++i;
                 }
             }
+        }
+
+        public IEnumerator<ExperimentSettings> GetEnumerator()
+        {
+            return _experimentSettings.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _experimentSettings.GetEnumerator();
         }
     }
 }

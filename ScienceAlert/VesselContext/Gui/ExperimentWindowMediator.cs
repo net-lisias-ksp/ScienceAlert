@@ -83,15 +83,6 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        // some deserialized window positions just kicked in and might not have made it
-        // to the shared configuration (as they aren't respected until the main UI becomes visible, which when entering
-        // the scene is often AFTER the game has re-saved)
-        private void OnViewForcefullyRepositioned()
-        {
-
-        }
-
-
         private void SaveViewConfiguration()
         {
             try
@@ -111,9 +102,8 @@ namespace ScienceAlert.VesselContext.Gui
             }
         }
 
-        // when flight scene first starts, the main canvas won't be enabled which will cause anchored position
-        // to be ignored apparently. The load signal might therefore come a bit too early and we'll have to wait
-        // before setting values
+
+
         private void OnGuiLoadSignal()
         {
             try
@@ -126,42 +116,7 @@ namespace ScienceAlert.VesselContext.Gui
             {
                 Log.Error("Error while loading view configuration: " + e);
             }
-
-            //StartCoroutine(LoadViewConfig());
-        }
-
-        //private IEnumerator LoadViewConfig()
-        //{
-        //    if (!Configuration.HasData)
-        //    {
-        //        Log.Warning("No experiment view configuration data to load.");
-        //        yield break;
-        //    }
-
-        //    var canvas = (transform.parent ?? transform).GetComponentInParent<Canvas>();
-        //    var configSnapshot = Configuration.CreateCopy(); // theoretically possible that data might change in the meantime in a perfect storm of conditions
-        //                                                     // which would cause the default values to immediately overwrite the values we WERE going to use
-
-        //    if (canvas == null)
-        //        yield break;
-
-        //    Log.Warning("Snapshot: " + configSnapshot.ToSafeString());
-        //    Log.Warning("Assigned canvas: " + canvas.name + " while expecting " +
-        //                UIMasterController.Instance.mainCanvas.name);
-
-        //    yield return StartCoroutine(CallbackUtil.HoldUntil(() => canvas.enabled));
-
-        //    try
-        //    {
-        //        var view = View;
-        //        Serializer.LoadObjectFromConfigNode(ref view, configSnapshot);
-        //        Log.Verbose("Loading experiment view configuration");
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Log.Error("Error while loading view configuration: " + e);
-        //    }
-        //}
+       }
 
 
         private void OnSensorStatusChanged(SensorStatusChange status)
@@ -189,7 +144,7 @@ namespace ScienceAlert.VesselContext.Gui
                     /* enabled? */                  buttonEnabled
                     );
 
-            View.UpdateExperimentEntry(identifier, info, true);
+            View.UpdateExperimentEntry(identifier, info);
         }
 
 

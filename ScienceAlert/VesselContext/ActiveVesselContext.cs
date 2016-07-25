@@ -78,6 +78,9 @@ namespace ScienceAlert.VesselContext
             mediationBinder.BindView<TooltipWindowView>()
                 .ToMediator<TooltipWindowMediator>();
 
+            mediationBinder.BindView<OptionsListItemView>()
+                .ToMediator<OptionsWindowListItemMediator>();
+
             injectionBinder.Bind<ITemporaryBindingFactory>().To<TemporaryBindingFactory>().ToSingleton();
             injectionBinder.Bind<IGameFactory>().Bind<KspFactory>().To<KspFactory>().ToSingleton();
 

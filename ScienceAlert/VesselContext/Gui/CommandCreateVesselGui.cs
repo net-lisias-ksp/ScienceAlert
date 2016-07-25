@@ -86,7 +86,7 @@ namespace ScienceAlert.VesselContext.Gui
             {
                 Log.Error("Failed to create views: " + createViewsRoutine.Error.Value);
 
-                _criticalShutdownSignal.Dispatch();
+                _criticalShutdownSignal.Dispatch(); // we can't be certain the error hasn't ruined the context so use the hard shutdown
                 Cancel();
                 Release();
                 yield break;
@@ -98,6 +98,14 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
+        private static void DestroyWindowInstances()
+        {
+            Object.FindObjectOfType<ExperimentWindowView>().Do(Object.Destroy);
+            Object.FindObjectOfType<OptionsWindowView>().Do(Object.Destroy);
+            Object.FindObjectOfType<TooltipWindowView>().Do(Object.Destroy);
+        }
+
+
         private IEnumerator CreateViews()
         {
             var experimentWindow = Object.Instantiate(_experimentWindow);
@@ -106,16 +114,21 @@ namespace ScienceAlert.VesselContext.Gui
 
             if (experimentWindow == null || optionsWindow == null || tooltipWindow == null)
             {
-                experimentWindow.Do(Object.Destroy);
-                optionsWindow.Do(Object.Destroy);
-                tooltipWindow.Do(Object.Destroy);
-
+                DestroyWindowInstances();
                 throw new FailedToLoadAssetException("One or more view prefabs failed to load.");
             }
 
-            _context.AddView(experimentWindow);
-            _context.AddView(optionsWindow);
-            _context.AddView(tooltipWindow);
+            try
+            {
+                _context.AddView(experimentWindow);
+                _context.AddView(optionsWindow);
+                _context.AddView(tooltipWindow);
+            }
+            catch (Exception e)
+            {
+                DestroyWindowInstances();
+                throw new Exception("could not add a View to context", e); // todo: better exception
+            }
 
             var dialogCanvas = UIMasterController.Instance.dialogCanvas.transform as RectTransform;
             var tooltipCanvas = UIMasterController.Instance.tooltipCanvas.transform as RectTransform;
@@ -138,6 +151,7 @@ namespace ScienceAlert.VesselContext.Gui
 
             yield return null; // wait for views to start
         }
+
 
 
         private IEnumerator LoadViewAssets()

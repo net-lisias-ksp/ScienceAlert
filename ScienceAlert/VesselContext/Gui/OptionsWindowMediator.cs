@@ -1,4 +1,5 @@
-﻿using ReeperCommon.Containers;
+﻿using System.Linq;
+using ReeperCommon.Containers;
 using ReeperCommon.Logging;
 using strange.extensions.mediation.impl;
 using ScienceAlert.UI.OptionsWindow;
@@ -7,6 +8,8 @@ namespace ScienceAlert.VesselContext.Gui
 {
     class OptionsWindowMediator : Mediator
     {
+        [Inject] public LocalConfiguration Configuration { get; set; }
+
         [Inject] public OptionsWindowView View { get; set; }
         [Inject] public SignalContextIsBeingDestroyed ContextDestroyed { get; set; }
 
@@ -19,6 +22,9 @@ namespace ScienceAlert.VesselContext.Gui
 
             // other signals
             ContextDestroyed.AddOnce(OnContextDestroyed);
+
+
+            CreateOptionsEntriesForConfiguration();
         }
 
 
@@ -27,6 +33,25 @@ namespace ScienceAlert.VesselContext.Gui
             View.CloseButtonClicked.RemoveListener(OnCloseButtonClicked);
 
             base.OnRemove();
+        }
+
+
+        private void CreateOptionsEntriesForConfiguration()
+        {
+            foreach (var setting in Configuration.Where(c => c.Experiment.HasValue))
+                View.AddEntry(
+                    new OptionDisplayStatus(
+                        new KspExperimentIdentifier(setting.Experiment.Value),
+                        setting.Experiment.Value.experimentTitle,
+                        setting.AlertsEnabled,
+                        setting.StopWarpOnAlert,
+                        setting.AlertOnRecoverable,
+                        setting.AlertOnTransmittable,
+                        setting.AlertOnLabValue,
+                        setting.SoundOnAlert,
+                        setting.AnimationOnAlert,
+                        setting.SubjectResearchThreshold,
+                        setting.IgnoreThreshold));
         }
 
 

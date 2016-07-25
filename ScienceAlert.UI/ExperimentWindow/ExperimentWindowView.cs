@@ -56,7 +56,7 @@ namespace ScienceAlert.UI.ExperimentWindow
 
 
         // ReSharper disable once UnusedMember.Global
-        public void UpdateExperimentEntry([NotNull] IExperimentIdentifier identifier, EntryDisplayStatus entryDisplayStatus, bool resort)
+        public void UpdateExperimentEntry([NotNull] IExperimentIdentifier identifier, EntryDisplayStatus entryDisplayStatus)
         {
             UpdateExperimentListItem(GetListItem(identifier), entryDisplayStatus);
         }

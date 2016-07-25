@@ -8,6 +8,8 @@ using UnityEngine;
 
 namespace ScienceAlert
 {
+    // Used in case something has blown up. All contexts will be untrustworthy (so dispatching signals is likely to fail), so
+    // this alternative mechanism is used for code that absolutely must run when shutting down if something broke
     class CriticalShutdownEventRunner : ICriticalShutdownEvent
     {
         private static readonly List<Action> Subscribers = new List<Action>();

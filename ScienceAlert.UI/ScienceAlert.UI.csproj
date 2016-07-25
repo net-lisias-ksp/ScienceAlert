@@ -54,7 +54,8 @@
     <Compile Include="ExperimentWindow\Signals.cs" />
     <Compile Include="HideTargetsOnMouseOver.cs" />
     <Compile Include="OptionsWindow\ExpandableButtonController.cs" />
-    <Compile Include="OptionsWindow\OptionsListItem.cs" />
+    <Compile Include="OptionsWindow\OptionDisplayStatus.cs" />
+    <Compile Include="OptionsWindow\OptionsListItemView.cs" />
     <Compile Include="OptionsWindow\OptionsWindowView.cs" />
     <Compile Include="OptionsWindow\MatchTextWithNumericValue.cs" />
     <Compile Include="OptionsWindow\ThresholdScaleController.cs" />
