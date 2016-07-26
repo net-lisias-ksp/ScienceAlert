@@ -49,7 +49,24 @@ namespace ScienceAlert.UI.OptionsWindow
             SubjectResearchThreshold = status.SubjectResearchThreshold;
             ReportMinimumThreshold = status.ReportMinimumThreshold;
             Title = status.ExperimentTitle;
+
+            Log.Warning("Initialized " + Experiment);
+
+            foreach (var toggle in GetComponentsInChildren<Toggle>(true))
+            {
+                Log.Warning("Number of event listeners for " + toggle.name + " is " +
+                            toggle.onValueChanged.GetPersistentEventCount());
+
+                for (int i = 0; i < toggle.onValueChanged.GetPersistentEventCount(); ++i)
+                {
+                    Log.Warning("#" + i + ": " + toggle.onValueChanged.GetPersistentMethodName(i));
+                    if (toggle.onValueChanged.GetPersistentTarget(i) == null) Log.Error("Contains null target!");
+                    else Log.Warning(" Has target: " + toggle.onValueChanged.GetPersistentTarget(i).name);
+
+                }
+            }
         }
+
 
         protected override void Start()
         {
@@ -57,7 +74,9 @@ namespace ScienceAlert.UI.OptionsWindow
             base.Start();
         }
 
+
         public IExperimentIdentifier Experiment { get; private set; }
+
 
         public string Title
         {
@@ -65,11 +84,13 @@ namespace ScienceAlert.UI.OptionsWindow
             set { _headerText.text = value; }
         }
 
+
         public bool AlertsEnabled
         {
             get { return _enableAlertsToggle.isOn; }
             set { _enableAlertsToggle.isOn = value; }
         }
+
 
         public bool StopWarp
         {
@@ -77,11 +98,13 @@ namespace ScienceAlert.UI.OptionsWindow
             set { _stopWarpToggle.isOn = value; }
         }
 
+
         public bool RecoveryAlerts
         {
             get { return _recoveryToggle.isOn; }
             set { _recoveryToggle.isOn = value; }
         }
+
 
         public bool TransmissionAlerts
         {
@@ -89,11 +112,13 @@ namespace ScienceAlert.UI.OptionsWindow
             set { _transmissionToggle.isOn = value; }
         }
 
+
         public bool LabAlerts
         {
             get { return _labToggle.isOn; }
             set { _labToggle.isOn = value; }
         }
+
 
         public bool SoundOnAlert
         {
@@ -101,11 +126,13 @@ namespace ScienceAlert.UI.OptionsWindow
             set { _soundToggle.isOn = value; }
         }
 
+
         public bool AnimationOnAlert
         {
             get { return _animationToggle.isOn; }
             set { _animationToggle.isOn = value; }
         }
+
 
         public float SubjectResearchThreshold
         {
@@ -113,19 +140,26 @@ namespace ScienceAlert.UI.OptionsWindow
             set { _subjectThresholdSlider.value = value; }
         }
 
+
         public float ReportMinimumThreshold
         {
             get { return _minimumThresholdSlider.value; }
             set { _minimumThresholdSlider.value = value; }
         }
 
+
         // UnityAction
-        public void OnEnableAlertsToggled(bool tf) { EnableAlertsSignal.Dispatch(tf); }
+        public void OnEnableAlertsToggled(bool tf)
+        {
+            Log.Warning("OnEnableAlertsToggled: " + tf);
+            EnableAlertsSignal.Dispatch(tf);
+        }
 
 
         // UnityAction
         public void OnStopWarpOnAlertToggled(bool tf)
         {
+            Log.Warning("OnStopWarpOnAlertToggled: " + tf);
             StopWarpOnAlertSignal.Dispatch(tf);
         }
   
@@ -134,6 +168,7 @@ namespace ScienceAlert.UI.OptionsWindow
         // UnityAction
         public void OnRecoveryAlertToggled(bool tf)
         {
+            Log.Warning("OnRecoveryAlertToggled: " + tf);
             RecoveryAlertSignal.Dispatch(tf);
         }
 
@@ -141,6 +176,7 @@ namespace ScienceAlert.UI.OptionsWindow
         // UnityAction
         public void OnTransmissionAlertToggled(bool tf)
         {
+            Log.Warning("OnTransmissionAlertToggled: " + tf);
             TransmissionAlertSignal.Dispatch(tf);
         }
 
@@ -148,6 +184,7 @@ namespace ScienceAlert.UI.OptionsWindow
         // UnityAction
         public void OnLabAlertToggled(bool tf)
         {
+            Log.Warning("OnLabAlertToggled: " + tf);
             LabAlertSignal.Dispatch(tf);
         }
 
@@ -155,6 +192,7 @@ namespace ScienceAlert.UI.OptionsWindow
         // UnityAction
         public void OnSoundOnAlertToggled(bool tf)
         {
+            Log.Warning("OnSoundOnAlertToggled: " + tf);
             SoundOnAlertSignal.Dispatch(tf);
         }
 
@@ -162,6 +200,7 @@ namespace ScienceAlert.UI.OptionsWindow
         // UnityAction
         public void OnAnimationOnAlertToggled(bool tf)
         {
+            Log.Warning("OnAnimationOnAlertToggled: " + tf);
             AnimationOnAlertSignal.Dispatch(tf);
         }
 
@@ -169,14 +208,18 @@ namespace ScienceAlert.UI.OptionsWindow
         // UnityAction
         public void OnSubjectResearchThresholdChanged(float newValue)
         {
+            Log.Warning("OnSubjectResearchThresholdChanged: " + newValue);
             SubjectResearchThresholdSignal.Dispatch(newValue);
         }
+
 
         // UnityAction
         public void OnReportScienceValueIgnoreThresholdChanged(float newValue)
         {
+            Log.Warning("OnReportScienceValueIgnoreThresholdChanged: " + newValue);
             ReportMinimumThresholdSignal.Dispatch(newValue);
         }
+
 
         public static class Factory
         {
@@ -191,7 +234,8 @@ namespace ScienceAlert.UI.OptionsWindow
                 var newEntry = Instantiate(prefab);
 
                 newEntry.Initialize(status);
-                
+
+                newEntry.gameObject.SetActive(true);
                 context.AddView(newEntry);
                 
                 return newEntry;

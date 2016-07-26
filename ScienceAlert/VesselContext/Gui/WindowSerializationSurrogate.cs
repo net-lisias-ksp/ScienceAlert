@@ -1,21 +1,17 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
 using JetBrains.Annotations;
-using KSP.UI;
 using ReeperCommon.Containers;
 using ReeperCommon.Logging;
-using ReeperCommon.Utilities;
 using ReeperKSP.Extensions;
 using ReeperKSP.Serialization;
-using ScienceAlert.UI;
 using ScienceAlert.UI.ExperimentWindow;
 using ScienceAlert.UI.OptionsWindow;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace ScienceAlert.VesselContext.Gui
 {
+    // ReSharper disable once UnusedMember.Global
     public class WindowSerializationSurrogate : 
         IConfigNodeItemSerializer<OptionsWindowView>,
         IConfigNodeItemSerializer<ExperimentWindowView>
@@ -57,10 +53,12 @@ namespace ScienceAlert.VesselContext.Gui
 
             config.Set("position", KSPUtil.WriteVector(rtToSerialize.anchoredPosition));
             config.Set("size", KSPUtil.WriteVector(rtToSerialize.sizeDelta));
+            config.Set("visible", mbTarget.gameObject.activeSelf);
         }
 
 
-        public void Deserialize(Type type, ref object target, string key, ConfigNode config, IConfigNodeSerializer serializer)
+        public void Deserialize(Type type, ref object target, string key, ConfigNode config,
+            IConfigNodeSerializer serializer)
         {
             Log.Warning(GetType().Name + " deserialize");
             Log.Warning("Deserializing from: " + config.ToSafeString());
@@ -74,7 +72,8 @@ namespace ScienceAlert.VesselContext.Gui
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("must not be empty or null", "key");
 
-            var rtToDeserialize = target.With(tar => tar as MonoBehaviour).With(mb => mb.gameObject.GetComponent<RectTransform>());
+            var rtToDeserialize =
+                target.With(tar => tar as MonoBehaviour).With(mb => mb.gameObject.GetComponent<RectTransform>());
 
             if (rtToDeserialize == null)
                 throw new ArgumentException("Expected an attached RectTransform on " + type.Name);
@@ -86,6 +85,14 @@ namespace ScienceAlert.VesselContext.Gui
             config.GetValueEx("size")
                 .With(KSPUtil.ParseVector2)
                 .Do(s => rtToDeserialize.sizeDelta = s);
+
+            config.GetValueEx("visible")
+                .With<string, bool>(s =>
+                {
+                    bool result;
+                    return !Boolean.TryParse(s, out result) || result;
+                })
+                .Do(b => rtToDeserialize.gameObject.SetActive(b));
         }
     }
 }

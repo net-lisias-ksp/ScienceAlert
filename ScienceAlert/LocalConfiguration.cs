@@ -60,11 +60,13 @@ namespace ScienceAlert
             // it's possible for the experiment this entry is for no longer exists (mod was removed, experiment disabled by a patch, etc)
             public Maybe<ScienceExperiment> Experiment { get; private set; }
 
+
             public bool AlertsEnabled
             {
                 get { return _alertsEnabled; }
                 set { SetParameter(Setting.EnableAlerts, ref _alertsEnabled, value); }
             }
+
 
             public bool StopWarpOnAlert
             {
@@ -72,11 +74,13 @@ namespace ScienceAlert
                 set { SetParameter(Setting.StopWarpOnAlert, ref _stopWarpOnAlert, value); }
             }
 
+
             public bool AlertOnRecoverable
             {
                 get { return _alertOnRecoverable; }
                 set { SetParameter(Setting.AlertOnRecoverable, ref _alertOnRecoverable, value); }
             }
+
 
             public bool AlertOnTransmittable
             {
@@ -84,11 +88,13 @@ namespace ScienceAlert
                 set { SetParameter(Setting.AlertOnTransmittable, ref _alertOnTransmittable, value); }
             }
 
+
             public bool AlertOnLabValue
             {
                 get { return _alertOnLabValue; }
                 set { SetParameter(Setting.AlertOnLabValue, ref _alertOnLabValue, value); }
             }
+
 
             public bool SoundOnAlert
             {
@@ -96,17 +102,20 @@ namespace ScienceAlert
                 set { SetParameter(Setting.SoundOnAlert, ref _soundOnAlert, value); }
             }
 
+
             public bool AnimationOnAlert
             {
                 get { return _animationOnAlert; }
                 set { SetParameter(Setting.AnimationOnAlert, ref _animationOnAlert, value); }
             }
 
+
             public float SubjectResearchThreshold
             {
                 get { return _subjectResearchThreshold; }
                 set { SetParameter(Setting.ResearchThreshold, ref _subjectResearchThreshold, value); }
             }
+
 
             public float IgnoreThreshold
             {
@@ -121,8 +130,12 @@ namespace ScienceAlert
                 var changed = existing.Equals(newValue);
                 existing = newValue;
 
-                if (changed) Changed.Fire(which);
+                if (!changed) return;
+
+                Changed.Fire(which);
+                Log.Verbose("ExperimentSetting changed: " + which + " for " + _experimentId);
             }
+
 
             public void PersistenceLoad()
             {

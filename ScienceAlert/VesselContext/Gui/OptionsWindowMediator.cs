@@ -24,7 +24,7 @@ namespace ScienceAlert.VesselContext.Gui
             ContextDestroyed.AddOnce(OnContextDestroyed);
 
 
-            CreateOptionsEntriesForConfiguration();
+            CreateOptionEntriesForConfiguration();
         }
 
 
@@ -36,7 +36,7 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        private void CreateOptionsEntriesForConfiguration()
+        private void CreateOptionEntriesForConfiguration()
         {
             foreach (var setting in Configuration.Where(c => c.Experiment.HasValue))
                 View.AddEntry(
