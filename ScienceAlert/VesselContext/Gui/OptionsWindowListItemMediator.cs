@@ -20,13 +20,19 @@ namespace ScienceAlert.VesselContext.Gui
             base.OnRegister();
             Log.Warning("OptionsWindowListItemMediator.OnRegister");
 
-            if (Configuration == null) Log.Error("Configuration not set at this point");
-            if (View.Experiment == null) Log.Error("View experiment not set");
+            if (Configuration == null)
+            {
+                Log.Error("Configuration not set at this point");
+                return;
+            }
 
-            var maybeSetting =
-                Configuration.With(
-                    lc => lc.FirstOrDefault(es => es.Experiment.HasValue && View.Experiment.Equals(es.Experiment.Value.id)))
-                    .ToMaybe();
+            if (View.Experiment == null)
+            {
+                Log.Error("View experiment not set");
+                return;
+            }
+
+            var maybeSetting = Configuration[View.Experiment];
 
             if (!maybeSetting.HasValue) // wat? somebody screwed up, we shouldn't be creating options for experiments that don't actually exist
             {
@@ -37,7 +43,12 @@ namespace ScienceAlert.VesselContext.Gui
 
             var setting = maybeSetting.Value;
 
-            View.EnableAlertsSignal.AddListener(tf => setting.AlertsEnabled = tf);
+            View.EnableAlertsSignal.AddListener(tf =>
+            {
+                Log.Warning("Signal from View received; changing setting");
+                setting.AlertsEnabled = tf;
+                Log.Warning("Value is now " + setting.AlertsEnabled);
+            });
             View.StopWarpOnAlertSignal.AddListener(tf => setting.StopWarpOnAlert = tf);
             View.RecoveryAlertSignal.AddListener(tf => setting.AlertOnRecoverable = tf);
             View.TransmissionAlertSignal.AddListener(tf => setting.AlertOnTransmittable = tf);

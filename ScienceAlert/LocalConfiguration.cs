@@ -7,6 +7,8 @@ using ReeperCommon.Containers;
 using ReeperCommon.Events;
 using ReeperCommon.Logging;
 using ReeperKSP.Serialization;
+using ScienceAlert.UI;
+
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable CollectionNeverUpdated.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -48,12 +50,14 @@ namespace ScienceAlert
             // ReSharper disable once UnusedMember.Global
             public ExperimentSettings()
             {
+                Log.Error("ExperimentSettings()");
             }
 
             public ExperimentSettings(ScienceExperiment experiment)
             {
                 _experimentId = experiment.id;
                 Experiment = Maybe<ScienceExperiment>.With(experiment);
+                Log.Error("ExperimentSettings(" + experiment.id + ")");
             }
 
 
@@ -127,10 +131,16 @@ namespace ScienceAlert
             private void SetParameter<TParamType>(Setting which, ref TParamType existing, TParamType newValue)
                 where TParamType : struct
             {
-                var changed = existing.Equals(newValue);
+                Log.Warning("SetParameter called: current value " + existing + " new value " + newValue);
+
+                var changed = !existing.Equals(newValue);
                 existing = newValue;
 
-                if (!changed) return;
+                if (!changed)
+                {
+                    Log.Warning("No change");
+                    return;
+                }
 
                 Changed.Fire(which);
                 Log.Verbose("ExperimentSetting changed: " + which + " for " + _experimentId);
@@ -148,6 +158,7 @@ namespace ScienceAlert
             public void PersistenceSave()
             {
                 Log.Warning("ExperimentSettings.PersistenceSave " + _experimentId);
+                Log.Warning("  enabled? " + AlertsEnabled);
             }
 
 
@@ -251,6 +262,35 @@ namespace ScienceAlert
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _experimentSettings.GetEnumerator();
+        }
+
+        public Maybe<ExperimentSettings> this[string experimentId]
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(experimentId)) return Maybe<ExperimentSettings>.None;
+
+                foreach (var s in _experimentSettings)
+                    if (s.Experiment.HasValue &&
+                        string.Equals(s.Experiment.Value.id, experimentId, StringComparison.Ordinal))
+                        return Maybe<ExperimentSettings>.With(s);
+
+                return Maybe<ExperimentSettings>.None;
+            }
+        }
+
+        public Maybe<ExperimentSettings> this[IExperimentIdentifier id]
+        {
+            get
+            {
+                if (id == null) return Maybe<ExperimentSettings>.None;
+
+                foreach (var s in _experimentSettings)
+                    if (s.Experiment.HasValue && id.Equals(s.Experiment.Value.id))
+                        return Maybe<ExperimentSettings>.With(s);
+
+                return Maybe<ExperimentSettings>.None;
+            }
         }
     }
 }

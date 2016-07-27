@@ -33,37 +33,11 @@ namespace ScienceAlert.Core
         {
             Log.Verbose("Saving local configuration");
 
-            var lc = _localConfiguration;
-            _serializer.LoadObjectFromConfigNode(ref lc, _scenarioConfig);
-
             var serialized = _serializer.CreateConfigNodeFromObject(_localConfiguration);
 
-            Log.Warning("Serialized local configuration: " + serialized.ToSafeString());
-
-            _scenarioConfig.comment = "This is a comment";
+            //serialized.comment = "This is a comment";
 
             _scenarioConfig.SetNode(LocalConfiguration.LocalConfigurationScenarioModuleNodeName, serialized, true);
-
-            var ls = new LocalConfiguration();
-            injectionBinder.injector.Inject(ls, false);
-
-            
-
-            var fi = typeof (LocalConfiguration).GetField("_experimentSettings",
-                BindingFlags.Instance | BindingFlags.NonPublic);
-
-            var list = fi.GetValue(ls) as List<LocalConfiguration.ExperimentSettings>;
-
-            Log.Warning("Found " + list.Count + " list items in test configuration before deserialization");
-
-            if (!ReferenceEquals(list, fi.GetValue(ls) as List<LocalConfiguration.ExperimentSettings>))
-                Log.Warning("Different lists");
-
-            list = fi.GetValue(ls) as List<LocalConfiguration.ExperimentSettings>;
-
-            _serializer.LoadObjectFromConfigNode(ref ls, serialized);
-
-            Log.Warning("Found " + list.Count + " list items in loaded configuration");
         }
     }
 }
