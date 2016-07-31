@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
 using JetBrains.Annotations;
-using ReeperCommon.Containers;
-using ReeperCommon.Logging;
+using strange.extensions.context.api;
 using strange.extensions.signal.impl;
 using UnityEngine;
 using UnityEngine.UI;
+// ReSharper disable UnusedMember.Global
 
 #pragma warning disable 649
 
@@ -17,35 +14,23 @@ namespace ScienceAlert.UI.ExperimentWindow
     [Serializable, DisallowMultipleComponent]
     public class ExperimentWindowView : ManualRegistrationView
     {
-        public enum ExperimentIndicatorTooltipType
-        {
-            Alert,
-            Recovery,
-            Transmission,
-            Lab,
-            None
-        }
-
-
-        [NonSerialized, HideInInspector]
-        public readonly Signal<IExperimentIdentifier> DeployButtonClicked = new Signal<IExperimentIdentifier>();
+        [Inject(ContextKeys.CONTEXT)] public IContext Context { get; set; }
 
         [NonSerialized, HideInInspector] public readonly Signal CloseButtonClicked = new Signal();
 
-        [NonSerialized, HideInInspector] public readonly Signal<IExperimentIdentifier, ExperimentIndicatorTooltipType> ChangeTooltip = 
-            new Signal<IExperimentIdentifier, ExperimentIndicatorTooltipType>();
-        
-        [SerializeField] private ExperimentListItem _listItemPrefab;
+        [SerializeField] private ExperimentListItemView _listItemPrefab;
         [SerializeField] private RectTransform _list;
 
-        private readonly Dictionary<IExperimentIdentifier, ExperimentListItem> _listEntries =
-            new Dictionary<IExperimentIdentifier, ExperimentListItem>();
+        private readonly Dictionary<IExperimentIdentifier, ExperimentListItemView> _listEntries =
+            new Dictionary<IExperimentIdentifier, ExperimentListItemView>();
 
 
-        protected override void Start()
+        protected override void Awake()
         {
-            base.Start();
+            _listItemPrefab.parentViewForcesInjection = false;
             _listItemPrefab.gameObject.SetActive(false);
+
+            base.Awake();
         }
 
 
@@ -62,11 +47,11 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
-        private ExperimentListItem GetListItem([NotNull] IExperimentIdentifier identifier)
+        private ExperimentListItemView GetListItem([NotNull] IExperimentIdentifier identifier)
         {
             if (identifier == null) throw new ArgumentNullException("identifier");
 
-            ExperimentListItem result;
+            ExperimentListItemView result;
 
             if (_listEntries.TryGetValue(identifier, out result))
                 return result;
@@ -83,7 +68,9 @@ namespace ScienceAlert.UI.ExperimentWindow
                 throw new ArgumentException("List already contains an item with identifier '" + identifier + "'",
                     "identifier");
 
-            var instance = Instantiate(_listItemPrefab);
+            var instance = ExperimentListItemView.Factory.Create(_listItemPrefab, Context, identifier);
+
+            _listEntries.Add(identifier, instance);
 
             instance.transform.SetParent(_list, false);
             instance.transform.SetAsLastSibling();
@@ -91,26 +78,9 @@ namespace ScienceAlert.UI.ExperimentWindow
 
             // todo: sorting
 
-            _listEntries.Add(identifier, instance);
-
-            instance.Identifier = identifier;
-            instance.Deploy.AddListener(OnExperimentButtonClicked);
-            instance.MousedOverIndicator.AddListener(OnIndicatorMousedOver);
-
             LayoutRebuilder.MarkLayoutForRebuild(_list);
         }
 
-
-        private void OnExperimentButtonClicked(IExperimentIdentifier identifier)
-        {
-            DeployButtonClicked.Dispatch(identifier);
-        }
-
-
-        private void OnIndicatorMousedOver(IExperimentIdentifier experimentIdentifier, ExperimentIndicatorTooltipType tooltipType)
-        {
-            ChangeTooltip.Dispatch(experimentIdentifier, tooltipType);
-        }
 
 
         // From UnityAction
@@ -120,7 +90,7 @@ namespace ScienceAlert.UI.ExperimentWindow
         }
 
 
-        private static void UpdateExperimentListItem([NotNull] ExperimentListItem item, EntryDisplayStatus displayStatus)
+        private static void UpdateExperimentListItem([NotNull] ExperimentListItemView item, EntryDisplayStatus displayStatus)
         {
             if (item == null) throw new ArgumentNullException("item");
 

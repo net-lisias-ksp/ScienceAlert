@@ -30,7 +30,7 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalContextIsBeingDestroyed ContextDestroyedSignal { get; set; }
 
         private ExperimentAlertStatus[] _possibleAlertStatues;
-        private ExperimentWindowView.ExperimentIndicatorTooltipType _currentTooltip;
+        private ExperimentListItemView.Indicator _currentTooltip;
         private string _alertTooltipText = string.Empty;
         private ExperimentAlertStatus _alertTextStatus = ExperimentAlertStatus.None;
 
@@ -60,7 +60,7 @@ namespace ScienceAlert.VesselContext.Gui
         private void Hide()
         {
             View.Visible = false;
-            _currentTooltip = ExperimentWindowView.ExperimentIndicatorTooltipType.None;
+            _currentTooltip = ExperimentListItemView.Indicator.None;
         }
 
 
@@ -70,11 +70,11 @@ namespace ScienceAlert.VesselContext.Gui
         }
 
 
-        private void OnTooltip([NotNull] IExperimentIdentifier identifier, ExperimentWindowView.ExperimentIndicatorTooltipType type)
+        private void OnTooltip([NotNull] IExperimentIdentifier identifier, ExperimentListItemView.Indicator type)
         {
             if (identifier == null) throw new ArgumentNullException("identifier");
 
-            if (type == ExperimentWindowView.ExperimentIndicatorTooltipType.None)
+            if (type == ExperimentListItemView.Indicator.None)
             {
                 Hide();
                 return;
@@ -88,33 +88,33 @@ namespace ScienceAlert.VesselContext.Gui
 
         private void OnSensorStateChanged(SensorStatusChange sensorStatusChange)
         {
-            if (_currentTooltip == ExperimentWindowView.ExperimentIndicatorTooltipType.None) return;
+            if (_currentTooltip == ExperimentListItemView.Indicator.None) return;
             View.SetTooltip(GetText(IdentifierProvider.Get(sensorStatusChange.CurrentState.Experiment), _currentTooltip));
         }
 
 
-        private string GetText(IExperimentIdentifier identifier, ExperimentWindowView.ExperimentIndicatorTooltipType type)
+        private string GetText(IExperimentIdentifier identifier, ExperimentListItemView.Indicator type)
         {
             ExperimentSensorState cachedState;
 
             switch (type)
             {
-                case ExperimentWindowView.ExperimentIndicatorTooltipType.Recovery:
+                case ExperimentListItemView.Indicator.Recovery:
                 {
                     cachedState = SensorStateCache.GetCachedState(identifier);
                     return "Recovery: " + cachedState.RecoveryValue.ToString("F1");
                 }
-                case ExperimentWindowView.ExperimentIndicatorTooltipType.Transmission:
+                case ExperimentListItemView.Indicator.Transmission:
                 {
                     cachedState = SensorStateCache.GetCachedState(identifier);
                     return "Transmission: " + cachedState.TransmissionValue.ToString("F1");
                 }
-                case ExperimentWindowView.ExperimentIndicatorTooltipType.Lab:
+                case ExperimentListItemView.Indicator.Lab:
                 {
                     cachedState = SensorStateCache.GetCachedState(identifier);
                     return "Lab Analysis: " + cachedState.LabValue.ToString("F1");
                 }
-                case ExperimentWindowView.ExperimentIndicatorTooltipType.Alert:
+                case ExperimentListItemView.Indicator.Alert:
                 {
                     var alertState = AlertStateCache.GetStatus(identifier);
 

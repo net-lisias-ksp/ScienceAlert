@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.Linq;
-using KSP.UI;
 using ReeperCommon.Containers;
-using ReeperCommon.Extensions;
 using ReeperCommon.Logging;
-using ReeperCommon.Utilities;
-using ReeperKSP.Extensions;
 using ReeperKSP.Serialization;
 using strange.extensions.mediation.impl;
 using ScienceAlert.UI;
@@ -20,9 +15,6 @@ using UnityEngine;
 
 namespace ScienceAlert.VesselContext.Gui
 {
-    
-
-
     class ExperimentWindowMediator : Mediator
     {
         private const float MinimumThresholdForIndicators = 0.1f; // sensor value must be at least this or we don't light the relevant indicator
@@ -38,20 +30,19 @@ namespace ScienceAlert.VesselContext.Gui
         [Inject] public SignalSetTooltip TooltipSignal { get; set; }
 
 
-        [Inject] public SignalDeployExperiment DeployExperiment { get; set; }
+
         [Inject] public SignalExperimentSensorStatusChanged SensorStatusChanged { get; set; }
         [Inject] public SignalExperimentAlertChanged AlertStatusChanged { get; set; }
 
         [Inject] public SignalSaveGuiSettings SaveSignal { get; set; }
         [Inject] public SignalLoadGuiSettings LoadSignal { get; set; }
 
+
         public override void OnRegister()
         {
             base.OnRegister();
 
             // view signals
-            View.DeployButtonClicked.AddListener(OnDeployButtonClicked);
-            View.ChangeTooltip.AddListener(OnChangeTooltip);
             View.CloseButtonClicked.AddListener(OnCloseButtonClicked);
 
             // other signals
@@ -69,8 +60,6 @@ namespace ScienceAlert.VesselContext.Gui
         public override void OnRemove()
         {
             // view signals
-            View.DeployButtonClicked.RemoveListener(OnDeployButtonClicked);
-            View.ChangeTooltip.RemoveListener(OnChangeTooltip);
             View.CloseButtonClicked.RemoveListener(OnCloseButtonClicked);
 
             // other signals
@@ -152,23 +141,6 @@ namespace ScienceAlert.VesselContext.Gui
         {
             View.UpdateExperimentEntryAlert(IdentifierProvider.Get(sensorStatus.CurrentState.Experiment),
                 alertStatus.CurrentStatus != ExperimentAlertStatus.None);
-        }
-
-
-        private void OnDeployButtonClicked(IExperimentIdentifier identifier)
-        {
-            Experiments.FirstOrDefault(exp => identifier.Equals(exp.id))
-                .Do(exp => DeployExperiment.Dispatch(exp))
-                .IfNull(() =>
-                {
-                    throw new ArgumentException("'" + identifier + "' is an unrecognized experiment identifier"); 
-                });
-        }
-
-
-        private void OnChangeTooltip(IExperimentIdentifier identifier, ExperimentWindowView.ExperimentIndicatorTooltipType type)
-        {
-            TooltipSignal.Dispatch(identifier, type);
         }
 
 

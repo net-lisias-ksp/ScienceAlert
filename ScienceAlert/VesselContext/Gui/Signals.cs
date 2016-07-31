@@ -18,7 +18,8 @@ namespace ScienceAlert.VesselContext.Gui
     }
 
 
-    class SignalSetTooltip : Signal<IExperimentIdentifier, ExperimentWindowView.ExperimentIndicatorTooltipType>
+    // ReSharper disable once ClassNeverInstantiated.Global
+    class SignalSetTooltip : Signal<IExperimentIdentifier, ExperimentListItemView.Indicator>
     {
     }
 }

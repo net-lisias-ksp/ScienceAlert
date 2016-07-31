@@ -49,22 +49,6 @@ namespace ScienceAlert.UI.OptionsWindow
             SubjectResearchThreshold = status.SubjectResearchThreshold;
             ReportMinimumThreshold = status.ReportMinimumThreshold;
             Title = status.ExperimentTitle;
-
-            Log.Warning("Initialized " + Experiment);
-
-            foreach (var toggle in GetComponentsInChildren<Toggle>(true))
-            {
-                Log.Warning("Number of event listeners for " + toggle.name + " is " +
-                            toggle.onValueChanged.GetPersistentEventCount());
-
-                for (int i = 0; i < toggle.onValueChanged.GetPersistentEventCount(); ++i)
-                {
-                    Log.Warning("#" + i + ": " + toggle.onValueChanged.GetPersistentMethodName(i));
-                    if (toggle.onValueChanged.GetPersistentTarget(i) == null) Log.Error("Contains null target!");
-                    else Log.Warning(" Has target: " + toggle.onValueChanged.GetPersistentTarget(i).name);
-
-                }
-            }
         }
 
 
