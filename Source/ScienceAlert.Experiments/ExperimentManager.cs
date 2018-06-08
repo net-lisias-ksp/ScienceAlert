@@ -39,6 +39,8 @@ namespace ScienceAlert.Experiments
 
         void Awake()
         {
+            Log.Write("ExperimentManager.Awake", Log.LogMask.Debug);
+
             vesselStorage = gameObject.AddComponent<StorageCache>();
             biomeFilter = GetComponent<BiomeFilter>();
             scienceAlert = gameObject.GetComponent<ScienceAlert>();
@@ -100,19 +102,25 @@ namespace ScienceAlert.Experiments
 
         private System.Collections.IEnumerator UpdateObservers()
         {
+            Log.Write("ExperimentManager.UpdateObservers", Log.LogMask.Debug);
+
             while (true)
             {
-                if (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
+                while (!FlightGlobals.ready || FlightGlobals.ActiveVessel == null)
                 {
                     yield return 0;
-                    continue;
+                    //continue;
                 }
                 var expSituation = ScienceUtil.GetExperimentSituation(FlightGlobals.ActiveVessel);
-
-                foreach (var observer in observers)
+                if (observers.Count == 0)
                 {
+                    ScienceAlert.Instance.SetUnlit();
+                } else
+                for (int i = observers.Count - 1; i >= 0; i--)
+                {
+                    ExperimentObserver observer = observers[i];
                     try
-                    {
+                        {
 #if PROFILE
                     float start = Time.realtimeSinceStartup;
 #endif
@@ -132,11 +140,13 @@ namespace ScienceAlert.Experiments
                                         FlightGlobals.ActiveVessel.GetOrbitDriver().orbit.UpdateFromUT(Planetarium.GetUniversalTime());
                                     }
 
+#if false
                             scienceAlert.Button.Important = true;
+#endif
 
                             if (observer.settings.AnimationOnDiscovery)
-                                scienceAlert.Button.PlayAnimation();
-                            else if (scienceAlert.Button.IsNormal) scienceAlert.Button.SetLit();
+                                ScienceAlert.Instance.PlayAnimation();
+                            else ScienceAlert.Instance.SetLit(); //  if (scienceAlert.Button.IsNormal) scienceAlert.Button.SetLit();
 
                             switch (Settings.Instance.SoundNotification)
                             {
@@ -152,8 +162,12 @@ namespace ScienceAlert.Experiments
                         }
                         else if (!observers.Any(ob => ob.Available))
                         {
-                            scienceAlert.Button.SetUnlit();
+                            //scienceAlert.Button.SetUnlit();
+                            ScienceAlert.Instance.SetUnlit();
+#if false
                             scienceAlert.Button.Important = false;
+#endif
+
                         }
 #if PROFILE
                     Log.Warning("Tick time ({1}): {0} ms", (Time.realtimeSinceStartup - start) * 1000f, observer.ExperimentTitle);
@@ -173,6 +187,8 @@ namespace ScienceAlert.Experiments
 
         public int RebuildObserverList()
         {
+            Log.Write("ExperimentManager.RebuildObserverList", Log.LogMask.Debug);
+
             observers.Clear();
             ScanInterface scanInterface = GetComponent<ScanInterface>();
 
@@ -216,9 +232,9 @@ namespace ScienceAlert.Experiments
             return observers.Count;
         }
 
-        #endregion
+#endregion
 
-        #region Message handling functions
+#region Message handling functions
 
         private void OnScanInterfaceChanged()
         {
@@ -230,7 +246,7 @@ namespace ScienceAlert.Experiments
             RebuildObserverList();
         }
 
-        #endregion
+#endregion
 
         public ReadOnlyCollection<ExperimentObserver> Observers => new ReadOnlyCollection<ExperimentObserver>(observers);
     }

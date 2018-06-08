@@ -18,27 +18,22 @@ namespace ScienceAlert.Experiments
         protected string lastAvailableId; // Id of the last time the experiment was available
         protected string lastBiomeQuery; // the last good biome result we had
 
-        protected BiomeFilter biomeFilter; // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
+        protected BiomeFilter biomeFilter
+            ; // Provides a little more accuracy when it comes to determining current biome (the original biome map has some filtering done on it)
 
         protected ScanInterface scanInterface; // Determines whether we're allowed to know if an experiment is available
         protected float nextReportValue; // take a guess
         protected bool requireControllable; // Vessel needs to be controllable for the experiment to be available
-        internal bool rerunnable = true; // Can the experiment be run again without having to reset it
-        internal bool resettable = true; // Whether an experiment can be reset - usually via the Part Action Window
+
         // events
         public ExperimentManager.ExperimentAvailableDelegate OnAvailable = delegate { };
 
         public ExperimentObserver(StorageCache cache, ExperimentSettings expSettings, BiomeFilter filter,
-            ScanInterface scanMapInterface, string expid, ModuleScienceExperiment exp = null)
+            ScanInterface scanMapInterface, string expid)
         {
             settings = expSettings;
             biomeFilter = filter;
             requireControllable = true;
-            if (exp != null)
-            {
-                rerunnable = exp.rerunnable;
-                resettable = exp.resettable;
-            }
 
             if (scanMapInterface == null)
                 scanMapInterface = new DefaultScanInterface();
@@ -67,14 +62,9 @@ namespace ScienceAlert.Experiments
             ScienceModuleList potentials = FlightGlobals.ActiveVessel
                 .FindPartModulesImplementing<ModuleScienceExperiment>();
 
-            for (int i = potentials.Count - 1; i >= 0; i--)
-            {
-                ModuleScienceExperiment potential = potentials[i];
-				if (potential.experimentID == experiment.id)
-                {
+            foreach (var potential in potentials)
+                if (potential.experimentID == experiment.id)
                     modules.Add(potential);
-                }
-            }
         }
 
         protected virtual float GetScienceTotal(ScienceSubject subject, out List<ScienceData> data)
@@ -178,7 +168,7 @@ namespace ScienceAlert.Experiments
                         // biome matters; check to make sure we have biome data available
                         if (scanInterface.HaveScanData(vessel.latitude, vessel.longitude, vessel.mainBody))
                         {
-                            if (biomeFilter.GetBiome(vessel.latitude, vessel.longitude,
+                            if (biomeFilter.GetBiome(vessel.latitude * Mathf.Deg2Rad, vessel.longitude * Mathf.Deg2Rad,
                                 out biome))
                             {
                                 lastBiomeQuery = biome;
@@ -303,12 +293,9 @@ namespace ScienceAlert.Experiments
 
         protected ModuleScienceExperiment GetNextOnboardExperimentModule()
         {
-            for (int i = modules.Count - 1; i >= 0; i--)
-            {
-                ModuleScienceExperiment module = modules[i];
+            foreach (var module in modules)
                 if (!module.Deployed && !module.Inoperable)
                     return module;
-            }
             return null;
         }
 
