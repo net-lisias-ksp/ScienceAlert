@@ -88,6 +88,9 @@
     <Compile Include="Properties\Version.cs">
       <DependentUpon>Version.tt</DependentUpon>
     </Compile>
+    <Compile Include="ScienceAlert\ExcludeFilters.cs">
+      <Link>ScienceAlert\ExcludeFilters.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Textures\btnBackground.png" />
@@ -114,4 +117,4 @@
   <PropertyGroup>
     <PostBuildEvent></PostBuildEvent>
   </PropertyGroup>
-</Project>
+</Project>
