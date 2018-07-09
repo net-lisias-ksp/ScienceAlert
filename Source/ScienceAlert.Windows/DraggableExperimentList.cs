@@ -80,6 +80,8 @@ namespace ScienceAlert.Windows
             base.OnGUI();
         }
 
+        bool doAll = false;
+        bool noEva = false;
         protected override void DrawUI()
         {
             GUILayout.BeginVertical();
@@ -92,24 +94,76 @@ namespace ScienceAlert.Windows
                 }
                 else
                 {
+                    doAll = false;
+                    if (GUILayout.Button("Deploy All", Settings.Skin.button))
+                    {
+                        doAll = true;
+                        noEva = false;
+                    }
+
+                    if (GUILayout.Button("Deploy All except EVA", Settings.Skin.button, GUILayout.Height(35)))
+                    {
+                        doAll = true;
+                        noEva = true;
+                    }
+                    if (GUILayout.Button("Collect All", Settings.Skin.button))
+                    {
+                        var parts = FlightGlobals.ActiveVessel.Parts.FindAll(p => p.Modules.Contains("ModuleScienceContainer"));
+
+                        foreach (var part in parts)
+                        {
+                            var m = part.Modules["ModuleScienceContainer"];
+
+                            if (m.Events["CollectAllEvent"].active)
+                            {
+                                //((ModuleScienceContainer)m).CollectAllEvent();
+
+                                ModuleScienceContainer msc = m as ModuleScienceContainer;
+                                msc.CollectAllEvent();
+                            }
+                        }
+                    }
+
                     //-----------------------------------------------------
                     // Experiment list
                     //-----------------------------------------------------
-                    foreach (var observer in observers)
+
+
+                    foreach (ExperimentObserver observer in observers)
                         if (observer.Available)
                         {
                             var content = new GUIContent(observer.ExperimentTitle);
+                            color = "";
+                            if (!observer.rerunnable) color = lblYellowColor;
+                            if (!observer.resettable) color = lblRedColor;
                             if (Settings.Instance.ShowReportValue) content.text += $" ({observer.NextReportValue:0.#})";
-                            if (!GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false))) continue;
+                            if (color != "")
+                                content.text = Colorized(color, content.text);
+                            if (!doAll && !GUILayout.Button(content, Settings.Skin.button, GUILayout.ExpandHeight(false)))
+                                continue;
+                            if (doAll && noEva && observer.Experiment.id == "evaReport")
+                                continue;
+
                             Log.Debug("Deploying {0}", observer.ExperimentTitle);
                             AudioPlayer.Audio.PlayUI("click2");
                             observer.Deploy();
                         }
+
                 }
             }
             GUILayout.EndVertical();
         }
+        //string lblGreenColor = "00ff00";
+        //string lblDrkGreenColor = "ff9d00";
+        //string lblBlueColor = "3DB1FF";
+        string lblYellowColor = "FFD966";
+        string lblRedColor = "f90000";
 
+        string color = "";
+        string Colorized(string color, string txt)
+        {
+            return string.Format("<color=#{0}>{1}</color>", color, txt);
+        }
         protected override void OnCloseClick()
         {
             Visible = false;
