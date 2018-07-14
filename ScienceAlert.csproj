@@ -81,6 +81,9 @@
     <Compile Include="ScienceAlert\StorageCache.cs" />
     <Compile Include="ScienceAlert.Toolbar\ToolbarManager.cs" />
     <Compile Include="ScienceAlert.Toolbar\ToolbarTypes.cs" />
+    <Compile Include="Version.cs">
+      <DependentUpon>Version.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Textures\btnBackground.png" />
@@ -96,6 +99,13 @@
     <EmbeddedResource Include="Textures\sheet.png" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Content Include="Version.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Version.cs</LastGenOutput>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent></PostBuildEvent>
