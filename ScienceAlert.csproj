@@ -26,22 +26,19 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <OutputPath>D:\KSP_131_test\GameData\ScienceAlert\</OutputPath>
+    <OutputPath>bin/Debug/</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>D:\KSP_131_test\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="UnityEngine">
-      <HintPath>D:\KSP_131_test\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\LIB\managed\1.4.1\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>D:\KSP_131_test\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\LIB\managed\1.4.1\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\LIB\managed\1.4.1\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +98,6 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>"D:\Microsoft Visual Studio 14.0\pdb2mdb\pdb2mdb.exe" "$(TargetPath)"</PostBuildEvent>
+    <PostBuildEvent></PostBuildEvent>
   </PropertyGroup>
 </Project>
