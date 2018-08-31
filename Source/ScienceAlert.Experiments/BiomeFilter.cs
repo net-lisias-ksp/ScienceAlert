@@ -27,7 +27,12 @@ namespace ScienceAlert.Experiments
         public bool GetBiome(double lat, double lon, out string biome)
         {
             biome = string.Empty;
-            var vessel = FlightGlobals.ActiveVessel;
+
+			// Convert to radians
+			lat *= Mathf.Deg2Rad;
+			lon *= Mathf.Deg2Rad;
+
+            Vessel vessel = FlightGlobals.ActiveVessel;
 
             if (vessel == null || vessel.mainBody.BiomeMap == null || vessel.mainBody.BiomeMap.MapName == null || vessel.mainBody.BiomeMap.Attributes.Length == 0)
             {
