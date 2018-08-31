@@ -81,7 +81,7 @@
     <Compile Include="ScienceAlert\StorageCache.cs" />
     <Compile Include="ScienceAlert.Toolbar\ToolbarManager.cs" />
     <Compile Include="ScienceAlert.Toolbar\ToolbarTypes.cs" />
-    <Compile Include="Version.cs">
+    <Compile Include="Properties\Version.cs">
       <DependentUpon>Version.tt</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -100,7 +100,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Version.tt">
+    <Content Include="Properties\Version.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Version.cs</LastGenOutput>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
