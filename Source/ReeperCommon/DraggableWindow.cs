@@ -1,4 +1,5 @@
 using UnityEngine;
+using ClickThroughFix;
 
 namespace ReeperCommon
 {
@@ -221,7 +222,7 @@ namespace ReeperCommon
 		protected void OnGUI()
 		{
 			GUI.skin = Skin;
-			windowRect = GUILayout.Window(winId, windowRect, _InternalDraw, Title);
+			windowRect = ClickThruBlocker.GUILayoutWindow(winId, windowRect, _InternalDraw, Title);
 			if (ClampToScreen)
 				windowRect = KSPUtil.ClampRectToScreen(windowRect);
 		}

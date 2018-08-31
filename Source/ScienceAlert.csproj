@@ -41,6 +41,9 @@
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\LIB\managed\1.4.1\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="ClickThroughBlocker">
+      <HintPath>..\..\..\..\LIB\plugins\ClickThroughBlocker.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

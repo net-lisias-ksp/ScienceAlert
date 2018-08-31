@@ -13,3 +13,5 @@
 
 [assembly: System.Reflection.AssemblyVersion(ScienceAlert.Version.Number)]
 [assembly: System.Reflection.AssemblyFileVersion(ScienceAlert.Version.Number)]
+
+[assembly: KSPAssemblyDependency("ClickThroughBlocker", 1, 0)]
