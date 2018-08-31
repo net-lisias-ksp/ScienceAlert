@@ -48,7 +48,7 @@ namespace ScienceAlert.Experiments
 
             string possibleBiome = string.Empty;
 
-            if (GetBiome(FlightGlobals.ActiveVessel.latitude * Mathf.Deg2Rad, FlightGlobals.ActiveVessel.longitude * Mathf.Deg2Rad, out possibleBiome))
+            if (GetBiome(FlightGlobals.ActiveVessel.latitude, FlightGlobals.ActiveVessel.longitude, out possibleBiome))
             {
                 // the biome we got is most likely good
                 biome = possibleBiome;
