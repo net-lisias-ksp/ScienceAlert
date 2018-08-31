@@ -70,7 +70,7 @@ namespace ScienceAlert.Experiments
             for (int i = potentials.Count - 1; i >= 0; i--)
             {
                 ModuleScienceExperiment potential = potentials[i];
-                if (potential.experimentID == experiment.id && !ExcludeFilters.IsExcluded(potential))
+				if (potential.experimentID == experiment.id)
                 {
                     modules.Add(potential);
                 }
