@@ -27,7 +27,6 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <OutputPath>bin/Debug/</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
