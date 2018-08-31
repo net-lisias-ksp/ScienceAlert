@@ -172,6 +172,14 @@ namespace ReeperCommon
 			return System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 		}
 
+		public static string GetPluginDataPath(string fn)
+		{
+			return System.IO.Path.Combine(
+				System.IO.Path.Combine(KSPUtil.ApplicationRootPath, "PluginData/ScienceAlert")
+				, fn
+			);
+		}
+
 		public static string GetRelativeToGameData(string path)
 		{
 			if (!path.Contains("GameData"))

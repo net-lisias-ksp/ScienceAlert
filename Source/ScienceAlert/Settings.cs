@@ -41,7 +41,7 @@ namespace ScienceAlert
 		private static Settings instance;
 
 		[DoNotSerialize]
-		private readonly string ConfigPath = ConfigUtil.GetDllDirectoryPath() + "/settings.cfg";
+		private readonly string ConfigPath = ConfigUtil.GetPluginDataPath("settings.cfg");
 
 		[DoNotSerialize]
 		private GUISkin skin;

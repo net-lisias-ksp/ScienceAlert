@@ -15,7 +15,7 @@ namespace ScienceAlert.ProfileData
         GameScenes.FLIGHT)]
     class ScienceAlertProfileManager : ScenarioModule
     {
-        private readonly string ProfileStoragePath = ConfigUtil.GetDllDirectoryPath() + "/profiles.cfg";
+		private readonly string ProfileStoragePath = ConfigUtil.GetPluginDataPath("profiles.cfg");
         ProfileTable storedProfiles;
         VesselTable vesselProfiles;
 
