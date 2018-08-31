@@ -27,7 +27,7 @@
 	int i2 = 0;
 	string s;
 
-	string versionfile =  @"/Users/lisias/Workspaces/KSP/GIT/net.lisias.ksp/ScienceAlert/ScienceAlert.version";
+	string versionfile =  this.Host.ResolvePath("../../ScienceAlert.version");
 	if (!File.Exists(versionfile))
 	{
 		Write("File: " + versionfile + " missing\n");		
