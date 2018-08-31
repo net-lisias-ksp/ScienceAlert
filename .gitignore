@@ -1,8 +1,5 @@
 .vs
 obj
 bin
-GameData/**/*.version
-GameData/**/*.dll
-GameData/**/README.md
-GameData/**/CHANGE_LOG.md
-Source/**/Properties/Version.cs
+GameData
+Source
