@@ -1,5 +1,7 @@
 # Science Alert :: Change Log
 
+* 2018-0211: 1.9.1.1 (DennyTX) for KSP 1.3.1
+	+ draggable windows fixed  (allow moving and freezing)
 * 2018-0210: 1.9.1 (DennyTX) for KSP 1.3.1
 	+ No changelog provided
 * 2015-0714: 1.8.9 (xEvilReeperx) for KSP 1.0.4
