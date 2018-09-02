@@ -1,5 +1,7 @@
 # Science Alert :: Change Log
 
+* 2015-0714: 1.8.9 (xEvilReeperx) for KSP 1.0.4
+	+ No changelog provided
 * 2015-0504: 1.8.7 (xEvilReeperx) for KSP 1.0
 	+ No changelog provided
 * 2015-0429: 1.8.6 (xEvilReeperx) for KSP 1.0
