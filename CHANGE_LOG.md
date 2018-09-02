@@ -1,5 +1,7 @@
 # Science Alert :: Change Log
 
+* 2018-0210: 1.9.1 (DennyTX) for KSP 1.3.1
+	+ No changelog provided
 * 2015-0714: 1.8.9 (xEvilReeperx) for KSP 1.0.4
 	+ Bugfix: Fixed an issue in StorageCache that could sometimes prevent it from properly handling OnVesselWasModified events, preventing ScienceAlert from issuing alerts
 * 2015-0504: 1.8.7 (xEvilReeperx) for KSP 1.0
