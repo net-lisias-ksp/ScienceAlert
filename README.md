@@ -46,7 +46,7 @@ Non-biome specific alerts will still occur as normal
 
 ## Installation
 
-In your KSP GameData folder, delete any existing EditorExtensions folder. Download the zip file to your KSP GameData folder and unzip.﻿
+In your KSP GameData folder, delete any existing `ScienceAlert` folder. Download the zip file to your KSP GameData folder and unzip.
 
 ### Dependencies
 
