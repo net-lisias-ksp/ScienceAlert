@@ -4,9 +4,9 @@ When is is it time for science?  Unofficial fork by Lisias.
 
 ## In a Hurry
 
-* [Releases](https://github.com/net-lisias-kspu/KerbalWindTunnel/tree/Archive)
-* [Source](https://github.com/net-lisias-kspu/KerbalWindTunnel)
-* [Latest Release](https://github.com/net-lisias-kspu/KerbalWindTunnel/releases)
+* [Latest Release](https://github.com/net-lisias-kspu/ScienceAlert/releases)
+	+ [Binary](https://github.com/net-lisias-kspu/ScienceAlert/tree/Archive)
+* [Source](https://github.com/net-lisias-kspu/ScienceAlert)
 * [Change Log](./CHANGE_LOG.md)
 
 
