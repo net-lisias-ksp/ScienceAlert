@@ -1,8 +1,4 @@
 {
-	"GITHUB": {
-		"USERNAME": "net-lisias-kspu",
-		"REPOSITORY": "ScienceAlert"
-		},
 	"NAME"		: "Science Alert Unofficial",
 	"URL"		: "https://raw.githubusercontent.com/net-lisias-kspu/ScienceAlert/master/ScienceAlert.version",
 	"DOWNLOAD"	: "https://github.com/net-lisias-kspu/ScienceAlert/releases",
